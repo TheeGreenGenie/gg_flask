@@ -10,6 +10,7 @@ from app.catalog.models import (
     ProductImage,
     Variant,
 )
+from app.wishlist.models import Wishlist, WishlistItem
 
 __all__ = [
     "Cart",
@@ -21,4 +22,6 @@ __all__ = [
     "Product",
     "ProductImage",
     "Variant",
+    "Wishlist",
+    "WishlistItem",
 ]

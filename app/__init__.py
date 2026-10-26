@@ -56,5 +56,9 @@ def create_app(config: BaseConfig | str | None = None) -> Flask:
 
     app.register_blueprint(store_bp)
 
+    from app.wishlist import init_wishlist
+
+    init_wishlist(app)
+
     logging.getLogger(__name__).info("app_started", extra={"app_env": app.config["APP_ENV"]})
     return app

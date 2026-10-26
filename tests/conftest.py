@@ -16,11 +16,38 @@ from tests.catalog_fixtures import manifest, write_assets
 class FakeRedis:
     def __init__(self, healthy: bool = True) -> None:
         self.healthy = healthy
+        self.counters: dict[str, int] = {}
 
     def ping(self) -> bool:
         if not self.healthy:
             raise ConnectionError("redis down")
         return True
+
+    def pipeline(self) -> FakePipeline:
+        return FakePipeline(self)
+
+
+class FakePipeline:
+    """Just enough of redis-py's pipeline for the rate limiter (no expiry)."""
+
+    def __init__(self, redis: FakeRedis) -> None:
+        self.redis = redis
+        self.ops: list[str] = []
+
+    def incr(self, name: str) -> None:
+        self.ops.append(name)
+
+    def expire(self, name: str, seconds: int, nx: bool = False) -> None:
+        pass
+
+    def execute(self) -> list[int]:
+        if not self.redis.healthy:
+            raise ConnectionError("redis down")
+        out = []
+        for name in self.ops:
+            self.redis.counters[name] = self.redis.counters.get(name, 0) + 1
+            out.append(self.redis.counters[name])
+        return [*out, True]
 
 
 @pytest.fixture

@@ -140,6 +140,25 @@ def product(slug: str) -> str:
     )
 
 
+def card_json(p: Product) -> dict[str, Any]:
+    """Minimal product fields for client-side cards (Find Fabrics, wishlist)."""
+    category = p.primary_category
+    return {
+        "slug": p.slug,
+        "name": p.name,
+        "price": money(p.price_cents),
+        "compare_at": money(p.compare_at_cents) if p.compare_at_cents else None,
+        "image": _media_url(p.cover.path if p.cover else None),
+        "alt": p.cover.alt if p.cover else p.name,
+        "category": category.name if category else "",
+        "category_url": url_for("store.category", slug=category.slug)
+        if category
+        else url_for("store.shop"),
+        "url": url_for("store.product", slug=p.slug),
+        "preview": url_for("store.product_preview", slug=p.slug),
+    }
+
+
 @bp.get("/find-fabrics/")
 def find_fabrics() -> str:
     """Swipe-to-save fabric discovery. The first batch is server-rendered for no-JS visitors."""
@@ -155,23 +174,7 @@ def discovery_feed() -> Response:
     except ValueError:
         offset = 0
     items, next_offset = queries.discovery(min(max(offset, 0), 10_000))
-    payload = [
-        {
-            "slug": p.slug,
-            "name": p.name,
-            "price": money(p.price_cents),
-            "compare_at": money(p.compare_at_cents) if p.compare_at_cents else None,
-            "image": _media_url(p.cover.path if p.cover else None),
-            "alt": p.cover.alt if p.cover else p.name,
-            "category": p.primary_category.name if p.primary_category else "",
-            "category_url": url_for("store.category", slug=p.primary_category.slug)
-            if p.primary_category
-            else url_for("store.shop"),
-            "url": url_for("store.product", slug=p.slug),
-            "preview": url_for("store.product_preview", slug=p.slug),
-        }
-        for p in items
-    ]
+    payload = [card_json(p) for p in items]
     resp = jsonify(items=payload, next_cursor=next_offset)
     resp.headers["Cache-Control"] = "public, max-age=60"
     return resp

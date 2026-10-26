@@ -195,6 +195,82 @@
 		});
 	}
 
+	/* ---------- Wishlist ---------- */
+	function csrfToken() {
+		var meta = document.querySelector('meta[name="csrf-token"]');
+		return meta ? meta.content : '';
+	}
+
+	/* Wishlist writes run one at a time: the first save creates the wishlist cookie, and
+	   parallel first saves would otherwise each create a separate list. */
+	var writeQueue = Promise.resolve();
+	function queued(fn) {
+		var next = writeQueue.then(fn, fn);
+		writeQueue = next.catch(function () {});
+		return next;
+	}
+
+	function postJSON(url, fields) {
+		var body = new FormData();
+		Object.keys(fields).forEach(function (k) { body.append(k, fields[k]); });
+		return fetch(url, {
+			method: 'POST',
+			body: body,
+			credentials: 'same-origin',
+			headers: { Accept: 'application/json', 'X-CSRFToken': csrfToken() }
+		}).then(function (r) {
+			return r.json().catch(function () { return { ok: false, message: 'Something went wrong.' }; });
+		});
+	}
+
+	function updateWishCount(count) {
+		var link = document.querySelector('[data-gg-wish-link]');
+		if (!link || typeof count !== 'number') { return; }
+		var badge = link.querySelector('[data-gg-wish-count]');
+		badge.textContent = String(count);
+		badge.hidden = count === 0;
+		link.setAttribute('aria-label', 'Wishlist, ' + count + ' item' + (count === 1 ? '' : 's'));
+	}
+
+	var WISH_URL = '/wishlist/toggle';
+	window.GGWishlist = {
+		add: function (slug) { return queued(function () { return postJSON(WISH_URL, { product: slug, action: 'add' }); }).then(function (d) { updateWishCount(d.count); return d; }); },
+		remove: function (slug) { return queued(function () { return postJSON(WISH_URL, { product: slug, action: 'remove' }); }).then(function (d) { updateWishCount(d.count); return d; }); },
+		clear: function () { return queued(function () { return postJSON('/wishlist/clear', {}); }).then(function (d) { updateWishCount(d.count); return d; }); },
+		list: function () {
+			return fetch('/api/v1/wishlist', { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+				.then(function (r) { return r.json(); });
+		}
+	};
+
+	/* Heart toggles on product pages and previews: plain forms upgraded to in-page toggles. */
+	function initWish(scope) {
+		(scope && scope.querySelectorAll ? scope : document).querySelectorAll('form[data-gg-wish]').forEach(function (form) {
+			if (form.dataset.ggWishReady) { return; }
+			form.dataset.ggWishReady = '1';
+			form.addEventListener('submit', function (event) {
+				event.preventDefault();
+				var button = form.querySelector('button');
+				var action = form.querySelector('[name="action"]');
+				var label = form.querySelector('[data-gg-wish-label]');
+				button.disabled = true;
+				// getAttribute: the hidden input named "action" shadows form.action.
+				queued(function () {
+					return postJSON(form.getAttribute('action'), { product: form.querySelector('[name="product"]').value, action: action.value });
+				})
+					.then(function (data) {
+						if (!data.ok) { window.alert(data.message); return; }
+						updateWishCount(data.count);
+						action.value = data.saved ? 'remove' : 'add';
+						button.setAttribute('aria-pressed', data.saved ? 'true' : 'false');
+						label.textContent = data.saved ? 'Saved to wishlist' : 'Add to wishlist';
+					})
+					.catch(function () { form.submit(); })
+					.then(function () { button.disabled = false; });
+			});
+		});
+	}
+
 	/* Header cart badge, total and accessible name after an in-page add to cart. */
 	function updateCartLink(count, subtotal) {
 		var link = document.querySelector('[data-gg-cart-link]');
@@ -230,6 +306,7 @@
 					if (window.GGProduct) { window.GGProduct.init(root); }
 					initQuantity(body);
 					wireAjaxAdd(body.querySelector('form[data-gg-buy]'), body);
+					initWish(body);
 					if (document.querySelector('dialog[open]')) { document.querySelector('dialog[open]').close(); }
 					dialog.showModal();
 					var title = body.querySelector('.gg-product__title');
@@ -283,7 +360,7 @@
 		});
 	}
 
-	[initHeader, initDropdowns, initDrawer, initNewsletter, initQuantity, initAutosubmit, initFilters, initTabs, initQuickView].forEach(function (fn) {
+	[initHeader, initDropdowns, initDrawer, initNewsletter, initQuantity, initAutosubmit, initFilters, initTabs, initQuickView, initWish].forEach(function (fn) {
 		try { fn(); } catch (error) {
 			if (window.console) { window.console.error('GG enhancement failed safely:', fn.name, error); }
 		}

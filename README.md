@@ -59,6 +59,10 @@ fixed color list and counted, so the preview shows each color's share of the fab
 `scripts/export_manifest_draft.py` reads the old WordPress database (read-only) and drafts
 a manifest with converted photos for curation. Needs `pip install -e ".[tools]"`.
 
+## Scheduled jobs
+
+Run daily: `flask --app wsgi wishlist-prune` deletes wishlists nobody has changed for 90 days.
+
 ## Checks (same as CI)
 
 ```bash
@@ -87,6 +91,8 @@ Set `TRUSTED_PROXY_HOPS` to the number of reverse proxies in front of the app. W
 | `/collections/<slug>/` | Hand-picked collections plus `new-arrivals` and `sale` |
 | `/product/<slug>/` | Product page |
 | `/cart/`, `/checkout/` | Cart (server-side) and checkout (payments arrive in Phase 7) |
+| `/find-fabrics/` | Swipe-to-save fabric discovery (feed: `/api/v1/discovery/fabrics`) |
+| `/wishlist/` | Anonymous wishlist (JSON: `/api/v1/wishlist`) |
 | `/media/<path>` | Product images in development (object storage/CDN in production) |
 
 ## Dependencies

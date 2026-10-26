@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>{% block title %}GG Afrikan Eleganz{% endblock %}</title>
   <meta name="description" content="{% block description %}Authentic African prints, fabrics and considered pieces from GG Afrikan Eleganz.{% endblock %}">
   <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" sizes="any">

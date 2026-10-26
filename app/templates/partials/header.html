@@ -39,6 +39,9 @@
 
     <div class="gg-header__end">
       {#- Account icon returns when customer accounts launch (after launch, #73). #}
+      <a class="gg-icon-btn gg-wish-link" href="{{ url_for('wishlist.page') }}" data-gg-wish-link aria-label="Wishlist, {{ wishlist_count }} item{{ '' if wishlist_count == 1 else 's' }}">
+        {{ icon('heart', 22) }}<span class="gg-badge" aria-hidden="true" data-gg-wish-count{% if not wishlist_count %} hidden{% endif %}>{{ wishlist_count }}</span>
+      </a>
       <a class="gg-cart-link" href="{{ url_for('store.cart') }}" data-gg-cart-link aria-label="Cart, {{ cart.count }} item{{ '' if cart.count == 1 else 's' }}, {{ cart.subtotal_cents|money }}">
         <span class="gg-cart-link__icon">{{ icon('cart', 22) }}<span class="gg-badge" aria-hidden="true" data-gg-cart-count>{{ cart.count }}</span></span>
         <span class="gg-cart-link__total" aria-hidden="true" data-gg-cart-total>{{ cart.subtotal_cents|money }}</span>
@@ -113,6 +116,7 @@
           {% endif %}
         </li>
       {% endfor %}
+      <li><a href="{{ url_for('wishlist.page') }}">Wishlist ({{ wishlist_count }})</a></li>
       <li><a href="/about-us/">About us</a></li>
       <li><a href="/contact-us/">Contact us</a></li>
     </ul>

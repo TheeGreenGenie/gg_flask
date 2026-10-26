@@ -1,16 +1,16 @@
 /* Find Fabrics: a swipeable card stack of in-stock fabrics.
    Right (drag, button, →) saves; left (drag, button, ←) skips; tap/Enter opens the preview.
-   Saved and seen fabrics live in this browser only (bounded, versioned keys, W-004) until
-   wishlists launch. Without JS the page shows a plain product grid instead. */
+   Saves go to the server-side wishlist (window.GGWishlist from site.js). Which cards have
+   been seen is remembered in this browser only (bounded, versioned key, W-004).
+   Without JS the page shows a plain product grid instead. */
 (function () {
 	'use strict';
 
 	var root = document.querySelector('[data-gg-ff]');
 	if (!root || !window.fetch) { return; }
 
-	var SAVED_KEY = 'gg-ff-saved-v1';
+	var LEGACY_SAVED_KEY = 'gg-ff-saved-v1'; // saves from before the server wishlist
 	var SEEN_KEY = 'gg-ff-seen-v1';
-	var MAX_SAVED = 100;
 	var MAX_SEEN = 1000;
 	var STACK_DEPTH = 3; // cards rendered at once
 	var SWIPE_DISTANCE = 110; // px past which a release counts as a swipe
@@ -45,7 +45,8 @@
 		try { window.localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* ignore */ }
 	}
 
-	var saved = load(SAVED_KEY).filter(function (f) { return f && typeof f.slug === 'string'; });
+	var wishlist = window.GGWishlist;
+	var saved = []; // mirror of the server wishlist: [{slug, name, price, image, url, preview}]
 	var seen = load(SEEN_KEY).filter(function (s) { return typeof s === 'string'; });
 
 	function markSeen(slug) {
@@ -170,8 +171,8 @@
 			remove.textContent = '×';
 			remove.addEventListener('click', function () {
 				saved = saved.filter(function (s) { return s.slug !== f.slug; });
-				store(SAVED_KEY, saved);
 				renderSaved();
+				if (wishlist) { wishlist.remove(f.slug); }
 			});
 			li.append(a, remove);
 			savedList.append(li);
@@ -201,15 +202,19 @@
 
 		if (direction > 0) {
 			if (!saved.some(function (s) { return s.slug === item.slug; })) {
-				saved.push({
-					slug: item.slug, name: item.name, price: item.price,
-					image: item.image, url: item.url, preview: item.preview
-				});
-				if (saved.length > MAX_SAVED) { saved = saved.slice(-MAX_SAVED); }
-				store(SAVED_KEY, saved);
+				saved.push(item);
 				renderSaved();
 			}
-			showToast('Saved ♥');
+			showToast('Saved to your wishlist ♥');
+			if (wishlist) {
+				wishlist.add(item.slug).then(function (data) {
+					if (!data.ok) {
+						saved = saved.filter(function (s) { return s.slug !== item.slug; });
+						renderSaved();
+						showToast(data.message);
+					}
+				}).catch(function () { showToast('Could not save — check your connection.'); });
+			}
 		}
 
 		function done() {
@@ -305,8 +310,8 @@
 
 	clearBtn.addEventListener('click', function () {
 		saved = [];
-		store(SAVED_KEY, saved);
 		renderSaved();
+		if (wishlist) { wishlist.clear(); }
 	});
 
 	root.querySelector('[data-gg-ff-reset]').addEventListener('click', function () {
@@ -327,4 +332,25 @@
 	renderSaved();
 	render();
 	ensureQueue().then(render);
+	loadWishlist();
+
+	/* Show the server wishlist, first moving over any saves kept only in this browser. */
+	function loadWishlist() {
+		if (!wishlist) { return; }
+		var legacy = load(LEGACY_SAVED_KEY).filter(function (f) { return f && typeof f.slug === 'string'; });
+		var moves = legacy.map(function (f) { return wishlist.add(f.slug).catch(function () {}); });
+		Promise.all(moves)
+			.then(function () {
+				if (legacy.length) {
+					try { window.localStorage.removeItem(LEGACY_SAVED_KEY); } catch (e) { /* ignore */ }
+				}
+				return wishlist.list();
+			})
+			.then(function (data) {
+				// API lists newest first; the panel renders newest first from the end.
+				saved = (data.items || []).slice().reverse();
+				renderSaved();
+			})
+			.catch(function () { /* panel stays as is */ });
+	}
 })();

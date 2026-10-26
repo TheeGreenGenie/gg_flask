@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+{%- from "partials/icons.html" import icon -%}
+{% block title %}Wishlist · GG Afrikan Eleganz{% endblock %}
+{% block content %}
+<div class="gg-page-title">
+  <div class="gg-container">
+    <nav class="gg-breadcrumbs" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="{{ url_for('store.home') }}">Home</a></li>
+        <li aria-current="page">Wishlist</li>
+      </ol>
+    </nav>
+    <h1>Your wishlist</h1>
+    <p class="gg-page-title__lede">Saved in this browser — no account needed. Lists are kept for {{ retention_days }} days after your last change.</p>
+  </div>
+</div>
+
+<div class="gg-container gg-wishlist">
+  {% if products %}
+    <div class="gg-wishlist__bar">
+      <p>{{ products|length }} saved item{{ '' if products|length == 1 else 's' }}</p>
+      <form method="post" action="{{ url_for('wishlist.clear') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="gg-button gg-button--outline">Clear wishlist</button>
+      </form>
+    </div>
+    <div class="gg-product-grid">
+      {% for p in products %}
+        <div class="gg-wishlist__item">
+          {% include "partials/product_card.html" %}
+          <form method="post" action="{{ url_for('wishlist.toggle') }}" class="gg-wishlist__remove">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="product" value="{{ p.slug }}">
+            <input type="hidden" name="action" value="remove">
+            <button type="submit" class="gg-icon-btn gg-icon-btn--round" aria-label="Remove {{ p.name }} from wishlist">{{ icon('close', 18) }}</button>
+          </form>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="gg-empty">
+      <h2>Your wishlist is empty</h2>
+      <p>Tap the heart on any product, or swipe right in Find Fabrics, to save it here.</p>
+      <div class="gg-ff__empty-actions">
+        <a class="gg-button gg-button--accent" href="{{ url_for('store.find_fabrics') }}">Find Fabrics</a>
+        <a class="gg-button gg-button--outline" href="{{ url_for('store.shop') }}">Browse the shop</a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

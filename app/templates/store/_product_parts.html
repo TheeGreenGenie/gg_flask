@@ -89,4 +89,18 @@
           <button class="gg-button gg-button--accent gg-buy__add" type="submit"{% if stock <= 0 %} disabled{% endif %}>Add to cart</button>
         </div>
       </form>
+      {{ wish_button(product) }}
+{%- endmacro -%}
+
+{#- Save/unsave toggle. Works as a plain form; site.js upgrades it to an in-page toggle. -#}
+{%- macro wish_button(product) -%}
+{%- set saved = product.slug in wishlist_slugs -%}
+<form class="gg-wish-form" method="post" action="{{ url_for('wishlist.toggle') }}" data-gg-wish>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="product" value="{{ product.slug }}">
+  <input type="hidden" name="action" value="{{ 'remove' if saved else 'add' }}">
+  <button type="submit" class="gg-wish-btn" aria-pressed="{{ 'true' if saved else 'false' }}">
+    {{ icon('heart', 18) }}<span data-gg-wish-label>{{ 'Saved to wishlist' if saved else 'Add to wishlist' }}</span>
+  </button>
+</form>
 {%- endmacro -%}

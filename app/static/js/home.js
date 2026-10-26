@@ -222,7 +222,124 @@
 		schedule();
 	}
 
+	/* Section snapping (owner request): after 1 s with no scrolling, glide smoothly to the
+	   nearest section edge so the page never rests between two screens. Any input cancels
+	   the glide. Tall sections can be read freely; they only snap near their edges. */
+	function initSnap() {
+		if (reducedMotion.matches) {
+			return;
+		}
+		var sections = Array.prototype.slice.call(home.querySelectorAll('[data-gg-section]'));
+		if (sections.length < 2) {
+			return;
+		}
+		var IDLE_MS = 1000;
+		var idleTimer = null;
+		var frame = null;
+		var gliding = false;
+
+		function headerOffset() {
+			return parseFloat(getComputedStyle(root).getPropertyValue('--gg-header-offset')) || 0;
+		}
+
+		function target() {
+			var y = window.scrollY;
+			var header = headerOffset();
+			var viewport = window.innerHeight - header;
+			var points = [];
+			var lastBottom = 0;
+			for (var i = 0; i < sections.length; i += 1) {
+				var top = sections[i].getBoundingClientRect().top + y - header;
+				var height = sections[i].offsetHeight;
+				var bottomAligned = top + height - viewport;
+				lastBottom = top + height;
+				if (height > viewport + 2) {
+					// Reading inside a tall section: leave the reader alone.
+					if (y > top + 2 && y < bottomAligned - 2) {
+						return null;
+					}
+					points.push(top, bottomAligned);
+				} else {
+					points.push(top);
+				}
+			}
+			if (y > lastBottom - viewport / 2) {
+				return null; // in the footer
+			}
+			var best = null;
+			points.forEach(function (point) {
+				var p = Math.max(0, Math.round(point));
+				if (best === null || Math.abs(p - y) < Math.abs(best - y)) {
+					best = p;
+				}
+			});
+			return best !== null && Math.abs(best - y) > 2 ? best : null;
+		}
+
+		function ease(t) {
+			return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; // easeInOutCubic
+		}
+
+		function cancelGlide() {
+			if (frame) {
+				window.cancelAnimationFrame(frame);
+				frame = null;
+			}
+			gliding = false;
+		}
+
+		function glideTo(destination) {
+			var start = window.scrollY;
+			var distance = destination - start;
+			var duration = Math.min(1200, Math.max(700, Math.abs(distance) * 1.4));
+			var began = null;
+			gliding = true;
+			function step(now) {
+				if (began === null) {
+					began = now;
+				}
+				var t = Math.min(1, (now - began) / duration);
+				window.scrollTo({ top: start + distance * ease(t), behavior: 'instant' });
+				if (t < 1 && gliding) {
+					frame = window.requestAnimationFrame(step);
+				} else {
+					cancelGlide();
+				}
+			}
+			frame = window.requestAnimationFrame(step);
+		}
+
+		function settle() {
+			idleTimer = null;
+			if (document.querySelector('dialog[open]') || document.activeElement.closest('form')) {
+				return;
+			}
+			var destination = target();
+			if (destination !== null) {
+				glideTo(destination);
+			}
+		}
+
+		function activity() {
+			cancelGlide();
+			window.clearTimeout(idleTimer);
+			idleTimer = window.setTimeout(settle, IDLE_MS);
+		}
+
+		window.addEventListener('scroll', function () {
+			if (!gliding) {
+				window.clearTimeout(idleTimer);
+				idleTimer = window.setTimeout(settle, IDLE_MS);
+			}
+		}, { passive: true });
+		['wheel', 'touchstart', 'touchmove', 'keydown', 'pointerdown'].forEach(function (type) {
+			window.addEventListener(type, activity, { passive: true });
+		});
+		reducedMotion.addEventListener('change', cancelGlide);
+	}
+
 	try {
+		initSnap();
 		initSlider();
 		initTabs();
 		initVideoFacades();

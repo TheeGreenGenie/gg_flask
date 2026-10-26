@@ -36,8 +36,8 @@ STORY_COLLECTIONS: Final = (
 
 FEATURED_CATEGORIES: Final = ("sarong-wraps", "adire", "jackets")
 
-# The old "Shop by cut" tab is gone: cut lengths are no longer categories (fabric is sold
-# by the yard, decision worksheet D-006 default).
+# The old "Shop by cut" tab is gone: cut lengths are no longer categories. Fabric is sold
+# in fixed bundles at a set price (owner, 2026-10-26).
 SHOP_GROUPS: Final = (
     ("print", "Print", "Shop by print", ("ankara", "kente", "satin-chiffon", "ethnic-prints")),
     (

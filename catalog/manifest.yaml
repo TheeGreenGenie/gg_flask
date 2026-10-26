@@ -54,7 +54,6 @@ products:
   name: Adire Print - Orange & Tan - 101219
   type: fabric
   status: active
-  sold_by: yard
   featured: true
   published: 2025-01-30
   legacy_wp_id: 30034
@@ -86,7 +85,6 @@ products:
   name: Adire Print - Pink & Cream - 101218
   type: fabric
   status: active
-  sold_by: yard
   featured: true
   published: 2025-01-30
   legacy_wp_id: 30032
@@ -118,7 +116,6 @@ products:
   name: Adire Print - Cream - 101217
   type: fabric
   status: active
-  sold_by: yard
   featured: true
   published: 2025-01-30
   legacy_wp_id: 30030
@@ -149,7 +146,6 @@ products:
   name: Adire Print - Burgundy & Cream - 101216
   type: fabric
   status: active
-  sold_by: yard
   featured: true
   published: 2025-01-30
   legacy_wp_id: 30028
@@ -181,7 +177,6 @@ products:
   name: Adire Print - Gold & Brown - 101215
   type: fabric
   status: active
-  sold_by: yard
   featured: true
   published: 2025-01-30
   legacy_wp_id: 30026
@@ -213,7 +208,6 @@ products:
   name: African Ankara Print - Brown & Orange - 101188
   type: fabric
   status: active
-  sold_by: yard
   featured: false
   published: 2024-09-29
   legacy_wp_id: 29517
@@ -247,7 +241,6 @@ products:
   name: African Ankara Print - Brown & Olive - 101187
   type: fabric
   status: active
-  sold_by: yard
   featured: false
   published: 2024-09-29
   legacy_wp_id: 29513
@@ -281,7 +274,6 @@ products:
   name: African Ankara Print - Brown & Gold - 101186
   type: fabric
   status: active
-  sold_by: yard
   featured: false
   published: 2024-09-29
   legacy_wp_id: 29510
@@ -315,7 +307,6 @@ products:
   name: African Ankara Print - Multicolor - 101185
   type: fabric
   status: active
-  sold_by: yard
   featured: false
   published: 2024-09-29
   legacy_wp_id: 29507
@@ -348,7 +339,6 @@ products:
   name: African Ankara Print - Navy & Gold - 101184
   type: fabric
   status: active
-  sold_by: yard
   featured: false
   published: 2024-09-29
   legacy_wp_id: 29499
@@ -382,7 +372,6 @@ products:
   name: Cushion Cover - Brown & Tan - G-6
   type: home_accessories
   status: active
-  sold_by: unit
   featured: false
   published: 2024-07-15
   legacy_wp_id: 28543
@@ -432,7 +421,6 @@ products:
   name: Cushion Cover - Brown - G-4
   type: home_accessories
   status: active
-  sold_by: unit
   featured: false
   published: 2024-07-08
   legacy_wp_id: 27797
@@ -501,7 +489,6 @@ products:
   name: Cushion Cover - Multicolor - G-5
   type: home_accessories
   status: active
-  sold_by: unit
   featured: false
   published: 2024-07-07
   legacy_wp_id: 27804
@@ -569,7 +556,6 @@ products:
   name: Cushion Cover - Multicolor - G-3
   type: home_accessories
   status: active
-  sold_by: unit
   featured: false
   published: 2024-07-07
   legacy_wp_id: 27791
@@ -638,7 +624,6 @@ products:
   name: Cushion Cover - Brown & Cream - G-2
   type: home_accessories
   status: active
-  sold_by: unit
   featured: false
   published: 2024-07-07
   legacy_wp_id: 27784
@@ -707,7 +692,6 @@ products:
   name: Ethnic Print - Black & Burgundy - 101203
   type: fabric
   status: active
-  sold_by: yard
   featured: false
   published: 2024-07-24
   legacy_wp_id: 28843
@@ -744,7 +728,6 @@ products:
   name: Ethnic Print - Yellow & Brown - 101140
   type: fabric
   status: active
-  sold_by: yard
   featured: false
   published: 2024-07-24
   legacy_wp_id: 28841
@@ -781,7 +764,6 @@ products:
   name: Ethnic Print - Black & Green - 101141
   type: fabric
   status: active
-  sold_by: yard
   featured: false
   published: 2024-07-24
   legacy_wp_id: 28839
@@ -818,7 +800,6 @@ products:
   name: Ethnic Print - Black & Brown - 101201
   type: fabric
   status: active
-  sold_by: yard
   featured: false
   published: 2024-07-24
   legacy_wp_id: 28836
@@ -852,7 +833,6 @@ products:
   name: Ethnic Print - Black & Navy - 101137
   type: fabric
   status: active
-  sold_by: yard
   featured: false
   published: 2024-07-24
   legacy_wp_id: 28834
@@ -886,7 +866,6 @@ products:
   name: Reversible Jacket TMB-1 - Grey - 1015
   type: clothing
   status: active
-  sold_by: unit
   featured: false
   published: 2024-10-03
   legacy_wp_id: 29649
@@ -915,7 +894,6 @@ products:
   name: Reversible Jacket TMB-4 - Brown & Cream - 1012
   type: clothing
   status: active
-  sold_by: unit
   featured: false
   published: 2024-10-03
   legacy_wp_id: 29643
@@ -945,7 +923,6 @@ products:
   name: Reversible Jacket TMB-4 - Grey & Brown - 1010
   type: clothing
   status: active
-  sold_by: unit
   featured: false
   published: 2024-10-03
   legacy_wp_id: 29639
@@ -983,7 +960,6 @@ products:
   name: Reversible Jacket TMB-1 - Red & Burgundy - 1016
   type: clothing
   status: active
-  sold_by: unit
   featured: false
   published: 2024-10-03
   legacy_wp_id: 29634
@@ -1013,7 +989,6 @@ products:
   name: Reversible Jacket TMB-4 - Brown & Cream - 1011
   type: clothing
   status: active
-  sold_by: unit
   featured: false
   published: 2024-10-03
   legacy_wp_id: 29630
@@ -1043,7 +1018,6 @@ products:
   name: Kente Print - Orange & Brown - 101024
   type: fabric
   status: active
-  sold_by: yard
   featured: false
   published: 2024-07-08
   legacy_wp_id: 27953
@@ -1082,7 +1056,6 @@ products:
   name: Kente Print - Gold & Brown - 101023
   type: fabric
   status: active
-  sold_by: yard
   featured: false
   published: 2024-07-08
   legacy_wp_id: 27951
@@ -1121,7 +1094,6 @@ products:
   name: Kente Print - Multicolor - 101020
   type: fabric
   status: active
-  sold_by: yard
   featured: false
   published: 2024-07-08
   legacy_wp_id: 27949
@@ -1159,7 +1131,6 @@ products:
   name: Kente Print - Olive & Yellow - 101021
   type: fabric
   status: active
-  sold_by: yard
   featured: false
   published: 2024-07-08
   legacy_wp_id: 27948
@@ -1198,7 +1169,6 @@ products:
   name: Kente Print - Multicolor - 101018
   type: fabric
   status: active
-  sold_by: yard
   featured: false
   published: 2024-07-08
   legacy_wp_id: 27945
@@ -1236,7 +1206,6 @@ products:
   name: Bob Marley Sarong Wrap - Green & Brown - 101200
   type: home_accessories
   status: active
-  sold_by: unit
   featured: false
   published: 2024-10-08
   legacy_wp_id: 29837
@@ -1263,7 +1232,6 @@ products:
   name: Bob Marley Sarong Wrap - Green & Yellow - 101199
   type: home_accessories
   status: active
-  sold_by: unit
   featured: false
   published: 2024-10-08
   legacy_wp_id: 29835
@@ -1290,7 +1258,6 @@ products:
   name: Bob Marley Sarong Wrap - Brown & Yellow - 101198
   type: home_accessories
   status: active
-  sold_by: unit
   featured: false
   published: 2024-10-08
   legacy_wp_id: 29833
@@ -1317,7 +1284,6 @@ products:
   name: Bob Marley Sarong Wrap - Multicolor - 101197
   type: home_accessories
   status: active
-  sold_by: unit
   featured: false
   published: 2024-10-08
   legacy_wp_id: 29818
@@ -1343,7 +1309,6 @@ products:
   name: Satin/Chiffon - Black & Brown - 101102
   type: fabric
   status: active
-  sold_by: yard
   featured: false
   published: 2024-07-16
   legacy_wp_id: 28615
@@ -1378,7 +1343,6 @@ products:
   name: Satin/Chiffon - Multicolor - 101101
   type: fabric
   status: active
-  sold_by: yard
   featured: false
   published: 2024-07-16
   legacy_wp_id: 28613
@@ -1412,7 +1376,6 @@ products:
   name: Satin/Chiffon - Teal & Brown - 101100
   type: fabric
   status: active
-  sold_by: yard
   featured: false
   published: 2024-07-16
   legacy_wp_id: 28611
@@ -1447,7 +1410,6 @@ products:
   name: Satin/Chiffon - Red & Cream - 101099
   type: fabric
   status: active
-  sold_by: yard
   featured: false
   published: 2024-07-16
   legacy_wp_id: 28609
@@ -1482,7 +1444,6 @@ products:
   name: Satin/Chiffon - Red - 101098
   type: fabric
   status: active
-  sold_by: yard
   featured: false
   published: 2024-07-16
   legacy_wp_id: 28606
@@ -1516,7 +1477,6 @@ products:
   name: Wrap Skirt WR 2002 - Brown & Cream - 101196
   type: clothing
   status: active
-  sold_by: unit
   featured: false
   published: 2024-10-08
   legacy_wp_id: 29804
@@ -1578,7 +1538,6 @@ products:
   name: Wrap Skirt WC 1202 - Navy & Purple - 101195
   type: clothing
   status: active
-  sold_by: unit
   featured: false
   published: 2024-10-08
   legacy_wp_id: 29801
@@ -1608,7 +1567,6 @@ products:
   name: Wrap Skirt WC 1202 - Olive & Red - 101194
   type: clothing
   status: active
-  sold_by: unit
   featured: false
   published: 2024-10-03
   legacy_wp_id: 29617
@@ -1638,7 +1596,6 @@ products:
   name: Wrap Skirt WC 1202 - Orange & Cream - 101193
   type: clothing
   status: active
-  sold_by: unit
   featured: false
   published: 2024-10-03
   legacy_wp_id: 29615
@@ -1668,7 +1625,6 @@ products:
   name: Wrap Skirt WC 1202 - Olive & Yellow - 101192
   type: clothing
   status: active
-  sold_by: unit
   featured: false
   published: 2024-10-03
   legacy_wp_id: 29613

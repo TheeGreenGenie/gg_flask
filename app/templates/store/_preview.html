@@ -1,0 +1,12 @@
+{%- from "store/_product_parts.html" import gallery_block, buy_box with context -%}
+{%- set variants = product.active_variants -%}
+{%- set chosen = (variants|selectattr('available_quantity', 'gt', 0)|first) or variants|first -%}
+{%- set main_image = (chosen.image.path if chosen and chosen.image else (gallery[0] if gallery else None)) -%}
+<div class="gg-preview" data-gg-product>
+  {{ gallery_block(product, gallery, main_image, eager=false) }}
+  <div class="gg-preview__summary">
+    {{ buy_box(product, chosen, variants, pfx='qv-', heading='h2') }}
+    <p class="gg-preview__message" data-gg-preview-message role="status" hidden></p>
+    <a class="gg-link gg-preview__full" href="{{ url_for('store.product', slug=product.slug) }}">View full details <span aria-hidden="true">→</span></a>
+  </div>
+</div>

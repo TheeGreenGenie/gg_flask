@@ -193,3 +193,58 @@ def test_unavailable_line_is_flagged_and_excluded(shop: FlaskClient, catalog_app
         db.session.commit()
     html = shop.get("/cart/").get_data(as_text=True)
     assert "out of stock" in html and money(0) in html
+
+
+# ---------- Preview, header, bundles ----------
+
+
+def test_preview_is_a_fragment_with_its_own_ids(shop: FlaskClient) -> None:
+    resp = shop.get("/product/cushion-g1/preview")
+    assert resp.status_code == 200
+    html = resp.get_data(as_text=True)
+    assert "<html" not in html and "<header" not in html
+    assert 'id="qv-qty"' in html and 'id="qty"' not in html
+    assert "View full details" in html
+    assert shop.get("/product/draft-thing/preview").status_code == 404
+
+
+def test_cards_link_to_page_and_preview(shop: FlaskClient) -> None:
+    html = shop.get("/shop/").get_data(as_text=True)
+    assert 'href="/product/ankara-blue/" data-gg-preview="/product/ankara-blue/preview"' in html
+
+
+def test_add_to_cart_json_for_preview(shop: FlaskClient, catalog_app: Flask) -> None:
+    resp = shop.post(
+        "/cart/add",
+        data={"variant": variant_id(catalog_app, "101001"), "quantity": 2},
+        headers={"Accept": "application/json"},
+    )
+    assert resp.status_code == 200
+    assert resp.get_json() == {
+        "ok": True,
+        "message": "Added to your cart.",
+        "count": 2,
+        "subtotal": money(2 * 899),
+        "cart_url": "/cart/",
+    }
+    bad = shop.post(
+        "/cart/add",
+        data={"variant": variant_id(catalog_app, "G1-2"), "quantity": 1},
+        headers={"Accept": "application/json"},
+    )
+    assert bad.status_code == 400 and bad.get_json()["ok"] is False
+
+
+def test_socials_are_inside_sticky_header_and_no_account_links(shop: FlaskClient) -> None:
+    html = shop.get("/").get_data(as_text=True)
+    header = html.split("<header", 1)[1].split("</header>", 1)[0]
+    assert "gg-topbar__social" in header
+    assert "/my-account/" not in html
+
+
+@pytest.mark.parametrize(
+    "path", ["/shop/", "/product/ankara-blue/", "/product/ankara-blue/preview"]
+)
+def test_prices_are_bundle_prices_not_per_yard(shop: FlaskClient, path: str) -> None:
+    html = shop.get(path).get_data(as_text=True).lower()
+    assert "per yard" not in html and "/ yard" not in html

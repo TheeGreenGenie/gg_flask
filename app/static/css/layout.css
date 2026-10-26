@@ -469,7 +469,10 @@
 
 /* ---------- Responsive ---------- */
 @media (max-width: 63.9375rem) {
-	.gg-topbar, .gg-header__nav-row, .gg-search { display: none; }
+	.gg-header__nav-row, .gg-search { display: none; }
+	.gg-topbar__links { gap: .9rem; }
+	.gg-topbar__social { gap: .2rem; padding-left: .5rem; }
+	.gg-topbar__social a { min-width: 1.75rem; justify-content: center; }
 	.gg-icon-btn.gg-header__menu-btn { display: inline-flex; }
 	.gg-header__main { min-height: 3.75rem; }
 	.gg-logo img { height: 1.6rem; }

@@ -1,6 +1,6 @@
 {#- Product card used in grids and carousels. Expects `p` (catalog.models.Product). -#}
 <article class="gg-card-product">
-  <a class="gg-card-product__link" href="{{ url_for('store.product', slug=p.slug) }}">
+  <a class="gg-card-product__link" href="{{ url_for('store.product', slug=p.slug) }}" data-gg-preview="{{ url_for('store.product_preview', slug=p.slug) }}">
     <div class="gg-card-product__media">
       <img src="{{ media_url(p.cover.path if p.cover else None) }}" width="400" height="500" alt="{{ p.cover.alt if p.cover else p.name }}" loading="lazy" decoding="async">
       {% if not p.in_stock %}
@@ -19,7 +19,6 @@
         {% else %}
           {{ p.price_cents|money }}
         {% endif %}
-        {% if p.sold_by.value == 'yard' %}<span class="gg-price__unit">/ yard</span>{% endif %}
       </p>
     </div>
   </a>

@@ -4,21 +4,22 @@
   {%- if item.collection -%}{{ url_for('store.collection', slug=item.collection) }}{%- else -%}{{ cat_url(item.category) }}{%- endif -%}
 {%- endmacro -%}
 
-<div class="gg-topbar">
-  <div class="gg-container gg-topbar__inner">
-    <nav class="gg-topbar__links" aria-label="Company">
-      <a href="/about-us/">About us</a>
-      <a href="/contact-us/">Contact us</a>
-    </nav>
-    <nav class="gg-topbar__social" aria-label="GG Afrikan Eleganz on social media">
-      {% for key, label, url in site.SOCIAL_LINKS %}
-        <a href="{{ url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ label }} (opens in a new tab)">{{ icon(key, 14) }}</a>
-      {% endfor %}
-    </nav>
-  </div>
-</div>
-
 <header class="gg-header" data-gg-header>
+  {#- Top bar sits inside the sticky header so company links and socials stay visible. #}
+  <div class="gg-topbar">
+    <div class="gg-container gg-topbar__inner">
+      <nav class="gg-topbar__links" aria-label="Company">
+        <a href="/about-us/">About us</a>
+        <a href="/contact-us/">Contact us</a>
+      </nav>
+      <nav class="gg-topbar__social" aria-label="GG Afrikan Eleganz on social media">
+        {% for key, label, url in site.SOCIAL_LINKS %}
+          <a href="{{ url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ label }} (opens in a new tab)">{{ icon(key, 14) }}</a>
+        {% endfor %}
+      </nav>
+    </div>
+  </div>
+
   <div class="gg-container gg-header__main">
     <div class="gg-header__start">
       <a class="gg-icon-btn gg-header__menu-btn" href="#footer-nav" data-gg-drawer-open aria-controls="gg-drawer" aria-label="Open menu">{{ icon('menu', 24) }}</a>
@@ -37,10 +38,10 @@
     </a>
 
     <div class="gg-header__end">
-      <a class="gg-icon-btn" href="/my-account/" aria-label="My account">{{ icon('user', 22) }}</a>
-      <a class="gg-cart-link" href="{{ url_for('store.cart') }}" aria-label="Cart, {{ cart.count }} item{{ '' if cart.count == 1 else 's' }}, {{ cart.subtotal_cents|money }}">
-        <span class="gg-cart-link__icon">{{ icon('cart', 22) }}<span class="gg-badge" aria-hidden="true">{{ cart.count }}</span></span>
-        <span class="gg-cart-link__total" aria-hidden="true">{{ cart.subtotal_cents|money }}</span>
+      {#- Account icon returns when customer accounts launch (after launch, #73). #}
+      <a class="gg-cart-link" href="{{ url_for('store.cart') }}" data-gg-cart-link aria-label="Cart, {{ cart.count }} item{{ '' if cart.count == 1 else 's' }}, {{ cart.subtotal_cents|money }}">
+        <span class="gg-cart-link__icon">{{ icon('cart', 22) }}<span class="gg-badge" aria-hidden="true" data-gg-cart-count>{{ cart.count }}</span></span>
+        <span class="gg-cart-link__total" aria-hidden="true" data-gg-cart-total>{{ cart.subtotal_cents|money }}</span>
       </a>
     </div>
   </div>
@@ -114,7 +115,6 @@
       {% endfor %}
       <li><a href="/about-us/">About us</a></li>
       <li><a href="/contact-us/">Contact us</a></li>
-      <li><a href="/my-account/">My account</a></li>
     </ul>
   </nav>
   <div class="gg-drawer__social">

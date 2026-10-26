@@ -923,14 +923,9 @@ html.gg-home-enhanced {
 }
 
 @media (min-width: 64rem) and (min-height: 43.75rem) and (prefers-reduced-motion: no-preference) {
+	/* Snapping is scripted in home.js (smooth glide after 1 s idle); no CSS snap here. */
 	html.gg-home-enhanced {
 		scroll-padding-top: var(--gg-header-offset);
-		scroll-snap-type: y proximity;
-	}
-
-	.gg-home__section {
-		scroll-snap-align: start;
-		scroll-snap-stop: normal;
 	}
 }
 
@@ -1042,7 +1037,6 @@ html.gg-home-enhanced {
 @media (prefers-reduced-motion: reduce) {
 	html.gg-home-enhanced {
 		scroll-behavior: auto;
-		scroll-snap-type: none;
 	}
 }
 

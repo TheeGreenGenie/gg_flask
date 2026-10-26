@@ -38,7 +38,6 @@ BASE: dict[str, Any] = {
             "name": "African Ankara Print - 101001",
             "type": "fabric",
             "status": "active",
-            "sold_by": "yard",
             "published": date(2026, 10, 1),
             "summary": "Blue wax print.",
             "categories": ["ankara"],

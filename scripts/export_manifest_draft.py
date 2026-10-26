@@ -292,7 +292,6 @@ def main() -> int:
                     "name": row["post_title"].strip(),
                     "type": product_type,
                     "status": "active",
-                    "sold_by": "yard" if product_type == "fabric" else "unit",
                     "featured": "featured" in row["_terms"],
                     "published": row["post_date"].date(),
                     "legacy_wp_id": row["ID"],

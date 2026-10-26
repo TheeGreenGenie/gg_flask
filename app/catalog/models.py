@@ -44,11 +44,6 @@ class ProductStatus(enum.StrEnum):
     ARCHIVED = "archived"
 
 
-class SoldBy(enum.StrEnum):
-    UNIT = "unit"
-    YARD = "yard"
-
-
 product_categories = Table(
     "product_categories",
     db.metadata,
@@ -130,10 +125,6 @@ class Product(db.Model):  # type: ignore[name-defined]
         Enum(ProductStatus, name="product_status", values_callable=lambda e: [m.value for m in e]),
         default=ProductStatus.DRAFT,
         index=True,
-    )
-    sold_by: Mapped[SoldBy] = mapped_column(
-        Enum(SoldBy, name="sold_by", values_callable=lambda e: [m.value for m in e]),
-        default=SoldBy.UNIT,
     )
     summary: Mapped[str] = mapped_column(String(300), default="")
     description: Mapped[str] = mapped_column(Text, default="")

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask import Blueprint, abort, flash, jsonify, redirect, render_template, request, url_for
 from werkzeug.wrappers import Response
 
 from app import site_content
@@ -12,6 +12,7 @@ from app.cart import service as cart_service
 from app.catalog import queries
 from app.catalog.models import Product
 from app.store import content
+from app.templating import money
 
 bp = Blueprint("store", __name__)
 
@@ -138,6 +139,15 @@ def product(slug: str) -> str:
     )
 
 
+@bp.get("/product/<slug>/preview")
+def product_preview(slug: str) -> str:
+    """Quick-view fragment loaded into a dialog when a product card is clicked."""
+    item = queries.product_by_slug(slug)
+    if item is None:
+        abort(404)
+    return render_template("store/_preview.html", product=item, gallery=_gallery(item))
+
+
 def _gallery(item: Product) -> list[str]:
     paths = [img.path for img in item.images]
     for v in item.active_variants:  # variant photos are always reachable from the gallery
@@ -155,16 +165,29 @@ def cart() -> str:
 
 
 @bp.post("/cart/add")
-def cart_add() -> Response:
+def cart_add() -> Response | tuple[Response, int]:
+    """Add to cart. Browsers get a redirect; the quick-view preview asks for JSON."""
+    wants_json = request.accept_mimetypes.best == "application/json"
     try:
         variant_id = int(request.form.get("variant", ""))
         quantity = int(request.form.get("quantity", "1"))
         _, message = cart_service.add(variant_id, quantity)
-        flash(message, "success")
     except ValueError as exc:  # includes CartError
         msg = str(exc) if isinstance(exc, cart_service.CartError) else "Please choose an option."
+        if wants_json:
+            return jsonify(ok=False, message=msg), 400
         flash(msg, "error")
         return redirect(_safe_back(url_for("store.shop")))
+    if wants_json:
+        view = cart_service.view(cart_service.current_cart())
+        return jsonify(
+            ok=True,
+            message=message,
+            count=view.count,
+            subtotal=money(view.subtotal_cents),
+            cart_url=url_for("store.cart"),
+        )
+    flash(message, "success")
     return redirect(url_for("store.cart"))
 
 

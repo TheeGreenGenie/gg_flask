@@ -189,3 +189,27 @@
 .gg-swatch--text:has(input:checked) { color: #fff; background: var(--gg-ink); }
 .gg-swatch--text.gg-swatch--soldout::after { display: none; }
 .gg-swatch--text.gg-swatch--soldout { text-decoration: line-through; }
+
+/* Quick-view preview dialog */
+.gg-quickview { width: min(60rem, calc(100vw - 2rem)); }
+.gg-quickview[open] { display: block; }
+
+.gg-preview {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: clamp(1rem, 3vw, 2rem);
+	padding: clamp(1rem, 3vw, 2rem);
+}
+
+.gg-preview .gg-gallery { position: static; }
+.gg-preview .gg-product__title { padding-right: 2.5rem; font-size: clamp(1.3rem, 2.5vw, 1.75rem); }
+.gg-preview__full { display: inline-block; margin-top: .5rem; }
+.gg-preview__message { margin: 0 0 .75rem; padding: .7rem .9rem; border-radius: var(--gg-radius-sm); font-weight: 700; }
+.gg-preview__message.is-ok { color: var(--gg-success); background: #f1f7ea; }
+.gg-preview__message.is-error { color: var(--gg-sale); background: #fdf1ef; }
+.gg-card-product__link[aria-busy="true"] { cursor: progress; opacity: .7; }
+
+@media (max-width: 40rem) {
+	.gg-preview { grid-template-columns: 1fr; }
+	.gg-quickview { width: 100vw; max-width: 100vw; max-height: 92dvh; margin: auto 0 0; border-radius: var(--gg-radius-lg) var(--gg-radius-lg) 0 0; }
+}

@@ -38,7 +38,7 @@
                   {% if lv.problem %}<p class="gg-cart-line__problem" role="alert">{{ lv.problem }}</p>{% endif %}
                 </div>
               </td>
-              <td class="gg-cart-line__price" data-label="Price">{{ lv.unit_cents|money }}{% if p.sold_by.value == 'yard' %} <small>/ yard</small>{% endif %}</td>
+              <td class="gg-cart-line__price" data-label="Price">{{ lv.unit_cents|money }}</td>
               <td data-label="Quantity">
                 <div class="gg-qty gg-qty--sm" data-gg-qty>
                   <button type="button" class="gg-qty__btn" data-gg-qty-step="-1" aria-label="Decrease quantity of {{ p.name }}">{{ icon('minus', 14) }}</button>

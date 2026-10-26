@@ -1,0 +1,92 @@
+{#- Gallery and buy box shared by the product page and the quick-view preview.
+    Import with context. `pfx` keeps element ids unique when both are on one page. -#}
+{%- from "partials/icons.html" import icon -%}
+
+{%- macro stock_text(n) -%}
+  {%- if n <= 0 -%}Out of stock{%- elif n <= 3 -%}Only {{ n }} left in stock{%- else -%}In stock{%- endif -%}
+{%- endmacro -%}
+
+{%- macro gallery_block(product, gallery, main_image, eager=true) -%}
+<section class="gg-gallery" aria-label="Product images" data-gg-gallery>
+  <figure class="gg-gallery__main">
+    <img src="{{ media_url(main_image) }}" width="1000" height="1000" alt="{{ product.name }}" data-gg-gallery-main{% if eager %} fetchpriority="high"{% endif %}>
+  </figure>
+  {% if gallery|length > 1 %}
+    <ul class="gg-gallery__thumbs">
+      {% for path in gallery %}
+        <li>
+          <a href="{{ media_url(path) }}" data-gg-gallery-thumb{% if path == main_image %} aria-current="true"{% endif %}>
+            <img src="{{ media_url(path) }}" width="120" height="120" alt="{{ product.name }}, image {{ loop.index }} of {{ gallery|length }}" loading="lazy">
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</section>
+{%- endmacro -%}
+
+{%- macro buy_box(product, chosen, variants, pfx='', heading='h1') -%}
+      <{{ heading }} id="{{ pfx }}product-title" class="gg-product__title">{{ product.name }}</{{ heading }}>
+      <p class="gg-price gg-price--lg" data-gg-price>
+        {% if chosen.on_sale %}
+          <del><span class="gg-visually-hidden">Was </span>{{ chosen.compare_at_cents|money }}</del>
+          <ins><span class="gg-visually-hidden">Now </span>{{ chosen.price_cents|money }}</ins>
+        {% else %}
+          {{ chosen.price_cents|money }}
+        {% endif %}
+      </p>
+      {% if product.summary %}<p class="gg-product__lede">{{ product.summary }}</p>{% endif %}
+
+      <form class="gg-buy" data-gg-buy method="post" action="{{ url_for('store.cart_add') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        {% if product.option_axes|length == 1 %}
+          {%- set axis = product.option_axes[0] -%}
+          <fieldset class="gg-swatches">
+            <legend>{{ axis.name }}: <strong data-gg-variant-label>{{ chosen.label }}</strong></legend>
+            <div class="gg-swatches__list">
+              {% for v in variants %}
+                {%- set sold_out = v.available_quantity <= 0 -%}
+                <label class="gg-swatch{% if not v.image %} gg-swatch--text{% endif %}{% if sold_out %} gg-swatch--soldout{% endif %}">
+                  <input type="radio" name="variant" value="{{ v.id }}" required
+                    data-label="{{ v.label }}" data-sku="{{ v.sku }}" data-stock="{{ v.available_quantity }}" data-price="{{ v.price_cents|money }}"
+                    {%- if v.compare_at_cents %} data-compare="{{ v.compare_at_cents|money }}"{% endif %}
+                    {%- if v.image %} data-image="{{ media_url(v.image.path) }}"{% endif %}
+                    {%- if sold_out %} disabled{% endif %}{% if v.id == chosen.id and not sold_out %} checked{% endif %}>
+                  {% if v.image %}
+                    <img src="{{ media_url(v.image.path) }}" width="64" height="64" alt="" loading="lazy">
+                    <span class="gg-visually-hidden">{{ v.label }}{% if sold_out %}, out of stock{% endif %}</span>
+                  {% else %}
+                    <span>{{ v.label }}<span class="gg-visually-hidden">{% if sold_out %}, out of stock{% endif %}</span></span>
+                  {% endif %}
+                </label>
+              {% endfor %}
+            </div>
+          </fieldset>
+        {% elif product.option_axes %}
+          <div class="gg-field">
+            <label for="{{ pfx }}variant">Choose an option</label>
+            <select id="{{ pfx }}variant" name="variant" required>
+              {% for v in variants %}
+                <option value="{{ v.id }}"{% if v.available_quantity <= 0 %} disabled{% endif %}{% if v.id == chosen.id %} selected{% endif %}>{{ v.label }} — {{ v.price_cents|money }}{% if v.available_quantity <= 0 %} (out of stock){% endif %}</option>
+              {% endfor %}
+            </select>
+          </div>
+        {% else %}
+          <input type="hidden" name="variant" value="{{ chosen.id }}">
+        {% endif %}
+
+        {%- set stock = chosen.available_quantity -%}
+        <p class="gg-stock{% if stock <= 0 %} gg-stock--out{% elif stock <= 3 %} gg-stock--low{% endif %}" data-gg-stock aria-live="polite">{{ stock_text(stock) }}</p>
+
+        <div class="gg-buy__row">
+          <div class="gg-qty" data-gg-qty>
+            <button type="button" class="gg-qty__btn" data-gg-qty-step="-1" aria-label="Decrease quantity">{{ icon('minus', 16) }}</button>
+            <label class="gg-visually-hidden" for="{{ pfx }}qty">Quantity</label>
+            <input id="{{ pfx }}qty" data-gg-qty-input name="quantity" type="number" inputmode="numeric" min="1" max="{{ [stock, 99]|min if stock > 0 else 1 }}" value="1" required>
+            <button type="button" class="gg-qty__btn" data-gg-qty-step="1" aria-label="Increase quantity">{{ icon('plus', 16) }}</button>
+          </div>
+          <button class="gg-button gg-button--accent gg-buy__add" type="submit"{% if stock <= 0 %} disabled{% endif %}>Add to cart</button>
+        </div>
+      </form>
+{%- endmacro -%}

@@ -120,8 +120,10 @@
 	}
 
 	/* Quantity steppers around number inputs. */
-	function initQuantity() {
-		document.querySelectorAll('[data-gg-qty]').forEach(function (wrap) {
+	function initQuantity(scope) {
+		(scope && scope.querySelectorAll ? scope : document).querySelectorAll('[data-gg-qty]').forEach(function (wrap) {
+			if (wrap.dataset.ggQtyReady) { return; }
+			wrap.dataset.ggQtyReady = '1';
 			var input = wrap.querySelector('input');
 			wrap.querySelectorAll('[data-gg-qty-step]').forEach(function (btn) {
 				btn.addEventListener('click', function () {
@@ -193,7 +195,89 @@
 		});
 	}
 
-	[initHeader, initDropdowns, initDrawer, initNewsletter, initQuantity, initAutosubmit, initFilters, initTabs].forEach(function (fn) {
+	/* Header cart badge, total and accessible name after an in-page add to cart. */
+	function updateCartLink(count, subtotal) {
+		var link = document.querySelector('[data-gg-cart-link]');
+		if (!link) { return; }
+		link.querySelector('[data-gg-cart-count]').textContent = String(count);
+		link.querySelector('[data-gg-cart-total]').textContent = subtotal;
+		link.setAttribute('aria-label', 'Cart, ' + count + ' item' + (count === 1 ? '' : 's') + ', ' + subtotal);
+	}
+
+	/* Clicking a product card opens a quick-view preview. Ctrl/Cmd/Shift/middle clicks,
+	   or any failure, fall through to the normal product page link. */
+	function initQuickView() {
+		var dialog = document.querySelector('[data-gg-quickview]');
+		if (!dialog || typeof dialog.showModal !== 'function' || !window.fetch) { return; }
+		var body = dialog.querySelector('[data-gg-quickview-body]');
+		var opener = null;
+		wireDialog(dialog, function () {
+			body.textContent = '';
+			if (opener) { opener.focus(); }
+		});
+
+		document.addEventListener('click', function (event) {
+			var link = event.target.closest && event.target.closest('a[data-gg-preview]');
+			if (!link || event.defaultPrevented || event.button !== 0 ||
+				event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) { return; }
+			event.preventDefault();
+			opener = link;
+			link.setAttribute('aria-busy', 'true');
+			fetch(link.getAttribute('data-gg-preview'), { credentials: 'same-origin' })
+				.then(function (r) {
+					if (!r.ok) { throw new Error('preview ' + r.status); }
+					return r.text();
+				})
+				.then(function (html) {
+					body.innerHTML = html; // same-origin server-rendered fragment, no scripts
+					var root = body.querySelector('[data-gg-product]');
+					if (window.GGProduct) { window.GGProduct.init(root); }
+					initQuantity(body);
+					wireAjaxAdd(body.querySelector('form[data-gg-buy]'), body);
+					if (document.querySelector('dialog[open]')) { document.querySelector('dialog[open]').close(); }
+					dialog.showModal();
+					var title = body.querySelector('.gg-product__title');
+					if (title) { title.tabIndex = -1; title.focus(); }
+				})
+				.catch(function () { window.location.href = link.href; })
+				.then(function () { link.removeAttribute('aria-busy'); });
+		});
+	}
+
+	/* Add to cart without leaving the preview. */
+	function wireAjaxAdd(form, scope) {
+		if (!form) { return; }
+		var message = scope.querySelector('[data-gg-preview-message]');
+		form.addEventListener('submit', function (event) {
+			event.preventDefault();
+			var button = form.querySelector('.gg-buy__add');
+			button.disabled = true;
+			fetch(form.action, {
+				method: 'POST',
+				body: new FormData(form),
+				credentials: 'same-origin',
+				headers: { Accept: 'application/json' }
+			})
+				.then(function (r) { return r.json(); })
+				.then(function (data) {
+					message.hidden = false;
+					message.className = 'gg-preview__message ' + (data.ok ? 'is-ok' : 'is-error');
+					message.textContent = data.message + ' ';
+					if (data.ok) {
+						updateCartLink(data.count, data.subtotal);
+						var view = document.createElement('a');
+						view.href = data.cart_url;
+						view.className = 'gg-link';
+						view.textContent = 'View cart';
+						message.append(view);
+					}
+				})
+				.catch(function () { form.submit(); })
+				.then(function () { button.disabled = false; });
+		});
+	}
+
+	[initHeader, initDropdowns, initDrawer, initNewsletter, initQuantity, initAutosubmit, initFilters, initTabs, initQuickView].forEach(function (fn) {
 		try { fn(); } catch (error) {
 			if (window.console) { window.console.error('GG enhancement failed safely:', fn.name, error); }
 		}

@@ -1,0 +1,18 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+instance/
+.env
+.env.*
+!.env.example
+*.log
+
+# Planning documents (kept locally, not part of the repository)
+flask_*.md
+PROJECT_STATUS.md

@@ -135,16 +135,16 @@
 
 .gg-option span { flex: 1; }
 .gg-option small { color: var(--gg-muted); }
-.gg-option:has(input:checked) { border-color: var(--gg-ink); background: #fffdf7; }
+.gg-option:has(input:checked) { border-color: var(--gg-ink); background: var(--gg-subtle-bg); }
 
 .gg-payment-placeholder {
 	display: grid;
 	place-items: center;
 	min-height: 7rem;
-	border: 1px dashed #cfc8bd;
+	border: 1px dashed var(--gg-input-border);
 	border-radius: var(--gg-radius-sm);
 	color: var(--gg-muted);
-	background: #fbfaf8;
+	background: var(--gg-subtle-bg);
 	font-size: .9rem;
 }
 
@@ -191,7 +191,7 @@
 	.gg-fields { grid-template-columns: 1fr; }
 }
 
-.gg-cart-line--problem { background: #fff8f6; }
+.gg-cart-line--problem { background: var(--gg-err-bg); }
 .gg-cart-line__problem { margin: .3rem 0 0; color: var(--gg-sale); font-size: .85rem; font-weight: 700; }
 .gg-summary__warning { color: var(--gg-sale); font-weight: 700; }
 .gg-cart__empty { grid-column: 1 / -1; }

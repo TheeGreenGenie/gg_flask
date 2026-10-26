@@ -8,6 +8,7 @@ from datetime import timedelta
 from sqlalchemy import Select, and_, exists, func, or_, select
 from sqlalchemy.orm import selectinload
 
+from app import cache
 from app.catalog.models import (
     Category,
     Collection,
@@ -232,7 +233,14 @@ def collection_by_slug(slug: str) -> Collection | None:
 
 
 def category_counts() -> dict[int, int]:
-    """Active product count per category (children roll up into parents)."""
+    """Active product count per category (children roll up into parents). Cached."""
+    raw = cache.cached_json(
+        "category-counts", lambda: {str(k): v for k, v in _category_counts().items()}
+    )
+    return {int(k): v for k, v in raw.items()}
+
+
+def _category_counts() -> dict[int, int]:
     rows = db.session.execute(
         select(product_categories.c.category_id, func.count())
         .join(Product, Product.id == product_categories.c.product_id)
@@ -250,16 +258,23 @@ DISCOVERY_PAGE_SIZE = 20  # feature matrix W-003
 DISCOVERY_ROOT = "fabrics"
 
 
-def discovery(offset: int, limit: int = DISCOVERY_PAGE_SIZE) -> tuple[list[Product], int | None]:
-    """In-stock fabrics for Find Fabrics, newest first, in a stable order.
+def discovery_category_ids(slug: str | None) -> list[int]:
+    """Category ids to draw from: the whole Fabrics tree, or one of its subcategories.
 
-    Returns the page and the next offset (None when there are no more).
+    Anything outside the Fabrics tree falls back to the whole tree.
     """
     root = category_by_slug(DISCOVERY_ROOT)
     if root is None:
-        return [], None
-    ids = [root.id, *(c.id for c in root.children)]
-    stmt = (
+        return []
+    if slug and slug != root.slug:
+        child = next((c for c in root.children if c.slug == slug), None)
+        if child is not None:
+            return [child.id]
+    return [root.id, *(c.id for c in root.children)]
+
+
+def _discovery_stmt(ids: list[int]) -> Select[Product]:
+    return (
         base_query()
         .where(
             _in_stock_clause(),
@@ -272,7 +287,39 @@ def discovery(offset: int, limit: int = DISCOVERY_PAGE_SIZE) -> tuple[list[Produ
         )
         .order_by(Product.published_at.desc().nulls_last(), Product.id.desc())
     )
+
+
+def discovery(
+    offset: int, limit: int = DISCOVERY_PAGE_SIZE, category: str | None = None
+) -> tuple[list[Product], int | None]:
+    """In-stock fabrics for Find Fabrics, newest first, in a stable order.
+
+    Returns the page and the next offset (None when there are no more).
+    """
+    ids = discovery_category_ids(category)
+    if not ids:
+        return [], None
     offset = max(0, offset)
-    rows = list(db.session.scalars(stmt.limit(limit + 1).offset(offset)))
+    rows = list(db.session.scalars(_discovery_stmt(ids).limit(limit + 1).offset(offset)))
     more = len(rows) > limit
     return rows[:limit], (offset + limit if more else None)
+
+
+def discovery_categories() -> list[dict[str, object]]:
+    """Fabric subcategories with in-stock counts, for the Find Fabrics picker (cached)."""
+
+    def compute() -> list[dict[str, object]]:
+        root = category_by_slug(DISCOVERY_ROOT)
+        if root is None:
+            return []
+        out: list[dict[str, object]] = []
+        for cat in [root, *root.children]:
+            ids = discovery_category_ids(cat.slug)
+            count = db.session.scalar(
+                select(func.count()).select_from(_discovery_stmt(ids).order_by(None).subquery())
+            )
+            if count or cat is root:
+                out.append({"slug": cat.slug, "name": cat.name, "count": int(count or 0)})
+        return out
+
+    return cache.cached_json("discovery-categories", compute)

@@ -195,6 +195,38 @@
 		});
 	}
 
+	/* ---------- Theme toggle (UI-004) ---------- */
+	function initTheme() {
+		var root = document.documentElement;
+		var media = window.matchMedia('(prefers-color-scheme: dark)');
+		var buttons = Array.prototype.slice.call(document.querySelectorAll('[data-gg-theme-toggle]'));
+		function effective() {
+			return root.getAttribute('data-theme') || (media.matches ? 'dark' : 'light');
+		}
+		function sync() {
+			var dark = effective() === 'dark';
+			buttons.forEach(function (b) {
+				b.hidden = false;
+				b.setAttribute('aria-pressed', dark ? 'true' : 'false');
+				if (b.classList.contains('gg-drawer__theme')) {
+					b.textContent = dark ? 'Light mode' : 'Dark mode';
+				} else {
+					b.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+				}
+			});
+		}
+		buttons.forEach(function (b) {
+			b.addEventListener('click', function () {
+				var next = effective() === 'dark' ? 'light' : 'dark';
+				root.setAttribute('data-theme', next);
+				storageSet('gg-theme', next);
+				sync();
+			});
+		});
+		media.addEventListener('change', sync);
+		sync();
+	}
+
 	/* ---------- Wishlist ---------- */
 	function csrfToken() {
 		var meta = document.querySelector('meta[name="csrf-token"]');
@@ -224,6 +256,7 @@
 	}
 
 	function updateWishCount(count) {
+		if (window.GGPreviewCache) { window.GGPreviewCache.clear(); }
 		var link = document.querySelector('[data-gg-wish-link]');
 		if (!link || typeof count !== 'number') { return; }
 		var badge = link.querySelector('[data-gg-wish-count]');
@@ -273,6 +306,7 @@
 
 	/* Header cart badge, total and accessible name after an in-page add to cart. */
 	function updateCartLink(count, subtotal) {
+		if (window.GGPreviewCache) { window.GGPreviewCache.clear(); }
 		var link = document.querySelector('[data-gg-cart-link]');
 		if (!link) { return; }
 		link.querySelector('[data-gg-cart-count]').textContent = String(count);
@@ -292,14 +326,37 @@
 			if (opener) { opener.focus(); }
 		});
 
+		/* Previews are prefetched on hover/touch and kept briefly, so a click opens them
+		   instantly. Cleared after cart or wishlist changes (previews show stock and hearts). */
+		var PREVIEW_TTL = 60000;
+		var previewCache = {};
+		function fetchPreview(url) {
+			var hit = previewCache[url];
+			if (hit && Date.now() - hit.at < PREVIEW_TTL) { return hit.promise; }
+			var promise = fetch(url, { credentials: 'same-origin' }).then(function (r) {
+				if (!r.ok) { throw new Error('preview ' + r.status); }
+				return r.text();
+			});
+			previewCache[url] = { at: Date.now(), promise: promise };
+			promise.catch(function () { delete previewCache[url]; });
+			return promise;
+		}
+		window.GGPreviewCache = { clear: function () { previewCache = {}; } };
+
+		function prefetch(event) {
+			var link = event.target.closest && event.target.closest('a[data-gg-preview]');
+			if (link) { fetchPreview(link.getAttribute('data-gg-preview')).catch(function () {}); }
+		}
+		document.addEventListener('pointerover', function (event) {
+			if (event.pointerType === 'mouse') { prefetch(event); }
+		}, { passive: true });
+		document.addEventListener('touchstart', prefetch, { passive: true });
+		document.addEventListener('focusin', prefetch);
+
 		function open(previewUrl, pageUrl, from) {
 			opener = from || null;
 			if (opener) { opener.setAttribute('aria-busy', 'true'); }
-			fetch(previewUrl, { credentials: 'same-origin' })
-				.then(function (r) {
-					if (!r.ok) { throw new Error('preview ' + r.status); }
-					return r.text();
-				})
+			fetchPreview(previewUrl)
 				.then(function (html) {
 					body.innerHTML = html; // same-origin server-rendered fragment, no scripts
 					var root = body.querySelector('[data-gg-product]');
@@ -360,7 +417,7 @@
 		});
 	}
 
-	[initHeader, initDropdowns, initDrawer, initNewsletter, initQuantity, initAutosubmit, initFilters, initTabs, initQuickView, initWish].forEach(function (fn) {
+	[initHeader, initDropdowns, initDrawer, initNewsletter, initQuantity, initAutosubmit, initFilters, initTabs, initQuickView, initWish, initTheme].forEach(function (fn) {
 		try { fn(); } catch (error) {
 			if (window.console) { window.console.error('GG enhancement failed safely:', fn.name, error); }
 		}

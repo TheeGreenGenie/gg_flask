@@ -28,6 +28,7 @@
 	var current = root.querySelector('[data-gg-ff-current]');
 	var toast = document.querySelector('[data-gg-ff-toast]');
 
+	var category = root.getAttribute('data-category') || 'fabrics';
 	var queue = [];
 	var cursor = 0;
 	var exhausted = false;
@@ -61,10 +62,13 @@
 	function fetchMore() {
 		if (loading || exhausted) { return Promise.resolve(); }
 		loading = true;
-		var url = root.getAttribute('data-feed') + '?cursor=' + encodeURIComponent(cursor);
+		var url = root.getAttribute('data-feed') + '?cursor=' + encodeURIComponent(cursor) +
+			'&category=' + encodeURIComponent(category);
+		var requested = category;
 		return fetch(url, { credentials: 'same-origin' })
 			.then(function (r) { if (!r.ok) { throw new Error('feed ' + r.status); } return r.json(); })
 			.then(function (data) {
+				if (requested !== category) { return; } // category changed while loading
 				(data.items || []).forEach(function (item) {
 					if (seen.indexOf(item.slug) === -1) { queue.push(item); }
 				});
@@ -78,9 +82,22 @@
 			.then(function () { loading = false; });
 	}
 
+	/* Warm the browser cache with the next photos so cards appear instantly. */
+	var preloaded = {};
+	function preloadUpcoming() {
+		queue.slice(STACK_DEPTH, STACK_DEPTH + 6).forEach(function (item) {
+			if (!preloaded[item.image]) {
+				preloaded[item.image] = true;
+				var img = new Image();
+				img.decoding = 'async';
+				img.src = item.image;
+			}
+		});
+	}
+
 	function ensureQueue() {
 		// Keep a few cards ready; skip whole pages of already-seen fabrics.
-		if (queue.length >= STACK_DEPTH + 2 || exhausted) { return Promise.resolve(); }
+		if (queue.length >= STACK_DEPTH + 2 || exhausted) { preloadUpcoming(); return Promise.resolve(); }
 		return fetchMore().then(function () {
 			if (queue.length < STACK_DEPTH + 2 && !exhausted) { return ensureQueue(); }
 		});
@@ -314,16 +331,48 @@
 		if (wishlist) { wishlist.clear(); }
 	});
 
-	root.querySelector('[data-gg-ff-reset]').addEventListener('click', function () {
-		seen = [];
-		store(SEEN_KEY, seen);
+	function restart() {
 		queue = [];
 		cursor = 0;
 		exhausted = false;
+		loading = false;
 		stackEl.textContent = '';
 		render();
 		ensureQueue().then(render);
+	}
+
+	root.querySelector('[data-gg-ff-reset]').addEventListener('click', function () {
+		seen = [];
+		store(SEEN_KEY, seen);
+		restart();
 	});
+
+	/* Category chips: links without JS; with JS they switch the stack in place. */
+	var chips = Array.prototype.slice.call(root.querySelectorAll('[data-gg-ff-cat]'));
+	var emptyCat = root.querySelector('[data-gg-ff-empty-cat]');
+	function setCategory(slug, label) {
+		category = slug;
+		chips.forEach(function (c) {
+			if (c.getAttribute('data-gg-ff-cat') === slug) { c.setAttribute('aria-current', 'true'); }
+			else { c.removeAttribute('aria-current'); }
+		});
+		if (emptyCat) { emptyCat.textContent = slug === 'fabrics' ? '' : 'in ' + label; }
+	}
+	chips.forEach(function (chip) {
+		chip.addEventListener('click', function (event) {
+			if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) { return; }
+			event.preventDefault();
+			var slug = chip.getAttribute('data-gg-ff-cat');
+			if (slug === category) { return; }
+			setCategory(slug, chip.firstChild.textContent.trim());
+			if (window.history && window.history.replaceState) {
+				window.history.replaceState(null, '', chip.href);
+			}
+			restart();
+		});
+	});
+	var initial = chips.filter(function (c) { return c.getAttribute('data-gg-ff-cat') === category; })[0];
+	if (initial) { setCategory(category, initial.firstChild.textContent.trim()); }
 
 	/* ---------- start: swap the no-JS grid for the stack ---------- */
 	var fallback = document.querySelector('[data-gg-ff-fallback]');

@@ -23,7 +23,7 @@
 .gg-button--dark { color: #fff; background: var(--gg-inverse); }
 .gg-button--dark:hover { color: #fff; background: #333; }
 .gg-button--outline { border-color: var(--gg-ink); color: var(--gg-ink); background: transparent; }
-.gg-button--outline:hover { color: #fff; background: var(--gg-ink); }
+.gg-button--outline:hover { color: var(--gg-paper); background: var(--gg-ink); }
 .gg-button--block { width: 100%; }
 .gg-button--lg { min-height: 3.4rem; font-size: 1rem; }
 .gg-button:disabled { cursor: not-allowed; opacity: .55; }
@@ -34,7 +34,7 @@
 input[type="text"], input[type="email"], input[type="search"], input[type="tel"], input[type="number"], select, textarea {
 	min-height: 2.9rem;
 	padding: .6rem .85rem;
-	border: 1px solid #cfc8bd;
+	border: 1px solid var(--gg-input-border);
 	border-radius: var(--gg-radius-sm);
 	background: var(--gg-paper);
 	font-size: 1rem; /* 16px avoids iOS zoom on focus */
@@ -146,7 +146,7 @@ fieldset { margin: 0; padding: 0; border: 0; }
 	list-style: none;
 }
 
-.gg-breadcrumbs li + li::before { content: "/"; margin-right: .5rem; color: #b3aa9d; }
+.gg-breadcrumbs li + li::before { content: "/"; margin-right: .5rem; color: var(--gg-crumb-sep); }
 .gg-breadcrumbs a { color: var(--gg-muted); text-decoration: none; }
 .gg-breadcrumbs a:hover { color: var(--gg-ink); text-decoration: underline; }
 .gg-breadcrumbs [aria-current] { color: var(--gg-ink); }
@@ -155,7 +155,7 @@ fieldset { margin: 0; padding: 0; border: 0; }
 .gg-qty {
 	display: inline-flex;
 	align-items: stretch;
-	border: 1px solid #cfc8bd;
+	border: 1px solid var(--gg-input-border);
 	border-radius: var(--gg-radius-sm);
 	background: var(--gg-paper);
 }
@@ -200,7 +200,7 @@ fieldset { margin: 0; padding: 0; border: 0; }
 	border: 0;
 	border-bottom: 2px solid transparent;
 	margin-bottom: -1px;
-	color: #666;
+	color: var(--gg-muted-2);
 	background: none;
 	font-size: .82rem;
 	font-weight: 700;

@@ -17,6 +17,7 @@ class FakeRedis:
     def __init__(self, healthy: bool = True) -> None:
         self.healthy = healthy
         self.counters: dict[str, int] = {}
+        self.values: dict[str, str] = {}
 
     def ping(self) -> bool:
         if not self.healthy:
@@ -25,6 +26,17 @@ class FakeRedis:
 
     def pipeline(self) -> FakePipeline:
         return FakePipeline(self)
+
+    def get(self, name: str) -> bytes | None:
+        value = self.values.get(name)
+        return value.encode() if value is not None else None
+
+    def setex(self, name: str, seconds: int, value: str) -> None:
+        self.values[name] = value
+
+    def incr(self, name: str) -> int:
+        self.values[name] = str(int(self.values.get(name, "0")) + 1)
+        return int(self.values[name])
 
 
 class FakePipeline:

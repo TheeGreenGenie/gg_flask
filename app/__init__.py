@@ -7,6 +7,7 @@ import logging
 from flask import Flask
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+from app.assets import init_assets
 from app.catalog import init_catalog
 from app.config import BaseConfig, load_config
 from app.extensions import csrf, db, init_redis, migrate
@@ -45,6 +46,7 @@ def create_app(config: BaseConfig | str | None = None) -> Flask:
     init_security_headers(app)
     init_templating(app)
     init_catalog(app)
+    init_assets(app)
 
     from app.health import bp as health_bp
     from app.main import bp as main_bp

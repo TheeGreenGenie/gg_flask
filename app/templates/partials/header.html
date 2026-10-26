@@ -39,6 +39,9 @@
 
     <div class="gg-header__end">
       {#- Account icon returns when customer accounts launch (after launch, #73). #}
+      <button type="button" class="gg-icon-btn gg-theme-btn" data-gg-theme-toggle aria-label="Switch to dark mode" hidden>
+        <span class="gg-theme-btn__sun">{{ icon('sun', 22) }}</span><span class="gg-theme-btn__moon">{{ icon('moon', 20) }}</span>
+      </button>
       <a class="gg-icon-btn gg-wish-link" href="{{ url_for('wishlist.page') }}" data-gg-wish-link aria-label="Wishlist, {{ wishlist_count }} item{{ '' if wishlist_count == 1 else 's' }}">
         {{ icon('heart', 22) }}<span class="gg-badge" aria-hidden="true" data-gg-wish-count{% if not wishlist_count %} hidden{% endif %}>{{ wishlist_count }}</span>
       </a>
@@ -117,6 +120,7 @@
         </li>
       {% endfor %}
       <li><a href="{{ url_for('wishlist.page') }}">Wishlist ({{ wishlist_count }})</a></li>
+          <li><button type="button" class="gg-drawer__theme" data-gg-theme-toggle hidden>Dark mode</button></li>
       <li><a href="/about-us/">About us</a></li>
       <li><a href="/contact-us/">Contact us</a></li>
     </ul>

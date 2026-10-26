@@ -89,7 +89,7 @@
 }
 
 .gg-stock { margin: 0; color: var(--gg-success); font-size: .9rem; font-weight: 700; }
-.gg-stock--low { color: #8a5a00; }
+.gg-stock--low { color: var(--gg-stock-low); }
 .gg-stock--out { color: var(--gg-sale); }
 
 .gg-buy__row { display: flex; gap: .75rem; }
@@ -141,7 +141,6 @@
 	overflow-x: auto;
 	scroll-behavior: smooth;
 	scroll-snap-type: x mandatory;
-	scrollbar-width: thin;
 }
 
 .gg-related__track > * { scroll-snap-align: start; }
@@ -186,7 +185,7 @@
 }
 
 .gg-swatch--text span { display: inline-block; }
-.gg-swatch--text:has(input:checked) { color: #fff; background: var(--gg-ink); }
+.gg-swatch--text:has(input:checked) { color: var(--gg-paper); background: var(--gg-ink); }
 .gg-swatch--text.gg-swatch--soldout::after { display: none; }
 .gg-swatch--text.gg-swatch--soldout { text-decoration: line-through; }
 
@@ -205,8 +204,8 @@
 .gg-preview .gg-product__title { padding-right: 2.5rem; font-size: clamp(1.3rem, 2.5vw, 1.75rem); }
 .gg-preview__full { display: inline-block; margin-top: .5rem; }
 .gg-preview__message { margin: 0 0 .75rem; padding: .7rem .9rem; border-radius: var(--gg-radius-sm); font-weight: 700; }
-.gg-preview__message.is-ok { color: var(--gg-success); background: #f1f7ea; }
-.gg-preview__message.is-error { color: var(--gg-sale); background: #fdf1ef; }
+.gg-preview__message.is-ok { color: var(--gg-success); background: var(--gg-ok-bg); }
+.gg-preview__message.is-error { color: var(--gg-sale); background: var(--gg-err-bg); }
 .gg-card-product__link[aria-busy="true"] { cursor: progress; opacity: .7; }
 
 @media (max-width: 40rem) {

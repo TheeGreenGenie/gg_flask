@@ -10,6 +10,7 @@ import yaml
 from flask import Blueprint, Flask, current_app, send_from_directory
 from werkzeug.wrappers import Response
 
+from app import cache
 from app.catalog import manifest, naming
 
 media_bp = Blueprint("media", __name__)
@@ -57,6 +58,7 @@ def init_catalog(app: Flask) -> None:
             for e in exc.errors:
                 click.echo(f"  - {e}", err=True)
             raise SystemExit(f"{len(exc.errors)} problem(s); nothing was changed") from None
+        cache.bump_catalog_version()
         click.echo(
             f"OK: loaded {report.products} products, {report.variants} variants, "
             f"{report.images} images, {report.categories} categories, "

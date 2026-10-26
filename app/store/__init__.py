@@ -7,7 +7,8 @@ from typing import Any
 from flask import Blueprint, abort, flash, jsonify, redirect, render_template, request, url_for
 from werkzeug.wrappers import Response
 
-from app import site_content
+from app import cache, site_content
+from app.assets import media_version
 from app.cart import service as cart_service
 from app.catalog import queries
 from app.catalog.models import Product
@@ -20,6 +21,9 @@ bp = Blueprint("store", __name__)
 def _media_url(path: str | None) -> str:
     if not path:
         return url_for("static", filename="img/placeholder.svg")
+    version = media_version(path)
+    if version:
+        return url_for("media.media_file", path=path, v=version)
     return url_for("media.media_file", path=path)
 
 
@@ -162,22 +166,35 @@ def card_json(p: Product) -> dict[str, Any]:
 @bp.get("/find-fabrics/")
 def find_fabrics() -> str:
     """Swipe-to-save fabric discovery. The first batch is server-rendered for no-JS visitors."""
-    items, _ = queries.discovery(0)
-    return render_template("store/find_fabrics.html", products=items)
+    categories = queries.discovery_categories()
+    selected = request.args.get("category", "")
+    if selected not in {c["slug"] for c in categories}:
+        selected = queries.DISCOVERY_ROOT
+    items, _ = queries.discovery(0, category=selected)
+    return render_template(
+        "store/find_fabrics.html", products=items, categories=categories, selected=selected
+    )
 
 
 @bp.get("/api/v1/discovery/fabrics")
 def discovery_feed() -> Response:
-    """Bounded, minimal JSON feed for the Find Fabrics card stack (W-003)."""
+    """Bounded, minimal JSON feed for the Find Fabrics card stack (W-003). Cached in Redis,
+    by browsers/CDNs for a minute, and revalidated with an ETag."""
     try:
-        offset = int(request.args.get("cursor", "0"))
+        offset = min(max(int(request.args.get("cursor", "0")), 0), 10_000)
     except ValueError:
         offset = 0
-    items, next_offset = queries.discovery(min(max(offset, 0), 10_000))
-    payload = [card_json(p) for p in items]
-    resp = jsonify(items=payload, next_cursor=next_offset)
+    category = request.args.get("category", "")[:80] or queries.DISCOVERY_ROOT
+
+    def compute() -> dict[str, Any]:
+        items, next_offset = queries.discovery(offset, category=category)
+        return {"items": [card_json(p) for p in items], "next_cursor": next_offset}
+
+    data = cache.cached_json(f"discovery:{category}:{offset}", compute)
+    resp = jsonify(data)
     resp.headers["Cache-Control"] = "public, max-age=60"
-    return resp
+    resp.add_etag()
+    return resp.make_conditional(request)
 
 
 @bp.get("/product/<slug>/preview")

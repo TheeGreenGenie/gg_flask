@@ -5,6 +5,19 @@
 {% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/find-fabrics.css') }}">{% endblock %}
 {% block scripts %}<script src="{{ url_for('static', filename='js/find-fabrics.js') }}" defer></script>{% endblock %}
 {% block body_class %}gg-body--ff{% endblock %}
+{%- macro category_chips() -%}
+<nav class="gg-ff__cats" aria-label="Fabric type">
+  <ul>
+    {% for c in categories %}
+      <li>
+        <a class="gg-chip" href="{{ url_for('store.find_fabrics', category=None if c.slug == 'fabrics' else c.slug) }}" data-gg-ff-cat="{{ c.slug }}"{% if c.slug == selected %} aria-current="true"{% endif %}>
+          {{ 'All fabrics' if c.slug == 'fabrics' else c.name }} <span class="gg-chip__count">{{ c.count }}</span>
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+</nav>
+{%- endmacro -%}
 {% block content %}
 <div class="gg-page-title">
   <div class="gg-container">
@@ -19,12 +32,13 @@
   </div>
 </div>
 
-<div class="gg-container gg-ff" data-gg-ff data-feed="{{ url_for('store.discovery_feed') }}" hidden>
+<div class="gg-container gg-ff" data-gg-ff data-feed="{{ url_for('store.discovery_feed') }}" data-category="{{ selected }}" hidden>
   <section class="gg-ff__stage" aria-label="Fabric cards">
+    {{ category_chips() }}
     <div class="gg-ff__stack" data-gg-ff-stack aria-live="polite"></div>
 
     <div class="gg-ff__empty" data-gg-ff-empty hidden>
-      <h2>You've seen every fabric</h2>
+      <h2>You've seen every fabric <span data-gg-ff-empty-cat></span></h2>
       <p>New prints arrive often. Start over to see them all again, or browse the full shop.</p>
       <div class="gg-ff__empty-actions">
         <button type="button" class="gg-button gg-button--accent" data-gg-ff-reset>Start over</button>
@@ -62,6 +76,7 @@
 
 {# Without JavaScript (or before it loads) visitors get a plain grid of the same fabrics. #}
 <div class="gg-container gg-ff-fallback" data-gg-ff-fallback>
+  {{ category_chips() }}
   {% if products %}
     <div class="gg-product-grid">
       {% for p in products %}{% include "partials/product_card.html" %}{% endfor %}

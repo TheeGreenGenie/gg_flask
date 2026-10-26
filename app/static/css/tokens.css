@@ -32,6 +32,18 @@
 	--gg-sale: #b3261e;
 	--gg-success: #2e6b2f;
 	--gg-footer-bg: #f9f9f9;
+	--gg-text-soft: #333;
+	--gg-muted-2: #666;
+	--gg-line-soft: #ececec;
+	--gg-input-border: #cfc8bd;
+	--gg-icon-muted: #9a8f80;
+	--gg-crumb-sep: #b3aa9d;
+	--gg-ok-bg: #f1f7ea;
+	--gg-err-bg: #fdf1ef;
+	--gg-subtle-bg: #fbfaf8;
+	--gg-stock-low: #8a5a00;
+	--gg-scroll-thumb: #c9c0b3;
+	--gg-scroll-thumb-hover: #a99f91;
 
 	--gg-radius-sm: .5rem;
 	--gg-radius-md: 1rem;
@@ -47,6 +59,70 @@
 	--gg-font-display: "Aclonica", "Lato", Arial, sans-serif;
 
 	color-scheme: light;
+}
+
+/* Dark theme (UI-004): follows the device setting unless the visitor picked one with the
+   header toggle, which theme-init.js applies as data-theme before the page paints. */
+:root[data-theme="dark"] {
+	--gg-ink: #f4f0e9;
+	--gg-muted: #bdb5aa;
+	--gg-paper: #141414;
+	--gg-warm: #0c0c0c;
+	--gg-warm-deep: #22201d;
+	--gg-inverse: #050505;
+	--gg-inverse-soft: #1a1917;
+	--gg-line: #39342e;
+	--gg-link: #ffc333;
+	--gg-focus: #ffc333;
+	--gg-sale: #ff8a80;
+	--gg-success: #8fd18f;
+	--gg-footer-bg: #0f0f0f;
+	--gg-text-soft: #e0dbd3;
+	--gg-muted-2: #b0a89c;
+	--gg-line-soft: #2a2826;
+	--gg-input-border: #4a443d;
+	--gg-icon-muted: #8f877c;
+	--gg-crumb-sep: #6f675d;
+	--gg-ok-bg: #16231a;
+	--gg-err-bg: #2a1614;
+	--gg-subtle-bg: #1c1a17;
+	--gg-stock-low: #ffc333;
+	--gg-scroll-thumb: #4a443d;
+	--gg-scroll-thumb-hover: #6a6157;
+	--gg-shadow: 0 1rem 3rem rgba(0, 0, 0, .45);
+	color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) {
+		--gg-ink: #f4f0e9;
+		--gg-muted: #bdb5aa;
+		--gg-paper: #141414;
+		--gg-warm: #0c0c0c;
+		--gg-warm-deep: #22201d;
+		--gg-inverse: #050505;
+		--gg-inverse-soft: #1a1917;
+		--gg-line: #39342e;
+		--gg-link: #ffc333;
+		--gg-focus: #ffc333;
+		--gg-sale: #ff8a80;
+		--gg-success: #8fd18f;
+		--gg-footer-bg: #0f0f0f;
+		--gg-text-soft: #e0dbd3;
+		--gg-muted-2: #b0a89c;
+		--gg-line-soft: #2a2826;
+		--gg-input-border: #4a443d;
+		--gg-icon-muted: #8f877c;
+		--gg-crumb-sep: #6f675d;
+		--gg-ok-bg: #16231a;
+		--gg-err-bg: #2a1614;
+		--gg-subtle-bg: #1c1a17;
+		--gg-stock-low: #ffc333;
+		--gg-scroll-thumb: #4a443d;
+		--gg-scroll-thumb-hover: #6a6157;
+		--gg-shadow: 0 1rem 3rem rgba(0, 0, 0, .45);
+		color-scheme: dark;
+	}
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -157,5 +233,39 @@ main:focus { outline: none; }
 		animation-iteration-count: 1 !important;
 		scroll-behavior: auto !important;
 		transition-duration: .01ms !important;
+	}
+}
+
+/* Dark-theme adjustments that are not plain colour swaps. */
+:root[data-theme="dark"] .gg-logo img { filter: invert(1) hue-rotate(180deg); }
+:root[data-theme="dark"] .gg-button--dark { color: var(--gg-accent-ink); background: var(--gg-accent); }
+:root[data-theme="dark"] .gg-button--dark:hover { background: var(--gg-accent-strong); }
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) .gg-logo img { filter: invert(1) hue-rotate(180deg); }
+	:root:not([data-theme="light"]) .gg-button--dark { color: var(--gg-accent-ink); background: var(--gg-accent); }
+	:root:not([data-theme="light"]) .gg-button--dark:hover { background: var(--gg-accent-strong); }
+}
+
+/* Scrollbars: slim, theme-coloured, no arrow buttons. */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-corner { background: transparent; }
+
+::-webkit-scrollbar-thumb {
+	border: 2px solid transparent;
+	border-radius: 999px;
+	background: var(--gg-scroll-thumb) padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover { background: var(--gg-scroll-thumb-hover) padding-box; }
+
+/* Firefox has no ::-webkit-scrollbar; its thin scrollbar has no arrows. Chromium ignores
+   the ::-webkit rules above if these standard properties are set, so keep them Firefox-only. */
+@supports not selector(::-webkit-scrollbar) {
+	html, * {
+		scrollbar-width: thin;
+		scrollbar-color: var(--gg-scroll-thumb) transparent;
 	}
 }

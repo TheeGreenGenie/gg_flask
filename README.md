@@ -25,6 +25,23 @@ Open http://127.0.0.1:5000/ and http://127.0.0.1:5000/health/ready.
 
 To run the production container locally: `docker compose --profile full up --build`, then open http://127.0.0.1:8000/.
 
+## Design prototypes (development only)
+
+Sample pages built from old-store data live at http://127.0.0.1:5000/prototype/ (home, shop, product, cart, checkout). They are not registered in production.
+
+The sample photos are generated from the old WordPress uploads and are not committed:
+
+```bash
+.venv/Scripts/pip install -e ".[tools]"
+.venv/Scripts/python scripts/prep_prototype_assets.py C:/xampp/htdocs/mysite/wp-content/uploads
+```
+
+Responsive check (all pages at 320/390/768/1280/1440, flags horizontal scrolling):
+
+```bash
+.venv/Scripts/python scripts/screenshots.py OUT_DIR http://127.0.0.1:5000
+```
+
 ## Checks (same as CI)
 
 ```bash

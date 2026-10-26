@@ -1,0 +1,26 @@
+{#- Product card used in grids and carousels. Expects `p` (fixtures.Product). -#}
+<article class="gg-card-product">
+  <a class="gg-card-product__link" href="{{ url_for('prototype.product', slug=p.slug) }}">
+    <div class="gg-card-product__media">
+      <img src="{{ url_for('static', filename=p.image) }}" width="400" height="500" alt="{{ p.name }}" loading="lazy" decoding="async">
+      {% if p.stock <= 0 %}
+        <span class="gg-tag gg-tag--muted">Sold out</span>
+      {% elif p.on_sale %}
+        <span class="gg-tag gg-tag--sale">Sale</span>
+      {% elif p.is_new %}
+        <span class="gg-tag">New</span>
+      {% endif %}
+    </div>
+    <div class="gg-card-product__body">
+      <h3 class="gg-card-product__title">{{ p.name }}</h3>
+      <p class="gg-price">
+        {% if p.on_sale %}
+          <del><span class="gg-visually-hidden">Was </span>{{ p.regular_cents|money }}</del>
+          <ins><span class="gg-visually-hidden">Now </span>{{ p.price_cents|money }}</ins>
+        {% else %}
+          {{ p.price_cents|money }}
+        {% endif %}
+      </p>
+    </div>
+  </a>
+</article>

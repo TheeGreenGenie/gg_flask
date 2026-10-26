@@ -1,0 +1,161 @@
+/* Design tokens, fonts and base styles. Values come from the current site (see design brief). */
+
+@font-face { font-family: "Lato"; font-weight: 400; font-style: normal; font-display: swap; src: url("../fonts/lato-400.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-weight: 700; font-style: normal; font-display: swap; src: url("../fonts/lato-700.woff2") format("woff2"); }
+@font-face { font-family: "Poppins"; font-weight: 400; font-style: normal; font-display: swap; src: url("../fonts/poppins-400.woff2") format("woff2"); }
+@font-face { font-family: "Poppins"; font-weight: 500; font-style: normal; font-display: swap; src: url("../fonts/poppins-500.woff2") format("woff2"); }
+@font-face { font-family: "Poppins"; font-weight: 600; font-style: normal; font-display: swap; src: url("../fonts/poppins-600.woff2") format("woff2"); }
+@font-face { font-family: "Aclonica"; font-weight: 400; font-style: normal; font-display: swap; src: url("../fonts/aclonica-400.woff2") format("woff2"); }
+
+:root {
+	--gg-max: 80rem;
+	--gg-gutter: clamp(1rem, 4vw, 4rem);
+	--gg-section-space: clamp(3.75rem, 8vw, 7.5rem);
+	--gg-header-offset: 9.75rem;
+
+	--gg-ink: #171512;
+	--gg-muted: #625d56;
+	--gg-paper: #fff;
+	--gg-warm: #f6f1e9;
+	--gg-warm-deep: #e9dfd1;
+	--gg-inverse: #111;
+	--gg-inverse-soft: #1a1917;
+	--gg-inverse-text: #f8f5ef;
+	--gg-inverse-muted: #c9c2b7;
+	--gg-line: #ded6cb;
+	--gg-accent: #ffc333;
+	--gg-accent-strong: #e5aa2e;
+	--gg-accent-ink: #1b1500;
+	--gg-link: #765000;
+	--gg-focus: #075fae;
+	--gg-badge: #83b735;
+	--gg-sale: #b3261e;
+	--gg-success: #2e6b2f;
+	--gg-footer-bg: #f9f9f9;
+
+	--gg-radius-sm: .5rem;
+	--gg-radius-md: 1rem;
+	--gg-radius-lg: 1.5rem;
+	--gg-shadow: 0 1rem 3rem rgba(44, 34, 20, .1);
+	--gg-motion-fast: 140ms;
+	--gg-motion-base: 220ms;
+	--gg-motion-section: 320ms;
+	--gg-ease: cubic-bezier(.22, 1, .36, 1);
+
+	--gg-font-body: "Lato", Arial, sans-serif;
+	--gg-font-heading: "Poppins", "Lato", Arial, sans-serif;
+	--gg-font-display: "Aclonica", "Lato", Arial, sans-serif;
+
+	color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+	overflow-x: clip;
+}
+
+body {
+	margin: 0;
+	min-height: 100vh;
+	color: var(--gg-ink);
+	background: var(--gg-paper);
+	font-family: var(--gg-font-body);
+	font-size: 1rem;
+	line-height: 1.6;
+	overflow-x: clip;
+}
+
+h1, h2, h3, h4 {
+	margin: 0 0 .5em;
+	color: inherit;
+	font-family: var(--gg-font-heading);
+	font-weight: 600;
+	line-height: 1.15;
+	letter-spacing: -.01em;
+}
+
+h1 { font-size: clamp(1.9rem, 4vw, 2.75rem); }
+h2 { font-size: clamp(1.5rem, 3vw, 2rem); }
+h3 { font-size: clamp(1.1rem, 2vw, 1.3rem); }
+
+p { margin: 0 0 1em; }
+
+a { color: var(--gg-link); text-underline-offset: .2em; }
+a:hover { color: var(--gg-ink); }
+
+img, svg { max-width: 100%; height: auto; }
+img { display: block; }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+
+:focus-visible {
+	outline: 3px solid var(--gg-focus);
+	outline-offset: 3px;
+}
+
+[hidden] { display: none !important; }
+
+main:focus { outline: none; }
+
+.gg-container {
+	width: 100%;
+	max-width: calc(var(--gg-max) + 2 * var(--gg-gutter));
+	margin-inline: auto;
+	padding-inline: var(--gg-gutter);
+}
+
+.gg-visually-hidden {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.gg-skip-link {
+	position: fixed;
+	z-index: 1000;
+	top: 1rem;
+	left: 1rem;
+	min-height: 2.75rem;
+	padding: .7rem 1rem;
+	transform: translateY(calc(-100% - 2rem));
+	border: 2px solid var(--gg-inverse);
+	border-radius: var(--gg-radius-sm);
+	color: var(--gg-accent-ink);
+	background: var(--gg-accent);
+	font-weight: 700;
+	text-decoration: none;
+	transition: transform var(--gg-motion-fast) ease;
+}
+
+.gg-skip-link:focus { transform: translateY(0); }
+
+.gg-eyebrow {
+	margin: 0 0 .75rem;
+	color: var(--gg-link);
+	font-size: .78rem;
+	font-weight: 700;
+	letter-spacing: .14em;
+	line-height: 1.3;
+	text-transform: uppercase;
+}
+
+.gg-page { padding-block: clamp(2rem, 5vw, 4rem); }
+
+@media (prefers-reduced-motion: reduce) {
+	*, *::before, *::after {
+		animation-duration: .01ms !important;
+		animation-iteration-count: 1 !important;
+		scroll-behavior: auto !important;
+		transition-duration: .01ms !important;
+	}
+}

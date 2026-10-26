@@ -1,0 +1,77 @@
+/* Shop and category pages: left filter sidebar on desktop, collapsible panel above results on phones. */
+
+.gg-shop {
+	display: grid;
+	grid-template-columns: 16rem minmax(0, 1fr);
+	gap: clamp(1.5rem, 4vw, 3rem);
+	padding-block: clamp(1.5rem, 4vw, 3rem) clamp(3rem, 6vw, 5rem);
+}
+
+.gg-filters > summary {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	min-height: 3rem;
+	padding: 0 1rem;
+	border: 1px solid var(--gg-line);
+	border-radius: var(--gg-radius-sm);
+	font-weight: 700;
+	list-style: none;
+	cursor: pointer;
+}
+
+.gg-filters > summary::-webkit-details-marker { display: none; }
+.gg-filters[open] > summary .gg-icon { transform: rotate(180deg); }
+
+.gg-filters__form { display: grid; gap: 1.75rem; padding-top: 1.25rem; }
+
+.gg-filters__title {
+	margin-bottom: .6rem;
+	padding-bottom: .4rem;
+	border-bottom: 2px solid var(--gg-accent);
+	font-size: .82rem;
+	font-weight: 700;
+	letter-spacing: .06em;
+	text-transform: uppercase;
+}
+
+.gg-filters__list { display: grid; margin: 0; padding: 0; list-style: none; }
+
+.gg-filters label {
+	display: flex;
+	align-items: center;
+	gap: .6rem;
+	min-height: 2.5rem;
+	color: #333;
+	font-size: .92rem;
+	cursor: pointer;
+}
+
+.gg-filters__count { color: var(--gg-muted); font-size: .8rem; }
+.gg-filters__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
+
+.gg-shop__toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: .75rem 1.5rem;
+	margin-bottom: 1.5rem;
+}
+
+.gg-shop__count { margin: 0; color: var(--gg-muted); font-size: .9rem; }
+.gg-sort { display: flex; gap: .5rem; }
+.gg-sort select { min-width: 14rem; }
+.gg-js .gg-sort__go { display: none; }
+
+@media (min-width: 64rem) {
+	/* On desktop the sidebar is always open; the summary is just a heading. */
+	.gg-filters > summary { pointer-events: none; padding: 0; border: 0; }
+	.gg-filters > summary .gg-icon { display: none; }
+}
+
+@media (max-width: 63.9375rem) {
+	.gg-shop { grid-template-columns: 1fr; }
+	.gg-sort, .gg-sort select { width: 100%; }
+	.gg-sort select { min-width: 0; flex: 1; }
+}

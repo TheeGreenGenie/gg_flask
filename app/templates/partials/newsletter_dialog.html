@@ -1,0 +1,15 @@
+{%- from "partials/icons.html" import icon -%}
+{#- Shown once per visitor after a short delay by site.js; never blocks the page without JS. -#}
+<dialog class="gg-modal gg-newsletter-modal" id="gg-newsletter" aria-labelledby="gg-newsletter-title" data-gg-newsletter>
+  <button class="gg-icon-btn gg-modal__close" type="button" data-gg-modal-close aria-label="Close">{{ icon('close', 22) }}</button>
+  <div class="gg-newsletter-modal__media" aria-hidden="true">
+    <img src="{{ url_for('static', filename='img/proto/open-african-prints.webp') }}" width="800" height="525" alt="" loading="lazy">
+  </div>
+  <div class="gg-newsletter-modal__body">
+    <p class="gg-eyebrow">Welcome to GG Afrikan Eleganz</p>
+    <h2 id="gg-newsletter-title">Stay connected to the culture</h2>
+    <p>Join our list to hear first about new prints, restocks and occasional offers.</p>
+    {% with form_id="modal" %}{% include "partials/newsletter_form.html" %}{% endwith %}
+    <p class="gg-newsletter-modal__fine">No spam. Unsubscribe any time. See our <a href="/privacy-policy/">Privacy Policy</a>.</p>
+  </div>
+</dialog>

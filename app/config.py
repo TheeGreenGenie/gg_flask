@@ -48,6 +48,7 @@ class BaseConfig:
     MAX_CONTENT_LENGTH = 2 * 1024 * 1024  # request bodies; uploads get their own path later
 
     ENABLE_HSTS = False
+    PROTOTYPES_ENABLED = False
 
     def __init__(self) -> None:
         self.SECRET_KEY = _env("SECRET_KEY")
@@ -62,6 +63,7 @@ class BaseConfig:
 class DevelopmentConfig(BaseConfig):
     APP_ENV = "development"
     DEBUG = True
+    PROTOTYPES_ENABLED = True
     SESSION_COOKIE_SECURE = False
 
     def __init__(self) -> None:
@@ -77,6 +79,7 @@ class DevelopmentConfig(BaseConfig):
 class TestingConfig(BaseConfig):
     APP_ENV = "testing"
     TESTING = True
+    PROTOTYPES_ENABLED = True
     SESSION_COOKIE_SECURE = False
     WTF_CSRF_ENABLED = False
 

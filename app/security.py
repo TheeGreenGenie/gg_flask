@@ -14,7 +14,7 @@ CONTENT_SECURITY_POLICY = "; ".join(
         "img-src 'self' data:",
         "font-src 'self'",
         "connect-src 'self'",
-        "frame-src 'none'",
+        "frame-src https://www.youtube-nocookie.com",  # homepage brand-story video
         "frame-ancestors 'none'",
         "base-uri 'self'",
         "form-action 'self'",

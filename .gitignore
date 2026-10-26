@@ -16,3 +16,6 @@ instance/
 # Planning documents (kept locally, not part of the repository)
 flask_*.md
 PROJECT_STATUS.md
+
+# Generated prototype images (scripts/prep_prototype_assets.py)
+app/static/img/proto/

@@ -21,6 +21,11 @@ dev = [
     "mypy>=1.13",
     "pip-audit>=2.7",
 ]
+# Design/QA helpers (scripts/): prototype image prep and responsive screenshots.
+tools = [
+    "pillow>=11.0",
+    "playwright>=1.49",
+]
 
 [build-system]
 requires = ["setuptools>=75"]

@@ -1,0 +1,123 @@
+{%- from "partials/icons.html" import icon -%}
+{%- macro cat_url(slug) -%}{{ url_for(shop_endpoint, category=slug) }}{%- endmacro -%}
+{%- macro menu_url(item) -%}
+  {%- if item.page -%}{{ url_for(shop_endpoint, page_key=item.page) }}{%- else -%}#{%- endif -%}
+{%- endmacro -%}
+
+<div class="gg-topbar">
+  <div class="gg-container gg-topbar__inner">
+    <nav class="gg-topbar__links" aria-label="Company">
+      <a href="/about-us/">About us</a>
+      <a href="/contact-us/">Contact us</a>
+    </nav>
+    <nav class="gg-topbar__social" aria-label="GG Afrikan Eleganz on social media">
+      {% for key, label, url in site.SOCIAL_LINKS %}
+        <a href="{{ url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ label }} (opens in a new tab)">{{ icon(key, 14) }}</a>
+      {% endfor %}
+    </nav>
+  </div>
+</div>
+
+<header class="gg-header" data-gg-header>
+  <div class="gg-container gg-header__main">
+    <div class="gg-header__start">
+      <a class="gg-icon-btn gg-header__menu-btn" href="#footer-nav" data-gg-drawer-open aria-controls="gg-drawer" aria-label="Open menu">{{ icon('menu', 24) }}</a>
+      <details class="gg-search" data-gg-dropdown>
+        <summary class="gg-icon-btn" aria-label="Search">{{ icon('search', 22) }}</summary>
+        <form class="gg-search__form" role="search" action="{{ url_for(shop_endpoint) }}" method="get">
+          <label class="gg-visually-hidden" for="gg-search-q">Search products</label>
+          <input id="gg-search-q" name="q" type="search" placeholder="Search for products" autocomplete="off" maxlength="100">
+          <button class="gg-button gg-button--dark" type="submit">Search</button>
+        </form>
+      </details>
+    </div>
+
+    <a class="gg-logo" href="{{ url_for('prototype.home') }}">
+      <img src="{{ url_for('static', filename='img/logo@2x.png') }}" width="570" height="72" alt="GG Afrikan Eleganz">
+    </a>
+
+    <div class="gg-header__end">
+      <a class="gg-icon-btn" href="/my-account/" aria-label="My account">{{ icon('user', 22) }}</a>
+      <a class="gg-cart-link" href="{{ url_for('prototype.cart') }}" aria-label="Cart, {{ cart.count }} item{{ '' if cart.count == 1 else 's' }}, {{ cart.subtotal_cents|money }}">
+        <span class="gg-cart-link__icon">{{ icon('cart', 22) }}<span class="gg-badge" aria-hidden="true">{{ cart.count }}</span></span>
+        <span class="gg-cart-link__total" aria-hidden="true">{{ cart.subtotal_cents|money }}</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="gg-header__nav-row">
+    <div class="gg-container gg-header__nav-inner">
+      <details class="gg-allcats" data-gg-dropdown>
+        <summary>{{ icon('menu', 18) }}<span>All categories</span>{{ icon('chevron-down', 16) }}</summary>
+        <ul class="gg-allcats__list">
+          {% for item in site.MAIN_MENU if item.children %}
+            {% for label, slug in item.children %}
+              <li><a href="{{ cat_url(slug) }}">{{ label }}</a></li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
+      </details>
+
+      <nav class="gg-mainnav" aria-label="Main">
+        <ul>
+          {% for item in site.MAIN_MENU %}
+            <li>
+              {% if item.children %}
+                <details class="gg-mainnav__dd" data-gg-dropdown>
+                  <summary>{{ item.label }}{{ icon('chevron-down', 12) }}</summary>
+                  <ul>
+                    {% for label, slug in item.children %}
+                      <li><a href="{{ cat_url(slug) }}">{{ label }}</a></li>
+                    {% endfor %}
+                  </ul>
+                </details>
+              {% else %}
+                <a href="{{ menu_url(item) }}">{{ item.label }}</a>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<dialog class="gg-drawer" id="gg-drawer" aria-label="Menu">
+  <div class="gg-drawer__head">
+    <img src="{{ url_for('static', filename='img/logo@2x.png') }}" width="190" height="24" alt="">
+    <button class="gg-icon-btn" type="button" data-gg-drawer-close aria-label="Close menu">{{ icon('close', 24) }}</button>
+  </div>
+  <form class="gg-drawer__search" role="search" action="{{ url_for(shop_endpoint) }}" method="get">
+    <label class="gg-visually-hidden" for="gg-drawer-q">Search products</label>
+    <input id="gg-drawer-q" name="q" type="search" placeholder="Search for products" maxlength="100">
+    <button class="gg-icon-btn" type="submit" aria-label="Search">{{ icon('search', 20) }}</button>
+  </form>
+  <nav aria-label="Mobile">
+    <ul class="gg-drawer__nav">
+      {% for item in site.MAIN_MENU %}
+        <li>
+          {% if item.children %}
+            <details>
+              <summary>{{ item.label }}{{ icon('chevron-down', 16) }}</summary>
+              <ul>
+                {% for label, slug in item.children %}
+                  <li><a href="{{ cat_url(slug) }}">{{ label }}</a></li>
+                {% endfor %}
+              </ul>
+            </details>
+          {% else %}
+            <a href="{{ menu_url(item) }}">{{ item.label }}</a>
+          {% endif %}
+        </li>
+      {% endfor %}
+      <li><a href="/about-us/">About us</a></li>
+      <li><a href="/contact-us/">Contact us</a></li>
+      <li><a href="/my-account/">My account</a></li>
+    </ul>
+  </nav>
+  <div class="gg-drawer__social">
+    {% for key, label, url in site.SOCIAL_LINKS %}
+      <a href="{{ url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ label }} (opens in a new tab)">{{ icon(key, 18) }}</a>
+    {% endfor %}
+  </div>
+</dialog>

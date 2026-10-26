@@ -1,0 +1,40 @@
+{%- from "partials/icons.html" import icon -%}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}GG Afrikan Eleganz{% endblock %}</title>
+  <meta name="description" content="{% block description %}Authentic African prints, fabrics and considered pieces from GG Afrikan Eleganz.{% endblock %}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" sizes="any">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+  <link rel="preload" href="{{ url_for('static', filename='fonts/lato-400.woff2') }}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+  {% block styles %}{% endblock %}
+  <script src="{{ url_for('static', filename='js/site.js') }}" defer></script>
+  {% block scripts %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <a class="gg-skip-link" href="#main">Skip to content</a>
+  {% include "partials/header.html" %}
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="gg-notices" role="status">
+        {% for category, message in messages %}
+          <p class="gg-notice gg-notice--{{ category }}">{{ icon('check', 18) }} {{ message }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main id="main" tabindex="-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% include "partials/footer.html" %}
+  {% if not hide_newsletter %}{% include "partials/newsletter_dialog.html" %}{% endif %}
+</body>
+</html>

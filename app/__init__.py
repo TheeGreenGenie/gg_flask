@@ -11,6 +11,7 @@ from app.config import BaseConfig, load_config
 from app.extensions import csrf, db, init_redis, migrate
 from app.log_config import configure_logging
 from app.security import init_security_headers
+from app.templating import init_templating
 
 
 def create_app(config: BaseConfig | str | None = None) -> Flask:
@@ -39,12 +40,18 @@ def create_app(config: BaseConfig | str | None = None) -> Flask:
     csrf.init_app(app)
     init_redis(app)
     init_security_headers(app)
+    init_templating(app)
 
     from app.health import bp as health_bp
     from app.main import bp as main_bp
 
     app.register_blueprint(health_bp)
     app.register_blueprint(main_bp)
+
+    if app.config["PROTOTYPES_ENABLED"]:
+        from app.prototype import bp as prototype_bp
+
+        app.register_blueprint(prototype_bp)
 
     logging.getLogger(__name__).info("app_started", extra={"app_env": app.config["APP_ENV"]})
     return app

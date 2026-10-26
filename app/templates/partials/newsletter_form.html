@@ -1,0 +1,6 @@
+<form class="gg-newsletter-form" action="{{ url_for('prototype.newsletter') }}" method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label class="gg-visually-hidden" for="nl-email-{{ form_id }}">Email address</label>
+  <input id="nl-email-{{ form_id }}" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="Your email address">
+  <button class="gg-button gg-button--accent" type="submit">Sign up</button>
+</form>

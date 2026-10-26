@@ -1,0 +1,62 @@
+{%- from "partials/icons.html" import icon -%}
+<footer class="gg-footer">
+  <section class="gg-footer__main" aria-labelledby="footer-nav">
+    <h2 id="footer-nav" class="gg-visually-hidden">Footer navigation</h2>
+    <div class="gg-container gg-footer__columns">
+      <nav class="gg-footer__col" aria-labelledby="footer-shop">
+        <h3 id="footer-shop" class="gg-footer__title">Shop</h3>
+        <ul>
+          {% for label, slug in site.FOOTER_SHOP %}
+            <li><a href="{{ url_for(shop_endpoint, category=slug) }}">{{ label }}</a></li>
+          {% endfor %}
+        </ul>
+      </nav>
+      <nav class="gg-footer__col" aria-labelledby="footer-quick">
+        <h3 id="footer-quick" class="gg-footer__title">Quick links</h3>
+        <ul>
+          {% for label, path in site.FOOTER_QUICK %}
+            <li><a href="{{ path }}">{{ label }}</a></li>
+          {% endfor %}
+        </ul>
+      </nav>
+      <nav class="gg-footer__col" aria-labelledby="footer-policies">
+        <h3 id="footer-policies" class="gg-footer__title">Policies</h3>
+        <ul>
+          {% for label, path in site.FOOTER_POLICIES %}
+            <li><a href="{{ path }}">{{ label }}</a></li>
+          {% endfor %}
+        </ul>
+      </nav>
+      <nav class="gg-footer__col" aria-labelledby="footer-contact">
+        <h3 id="footer-contact" class="gg-footer__title">Get in touch</h3>
+        <ul>
+          <li><a href="/contact-us/">Contact us</a></li>
+          {%- set user, domain = site.CONTACT_EMAIL.split('@') %}
+          <li><a href="mailto:{{ site.CONTACT_EMAIL }}">{{ user }}@<wbr>{{ domain }}</a></li>
+          <li><a href="{{ site.CONTACT_PHONE|phone_uri }}">{{ site.CONTACT_PHONE }}</a></li>
+        </ul>
+      </nav>
+    </div>
+  </section>
+
+  <section class="gg-footer__newsletter" aria-labelledby="footer-newsletter">
+    <div class="gg-container gg-footer__newsletter-inner">
+      <div class="gg-footer__newsletter-text">
+        <h2 id="footer-newsletter">Stay connected to the culture</h2>
+        <p>Be first to discover new prints, considered style ideas, and occasional offers. Read our <a href="/privacy-policy/">Privacy Policy</a>.</p>
+      </div>
+      {% with form_id="footer" %}{% include "partials/newsletter_form.html" %}{% endwith %}
+    </div>
+  </section>
+
+  <div class="gg-footer__bottom">
+    <div class="gg-container gg-footer__bottom-inner">
+      <nav class="gg-footer__social" aria-label="GG Afrikan Eleganz on social media">
+        {% for key, label, url in site.SOCIAL_LINKS %}
+          <a href="{{ url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ label }} (opens in a new tab)">{{ icon(key, 16) }}</a>
+        {% endfor %}
+      </nav>
+      <p class="gg-footer__copyright">&copy; {{ current_year }} GG Afrikan Eleganz. All rights reserved.</p>
+    </div>
+  </div>
+</footer>

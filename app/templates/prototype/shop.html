@@ -1,0 +1,104 @@
+{% extends "layout.html" %}
+{%- from "partials/icons.html" import icon -%}
+{% block title %}{{ title }} · GG Afrikan Eleganz{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">{% endblock %}
+{% block content %}
+{%- macro page_url(n) -%}
+  {{ url_for('prototype.shop', category=category.slug if category else None, page_key=page_key or None, q=query or None, in_stock='1' if in_stock else None, sort=sort if sort != 'default' else None, page=n if n > 1 else None) }}
+{%- endmacro -%}
+
+<div class="gg-page-title">
+  <div class="gg-container">
+    <nav class="gg-breadcrumbs" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="{{ url_for('prototype.home') }}">Home</a></li>
+        {% if category or page_key or query %}<li><a href="{{ url_for('prototype.shop') }}">Shop</a></li>{% endif %}
+        <li aria-current="page">{{ title }}</li>
+      </ol>
+    </nav>
+    <h1>{{ title }}</h1>
+  </div>
+</div>
+
+<div class="gg-container gg-shop">
+  <aside class="gg-shop__filters" aria-labelledby="filters-title">
+    <details class="gg-filters" open data-gg-filters>
+      <summary id="filters-title">Filter products{{ icon('chevron-down', 16) }}</summary>
+      <form class="gg-filters__form" method="get" action="{{ url_for('prototype.shop') }}">
+        {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+        {% if sort != 'default' %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+        <fieldset>
+          <legend class="gg-filters__title">Categories</legend>
+          <ul class="gg-filters__list">
+            <li><label><input type="radio" name="category" value=""{% if not category %} checked{% endif %}> All products</label></li>
+            {% for c in filter_categories %}
+              <li><label><input type="radio" name="category" value="{{ c.slug }}"{% if category and category.slug == c.slug %} checked{% endif %}> {{ c.name }} <span class="gg-filters__count">({{ c.count }})</span></label></li>
+            {% endfor %}
+          </ul>
+        </fieldset>
+        <fieldset>
+          <legend class="gg-filters__title">Availability</legend>
+          <label class="gg-filters__check"><input type="checkbox" name="in_stock" value="1"{% if in_stock %} checked{% endif %}> In stock only</label>
+        </fieldset>
+        <fieldset>
+          <legend class="gg-filters__title">Show</legend>
+          <ul class="gg-filters__list">
+            <li><label><input type="radio" name="page_key" value=""{% if not page_key %} checked{% endif %}> Everything</label></li>
+            <li><label><input type="radio" name="page_key" value="new"{% if page_key == 'new' %} checked{% endif %}> New arrivals</label></li>
+            <li><label><input type="radio" name="page_key" value="sale"{% if page_key == 'sale' %} checked{% endif %}> On sale</label></li>
+          </ul>
+        </fieldset>
+        <div class="gg-filters__actions">
+          <button class="gg-button gg-button--dark" type="submit">Apply filters</button>
+          <a class="gg-link" href="{{ url_for('prototype.shop') }}">Clear all</a>
+        </div>
+      </form>
+    </details>
+  </aside>
+
+  <section class="gg-shop__results" aria-labelledby="results-count">
+    <div class="gg-shop__toolbar">
+      <p id="results-count" class="gg-shop__count">
+        {% if total %}Showing {{ (page - 1) * 8 + 1 }}–{{ (page - 1) * 8 + products|length }} of {{ total }} result{{ '' if total == 1 else 's' }}{% else %}No results{% endif %}
+      </p>
+      <form class="gg-sort" method="get" action="{{ url_for('prototype.shop') }}" data-gg-autosubmit>
+        {% if category %}<input type="hidden" name="category" value="{{ category.slug }}">{% endif %}
+        {% if page_key %}<input type="hidden" name="page_key" value="{{ page_key }}">{% endif %}
+        {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+        {% if in_stock %}<input type="hidden" name="in_stock" value="1">{% endif %}
+        <label class="gg-visually-hidden" for="sort">Sort products</label>
+        <select id="sort" name="sort">
+          {% for key, (label, _) in sorts.items() %}
+            <option value="{{ key }}"{% if key == sort %} selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <button class="gg-button gg-button--outline gg-sort__go" type="submit">Sort</button>
+      </form>
+    </div>
+
+    {% if products %}
+      <div class="gg-product-grid">
+        {% for p in products %}{% include "partials/product_card.html" %}{% endfor %}
+      </div>
+    {% else %}
+      <div class="gg-empty">
+        <h2>Nothing matches those filters</h2>
+        <p>Try removing a filter, or browse everything we have in stock.</p>
+        <a class="gg-button gg-button--accent" href="{{ url_for('prototype.shop') }}">View all products</a>
+      </div>
+    {% endif %}
+
+    {% if pages > 1 %}
+      <nav class="gg-pagination" aria-label="Pagination">
+        <ul>
+          {% if page > 1 %}<li><a href="{{ page_url(page - 1) }}" aria-label="Previous page">{{ icon('chevron-left', 16) }}</a></li>{% endif %}
+          {% for n in range(1, pages + 1) %}
+            <li>{% if n == page %}<span aria-current="page">{{ n }}</span>{% else %}<a href="{{ page_url(n) }}">{{ n }}</a>{% endif %}</li>
+          {% endfor %}
+          {% if page < pages %}<li><a href="{{ page_url(page + 1) }}" aria-label="Next page">{{ icon('chevron-right', 16) }}</a></li>{% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

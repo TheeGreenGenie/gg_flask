@@ -1,7 +1,7 @@
 """Store-wide content shown in the header and footer.
 
 The menu is hand-written (catalog decision D-008) and is not generated from
-categories. Category entries hold a category slug; plain entries hold a page key.
+categories. Entries link to a category slug or a collection slug.
 """
 
 from __future__ import annotations
@@ -11,31 +11,34 @@ from typing import Final
 MAIN_MENU: Final = (
     {
         "label": "Real African Prints Shop",
+        "category": "fabrics",
         "children": (
             ("Ankara Prints", "ankara"),
             ("Kente Prints", "kente"),
             ("Adire (Tie-Dye)", "adire"),
-            ("Satin / Chiffon", "satin-chiffon"),
-            ("Ethnic Prints", "ethnic"),
+            ("Satin & Chiffon", "satin-chiffon"),
+            ("Ethnic Prints", "ethnic-prints"),
         ),
     },
     {
         "label": "Clothing",
-        "children": (("Skirts", "clothing"), ("Reversible Jackets", "reversible-jacket")),
+        "category": "clothing",
+        "children": (("Skirts", "skirts"), ("Jackets", "jackets")),
     },
     {
         "label": "Accessories",
-        "children": (("Cushion Covers", "cushion-covers"), ("Sarong Wraps", "sarong-wrap")),
+        "category": "home-accessories",
+        "children": (("Cushion Covers", "cushion-covers"), ("Sarong Wraps", "sarong-wraps")),
     },
-    {"label": "New Arrivals", "page": "new"},
-    {"label": "Sale", "page": "sale"},
+    {"label": "New Arrivals", "collection": "new-arrivals"},
+    {"label": "Sale", "collection": "sale"},
 )
 
 FOOTER_SHOP: Final = (
     ("Ankara Fabrics", "ankara"),
     ("Cushion Covers", "cushion-covers"),
     ("Clothing", "clothing"),
-    ("Accessories", "sarong-wrap"),
+    ("Accessories", "home-accessories"),
 )
 
 # (label, path) — content pages are built in Phase 4; Support is merged into Contact (#87).
@@ -61,3 +64,19 @@ SOCIAL_LINKS: Final = (
 
 CONTACT_EMAIL: Final = "info@ggafrikaneleganz.com"
 CONTACT_PHONE: Final = "+1 215-984-2270"
+
+US_STATES: Final = (
+    ("AL", "Alabama"), ("AK", "Alaska"), ("AZ", "Arizona"), ("AR", "Arkansas"),
+    ("CA", "California"), ("CO", "Colorado"), ("CT", "Connecticut"), ("DE", "Delaware"),
+    ("DC", "District of Columbia"), ("FL", "Florida"), ("GA", "Georgia"), ("HI", "Hawaii"),
+    ("ID", "Idaho"), ("IL", "Illinois"), ("IN", "Indiana"), ("IA", "Iowa"), ("KS", "Kansas"),
+    ("KY", "Kentucky"), ("LA", "Louisiana"), ("ME", "Maine"), ("MD", "Maryland"),
+    ("MA", "Massachusetts"), ("MI", "Michigan"), ("MN", "Minnesota"), ("MS", "Mississippi"),
+    ("MO", "Missouri"), ("MT", "Montana"), ("NE", "Nebraska"), ("NV", "Nevada"),
+    ("NH", "New Hampshire"), ("NJ", "New Jersey"), ("NM", "New Mexico"), ("NY", "New York"),
+    ("NC", "North Carolina"), ("ND", "North Dakota"), ("OH", "Ohio"), ("OK", "Oklahoma"),
+    ("OR", "Oregon"), ("PA", "Pennsylvania"), ("RI", "Rhode Island"),
+    ("SC", "South Carolina"), ("SD", "South Dakota"), ("TN", "Tennessee"), ("TX", "Texas"),
+    ("UT", "Utah"), ("VT", "Vermont"), ("VA", "Virginia"), ("WA", "Washington"),
+    ("WV", "West Virginia"), ("WI", "Wisconsin"), ("WY", "Wyoming"),
+)  # fmt: skip

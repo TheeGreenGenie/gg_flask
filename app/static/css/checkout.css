@@ -190,3 +190,8 @@
 @media (max-width: 30rem) {
 	.gg-fields { grid-template-columns: 1fr; }
 }
+
+.gg-cart-line--problem { background: #fff8f6; }
+.gg-cart-line__problem { margin: .3rem 0 0; color: var(--gg-sale); font-size: .85rem; font-weight: 700; }
+.gg-summary__warning { color: var(--gg-sale); font-weight: 700; }
+.gg-cart__empty { grid-column: 1 / -1; }

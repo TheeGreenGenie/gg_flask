@@ -15,11 +15,12 @@ from playwright.sync_api import sync_playwright
 
 WIDTHS = (320, 390, 768, 1280, 1440)
 DEFAULT_PATHS = (
-    "/prototype/home",
-    "/prototype/shop",
-    "/prototype/product/african-ankara-print-101025/",
-    "/prototype/cart",
-    "/prototype/checkout",
+    "/",
+    "/shop/",
+    "/shop/fabrics/",
+    "/product/cushion-cover-g-3/",
+    "/product/kente-print-101024/",
+    "/cart/",
 )
 
 

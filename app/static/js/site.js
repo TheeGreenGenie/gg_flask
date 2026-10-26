@@ -138,8 +138,8 @@
 
 	/* Sort dropdowns submit on change; the Sort button stays for no-JS. */
 	function initAutosubmit() {
-		document.querySelectorAll('form[data-gg-autosubmit] select').forEach(function (select) {
-			select.addEventListener('change', function () { select.form.submit(); });
+		document.querySelectorAll('form[data-gg-autosubmit] select, [data-gg-autosubmit-field]').forEach(function (field) {
+			field.addEventListener('change', function () { field.form.submit(); });
 		});
 	}
 

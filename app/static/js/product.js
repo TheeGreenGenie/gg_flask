@@ -26,6 +26,9 @@
 
 	/* Colorway picker updates the photo, label, stock message and quantity limit. */
 	var label = page.querySelector('[data-gg-variant-label]');
+	var price = page.querySelector('[data-gg-price]');
+	var sku = page.querySelector('[data-gg-sku]');
+	var unit = price ? price.querySelector('.gg-price__unit') : null;
 	var stock = page.querySelector('[data-gg-stock]');
 	var qty = page.querySelector('#qty');
 	var add = page.querySelector('.gg-buy__add');
@@ -33,8 +36,22 @@
 	page.querySelectorAll('input[name="variant"]').forEach(function (radio) {
 		radio.addEventListener('change', function () {
 			var n = parseInt(radio.dataset.stock, 10) || 0;
-			showImage(radio.dataset.image);
+			if (radio.dataset.image) { showImage(radio.dataset.image); }
 			if (label) { label.textContent = radio.dataset.label; }
+			if (sku) { sku.textContent = radio.dataset.sku || sku.textContent; }
+			if (price && radio.dataset.price) {
+				price.textContent = '';
+				if (radio.dataset.compare) {
+					var del = document.createElement('del');
+					del.textContent = radio.dataset.compare;
+					var ins = document.createElement('ins');
+					ins.textContent = radio.dataset.price;
+					price.append(del, ' ', ins);
+				} else {
+					price.append(radio.dataset.price);
+				}
+				if (unit) { price.append(' ', unit); }
+			}
 			if (stock) {
 				stock.textContent = n <= 0 ? 'Out of stock' : (n <= 3 ? 'Only ' + n + ' left in stock' : 'In stock');
 				stock.className = 'gg-stock' + (n <= 0 ? ' gg-stock--out' : (n <= 3 ? ' gg-stock--low' : ''));

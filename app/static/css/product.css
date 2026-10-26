@@ -172,3 +172,20 @@
 @media (min-width: 48rem) {
 	.gg-sticky-buy { display: none !important; }
 }
+
+.gg-swatch--text {
+	width: auto;
+	height: auto;
+	min-width: 2.9rem;
+	min-height: 2.9rem;
+	padding: .55rem 1rem;
+	border-radius: 999px;
+	font-size: .88rem;
+	font-weight: 700;
+	text-align: center;
+}
+
+.gg-swatch--text span { display: inline-block; }
+.gg-swatch--text:has(input:checked) { color: #fff; background: var(--gg-ink); }
+.gg-swatch--text.gg-swatch--soldout::after { display: none; }
+.gg-swatch--text.gg-swatch--soldout { text-decoration: line-through; }

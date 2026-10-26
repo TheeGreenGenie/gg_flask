@@ -250,3 +250,5 @@ fieldset { margin: 0; padding: 0; border: 0; }
 
 /* ---------- Prototype index ---------- */
 .gg-proto-index__list { display: grid; gap: .5rem; padding-left: 1.25rem; font-size: 1.1rem; }
+
+.gg-price__from { color: var(--gg-muted); font-size: .85em; font-weight: 400; }

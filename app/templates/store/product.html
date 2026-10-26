@@ -1,0 +1,187 @@
+{% extends "layout.html" %}
+{%- from "partials/icons.html" import icon -%}
+{% block title %}{{ product.name }} · GG Afrikan Eleganz{% endblock %}
+{% block description %}{{ product.summary or product.name }}{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/product.css') }}">{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/product.js') }}" defer></script>{% endblock %}
+{% block content %}
+{%- macro stock_text(n) -%}
+  {%- if n <= 0 -%}Out of stock{%- elif n <= 3 -%}Only {{ n }} left in stock{%- else -%}In stock{%- endif -%}
+{%- endmacro -%}
+{%- set variants = product.active_variants -%}
+{%- set chosen = (variants|selectattr('available_quantity', 'gt', 0)|first) or variants|first -%}
+{%- set main_image = (chosen.image.path if chosen and chosen.image else (gallery[0] if gallery else None)) -%}
+{%- set per_yard = product.sold_by.value == 'yard' -%}
+
+<div class="gg-container gg-product" data-gg-product>
+  <nav class="gg-breadcrumbs" aria-label="Breadcrumb">
+    <ol>
+      <li><a href="{{ url_for('store.home') }}">Home</a></li>
+      <li><a href="{{ url_for('store.shop') }}">Shop</a></li>
+      {% if category and category.parent %}<li><a href="{{ url_for('store.category', slug=category.parent.slug) }}">{{ category.parent.name }}</a></li>{% endif %}
+      {% if category %}<li><a href="{{ url_for('store.category', slug=category.slug) }}">{{ category.name }}</a></li>{% endif %}
+      <li aria-current="page">{{ product.name }}</li>
+    </ol>
+  </nav>
+
+  <div class="gg-product__top">
+    <section class="gg-gallery" aria-label="Product images" data-gg-gallery>
+      <figure class="gg-gallery__main">
+        <img src="{{ media_url(main_image) }}" width="1000" height="1000" alt="{{ product.name }}" data-gg-gallery-main fetchpriority="high">
+      </figure>
+      {% if gallery|length > 1 %}
+        <ul class="gg-gallery__thumbs">
+          {% for path in gallery %}
+            <li>
+              <a href="{{ media_url(path) }}" data-gg-gallery-thumb{% if path == main_image %} aria-current="true"{% endif %}>
+                <img src="{{ media_url(path) }}" width="120" height="120" alt="{{ product.name }}, image {{ loop.index }} of {{ gallery|length }}" loading="lazy">
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </section>
+
+    <section class="gg-product__summary" aria-labelledby="product-title">
+      <h1 id="product-title">{{ product.name }}</h1>
+      <p class="gg-price gg-price--lg" data-gg-price>
+        {% if chosen.on_sale %}
+          <del><span class="gg-visually-hidden">Was </span>{{ chosen.compare_at_cents|money }}</del>
+          <ins><span class="gg-visually-hidden">Now </span>{{ chosen.price_cents|money }}</ins>
+        {% else %}
+          {{ chosen.price_cents|money }}
+        {% endif %}
+        {% if per_yard %}<span class="gg-price__unit">per yard</span>{% endif %}
+      </p>
+      {% if product.summary %}<p class="gg-product__lede">{{ product.summary }}</p>{% endif %}
+
+      <form class="gg-buy" method="post" action="{{ url_for('store.cart_add') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        {% if product.option_axes|length == 1 %}
+          {%- set axis = product.option_axes[0] -%}
+          <fieldset class="gg-swatches">
+            <legend>{{ axis.name }}: <strong data-gg-variant-label>{{ chosen.label }}</strong></legend>
+            <div class="gg-swatches__list">
+              {% for v in variants %}
+                {%- set sold_out = v.available_quantity <= 0 -%}
+                <label class="gg-swatch{% if not v.image %} gg-swatch--text{% endif %}{% if sold_out %} gg-swatch--soldout{% endif %}">
+                  <input type="radio" name="variant" value="{{ v.id }}" required
+                    data-label="{{ v.label }}" data-sku="{{ v.sku }}" data-stock="{{ v.available_quantity }}" data-price="{{ v.price_cents|money }}"
+                    {%- if v.compare_at_cents %} data-compare="{{ v.compare_at_cents|money }}"{% endif %}
+                    {%- if v.image %} data-image="{{ media_url(v.image.path) }}"{% endif %}
+                    {%- if sold_out %} disabled{% endif %}{% if v.id == chosen.id and not sold_out %} checked{% endif %}>
+                  {% if v.image %}
+                    <img src="{{ media_url(v.image.path) }}" width="64" height="64" alt="" loading="lazy">
+                    <span class="gg-visually-hidden">{{ v.label }}{% if sold_out %}, out of stock{% endif %}</span>
+                  {% else %}
+                    <span>{{ v.label }}<span class="gg-visually-hidden">{% if sold_out %}, out of stock{% endif %}</span></span>
+                  {% endif %}
+                </label>
+              {% endfor %}
+            </div>
+          </fieldset>
+        {% elif product.option_axes %}
+          <div class="gg-field">
+            <label for="variant">Choose an option</label>
+            <select id="variant" name="variant" required>
+              {% for v in variants %}
+                <option value="{{ v.id }}"{% if v.available_quantity <= 0 %} disabled{% endif %}{% if v.id == chosen.id %} selected{% endif %}>{{ v.label }} — {{ v.price_cents|money }}{% if v.available_quantity <= 0 %} (out of stock){% endif %}</option>
+              {% endfor %}
+            </select>
+          </div>
+        {% else %}
+          <input type="hidden" name="variant" value="{{ chosen.id }}">
+        {% endif %}
+
+        {%- set stock = chosen.available_quantity -%}
+        <p class="gg-stock{% if stock <= 0 %} gg-stock--out{% elif stock <= 3 %} gg-stock--low{% endif %}" data-gg-stock aria-live="polite">{{ stock_text(stock) }}</p>
+
+        <div class="gg-buy__row">
+          <div class="gg-qty" data-gg-qty>
+            <button type="button" class="gg-qty__btn" data-gg-qty-step="-1" aria-label="Decrease quantity">{{ icon('minus', 16) }}</button>
+            <label class="gg-visually-hidden" for="qty">Quantity{% if per_yard %} in yards{% endif %}</label>
+            <input id="qty" name="quantity" type="number" inputmode="numeric" min="1" max="{{ [stock, 99]|min if stock > 0 else 1 }}" value="1" required>
+            <button type="button" class="gg-qty__btn" data-gg-qty-step="1" aria-label="Increase quantity">{{ icon('plus', 16) }}</button>
+          </div>
+          <button class="gg-button gg-button--accent gg-buy__add" type="submit"{% if stock <= 0 %} disabled{% endif %}>Add to cart</button>
+        </div>
+        {% if per_yard %}<p class="gg-field__hint">Quantity is in yards; your fabric is cut as one continuous piece.</p>{% endif %}
+      </form>
+
+      <div class="gg-accordions">
+        <details>
+          <summary>Care instructions{{ icon('chevron-down', 16) }}</summary>
+          <ul>
+            <li>Hand wash in cold water with mild detergent</li>
+            <li>Do not bleach</li>
+            <li>Air dry away from direct sunlight</li>
+            <li>Iron on medium heat if needed</li>
+            <li>Do not dry clean</li>
+          </ul>
+        </details>
+        <details>
+          <summary>Color disclaimer{{ icon('chevron-down', 16) }}</summary>
+          <p>Please note that actual product colors may vary slightly from the images shown on your screen due to differences in monitor settings and lighting conditions. We strive to represent our fabrics as accurately as possible, but some color variation is natural and expected.</p>
+        </details>
+        <details>
+          <summary>Ask a question{{ icon('chevron-down', 16) }}</summary>
+          <p>Have a question about this product? We're here to help!</p>
+          <p><a href="/contact-us/">Contact us</a> or email us at <a href="mailto:{{ site.CONTACT_EMAIL }}">{{ site.CONTACT_EMAIL }}</a></p>
+        </details>
+      </div>
+
+      <dl class="gg-product__meta">
+        <div><dt>SKU</dt><dd data-gg-sku>{{ chosen.sku }}</dd></div>
+        {% if category %}<div><dt>Category</dt><dd><a href="{{ url_for('store.category', slug=category.slug) }}">{{ category.name }}</a></dd></div>{% endif %}
+        {% if product.color_list %}<div><dt>Colors</dt><dd>{{ product.color_list|join(', ') }}</dd></div>{% endif %}
+      </dl>
+    </section>
+  </div>
+
+  <div class="gg-tabs" data-gg-tabs>
+    <div class="gg-tabs__list" data-gg-tabs-list data-gg-tabs-label="Product information" hidden>
+      <button type="button" data-gg-tab-target="tab-description">Description</button>
+      <button type="button" data-gg-tab-target="tab-shipping">Shipping &amp; delivery</button>
+    </div>
+    <section id="tab-description" class="gg-tabs__panel" data-gg-tab-panel>
+      <h2 class="gg-tabs__fallback-title">Description</h2>
+      {% for para in (product.description or product.summary).split('\n\n') if para.strip() %}
+        <p>{% for line in para.split('\n') %}{{ line }}{% if not loop.last %}<br>{% endif %}{% endfor %}</p>
+      {% endfor %}
+    </section>
+    <section id="tab-shipping" class="gg-tabs__panel" data-gg-tab-panel>
+      <h2 class="gg-tabs__fallback-title">Shipping &amp; delivery</h2>
+      {# Copy carried over from the old site; wording to be confirmed against flat-rate shipping (#66). #}
+      <h3>How we deliver your African prints to your doorstep</h3>
+      <p>At GG Afrikan Eleganz, we prioritize two key aspects to ensure a seamless shipping experience for our customers in the US:</p>
+      <p><strong>Speedy and secure delivery</strong></p>
+      <p>Receive a tracking number with your order confirmation to monitor your package's journey. Secure and eco-friendly packaging ensures your items arrive in perfect condition.</p>
+      <p><strong>Exceptional customer support</strong></p>
+      <p>Our customer support team is ready to assist with any shipping inquiries, from tracking issues to delivery questions.</p>
+      <p>See our <a href="/shipping-information/">shipping information</a> and <a href="/returns-exchanges/">returns &amp; exchanges</a> pages for details.</p>
+    </section>
+  </div>
+
+  {% if related %}
+    <section class="gg-related" aria-labelledby="related-title" data-gg-carousel>
+      <div class="gg-related__head">
+        <h2 id="related-title">You may also like</h2>
+        <div class="gg-related__controls" data-gg-carousel-controls hidden>
+          <button type="button" class="gg-icon-btn gg-icon-btn--round" data-gg-carousel-prev aria-label="Previous products">{{ icon('chevron-left', 18) }}</button>
+          <button type="button" class="gg-icon-btn gg-icon-btn--round" data-gg-carousel-next aria-label="Next products">{{ icon('chevron-right', 18) }}</button>
+        </div>
+      </div>
+      <div class="gg-related__track" data-gg-carousel-track>
+        {% for p in related %}{% include "partials/product_card.html" %}{% endfor %}
+      </div>
+    </section>
+  {% endif %}
+</div>
+
+<div class="gg-sticky-buy" data-gg-sticky-buy hidden>
+  <span class="gg-sticky-buy__name">{{ product.name }}</span>
+  <span class="gg-sticky-buy__price">{{ chosen.price_cents|money }}</span>
+  <a class="gg-button gg-button--accent" href="#product-title">Choose &amp; add</a>
+</div>
+{% endblock %}

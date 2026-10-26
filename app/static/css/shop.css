@@ -75,3 +75,24 @@
 	.gg-sort, .gg-sort select { width: 100%; }
 	.gg-sort select { min-width: 0; flex: 1; }
 }
+
+.gg-page-title__lede { max-width: 40rem; margin: .5rem 0 0; color: var(--gg-muted); }
+
+.gg-filters__tree, .gg-filters__tree ul { margin: 0; padding: 0; list-style: none; }
+.gg-filters__tree ul { padding-left: 1rem; border-left: 1px solid var(--gg-line); margin: .1rem 0 .4rem .2rem; }
+
+.gg-filters__tree a {
+	display: flex;
+	align-items: center;
+	gap: .35rem;
+	min-height: 2.4rem;
+	color: #333;
+	font-size: .92rem;
+	text-decoration: none;
+}
+
+.gg-filters__tree a:hover { color: var(--gg-ink); text-decoration: underline; text-decoration-color: var(--gg-accent); }
+.gg-filters__tree a[aria-current] { color: var(--gg-ink); font-weight: 700; }
+.gg-filters__form > * + * { margin-top: 1.5rem; }
+.gg-filters__check { display: flex; align-items: center; gap: .6rem; min-height: 2.5rem; cursor: pointer; }
+.gg-js .gg-filters__apply { display: none; }

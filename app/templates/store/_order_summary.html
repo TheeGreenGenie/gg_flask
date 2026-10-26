@@ -1,0 +1,19 @@
+<ul class="gg-order-lines">
+  {% for lv in cart.lines if not lv.problem %}
+    {% set img = lv.variant.image.path if lv.variant.image else (lv.product.cover.path if lv.product.cover else None) %}
+    <li>
+      <span class="gg-order-lines__img">
+        <img src="{{ media_url(img) }}" width="56" height="56" alt="" loading="lazy">
+        <span class="gg-badge">{{ lv.line.quantity }}</span>
+      </span>
+      <span class="gg-order-lines__name">{{ lv.product.name }}{% if lv.variant.option_values %}<small>{{ lv.variant.label }}</small>{% endif %}</span>
+      <span class="gg-order-lines__total">{{ lv.total_cents|money }}</span>
+    </li>
+  {% endfor %}
+</ul>
+<dl class="gg-summary__rows">
+  <div><dt>Subtotal</dt><dd>{{ cart.subtotal_cents|money }}</dd></div>
+  <div><dt>Shipping</dt><dd>Calculated next</dd></div>
+  <div><dt>Tax</dt><dd>Calculated after address</dd></div>
+  <div class="gg-summary__total"><dt>Total so far</dt><dd>{{ cart.subtotal_cents|money }}</dd></div>
+</dl>

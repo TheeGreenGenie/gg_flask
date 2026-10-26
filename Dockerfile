@@ -13,9 +13,12 @@ RUN pip install -r requirements.lock
 COPY pyproject.toml wsgi.py ./
 COPY app ./app
 COPY migrations ./migrations
-RUN pip install --no-deps .
+COPY catalog ./catalog
 
-RUN useradd --system --uid 10001 --no-create-home appuser
+# Runs from /srv (not pip-installed) so app.root_path, catalog/ and instance/ resolve here.
+# instance/media holds seeded product images until object storage is set up.
+RUN useradd --system --uid 10001 --no-create-home appuser \
+    && mkdir -p /srv/instance/media && chown -R appuser /srv/instance
 USER appuser
 
 ENV APP_ENV=production

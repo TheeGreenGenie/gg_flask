@@ -21,26 +21,43 @@ set FLASK_APP=wsgi.py            # PowerShell: $env:FLASK_APP="wsgi.py"
 .venv/Scripts/flask run
 ```
 
-Open http://127.0.0.1:5000/ and http://127.0.0.1:5000/health/ready.
+Load the catalog (`flask --app wsgi catalog load`), then open http://127.0.0.1:5000/.
 
-To run the production container locally: `docker compose --profile full up --build`, then open http://127.0.0.1:8000/.
+To run the production container locally: `docker compose --profile full up --build`, then run
+`docker compose exec web flask --app wsgi db upgrade` and `... catalog load`, and open
+http://127.0.0.1:8000/.
 
-## Design prototypes (development only)
+## Catalog
 
-Sample pages built from old-store data live at http://127.0.0.1:5000/prototype/ (home, shop, product, cart, checkout). They are not registered in production.
-
-The sample photos are generated from the old WordPress uploads and are not committed:
-
-```bash
-.venv/Scripts/pip install -e ".[tools]"
-.venv/Scripts/python scripts/prep_prototype_assets.py C:/xampp/htdocs/mysite/wp-content/uploads
-```
-
-Responsive check (all pages at 320/390/768/1280/1440, flags horizontal scrolling):
+Products come from [catalog/manifest.yaml](catalog/manifest.yaml) plus photos in `catalog/assets/`.
+Edit the YAML, then:
 
 ```bash
-.venv/Scripts/python scripts/screenshots.py OUT_DIR http://127.0.0.1:5000
+.venv/Scripts/flask --app wsgi catalog validate   # check for problems, changes nothing
+.venv/Scripts/flask --app wsgi catalog load       # add/update products (safe to re-run)
 ```
+
+Products removed from the manifest are archived, never deleted. Prices are whole cents
+(`899` = $8.99). Every product has at least one variant.
+
+### Automatic names
+
+```bash
+.venv/Scripts/flask --app wsgi catalog autoname            # preview
+.venv/Scripts/flask --app wsgi catalog autoname --write    # save into manifest.yaml
+.venv/Scripts/flask --app wsgi catalog autoname --sheet review.png   # visual check
+```
+
+Names follow `<family as on the site> - <colors> - <code>`, e.g.
+`African Ankara Print - Navy & Gold - 101184`. Colors are measured on the fabric only: a
+plain light studio backdrop is removed first, then each remaining pixel is matched to the
+fixed color list and counted, so the preview shows each color's share of the fabric. Set
+`colors: [Blue, Gold]` on a product to override detection, or `autoname: false` to skip it.
+
+### Drafting from the old site (dev only)
+
+`scripts/export_manifest_draft.py` reads the old WordPress database (read-only) and drafts
+a manifest with converted photos for curation. Needs `pip install -e ".[tools]"`.
 
 ## Checks (same as CI)
 
@@ -65,6 +82,12 @@ Set `TRUSTED_PROXY_HOPS` to the number of reverse proxies in front of the app. W
 |---|---|
 | `/health/live` | Process is up (no dependency checks) |
 | `/health/ready` | Database and Redis reachable; 503 otherwise |
+| `/` | Homepage |
+| `/shop/`, `/shop/<category>/` | All products / a category (includes its subcategories) |
+| `/collections/<slug>/` | Hand-picked collections plus `new-arrivals` and `sale` |
+| `/product/<slug>/` | Product page |
+| `/cart/`, `/checkout/` | Cart (server-side) and checkout (payments arrive in Phase 7) |
+| `/media/<path>` | Product images in development (object storage/CDN in production) |
 
 ## Dependencies
 

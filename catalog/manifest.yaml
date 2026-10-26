@@ -1,0 +1,1696 @@
+# GG Afrikan Eleganz launch manifest — DRAFT generated from the old WordPress catalog.
+# Review every product: names, copy, prices, stock (untracked items were set to 10),
+# alt text and categories. Then run `flask catalog validate` and `flask catalog load`.
+schema_version: 1
+categories:
+- slug: fabrics
+  name: Fabrics
+  image: categories/fabrics.webp
+  children:
+  - slug: ankara
+    name: Ankara Prints
+    image: categories/ankara.webp
+  - slug: kente
+    name: Kente Prints
+    image: categories/kente.webp
+  - slug: adire
+    name: Adire (Tie-Dye)
+    image: categories/adire.webp
+  - slug: satin-chiffon
+    name: Satin & Chiffon
+    image: categories/satin-chiffon.webp
+  - slug: ethnic-prints
+    name: Ethnic Prints
+    image: categories/ethnic-prints.webp
+- slug: clothing
+  name: Clothing
+  image: categories/clothing.webp
+  children:
+  - slug: skirts
+    name: Skirts
+    image: categories/skirts.webp
+  - slug: jackets
+    name: Jackets
+    image: categories/jackets.webp
+- slug: home-accessories
+  name: Home & Accessories
+  image: categories/home-accessories.webp
+  children:
+  - slug: cushion-covers
+    name: Cushion Covers
+    image: categories/cushion-covers.webp
+  - slug: sarong-wraps
+    name: Sarong Wraps
+    image: categories/sarong-wraps.webp
+collections:
+- slug: bhm-collection
+  name: BHM Collection
+  description: Celebrating Black History Month.
+- slug: classic-designs
+  name: Classic Designs
+  description: ''
+products:
+- slug: adire-print-101219
+  name: Adire Print - Orange & Tan - 101219
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: true
+  published: 2025-01-30
+  legacy_wp_id: 30034
+  summary: Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments, headwraps,
+    and crafts.
+  description: 'Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments,
+    headwraps, and crafts.
+
+    Elevate your style with tradition and artistry.
+
+    100% Cotton.
+
+    Comes in 4 1/2 yards pack,'
+  categories:
+  - adire
+  collections: []
+  images:
+  - file: products/adire-print-101219/01.webp
+    alt: Adire Print - Orange & Tan - 101219
+  options: []
+  variants:
+  - sku: GG-30034
+    price_cents: 4000
+    stock: 10
+  colors:
+  - Orange
+  - Tan
+- slug: adire-print-101218
+  name: Adire Print - Pink & Cream - 101218
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: true
+  published: 2025-01-30
+  legacy_wp_id: 30032
+  summary: Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments, headwraps,
+    and crafts.
+  description: 'Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments,
+    headwraps, and crafts.
+
+    Elevate your style with tradition and artistry.
+
+    100% Cotton.
+
+    Comes in 4 1/2 yards pack,'
+  categories:
+  - adire
+  collections: []
+  images:
+  - file: products/adire-print-101218/01.webp
+    alt: Adire Print - Pink & Cream - 101218
+  options: []
+  variants:
+  - sku: GG-30032
+    price_cents: 4000
+    stock: 10
+  colors:
+  - Pink
+  - Cream
+- slug: adire-print-101217
+  name: Adire Print - Cream - 101217
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: true
+  published: 2025-01-30
+  legacy_wp_id: 30030
+  summary: Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments, headwraps,
+    and crafts.
+  description: 'Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments,
+    headwraps, and crafts.
+
+    Elevate your style with tradition and artistry.
+
+    100% Cotton.
+
+    Comes in 4 1/2 yards pack,'
+  categories:
+  - adire
+  collections: []
+  images:
+  - file: products/adire-print-101217/01.webp
+    alt: Adire Print - Cream - 101217
+  options: []
+  variants:
+  - sku: GG-30030
+    price_cents: 4000
+    stock: 10
+  colors:
+  - Cream
+- slug: adire-print-101216
+  name: Adire Print - Burgundy & Cream - 101216
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: true
+  published: 2025-01-30
+  legacy_wp_id: 30028
+  summary: Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments, headwraps,
+    and crafts.
+  description: 'Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments,
+    headwraps, and crafts.
+
+    Elevate your style with tradition and artistry.
+
+    100% Cotton.
+
+    Comes in 4 1/2 yards pack,'
+  categories:
+  - adire
+  collections: []
+  images:
+  - file: products/adire-print-101216/01.webp
+    alt: Adire Print - Burgundy & Cream - 101216
+  options: []
+  variants:
+  - sku: GG-30028
+    price_cents: 4000
+    stock: 10
+  colors:
+  - Burgundy
+  - Cream
+- slug: adire-print-101215
+  name: Adire Print - Gold & Brown - 101215
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: true
+  published: 2025-01-30
+  legacy_wp_id: 30026
+  summary: Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments, headwraps,
+    and crafts.
+  description: 'Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments,
+    headwraps, and crafts.
+
+    Elevate your style with tradition and artistry.
+
+    100% Cotton.
+
+    Comes in 4 1/2 yards pack,'
+  categories:
+  - adire
+  collections: []
+  images:
+  - file: products/adire-print-101215/01.webp
+    alt: Adire Print - Gold & Brown - 101215
+  options: []
+  variants:
+  - sku: GG-30026
+    price_cents: 4000
+    stock: 10
+  colors:
+  - Gold
+  - Brown
+- slug: african-ankara-print-101188
+  name: African Ankara Print - Brown & Orange - 101188
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: false
+  published: 2024-09-29
+  legacy_wp_id: 29517
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections:
+  - classic-designs
+  images:
+  - file: products/african-ankara-print-101188/01.webp
+    alt: African Ankara Print - Brown & Orange - 101188
+  options: []
+  variants:
+  - sku: GG-29517
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Orange
+- slug: african-ankara-print-101187
+  name: African Ankara Print - Brown & Olive - 101187
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: false
+  published: 2024-09-29
+  legacy_wp_id: 29513
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections:
+  - classic-designs
+  images:
+  - file: products/african-ankara-print-101187/01.webp
+    alt: African Ankara Print - Brown & Olive - 101187
+  options: []
+  variants:
+  - sku: GG-29513
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Olive
+- slug: african-ankara-print-101186
+  name: African Ankara Print - Brown & Gold - 101186
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: false
+  published: 2024-09-29
+  legacy_wp_id: 29510
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections:
+  - classic-designs
+  images:
+  - file: products/african-ankara-print-101186/01.webp
+    alt: African Ankara Print - Brown & Gold - 101186
+  options: []
+  variants:
+  - sku: GG-29510
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Gold
+- slug: african-ankara-print-101185
+  name: African Ankara Print - Multicolor - 101185
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: false
+  published: 2024-09-29
+  legacy_wp_id: 29507
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections:
+  - classic-designs
+  images:
+  - file: products/african-ankara-print-101185/01.webp
+    alt: African Ankara Print - Multicolor - 101185
+  options: []
+  variants:
+  - sku: GG-29507
+    price_cents: 899
+    stock: 10
+  colors:
+  - Multicolor
+- slug: african-ankara-print-101184
+  name: African Ankara Print - Navy & Gold - 101184
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: false
+  published: 2024-09-29
+  legacy_wp_id: 29499
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections:
+  - classic-designs
+  images:
+  - file: products/african-ankara-print-101184/01.webp
+    alt: African Ankara Print - Navy & Gold - 101184
+  options: []
+  variants:
+  - sku: GG-29499
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Gold
+- slug: cushion-cover-g-6
+  name: Cushion Cover - Brown & Tan - G-6
+  type: home_accessories
+  status: active
+  sold_by: unit
+  featured: false
+  published: 2024-07-15
+  legacy_wp_id: 28543
+  summary: African Ethnic Pillowcase.
+  description: 'African Ethnic Pillowcase.
+
+    Perfect for home decor or sofa cushion covers.
+
+    Enhance your space with these stylish textile pillow covers.
+
+
+    Size: 450mm x 450mm'
+  categories:
+  - cushion-covers
+  collections: []
+  images:
+  - file: products/cushion-cover-g-6/01.webp
+    alt: Cushion Cover - Brown & Tan - G-6
+  - file: products/cushion-cover-g-6/02.webp
+    alt: Cushion Cover - Brown & Tan - G-6
+  - file: products/cushion-cover-g-6/03.webp
+    alt: Cushion Cover - Brown & Tan - G-6
+  options:
+  - name: Style
+    values:
+    - Style 1
+    - Style 2
+  variants:
+  - sku: GG-28543-1
+    options:
+      Style: Style 1
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+    image: products/cushion-cover-g-6/02.webp
+  - sku: GG-28543-2
+    options:
+      Style: Style 2
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+    image: products/cushion-cover-g-6/03.webp
+  colors:
+  - Brown
+  - Tan
+- slug: cushion-cover-g-4
+  name: Cushion Cover - Brown - G-4
+  type: home_accessories
+  status: active
+  sold_by: unit
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 27797
+  summary: African Ethnic Pillowcase.
+  description: 'African Ethnic Pillowcase.
+
+    Perfect for home decor or sofa cushion covers.
+
+    Enhance your space with these stylish textile pillow covers.
+
+
+    Size: 450mm x 450mm'
+  categories:
+  - cushion-covers
+  collections: []
+  images:
+  - file: products/cushion-cover-g-4/01.webp
+    alt: Cushion Cover - Brown - G-4
+  - file: products/cushion-cover-g-4/02.webp
+    alt: Cushion Cover - Brown - G-4
+  - file: products/cushion-cover-g-4/03.webp
+    alt: Cushion Cover - Brown - G-4
+  - file: products/cushion-cover-g-4/04.webp
+    alt: Cushion Cover - Brown - G-4
+  - file: products/cushion-cover-g-4/05.webp
+    alt: Cushion Cover - Brown - G-4
+  options:
+  - name: Style
+    values:
+    - Style 1
+    - Style 2
+    - Style 3
+    - Style 4
+  variants:
+  - sku: GG-27797-1
+    options:
+      Style: Style 1
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+    image: products/cushion-cover-g-4/02.webp
+  - sku: GG-27797-2
+    options:
+      Style: Style 2
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+    image: products/cushion-cover-g-4/03.webp
+  - sku: GG-27797-3
+    options:
+      Style: Style 3
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+    image: products/cushion-cover-g-4/04.webp
+  - sku: GG-27797-4
+    options:
+      Style: Style 4
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+    image: products/cushion-cover-g-4/05.webp
+  colors:
+  - Brown
+- slug: cushion-cover-g-5
+  name: Cushion Cover - Multicolor - G-5
+  type: home_accessories
+  status: active
+  sold_by: unit
+  featured: false
+  published: 2024-07-07
+  legacy_wp_id: 27804
+  summary: African Ethnic Pillowcase.
+  description: 'African Ethnic Pillowcase.
+
+    Perfect for home decor or sofa cushion covers.
+
+    Enhance your space with these stylish textile pillow covers.
+
+
+    Size: 450mm x 450mm'
+  categories:
+  - cushion-covers
+  collections: []
+  images:
+  - file: products/cushion-cover-g-5/01.webp
+    alt: Cushion Cover - Multicolor - G-5
+  - file: products/cushion-cover-g-5/02.webp
+    alt: Cushion Cover - Multicolor - G-5
+  - file: products/cushion-cover-g-5/03.webp
+    alt: Cushion Cover - Multicolor - G-5
+  - file: products/cushion-cover-g-5/04.webp
+    alt: Cushion Cover - Multicolor - G-5
+  - file: products/cushion-cover-g-5/05.webp
+    alt: Cushion Cover - Multicolor - G-5
+  options:
+  - name: Style
+    values:
+    - Style 1
+    - Style 2
+    - Style 3
+    - Style 4
+  variants:
+  - sku: GG-27804-1
+    options:
+      Style: Style 1
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+    image: products/cushion-cover-g-5/02.webp
+  - sku: GG-27804-2
+    options:
+      Style: Style 2
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+  - sku: GG-27804-3
+    options:
+      Style: Style 3
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+    image: products/cushion-cover-g-5/04.webp
+  - sku: GG-27804-4
+    options:
+      Style: Style 4
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+    image: products/cushion-cover-g-5/05.webp
+  colors:
+  - Multicolor
+- slug: cushion-cover-g-3
+  name: Cushion Cover - Multicolor - G-3
+  type: home_accessories
+  status: active
+  sold_by: unit
+  featured: false
+  published: 2024-07-07
+  legacy_wp_id: 27791
+  summary: African Ethnic Pillowcase.
+  description: 'African Ethnic Pillowcase.
+
+    Perfect for home decor or sofa cushion covers.
+
+    Enhance your space with these stylish textile pillow covers.
+
+
+    Size: 450mm x 450mm'
+  categories:
+  - cushion-covers
+  collections: []
+  images:
+  - file: products/cushion-cover-g-3/01.webp
+    alt: Cushion Cover - Multicolor - G-3
+  - file: products/cushion-cover-g-3/02.webp
+    alt: Cushion Cover - Multicolor - G-3
+  - file: products/cushion-cover-g-3/03.webp
+    alt: Cushion Cover - Multicolor - G-3
+  - file: products/cushion-cover-g-3/04.webp
+    alt: Cushion Cover - Multicolor - G-3
+  - file: products/cushion-cover-g-3/05.webp
+    alt: Cushion Cover - Multicolor - G-3
+  options:
+  - name: Style
+    values:
+    - Style 1
+    - Style 2
+    - Style 3
+    - Style 4
+  variants:
+  - sku: GG-27791-1
+    options:
+      Style: Style 1
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+    image: products/cushion-cover-g-3/02.webp
+  - sku: GG-27791-2
+    options:
+      Style: Style 2
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+    image: products/cushion-cover-g-3/03.webp
+  - sku: GG-27791-3
+    options:
+      Style: Style 3
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+    image: products/cushion-cover-g-3/04.webp
+  - sku: GG-27791-4
+    options:
+      Style: Style 4
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+    image: products/cushion-cover-g-3/05.webp
+  colors:
+  - Multicolor
+- slug: cushion-cover-g-2
+  name: Cushion Cover - Brown & Cream - G-2
+  type: home_accessories
+  status: active
+  sold_by: unit
+  featured: false
+  published: 2024-07-07
+  legacy_wp_id: 27784
+  summary: African Ethnic Pillowcase.
+  description: 'African Ethnic Pillowcase.
+
+    Perfect for home decor or sofa cushion covers.
+
+    Enhance your space with these stylish textile pillow covers.
+
+
+    Size: 450mm x 450mm'
+  categories:
+  - cushion-covers
+  collections: []
+  images:
+  - file: products/cushion-cover-g-2/01.webp
+    alt: Cushion Cover - Brown & Cream - G-2
+  - file: products/cushion-cover-g-2/02.webp
+    alt: Cushion Cover - Brown & Cream - G-2
+  - file: products/cushion-cover-g-2/03.webp
+    alt: Cushion Cover - Brown & Cream - G-2
+  - file: products/cushion-cover-g-2/04.webp
+    alt: Cushion Cover - Brown & Cream - G-2
+  - file: products/cushion-cover-g-2/05.webp
+    alt: Cushion Cover - Brown & Cream - G-2
+  options:
+  - name: Style
+    values:
+    - Style 1
+    - Style 2
+    - Style 3
+    - Style 4
+  variants:
+  - sku: GG-27784-1
+    options:
+      Style: Style 1
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+    image: products/cushion-cover-g-2/02.webp
+  - sku: GG-27784-2
+    options:
+      Style: Style 2
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+    image: products/cushion-cover-g-2/03.webp
+  - sku: GG-27784-3
+    options:
+      Style: Style 3
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+    image: products/cushion-cover-g-2/04.webp
+  - sku: GG-27784-4
+    options:
+      Style: Style 4
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+  colors:
+  - Brown
+  - Cream
+- slug: ethnic-print-101203
+  name: Ethnic Print - Black & Burgundy - 101203
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: false
+  published: 2024-07-24
+  legacy_wp_id: 28843
+  summary: Authentic Kente Fabric.
+  description: 'Authentic Kente Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    Features vibrant colors and traditional patterns.
+
+
+    Perfect for creating unique garments and home decor items.
+
+
+    100% Cotton. Width: 45". Sold by Yard.'
+  categories:
+  - ethnic-prints
+  collections:
+  - bhm-collection
+  images:
+  - file: products/ethnic-print-101203/01.webp
+    alt: Ethnic Print - Black & Burgundy - 101203
+  options: []
+  variants:
+  - sku: GG-28843
+    price_cents: 899
+    stock: 10
+  colors:
+  - Black
+  - Burgundy
+- slug: ethnic-print-101140
+  name: Ethnic Print - Yellow & Brown - 101140
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: false
+  published: 2024-07-24
+  legacy_wp_id: 28841
+  summary: Authentic Kente Fabric.
+  description: 'Authentic Kente Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    Features vibrant colors and traditional patterns.
+
+
+    Perfect for creating unique garments and home decor items.
+
+
+    100% Cotton. Width: 45". Sold by Yard.'
+  categories:
+  - ethnic-prints
+  collections:
+  - bhm-collection
+  images:
+  - file: products/ethnic-print-101140/01.webp
+    alt: Ethnic Print - Yellow & Brown - 101140
+  options: []
+  variants:
+  - sku: GG-28841
+    price_cents: 899
+    stock: 10
+  colors:
+  - Yellow
+  - Brown
+- slug: ethnic-print-101141
+  name: Ethnic Print - Black & Green - 101141
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: false
+  published: 2024-07-24
+  legacy_wp_id: 28839
+  summary: Authentic Kente Fabric.
+  description: 'Authentic Kente Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    Features vibrant colors and traditional patterns.
+
+
+    Perfect for creating unique garments and home decor items.
+
+
+    100% Cotton. Width: 45". Sold by Yard.'
+  categories:
+  - ethnic-prints
+  collections:
+  - bhm-collection
+  images:
+  - file: products/ethnic-print-101141/01.webp
+    alt: Ethnic Print - Black & Green - 101141
+  options: []
+  variants:
+  - sku: GG-28839
+    price_cents: 899
+    stock: 10
+  colors:
+  - Black
+  - Green
+- slug: ethnic-print-101201
+  name: Ethnic Print - Black & Brown - 101201
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: false
+  published: 2024-07-24
+  legacy_wp_id: 28836
+  summary: Genuine African Ethnic Print Fabric.
+  description: 'Genuine African Ethnic Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. Width: 45".'
+  categories:
+  - ethnic-prints
+  collections:
+  - bhm-collection
+  images:
+  - file: products/ethnic-print-101201/01.webp
+    alt: Ethnic Print - Black & Brown - 101201
+  options: []
+  variants:
+  - sku: GG-28836
+    price_cents: 899
+    stock: 10
+  colors:
+  - Black
+  - Brown
+- slug: ethnic-print-101137
+  name: Ethnic Print - Black & Navy - 101137
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: false
+  published: 2024-07-24
+  legacy_wp_id: 28834
+  summary: Genuine African Ethnic Print Fabric.
+  description: 'Genuine African Ethnic Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. Width: 45".'
+  categories:
+  - ethnic-prints
+  collections:
+  - bhm-collection
+  images:
+  - file: products/ethnic-print-101137/01.webp
+    alt: Ethnic Print - Black & Navy - 101137
+  options: []
+  variants:
+  - sku: GG-28834
+    price_cents: 899
+    stock: 10
+  colors:
+  - Black
+  - Navy
+- slug: reversible-jacket-tmb-1-1015
+  name: Reversible Jacket TMB-1 - Grey - 1015
+  type: clothing
+  status: active
+  sold_by: unit
+  featured: false
+  published: 2024-10-03
+  legacy_wp_id: 29649
+  summary: Reversible TMB-1-Swing One Size, designed in a stylish swing cut and one-size fit. Featuring
+    bold prints on both sides, it offers two looks in one for effortless fashion.
+  description: Reversible TMB-1-Swing One Size, designed in a stylish swing cut and one-size fit. Featuring
+    bold prints on both sides, it offers two looks in one for effortless fashion.
+  categories:
+  - jackets
+  collections: []
+  images:
+  - file: products/reversible-jacket-tmb-1-1015/01.webp
+    alt: Reversible Jacket TMB-1 - Grey - 1015
+  - file: products/reversible-jacket-tmb-1-1015/02.webp
+    alt: Reversible Jacket TMB-1 - Grey - 1015
+  - file: products/reversible-jacket-tmb-1-1015/03.webp
+    alt: Reversible Jacket TMB-1 - Grey - 1015
+  options: []
+  variants:
+  - sku: GG-29649
+    price_cents: 4000
+    stock: 10
+  colors:
+  - Grey
+- slug: reversible-jacket-tmb-4-1012
+  name: Reversible Jacket TMB-4 - Brown & Cream - 1012
+  type: clothing
+  status: active
+  sold_by: unit
+  featured: false
+  published: 2024-10-03
+  legacy_wp_id: 29643
+  summary: Reversible Jacket TMB-4 One Size, designed in a stylish swing cut and one-size fit. Featuring
+    bold prints on both sides, it offers two looks in one for effortless fashion.
+  description: Reversible Jacket TMB-4 One Size, designed in a stylish swing cut and one-size fit. Featuring
+    bold prints on both sides, it offers two looks in one for effortless fashion.
+  categories:
+  - jackets
+  collections: []
+  images:
+  - file: products/reversible-jacket-tmb-4-1012/01.webp
+    alt: Reversible Jacket TMB-4 - Brown & Cream - 1012
+  - file: products/reversible-jacket-tmb-4-1012/02.webp
+    alt: Reversible Jacket TMB-4 - Brown & Cream - 1012
+  - file: products/reversible-jacket-tmb-4-1012/03.webp
+    alt: Reversible Jacket TMB-4 - Brown & Cream - 1012
+  options: []
+  variants:
+  - sku: GG-29643
+    price_cents: 4000
+    stock: 10
+  colors:
+  - Brown
+  - Cream
+- slug: reversible-jacket-tmb-4-1010
+  name: Reversible Jacket TMB-4 - Grey & Brown - 1010
+  type: clothing
+  status: active
+  sold_by: unit
+  featured: false
+  published: 2024-10-03
+  legacy_wp_id: 29639
+  summary: Reversible Jacket TMB-3 One Size, designed in a stylish swing cut and one-size fit. Featuring
+    bold prints on both sides, it offers two looks in one for effortless fashion.
+  description: Reversible Jacket TMB-3 One Size, designed in a stylish swing cut and one-size fit. Featuring
+    bold prints on both sides, it offers two looks in one for effortless fashion.
+  categories:
+  - jackets
+  collections: []
+  images:
+  - file: products/reversible-jacket-tmb-4-1010/01.webp
+    alt: Reversible Jacket TMB-4 - Grey & Brown - 1010
+  - file: products/reversible-jacket-tmb-4-1010/02.webp
+    alt: Reversible Jacket TMB-4 - Grey & Brown - 1010
+  - file: products/reversible-jacket-tmb-4-1010/03.webp
+    alt: Reversible Jacket TMB-4 - Grey & Brown - 1010
+  - file: products/reversible-jacket-tmb-4-1010/04.webp
+    alt: Reversible Jacket TMB-4 - Grey & Brown - 1010
+  - file: products/reversible-jacket-tmb-4-1010/05.webp
+    alt: Reversible Jacket TMB-4 - Grey & Brown - 1010
+  - file: products/reversible-jacket-tmb-4-1010/06.webp
+    alt: Reversible Jacket TMB-4 - Grey & Brown - 1010
+  - file: products/reversible-jacket-tmb-4-1010/07.webp
+    alt: Reversible Jacket TMB-4 - Grey & Brown - 1010
+  options: []
+  variants:
+  - sku: GG-29639
+    price_cents: 4000
+    stock: 10
+  colors:
+  - Grey
+  - Brown
+- slug: reversible-jacket-tmb-1-1016
+  name: Reversible Jacket TMB-1 - Red & Burgundy - 1016
+  type: clothing
+  status: active
+  sold_by: unit
+  featured: false
+  published: 2024-10-03
+  legacy_wp_id: 29634
+  summary: Reversible Jacket TMB-1 Swing One Size Plus , designed in a stylish swing cut and one-size
+    fit. Featuring bold prints on both sides, it offers two looks in one for effortless fashion.
+  description: Reversible Jacket TMB-1 Swing One Size Plus , designed in a stylish swing cut and one-size
+    fit. Featuring bold prints on both sides, it offers two looks in one for effortless fashion.
+  categories:
+  - jackets
+  collections: []
+  images:
+  - file: products/reversible-jacket-tmb-1-1016/01.webp
+    alt: Reversible Jacket TMB-1 - Red & Burgundy - 1016
+  - file: products/reversible-jacket-tmb-1-1016/02.webp
+    alt: Reversible Jacket TMB-1 - Red & Burgundy - 1016
+  - file: products/reversible-jacket-tmb-1-1016/03.webp
+    alt: Reversible Jacket TMB-1 - Red & Burgundy - 1016
+  options: []
+  variants:
+  - sku: GG-29634
+    price_cents: 4000
+    stock: 10
+  colors:
+  - Red
+  - Burgundy
+- slug: reversible-jacket-tmb-4-1011
+  name: Reversible Jacket TMB-4 - Brown & Cream - 1011
+  type: clothing
+  status: active
+  sold_by: unit
+  featured: false
+  published: 2024-10-03
+  legacy_wp_id: 29630
+  summary: Reversible Jacket TMB-4 Swing One Size Plus , designed in a stylish swing cut and one-size
+    fit. Featuring bold prints on both sides, it offers two looks in one for effortless fashion.
+  description: Reversible Jacket TMB-4 Swing One Size Plus , designed in a stylish swing cut and one-size
+    fit. Featuring bold prints on both sides, it offers two looks in one for effortless fashion.
+  categories:
+  - jackets
+  collections: []
+  images:
+  - file: products/reversible-jacket-tmb-4-1011/01.webp
+    alt: Reversible Jacket TMB-4 - Brown & Cream - 1011
+  - file: products/reversible-jacket-tmb-4-1011/02.webp
+    alt: Reversible Jacket TMB-4 - Brown & Cream - 1011
+  - file: products/reversible-jacket-tmb-4-1011/03.webp
+    alt: Reversible Jacket TMB-4 - Brown & Cream - 1011
+  options: []
+  variants:
+  - sku: GG-29630
+    price_cents: 4000
+    stock: 10
+  colors:
+  - Brown
+  - Cream
+- slug: kente-print-101024
+  name: Kente Print - Orange & Brown - 101024
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 27953
+  summary: Authentic Kente Fabric.
+  description: 'Authentic Kente Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    Features vibrant colors and traditional patterns.
+
+
+    Perfect for creating unique garments and home decor items.
+
+
+    100% Cotton. Width: 45". Sold by the Yard.'
+  categories:
+  - kente
+  collections:
+  - bhm-collection
+  images:
+  - file: products/kente-print-101024/01.webp
+    alt: Kente Print - Orange & Brown - 101024
+  - file: products/kente-print-101024/02.webp
+    alt: Kente Print - Orange & Brown - 101024
+  options: []
+  variants:
+  - sku: '101024'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Orange
+  - Brown
+- slug: kente-print-101023
+  name: Kente Print - Gold & Brown - 101023
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 27951
+  summary: Authentic Kente Fabric.
+  description: 'Authentic Kente Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    Features vibrant colors and traditional patterns.
+
+
+    Perfect for creating unique garments and home decor items.
+
+
+    100% Cotton. Width: 45". Sold by the Yard.'
+  categories:
+  - kente
+  collections:
+  - bhm-collection
+  images:
+  - file: products/kente-print-101023/01.webp
+    alt: Kente Print - Gold & Brown - 101023
+  - file: products/kente-print-101023/02.webp
+    alt: Kente Print - Gold & Brown - 101023
+  options: []
+  variants:
+  - sku: '101023'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Gold
+  - Brown
+- slug: kente-print-1010120
+  name: Kente Print - Multicolor - 101020
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 27949
+  summary: Authentic Kente Fabric.
+  description: 'Authentic Kente Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    Features vibrant colors and traditional patterns.
+
+
+    Perfect for creating unique garments and home decor items.
+
+
+    100% Cotton. Width: 45". Sold by the Yard.'
+  categories:
+  - kente
+  collections:
+  - bhm-collection
+  images:
+  - file: products/kente-print-1010120/01.webp
+    alt: Kente Print - Multicolor - 101020
+  - file: products/kente-print-1010120/02.webp
+    alt: Kente Print - Multicolor - 101020
+  options: []
+  variants:
+  - sku: '101020'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Multicolor
+- slug: kente-print-101021
+  name: Kente Print - Olive & Yellow - 101021
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 27948
+  summary: Authentic Kente Fabric.
+  description: 'Authentic Kente Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    Features vibrant colors and traditional patterns.
+
+
+    Perfect for creating unique garments and home decor items.
+
+
+    100% Cotton. Width: 45". Sold by the Yard.'
+  categories:
+  - kente
+  collections:
+  - bhm-collection
+  images:
+  - file: products/kente-print-101021/01.webp
+    alt: Kente Print - Olive & Yellow - 101021
+  - file: products/kente-print-101021/02.webp
+    alt: Kente Print - Olive & Yellow - 101021
+  options: []
+  variants:
+  - sku: '101021'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Olive
+  - Yellow
+- slug: kente-print-101018
+  name: Kente Print - Multicolor - 101018
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 27945
+  summary: Authentic Kente Fabric.
+  description: 'Authentic Kente Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    Features vibrant colors and traditional patterns.
+
+
+    Perfect for creating unique garments and home decor items.
+
+
+    100% Cotton. Width: 45". Sold by the Yard.'
+  categories:
+  - kente
+  collections:
+  - bhm-collection
+  images:
+  - file: products/kente-print-101018/01.webp
+    alt: Kente Print - Multicolor - 101018
+  - file: products/kente-print-101018/02.webp
+    alt: Kente Print - Multicolor - 101018
+  options: []
+  variants:
+  - sku: '101018'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Multicolor
+- slug: bob-marley-sarong-wrap-101200
+  name: Bob Marley Sarong Wrap - Green & Brown - 101200
+  type: home_accessories
+  status: active
+  sold_by: unit
+  featured: false
+  published: 2024-10-08
+  legacy_wp_id: 29837
+  summary: Bob Marley-inspired African Sarong Wrap with vibrant prints, celebrating reggae spirit and
+    offering lightweight comfort for versatile style in any occasion.
+  description: Bob Marley-inspired African Sarong Wrap with vibrant prints, celebrating reggae spirit
+    and offering lightweight comfort for versatile style in any occasion.
+  categories:
+  - sarong-wraps
+  collections:
+  - bhm-collection
+  images:
+  - file: products/bob-marley-sarong-wrap-101200/01.webp
+    alt: Bob Marley Sarong Wrap - Green & Brown - 101200
+  options: []
+  variants:
+  - sku: GG-29837
+    price_cents: 1000
+    stock: 10
+  colors:
+  - Green
+  - Brown
+- slug: bob-marley-sarong-wrap-101199
+  name: Bob Marley Sarong Wrap - Green & Yellow - 101199
+  type: home_accessories
+  status: active
+  sold_by: unit
+  featured: false
+  published: 2024-10-08
+  legacy_wp_id: 29835
+  summary: Bob Marley-inspired African Sarong Wrap with vibrant prints, celebrating reggae spirit and
+    offering lightweight comfort for versatile style in any occasion.
+  description: Bob Marley-inspired African Sarong Wrap with vibrant prints, celebrating reggae spirit
+    and offering lightweight comfort for versatile style in any occasion.
+  categories:
+  - sarong-wraps
+  collections:
+  - bhm-collection
+  images:
+  - file: products/bob-marley-sarong-wrap-101199/01.webp
+    alt: Bob Marley Sarong Wrap - Green & Yellow - 101199
+  options: []
+  variants:
+  - sku: GG-29835
+    price_cents: 1000
+    stock: 10
+  colors:
+  - Green
+  - Yellow
+- slug: bob-marley-sarong-wrap-101198
+  name: Bob Marley Sarong Wrap - Brown & Yellow - 101198
+  type: home_accessories
+  status: active
+  sold_by: unit
+  featured: false
+  published: 2024-10-08
+  legacy_wp_id: 29833
+  summary: Bob Marley-inspired African Sarong Wrap with vibrant prints, celebrating reggae spirit and
+    offering lightweight comfort for versatile style in any occasion.
+  description: Bob Marley-inspired African Sarong Wrap with vibrant prints, celebrating reggae spirit
+    and offering lightweight comfort for versatile style in any occasion.
+  categories:
+  - sarong-wraps
+  collections:
+  - bhm-collection
+  images:
+  - file: products/bob-marley-sarong-wrap-101198/01.webp
+    alt: Bob Marley Sarong Wrap - Brown & Yellow - 101198
+  options: []
+  variants:
+  - sku: GG-29833
+    price_cents: 1000
+    stock: 10
+  colors:
+  - Brown
+  - Yellow
+- slug: bob-marley-sarong-wrap-101197
+  name: Bob Marley Sarong Wrap - Multicolor - 101197
+  type: home_accessories
+  status: active
+  sold_by: unit
+  featured: false
+  published: 2024-10-08
+  legacy_wp_id: 29818
+  summary: Bob Marley-inspired African Sarong Wrap with vibrant prints, celebrating reggae spirit and
+    offering lightweight comfort for versatile style in any occasion.
+  description: Bob Marley-inspired African Sarong Wrap with vibrant prints, celebrating reggae spirit
+    and offering lightweight comfort for versatile style in any occasion.
+  categories:
+  - sarong-wraps
+  collections:
+  - bhm-collection
+  images:
+  - file: products/bob-marley-sarong-wrap-101197/01.webp
+    alt: Bob Marley Sarong Wrap - Multicolor - 101197
+  options: []
+  variants:
+  - sku: GG-29818
+    price_cents: 1000
+    stock: 10
+  colors:
+  - Multicolor
+- slug: satin-chiffon-101102
+  name: Satin/Chiffon - Black & Brown - 101102
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28615
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards.
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections: []
+  images:
+  - file: products/satin-chiffon-101102/01.webp
+    alt: Satin/Chiffon - Black & Brown - 101102
+  options: []
+  variants:
+  - sku: GG-28615
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Black
+  - Brown
+- slug: satin-chiffon-101101
+  name: Satin/Chiffon - Multicolor - 101101
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28613
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards.
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections: []
+  images:
+  - file: products/satin-chiffon-101101/01.webp
+    alt: Satin/Chiffon - Multicolor - 101101
+  options: []
+  variants:
+  - sku: GG-28613
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Multicolor
+- slug: satin-chiffon-101100
+  name: Satin/Chiffon - Teal & Brown - 101100
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28611
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards.
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections: []
+  images:
+  - file: products/satin-chiffon-101100/01.webp
+    alt: Satin/Chiffon - Teal & Brown - 101100
+  options: []
+  variants:
+  - sku: GG-28611
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Teal
+  - Brown
+- slug: satin-chiffon-101099
+  name: Satin/Chiffon - Red & Cream - 101099
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28609
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards.
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections: []
+  images:
+  - file: products/satin-chiffon-101099/01.webp
+    alt: Satin/Chiffon - Red & Cream - 101099
+  options: []
+  variants:
+  - sku: GG-28609
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Red
+  - Cream
+- slug: satin-chiffon-101098
+  name: Satin/Chiffon - Red - 101098
+  type: fabric
+  status: active
+  sold_by: yard
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28606
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards.
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections: []
+  images:
+  - file: products/satin-chiffon-101098/01.webp
+    alt: Satin/Chiffon - Red - 101098
+  options: []
+  variants:
+  - sku: GG-28606
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Red
+- slug: wrap-skirt-wr-2002-101196
+  name: Wrap Skirt WR 2002 - Brown & Cream - 101196
+  type: clothing
+  status: active
+  sold_by: unit
+  featured: false
+  published: 2024-10-08
+  legacy_wp_id: 29804
+  summary: Stylish African wrap skirt with bold African prints, adjustable for a perfect fit. A blend
+    of comfort and elegance for any occasion.
+  description: 'The many ways you can wear your wrap skirt
+
+
+    https://youtu.be/D311K8Sw5p4'
+  categories:
+  - skirts
+  collections: []
+  images:
+  - file: products/wrap-skirt-wr-2002-101196/01.webp
+    alt: Wrap Skirt WR 2002 - Brown & Cream - 101196
+  - file: products/wrap-skirt-wr-2002-101196/02.webp
+    alt: Wrap Skirt WR 2002 - Brown & Cream - 101196
+  - file: products/wrap-skirt-wr-2002-101196/03.webp
+    alt: Wrap Skirt WR 2002 - Brown & Cream - 101196
+  options:
+  - name: Colorway
+    values:
+    - Colorway 1
+    - Colorway 2
+    - Colorway 3
+    - Colorway 4
+    - Colorway 5
+  variants:
+  - sku: GG-29804-1
+    options:
+      Colorway: Colorway 1
+    price_cents: 2500
+    stock: 10
+  - sku: GG-29804-2
+    options:
+      Colorway: Colorway 2
+    price_cents: 2500
+    stock: 10
+  - sku: GG-29804-3
+    options:
+      Colorway: Colorway 3
+    price_cents: 2500
+    stock: 10
+  - sku: GG-29804-4
+    options:
+      Colorway: Colorway 4
+    price_cents: 2500
+    stock: 10
+    image: products/wrap-skirt-wr-2002-101196/03.webp
+  - sku: GG-29804-5
+    options:
+      Colorway: Colorway 5
+    price_cents: 2500
+    stock: 10
+  colors:
+  - Brown
+  - Cream
+- slug: wrap-skirt-wc-1202-101195
+  name: Wrap Skirt WC 1202 - Navy & Purple - 101195
+  type: clothing
+  status: active
+  sold_by: unit
+  featured: false
+  published: 2024-10-08
+  legacy_wp_id: 29801
+  summary: Stylish African wrap skirt with bold African prints, adjustable for a perfect fit. A blend
+    of comfort and elegance for any occasion.
+  description: 'The many ways you can wear your wrap skirt
+
+
+    https://youtu.be/D311K8Sw5p4'
+  categories:
+  - skirts
+  collections: []
+  images:
+  - file: products/wrap-skirt-wc-1202-101195/01.webp
+    alt: Wrap Skirt WC 1202 - Navy & Purple - 101195
+  - file: products/wrap-skirt-wc-1202-101195/02.webp
+    alt: Wrap Skirt WC 1202 - Navy & Purple - 101195
+  options: []
+  variants:
+  - sku: GG-29801
+    price_cents: 2500
+    stock: 10
+  colors:
+  - Navy
+  - Purple
+- slug: wrap-skirt-wc-1202-101194
+  name: Wrap Skirt WC 1202 - Olive & Red - 101194
+  type: clothing
+  status: active
+  sold_by: unit
+  featured: false
+  published: 2024-10-03
+  legacy_wp_id: 29617
+  summary: Stylish African wrap skirt with bold African prints, adjustable for a perfect fit. A blend
+    of comfort and elegance for any occasion.
+  description: 'The many ways you can wear your wrap skirt
+
+
+    https://youtu.be/D311K8Sw5p4'
+  categories:
+  - skirts
+  collections: []
+  images:
+  - file: products/wrap-skirt-wc-1202-101194/01.webp
+    alt: Wrap Skirt WC 1202 - Olive & Red - 101194
+  - file: products/wrap-skirt-wc-1202-101194/02.webp
+    alt: Wrap Skirt WC 1202 - Olive & Red - 101194
+  options: []
+  variants:
+  - sku: GG-29617
+    price_cents: 2500
+    stock: 10
+  colors:
+  - Olive
+  - Red
+- slug: wrap-skirt-wc-1202-101193
+  name: Wrap Skirt WC 1202 - Orange & Cream - 101193
+  type: clothing
+  status: active
+  sold_by: unit
+  featured: false
+  published: 2024-10-03
+  legacy_wp_id: 29615
+  summary: Stylish African wrap skirt with bold African prints, adjustable for a perfect fit. A blend
+    of comfort and elegance for any occasion.
+  description: 'The many ways you can wear your wrap skirt
+
+
+    https://youtu.be/D311K8Sw5p4'
+  categories:
+  - skirts
+  collections: []
+  images:
+  - file: products/wrap-skirt-wc-1202-101193/01.webp
+    alt: Wrap Skirt WC 1202 - Orange & Cream - 101193
+  - file: products/wrap-skirt-wc-1202-101193/02.webp
+    alt: Wrap Skirt WC 1202 - Orange & Cream - 101193
+  options: []
+  variants:
+  - sku: GG-29615
+    price_cents: 2500
+    stock: 10
+  colors:
+  - Orange
+  - Cream
+- slug: wrap-skirt-wc-1202-101192
+  name: Wrap Skirt WC 1202 - Olive & Yellow - 101192
+  type: clothing
+  status: active
+  sold_by: unit
+  featured: false
+  published: 2024-10-03
+  legacy_wp_id: 29613
+  summary: Stylish African wrap skirt with bold African prints, adjustable for a perfect fit. A blend
+    of comfort and elegance for any occasion.
+  description: 'The many ways you can wear your wrap skirt
+
+
+    https://youtu.be/D311K8Sw5p4'
+  categories:
+  - skirts
+  collections: []
+  images:
+  - file: products/wrap-skirt-wc-1202-101192/01.webp
+    alt: Wrap Skirt WC 1202 - Olive & Yellow - 101192
+  - file: products/wrap-skirt-wc-1202-101192/02.webp
+    alt: Wrap Skirt WC 1202 - Olive & Yellow - 101192
+  options: []
+  variants:
+  - sku: GG-29613
+    price_cents: 2500
+    stock: 10
+  colors:
+  - Olive
+  - Yellow

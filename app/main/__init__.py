@@ -1,16 +1,11 @@
-"""Storefront placeholder until the design system lands in Phase 2."""
+"""Site-level routes that are not part of the storefront."""
 
 from __future__ import annotations
 
-from flask import Blueprint, current_app, render_template, send_from_directory
+from flask import Blueprint, current_app, send_from_directory
 from werkzeug.wrappers import Response
 
 bp = Blueprint("main", __name__)
-
-
-@bp.get("/")
-def home() -> str:
-    return render_template("home.html")
 
 
 @bp.get("/favicon.ico")

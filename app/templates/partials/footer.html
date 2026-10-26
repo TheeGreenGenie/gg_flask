@@ -7,7 +7,7 @@
         <h3 id="footer-shop" class="gg-footer__title">Shop</h3>
         <ul>
           {% for label, slug in site.FOOTER_SHOP %}
-            <li><a href="{{ url_for(shop_endpoint, category=slug) }}">{{ label }}</a></li>
+            <li><a href="{{ url_for('store.category', slug=slug) }}">{{ label }}</a></li>
           {% endfor %}
         </ul>
       </nav>

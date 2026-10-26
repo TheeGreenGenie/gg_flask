@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+{%- from "partials/icons.html" import icon -%}
+{% block title %}Checkout · GG Afrikan Eleganz{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}">{% endblock %}
+{% block content %}
+{%- macro field(id, label, type='text', autocomplete='', required=true, wide=false, hint='') -%}
+  <div class="gg-field{% if wide %} gg-field--wide{% endif %}">
+    <label for="{{ id }}">{{ label }}{% if required %} <span class="gg-required" aria-hidden="true">*</span>{% else %} <span class="gg-optional">(optional)</span>{% endif %}</label>
+    <input id="{{ id }}" name="{{ id }}" type="{{ type }}"{% if autocomplete %} autocomplete="{{ autocomplete }}"{% endif %}{% if required %} required{% endif %}{% if hint %} aria-describedby="{{ id }}-hint"{% endif %}>
+    {% if hint %}<p class="gg-field__hint" id="{{ id }}-hint">{{ hint }}</p>{% endif %}
+  </div>
+{%- endmacro -%}
+
+<div class="gg-page-title">
+  <div class="gg-container">
+    <h1>Checkout</h1>
+  </div>
+</div>
+
+<div class="gg-container gg-checkout">
+  <details class="gg-checkout__mobile-summary">
+    <summary>
+      <span>{{ icon('cart', 18) }} Show order summary {{ icon('chevron-down', 14) }}</span>
+      <strong>{{ cart.subtotal_cents|money }}</strong>
+    </summary>
+    {% include "store/_order_summary.html" %}
+  </details>
+
+  <form class="gg-checkout__form" method="post" action="#" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <section class="gg-checkout__step" aria-labelledby="step-contact">
+      <h2 id="step-contact"><span class="gg-step-num" aria-hidden="true">1</span> Contact</h2>
+      <div class="gg-fields">
+        {{ field('email', 'Email address', 'email', 'email', wide=true, hint='We’ll send your order confirmation here.') }}
+      </div>
+      <label class="gg-check"><input type="checkbox" name="marketing" value="1"> Email me about new prints and offers</label>
+    </section>
+
+    <section class="gg-checkout__step" aria-labelledby="step-shipping">
+      <h2 id="step-shipping"><span class="gg-step-num" aria-hidden="true">2</span> Shipping address</h2>
+      <div class="gg-fields">
+        {{ field('first_name', 'First name', autocomplete='shipping given-name') }}
+        {{ field('last_name', 'Last name', autocomplete='shipping family-name') }}
+        {{ field('address1', 'Street address', autocomplete='shipping address-line1', wide=true) }}
+        {{ field('address2', 'Apartment, suite, etc.', autocomplete='shipping address-line2', required=false, wide=true) }}
+        {{ field('city', 'City', autocomplete='shipping address-level2') }}
+        <div class="gg-field">
+          <label for="state">State <span class="gg-required" aria-hidden="true">*</span></label>
+          <select id="state" name="state" autocomplete="shipping address-level1" required>
+            <option value="">Select a state</option>
+            {% for code, name in us_states %}<option value="{{ code }}">{{ name }}</option>{% endfor %}
+          </select>
+        </div>
+        {{ field('postcode', 'ZIP code', autocomplete='shipping postal-code') }}
+        {{ field('phone', 'Phone', 'tel', 'shipping tel', required=false, hint='Only used if the carrier needs to reach you.') }}
+      </div>
+      <p class="gg-field__hint">Country: United States</p>
+    </section>
+
+    <section class="gg-checkout__step" aria-labelledby="step-delivery">
+      <h2 id="step-delivery"><span class="gg-step-num" aria-hidden="true">3</span> Delivery</h2>
+      <fieldset class="gg-options">
+        <legend class="gg-visually-hidden">Shipping method</legend>
+        <label class="gg-option"><input type="radio" name="shipping" value="flat" checked> <span>Flat rate shipping</span> <strong>Rate confirmed in Phase 7</strong></label>
+      </fieldset>
+    </section>
+
+    <section class="gg-checkout__step" aria-labelledby="step-payment">
+      <h2 id="step-payment"><span class="gg-step-num" aria-hidden="true">4</span> Payment</h2>
+      <p class="gg-field__hint">{{ icon('lock', 14) }} Card details are entered in a secure Stripe form and never touch our servers.</p>
+      <fieldset class="gg-options">
+        <legend class="gg-visually-hidden">Payment method</legend>
+        <label class="gg-option"><input type="radio" name="payment" value="stripe" checked> <span>Card, Apple Pay, Google Pay, Link or Cash App</span></label>
+        <div class="gg-payment-placeholder">Stripe payment form appears here (Phase 7)</div>
+        <label class="gg-option"><input type="radio" name="payment" value="paypal"> <span>PayPal, Venmo or Pay Later</span></label>
+      </fieldset>
+      <label class="gg-check"><input type="checkbox" name="terms" value="1" required> I have read and agree to the <a href="/terms-of-service/">terms &amp; conditions</a> <span class="gg-required" aria-hidden="true">*</span></label>
+      <button class="gg-button gg-button--accent gg-button--block gg-button--lg" type="submit" disabled>Place order</button>
+      <p class="gg-field__hint">Ordering opens when payments are connected (Phase 7).</p>
+    </section>
+  </form>
+
+  <aside class="gg-checkout__summary" aria-labelledby="order-summary-title">
+    <h2 id="order-summary-title">Order summary</h2>
+    {% include "store/_order_summary.html" %}
+  </aside>
+</div>
+{% endblock %}

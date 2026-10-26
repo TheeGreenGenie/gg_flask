@@ -499,3 +499,9 @@
 @media (max-width: 22.4375rem) {
 	.gg-footer__columns { grid-template-columns: 1fr; }
 }
+
+.gg-notice--error {
+	border-left-color: var(--gg-sale);
+	color: var(--gg-sale);
+	background: #fdf1ef;
+}

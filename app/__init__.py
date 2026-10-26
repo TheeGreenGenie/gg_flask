@@ -7,6 +7,7 @@ import logging
 from flask import Flask
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+from app.catalog import init_catalog
 from app.config import BaseConfig, load_config
 from app.extensions import csrf, db, init_redis, migrate
 from app.log_config import configure_logging
@@ -35,12 +36,15 @@ def create_app(config: BaseConfig | str | None = None) -> Flask:
             app.wsgi_app, x_for=hops, x_proto=hops, x_host=hops, x_prefix=0
         )
 
+    from app import models  # noqa: F401  (register all tables)
+
     db.init_app(app)
     migrate.init_app(app, db)
     csrf.init_app(app)
     init_redis(app)
     init_security_headers(app)
     init_templating(app)
+    init_catalog(app)
 
     from app.health import bp as health_bp
     from app.main import bp as main_bp
@@ -48,10 +52,9 @@ def create_app(config: BaseConfig | str | None = None) -> Flask:
     app.register_blueprint(health_bp)
     app.register_blueprint(main_bp)
 
-    if app.config["PROTOTYPES_ENABLED"]:
-        from app.prototype import bp as prototype_bp
+    from app.store import bp as store_bp
 
-        app.register_blueprint(prototype_bp)
+    app.register_blueprint(store_bp)
 
     logging.getLogger(__name__).info("app_started", extra={"app_env": app.config["APP_ENV"]})
     return app

@@ -1,25 +1,25 @@
-{#- Product card used in grids and carousels. Expects `p` (fixtures.Product). -#}
+{#- Product card used in grids and carousels. Expects `p` (catalog.models.Product). -#}
 <article class="gg-card-product">
-  <a class="gg-card-product__link" href="{{ url_for('prototype.product', slug=p.slug) }}">
+  <a class="gg-card-product__link" href="{{ url_for('store.product', slug=p.slug) }}">
     <div class="gg-card-product__media">
-      <img src="{{ url_for('static', filename=p.image) }}" width="400" height="500" alt="{{ p.name }}" loading="lazy" decoding="async">
-      {% if p.stock <= 0 %}
+      <img src="{{ media_url(p.cover.path if p.cover else None) }}" width="400" height="500" alt="{{ p.cover.alt if p.cover else p.name }}" loading="lazy" decoding="async">
+      {% if not p.in_stock %}
         <span class="gg-tag gg-tag--muted">Sold out</span>
       {% elif p.on_sale %}
         <span class="gg-tag gg-tag--sale">Sale</span>
-      {% elif p.is_new %}
-        <span class="gg-tag">New</span>
       {% endif %}
     </div>
     <div class="gg-card-product__body">
       <h3 class="gg-card-product__title">{{ p.name }}</h3>
       <p class="gg-price">
-        {% if p.on_sale %}
-          <del><span class="gg-visually-hidden">Was </span>{{ p.regular_cents|money }}</del>
+        {% if p.has_options and p.active_variants|map(attribute='price_cents')|unique|list|length > 1 %}<span class="gg-price__from">From </span>{% endif %}
+        {% if p.compare_at_cents %}
+          <del><span class="gg-visually-hidden">Was </span>{{ p.compare_at_cents|money }}</del>
           <ins><span class="gg-visually-hidden">Now </span>{{ p.price_cents|money }}</ins>
         {% else %}
           {{ p.price_cents|money }}
         {% endif %}
+        {% if p.sold_by.value == 'yard' %}<span class="gg-price__unit">/ yard</span>{% endif %}
       </p>
     </div>
   </a>

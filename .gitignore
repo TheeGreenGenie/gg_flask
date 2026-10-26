@@ -17,5 +17,3 @@ instance/
 flask_*.md
 PROJECT_STATUS.md
 
-# Generated prototype images (scripts/prep_prototype_assets.py)
-app/static/img/proto/

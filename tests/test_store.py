@@ -248,3 +248,38 @@ def test_socials_are_inside_sticky_header_and_no_account_links(shop: FlaskClient
 def test_prices_are_bundle_prices_not_per_yard(shop: FlaskClient, path: str) -> None:
     html = shop.get(path).get_data(as_text=True).lower()
     assert "per yard" not in html and "/ yard" not in html
+
+
+# ---------- Find Fabrics ----------
+
+
+def test_find_fabrics_page_has_stack_and_no_js_grid(shop: FlaskClient) -> None:
+    html = shop.get("/find-fabrics/").get_data(as_text=True)
+    assert "data-gg-ff" in html and "find-fabrics.js" in html
+    fallback = html.split("data-gg-ff-fallback", 1)[1]
+    assert "/product/ankara-blue/" in fallback  # in-stock fabric
+    assert "cushion-g1" not in fallback  # not a fabric
+    assert 'href="/find-fabrics/"' in html  # in the menu
+
+
+def test_discovery_feed_is_minimal_bounded_and_fabric_only(shop: FlaskClient) -> None:
+    data = shop.get("/api/v1/discovery/fabrics").get_json()
+    assert [i["slug"] for i in data["items"]] == ["ankara-blue"]
+    assert data["next_cursor"] is None
+    item = data["items"][0]
+    assert set(item) == {
+        "slug", "name", "price", "compare_at", "image", "alt",
+        "category", "category_url", "url", "preview",
+    }  # fmt: skip
+    assert item["preview"] == "/product/ankara-blue/preview"
+    assert shop.get("/api/v1/discovery/fabrics?cursor=nope").status_code == 200
+    assert shop.get("/api/v1/discovery/fabrics?cursor=-5").get_json()["items"]
+
+
+def test_discovery_paginates_with_stable_cursor(catalog_app: Flask) -> None:
+    from app.catalog import queries
+
+    with catalog_app.app_context():
+        first, nxt = queries.discovery(0, limit=1)
+        assert len(first) == 1 and nxt is None
+        assert queries.discovery(5, limit=1) == ([], None)

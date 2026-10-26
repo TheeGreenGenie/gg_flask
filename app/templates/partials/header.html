@@ -1,7 +1,7 @@
 {%- from "partials/icons.html" import icon -%}
 {%- macro cat_url(slug) -%}{{ url_for('store.category', slug=slug) }}{%- endmacro -%}
 {%- macro menu_url(item) -%}
-  {%- if item.collection -%}{{ url_for('store.collection', slug=item.collection) }}{%- else -%}{{ cat_url(item.category) }}{%- endif -%}
+  {%- if item.url -%}{{ item.url }}{%- elif item.collection -%}{{ url_for('store.collection', slug=item.collection) }}{%- else -%}{{ cat_url(item.category) }}{%- endif -%}
 {%- endmacro -%}
 
 <header class="gg-header" data-gg-header>

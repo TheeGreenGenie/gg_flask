@@ -1,7 +1,7 @@
 """Store-wide content shown in the header and footer.
 
 The menu is hand-written (catalog decision D-008) and is not generated from
-categories. Entries link to a category slug or a collection slug.
+categories. Entries link to a category slug, a collection slug or a fixed URL.
 """
 
 from __future__ import annotations
@@ -30,6 +30,7 @@ MAIN_MENU: Final = (
         "category": "home-accessories",
         "children": (("Cushion Covers", "cushion-covers"), ("Sarong Wraps", "sarong-wraps")),
     },
+    {"label": "Find Fabrics", "url": "/find-fabrics/"},
     {"label": "New Arrivals", "collection": "new-arrivals"},
     {"label": "Sale", "collection": "sale"},
 )

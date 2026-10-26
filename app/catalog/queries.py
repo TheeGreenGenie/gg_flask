@@ -244,3 +244,35 @@ def category_counts() -> dict[int, int]:
         if cat.parent_id is not None:
             counts[cat.parent_id] = counts.get(cat.parent_id, 0) + counts.get(cat.id, 0)
     return counts
+
+
+DISCOVERY_PAGE_SIZE = 20  # feature matrix W-003
+DISCOVERY_ROOT = "fabrics"
+
+
+def discovery(offset: int, limit: int = DISCOVERY_PAGE_SIZE) -> tuple[list[Product], int | None]:
+    """In-stock fabrics for Find Fabrics, newest first, in a stable order.
+
+    Returns the page and the next offset (None when there are no more).
+    """
+    root = category_by_slug(DISCOVERY_ROOT)
+    if root is None:
+        return [], None
+    ids = [root.id, *(c.id for c in root.children)]
+    stmt = (
+        base_query()
+        .where(
+            _in_stock_clause(),
+            exists(
+                select(product_categories.c.product_id).where(
+                    product_categories.c.product_id == Product.id,
+                    product_categories.c.category_id.in_(ids),
+                )
+            ),
+        )
+        .order_by(Product.published_at.desc().nulls_last(), Product.id.desc())
+    )
+    offset = max(0, offset)
+    rows = list(db.session.scalars(stmt.limit(limit + 1).offset(offset)))
+    more = len(rows) > limit
+    return rows[:limit], (offset + limit if more else None)

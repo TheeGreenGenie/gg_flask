@@ -17,15 +17,16 @@ from app.templating import money
 bp = Blueprint("store", __name__)
 
 
+def _media_url(path: str | None) -> str:
+    if not path:
+        return url_for("static", filename="img/placeholder.svg")
+    return url_for("media.media_file", path=path)
+
+
 @bp.app_context_processor
 def store_globals() -> dict[str, Any]:
-    def media_url(path: str | None) -> str:
-        if not path:
-            return url_for("static", filename="img/placeholder.svg")
-        return url_for("media.media_file", path=path)
-
     cart = cart_service.view(cart_service.current_cart())
-    return {"media_url": media_url, "cart": cart}
+    return {"media_url": _media_url, "cart": cart}
 
 
 @bp.after_app_request
@@ -137,6 +138,43 @@ def product(slug: str) -> str:
         gallery=_gallery(item),
         related=queries.related(item),
     )
+
+
+@bp.get("/find-fabrics/")
+def find_fabrics() -> str:
+    """Swipe-to-save fabric discovery. The first batch is server-rendered for no-JS visitors."""
+    items, _ = queries.discovery(0)
+    return render_template("store/find_fabrics.html", products=items)
+
+
+@bp.get("/api/v1/discovery/fabrics")
+def discovery_feed() -> Response:
+    """Bounded, minimal JSON feed for the Find Fabrics card stack (W-003)."""
+    try:
+        offset = int(request.args.get("cursor", "0"))
+    except ValueError:
+        offset = 0
+    items, next_offset = queries.discovery(min(max(offset, 0), 10_000))
+    payload = [
+        {
+            "slug": p.slug,
+            "name": p.name,
+            "price": money(p.price_cents),
+            "compare_at": money(p.compare_at_cents) if p.compare_at_cents else None,
+            "image": _media_url(p.cover.path if p.cover else None),
+            "alt": p.cover.alt if p.cover else p.name,
+            "category": p.primary_category.name if p.primary_category else "",
+            "category_url": url_for("store.category", slug=p.primary_category.slug)
+            if p.primary_category
+            else url_for("store.shop"),
+            "url": url_for("store.product", slug=p.slug),
+            "preview": url_for("store.product_preview", slug=p.slug),
+        }
+        for p in items
+    ]
+    resp = jsonify(items=payload, next_cursor=next_offset)
+    resp.headers["Cache-Control"] = "public, max-age=60"
+    return resp
 
 
 @bp.get("/product/<slug>/preview")

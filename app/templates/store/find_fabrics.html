@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+{%- from "partials/icons.html" import icon -%}
+{% block title %}Find Fabrics · GG Afrikan Eleganz{% endblock %}
+{% block description %}Swipe through our in-stock African prints and save the ones you love.{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/find-fabrics.css') }}">{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/find-fabrics.js') }}" defer></script>{% endblock %}
+{% block body_class %}gg-body--ff{% endblock %}
+{% block content %}
+<div class="gg-page-title">
+  <div class="gg-container">
+    <nav class="gg-breadcrumbs" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="{{ url_for('store.home') }}">Home</a></li>
+        <li aria-current="page">Find Fabrics</li>
+      </ol>
+    </nav>
+    <h1>Find Fabrics</h1>
+    <p class="gg-page-title__lede">Swipe right to save · Swipe left to skip · Tap a fabric for details</p>
+  </div>
+</div>
+
+<div class="gg-container gg-ff" data-gg-ff data-feed="{{ url_for('store.discovery_feed') }}" hidden>
+  <section class="gg-ff__stage" aria-label="Fabric cards">
+    <div class="gg-ff__stack" data-gg-ff-stack aria-live="polite"></div>
+
+    <div class="gg-ff__empty" data-gg-ff-empty hidden>
+      <h2>You've seen every fabric</h2>
+      <p>New prints arrive often. Start over to see them all again, or browse the full shop.</p>
+      <div class="gg-ff__empty-actions">
+        <button type="button" class="gg-button gg-button--accent" data-gg-ff-reset>Start over</button>
+        <a class="gg-button gg-button--outline" href="{{ url_for('store.category', slug='fabrics') }}">Browse all fabrics</a>
+      </div>
+    </div>
+
+    <div class="gg-ff__controls" data-gg-ff-controls>
+      <button type="button" class="gg-ff__btn gg-ff__btn--skip" data-gg-ff-skip aria-label="Skip this fabric">{{ icon('close', 28) }}</button>
+      <button type="button" class="gg-ff__btn gg-ff__btn--info" data-gg-ff-info aria-label="Show details for this fabric">{{ icon('search', 22) }}</button>
+      <button type="button" class="gg-ff__btn gg-ff__btn--save" data-gg-ff-save aria-label="Save this fabric">{{ icon('heart', 28) }}</button>
+    </div>
+    <p class="gg-ff__hint">Keyboard: ← skip · → save · Enter for details</p>
+  </section>
+
+  <aside class="gg-ff__side" aria-label="Your fabrics">
+    <section class="gg-ff__side-block" data-gg-ff-current hidden>
+      <h2 class="gg-ff__side-title">This fabric</h2>
+      <p class="gg-ff__side-cat"></p>
+      <a class="gg-link" href="#" data-gg-ff-cat-link>See more in this category →</a>
+    </section>
+    <section class="gg-ff__side-block">
+      <div class="gg-ff__side-head">
+        <h2 class="gg-ff__side-title">Saved fabrics <span data-gg-ff-saved-count>(0)</span></h2>
+        <button type="button" class="gg-ff__clear" data-gg-ff-clear hidden>Clear</button>
+      </div>
+      <p class="gg-ff__saved-empty" data-gg-ff-saved-empty>Fabrics you save will show up here.</p>
+      <ul class="gg-ff__saved" data-gg-ff-saved></ul>
+      <p class="gg-ff__note">Saved on this device. Tap a fabric to see details or add it to your cart.</p>
+    </section>
+  </aside>
+</div>
+
+<div class="gg-toast" data-gg-ff-toast role="status" aria-live="polite"></div>
+
+{# Without JavaScript (or before it loads) visitors get a plain grid of the same fabrics. #}
+<div class="gg-container gg-ff-fallback" data-gg-ff-fallback>
+  {% if products %}
+    <div class="gg-product-grid">
+      {% for p in products %}{% include "partials/product_card.html" %}{% endfor %}
+    </div>
+  {% else %}
+    <div class="gg-empty">
+      <h2>No fabrics in stock right now</h2>
+      <p>Please check back soon.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

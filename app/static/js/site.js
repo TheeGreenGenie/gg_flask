@@ -216,14 +216,10 @@
 			if (opener) { opener.focus(); }
 		});
 
-		document.addEventListener('click', function (event) {
-			var link = event.target.closest && event.target.closest('a[data-gg-preview]');
-			if (!link || event.defaultPrevented || event.button !== 0 ||
-				event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) { return; }
-			event.preventDefault();
-			opener = link;
-			link.setAttribute('aria-busy', 'true');
-			fetch(link.getAttribute('data-gg-preview'), { credentials: 'same-origin' })
+		function open(previewUrl, pageUrl, from) {
+			opener = from || null;
+			if (opener) { opener.setAttribute('aria-busy', 'true'); }
+			fetch(previewUrl, { credentials: 'same-origin' })
 				.then(function (r) {
 					if (!r.ok) { throw new Error('preview ' + r.status); }
 					return r.text();
@@ -239,8 +235,18 @@
 					var title = body.querySelector('.gg-product__title');
 					if (title) { title.tabIndex = -1; title.focus(); }
 				})
-				.catch(function () { window.location.href = link.href; })
-				.then(function () { link.removeAttribute('aria-busy'); });
+				.catch(function () { window.location.href = pageUrl; })
+				.then(function () { if (opener) { opener.removeAttribute('aria-busy'); } });
+		}
+
+		window.GGQuickView = { open: open };
+
+		document.addEventListener('click', function (event) {
+			var link = event.target.closest && event.target.closest('a[data-gg-preview]');
+			if (!link || event.defaultPrevented || event.button !== 0 ||
+				event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) { return; }
+			event.preventDefault();
+			open(link.getAttribute('data-gg-preview'), link.href, link);
 		});
 	}
 

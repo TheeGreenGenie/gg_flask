@@ -59,6 +59,22 @@ fixed color list and counted, so the preview shows each color's share of the fab
 `scripts/export_manifest_draft.py` reads the old WordPress database (read-only) and drafts
 a manifest with converted photos for curation. Needs `pip install -e ".[tools]"`.
 
+## Marketing contacts
+
+Customers who opted in can be exported for your email or SMS provider:
+
+```bash
+.venv/Scripts/flask --app wsgi accounts export-marketing --channel email > email-optins.csv
+.venv/Scripts/flask --app wsgi accounts export-marketing --channel sms > sms-optins.csv
+```
+
+The files contain personal data: import them into the provider, then delete them. Only
+people whose latest choice is "yes" are included; every opt-in/opt-out is kept in
+`marketing_consents` with the exact wording shown, the date and the source.
+
+Password-reset emails print to the terminal in development. On the live site reset is
+switched off (and says so) until an email provider is connected (`MAIL_BACKEND`).
+
 ## Scheduled jobs
 
 Run daily: `flask --app wsgi wishlist-prune` deletes wishlists nobody has changed for 90 days.
@@ -93,6 +109,7 @@ Set `TRUSTED_PROXY_HOPS` to the number of reverse proxies in front of the app. W
 | `/cart/`, `/checkout/` | Cart (server-side) and checkout (payments arrive in Phase 7) |
 | `/find-fabrics/` | Swipe-to-save fabric discovery (feed: `/api/v1/discovery/fabrics`) |
 | `/wishlist/` | Anonymous wishlist (JSON: `/api/v1/wishlist`) |
+| `/account/` | Customer accounts: register, sign in, details, message preferences, password, delete |
 | `/media/<path>` | Product images in development (object storage/CDN in production) |
 
 ## Dependencies

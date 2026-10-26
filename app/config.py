@@ -42,7 +42,10 @@ class BaseConfig:
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
     SESSION_COOKIE_SECURE = True
-    PERMANENT_SESSION_LIFETIME = timedelta(hours=12)
+    # Used only when a customer ticks "Keep me signed in"; otherwise the login cookie
+    # ends with the browser session.
+    PERMANENT_SESSION_LIFETIME = timedelta(days=30)
+    MAIL_BACKEND: str | None = None  # see app/mail.py
 
     WTF_CSRF_TIME_LIMIT = 3600
     MAX_CONTENT_LENGTH = 2 * 1024 * 1024  # request bodies; uploads get their own path later
@@ -62,6 +65,7 @@ class BaseConfig:
 class DevelopmentConfig(BaseConfig):
     APP_ENV = "development"
     DEBUG = True
+    MAIL_BACKEND = "console"
     SESSION_COOKIE_SECURE = False
 
     def __init__(self) -> None:
@@ -77,6 +81,7 @@ class DevelopmentConfig(BaseConfig):
 class TestingConfig(BaseConfig):
     APP_ENV = "testing"
     TESTING = True
+    MAIL_BACKEND = "memory"
     SESSION_COOKIE_SECURE = False
     WTF_CSRF_ENABLED = False
 

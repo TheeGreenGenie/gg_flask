@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import secrets
 from datetime import timedelta
+from typing import TYPE_CHECKING, Any
 
 from flask import current_app, g, request
 from sqlalchemy import delete, select
@@ -20,6 +21,9 @@ from app import ratelimit
 from app.catalog.models import Product, ProductStatus, utcnow
 from app.extensions import db
 from app.wishlist.models import Wishlist, WishlistItem
+
+if TYPE_CHECKING:
+    from app.accounts.models import User
 
 COOKIE = "gg_wishlist"
 RETENTION_DAYS = 90
@@ -35,28 +39,67 @@ def _hash(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
 
+def _load(*conditions: Any) -> Wishlist | None:
+    return db.session.scalar(
+        select(Wishlist)
+        .where(*conditions)
+        .options(
+            selectinload(Wishlist.items)
+            .selectinload(WishlistItem.product)
+            .selectinload(Product.images)
+        )
+    )
+
+
 def current(create: bool = False) -> Wishlist | None:
+    """Signed-in customers get their account's list; everyone else the cookie's list."""
     if "wishlist" in g and (g.wishlist is not None or not create):
         return g.wishlist
-    token = request.cookies.get(COOKIE, "")
+    from app.accounts.service import current_user
+
+    user = current_user()
     wishlist = None
-    if token and len(token) <= 100:
-        wishlist = db.session.scalar(
-            select(Wishlist)
-            .where(Wishlist.token_hash == _hash(token))
-            .options(
-                selectinload(Wishlist.items)
-                .selectinload(WishlistItem.product)
-                .selectinload(Product.images)
-            )
-        )
-    if wishlist is None and create:
-        token = secrets.token_urlsafe(32)
-        wishlist = Wishlist(token_hash=_hash(token))
-        db.session.add(wishlist)
-        g.new_wishlist_token = token
+    if user is not None:
+        wishlist = _load(Wishlist.user_id == user.id)
+        if wishlist is None and create:
+            # Account lists are never looked up by token; store an unguessable placeholder.
+            wishlist = Wishlist(token_hash=_hash(secrets.token_urlsafe(32)), user_id=user.id)
+            db.session.add(wishlist)
+    else:
+        token = request.cookies.get(COOKIE, "")
+        if token and len(token) <= 100:
+            wishlist = _load(Wishlist.token_hash == _hash(token), Wishlist.user_id.is_(None))
+        if wishlist is None and create:
+            token = secrets.token_urlsafe(32)
+            wishlist = Wishlist(token_hash=_hash(token))
+            db.session.add(wishlist)
+            g.new_wishlist_token = token
     g.wishlist = wishlist
     return wishlist
+
+
+def claim_for_user(anonymous: Wishlist | None, user: User) -> None:
+    """On login, adopt the browser's list or merge it into the account's existing list."""
+    g.pop("wishlist", None)
+    if anonymous is None or anonymous.user_id is not None:
+        return
+    owned = _load(Wishlist.user_id == user.id)
+    if owned is None:
+        anonymous.user_id = user.id
+        return
+    have = {i.product_id for i in owned.items}
+    for item in list(anonymous.items):
+        if item.product_id not in have and len(owned.items) < MAX_ITEMS:
+            owned.items.append(WishlistItem(product_id=item.product_id))
+            have.add(item.product_id)
+    db.session.delete(anonymous)  # its items go with it (ORM cascade)
+    owned.updated_at = utcnow()
+
+
+def delete_for_user(user: User) -> None:
+    owned = _load(Wishlist.user_id == user.id)
+    if owned is not None:
+        db.session.delete(owned)  # items cascade
 
 
 def set_cookie(response: Response) -> Response:
@@ -146,8 +189,9 @@ def clear() -> None:
 def prune(days: int = RETENTION_DAYS) -> int:
     """Delete wishlists untouched for `days`. Returns how many were removed."""
     cutoff = utcnow() - timedelta(days=days)
-    stale = select(Wishlist.id).where(Wishlist.updated_at < cutoff)
+    is_stale = (Wishlist.updated_at < cutoff, Wishlist.user_id.is_(None))  # keep account lists
+    stale = select(Wishlist.id).where(*is_stale)
     db.session.execute(delete(WishlistItem).where(WishlistItem.wishlist_id.in_(stale)))
-    result = db.session.execute(delete(Wishlist).where(Wishlist.updated_at < cutoff))
+    result = db.session.execute(delete(Wishlist).where(*is_stale))
     db.session.commit()
     return int(result.rowcount or 0)  # type: ignore[attr-defined]

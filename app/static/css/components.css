@@ -31,7 +31,7 @@
 .gg-link { color: var(--gg-link); font-weight: 700; }
 
 /* ---------- Form controls ---------- */
-input[type="text"], input[type="email"], input[type="search"], input[type="tel"], input[type="number"], select, textarea {
+input[type="text"], input[type="email"], input[type="search"], input[type="tel"], input[type="number"], input[type="password"], select, textarea {
 	min-height: 2.9rem;
 	padding: .6rem .85rem;
 	border: 1px solid var(--gg-input-border);

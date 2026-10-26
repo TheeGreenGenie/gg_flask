@@ -1,0 +1,26 @@
+{% extends "accounts/_base.html" %}
+{% block title %}Sign in · GG Afrikan Eleganz{% endblock %}
+{% block heading %}Sign in{% endblock %}
+{% block lede %}<p class="gg-page-title__lede">Accounts from our previous website were not carried over. If you shopped with us before, please create a new account.</p>{% endblock %}
+{% block body %}
+<form class="gg-account__card" method="post" action="{{ url_for('accounts.login', next=request.args.get('next')) }}" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  {% include "accounts/_error.html" %}
+  <div class="gg-fields">
+    <div class="gg-field gg-field--wide">
+      <label for="email">Email address</label>
+      <input id="email" name="email" type="email" autocomplete="email" required maxlength="254" value="{{ email }}">
+    </div>
+    <div class="gg-field gg-field--wide">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required maxlength="128">
+    </div>
+  </div>
+  <div class="gg-account__row">
+    <label class="gg-check"><input type="checkbox" name="remember" value="1"> Keep me signed in</label>
+    <a class="gg-link" href="{{ url_for('accounts.forgot_password') }}">Forgot password?</a>
+  </div>
+  <button class="gg-button gg-button--accent gg-button--block gg-button--lg" type="submit">Sign in</button>
+  <p class="gg-account__switch">New here? <a class="gg-link" href="{{ url_for('accounts.register', next=request.args.get('next')) }}">Create an account</a></p>
+</form>
+{% endblock %}

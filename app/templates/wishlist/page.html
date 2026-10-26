@@ -11,7 +11,11 @@
       </ol>
     </nav>
     <h1>Your wishlist</h1>
-    <p class="gg-page-title__lede">Saved in this browser — no account needed. Lists are kept for {{ retention_days }} days after your last change.</p>
+    {% if current_user %}
+      <p class="gg-page-title__lede">Saved to your account, on every device you sign in to.</p>
+    {% else %}
+      <p class="gg-page-title__lede">Saved in this browser for {{ retention_days }} days after your last change. <a class="gg-link" href="{{ url_for('accounts.register', next=url_for('wishlist.page')) }}">Create an account</a> or <a class="gg-link" href="{{ url_for('accounts.login', next=url_for('wishlist.page')) }}">sign in</a> to keep it on every device.</p>
+    {% endif %}
   </div>
 </div>
 

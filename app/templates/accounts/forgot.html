@@ -1,0 +1,23 @@
+{% extends "accounts/_base.html" %}
+{% block title %}Reset your password · GG Afrikan Eleganz{% endblock %}
+{% block heading %}Reset your password{% endblock %}
+{% block body %}
+<div class="gg-account__card">
+  {% if available %}
+    <form method="post" action="{{ url_for('accounts.forgot_password') }}" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <p>Enter the email address for your account and we'll send you a link to choose a new password.</p>
+      <div class="gg-fields">
+        <div class="gg-field gg-field--wide">
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" autocomplete="email" required maxlength="254">
+        </div>
+      </div>
+      <button class="gg-button gg-button--accent gg-button--block gg-button--lg" type="submit">Send reset link</button>
+    </form>
+  {% else %}
+    <p>Password reset by email isn't available yet. Please <a class="gg-link" href="/contact-us/">contact us</a> or email <a class="gg-link" href="mailto:{{ site.CONTACT_EMAIL }}">{{ site.CONTACT_EMAIL }}</a> and we'll help.</p>
+  {% endif %}
+  <p class="gg-account__switch"><a class="gg-link" href="{{ url_for('accounts.login') }}">Back to sign in</a></p>
+</div>
+{% endblock %}

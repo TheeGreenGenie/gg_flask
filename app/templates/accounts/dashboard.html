@@ -1,0 +1,93 @@
+{% extends "accounts/_base.html" %}
+{% block title %}My account · GG Afrikan Eleganz{% endblock %}
+{% block heading %}Hello{% if user.first_name %}, {{ user.first_name }}{% endif %}{% endblock %}
+{% block lede %}<p class="gg-page-title__lede">Signed in as {{ user.email }}.</p>{% endblock %}
+{% block body %}
+<div class="gg-account__grid">
+  <nav class="gg-account__nav" aria-label="Account sections">
+    <a href="#details">My details</a>
+    <a href="#preferences">Messages from us</a>
+    <a href="{{ url_for('wishlist.page') }}">Wishlist ({{ wishlist_count }})</a>
+    <a href="#password">Password</a>
+    <a href="#delete">Delete account</a>
+    <form method="post" action="{{ url_for('accounts.logout') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="gg-button gg-button--outline gg-button--block">Sign out</button>
+    </form>
+  </nav>
+
+  <div class="gg-account__sections">
+    <section class="gg-account__card" id="details" aria-labelledby="details-title">
+      <h2 id="details-title">My details</h2>
+      <form method="post" action="{{ url_for('accounts.details') }}" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="gg-fields">
+          <div class="gg-field">
+            <label for="first_name">First name</label>
+            <input id="first_name" name="first_name" type="text" autocomplete="given-name" maxlength="80" value="{{ user.first_name }}">
+          </div>
+          <div class="gg-field">
+            <label for="phone">Mobile number <span class="gg-optional">(optional)</span></label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="25" value="{{ user.phone or '' }}">
+          </div>
+          <div class="gg-field gg-field--wide">
+            <label for="email-ro">Email address</label>
+            <input id="email-ro" type="email" value="{{ user.email }}" readonly aria-describedby="email-hint">
+            <p class="gg-field__hint" id="email-hint">To change your email address, please <a class="gg-link" href="/contact-us/">contact us</a>.</p>
+          </div>
+        </div>
+        <button class="gg-button gg-button--dark" type="submit">Save details</button>
+      </form>
+    </section>
+
+    <section class="gg-account__card" id="preferences" aria-labelledby="prefs-title">
+      <h2 id="prefs-title">Messages from us</h2>
+      <p>Choose how we can tell you about new prints, offers and opportunities. You can change this any time.</p>
+      <form method="post" action="{{ url_for('accounts.preferences') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label class="gg-check"><input type="checkbox" name="email_opt_in" value="1"{% if email_on %} checked{% endif %}> <span>{{ email_wording }} <small class="gg-account__dest">Sent to {{ user.email }}</small></span></label>
+        <label class="gg-check"><input type="checkbox" name="sms_opt_in" value="1"{% if sms_on %} checked{% endif %}{% if not user.phone %} disabled{% endif %}> <span>{{ sms_wording }} <small class="gg-account__dest">{% if user.phone %}Sent to {{ user.phone }}{% else %}Add a mobile number above to turn this on.{% endif %}</small></span></label>
+        <button class="gg-button gg-button--dark" type="submit">Save preferences</button>
+      </form>
+    </section>
+
+    <section class="gg-account__card" id="password" aria-labelledby="pw-title">
+      <h2 id="pw-title">Password</h2>
+      <form method="post" action="{{ url_for('accounts.password') }}" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="gg-fields">
+          <div class="gg-field">
+            <label for="current_password">Current password</label>
+            <input id="current_password" name="current_password" type="password" autocomplete="current-password" required maxlength="128">
+          </div>
+          <div class="gg-field">
+            <label for="new_password">New password</label>
+            <input id="new_password" name="new_password" type="password" autocomplete="new-password" required minlength="10" maxlength="128">
+          </div>
+        </div>
+        <p class="gg-field__hint">Changing your password signs you out on every other device.</p>
+        <button class="gg-button gg-button--dark" type="submit">Change password</button>
+      </form>
+    </section>
+
+    <section class="gg-account__card gg-account__card--danger" id="delete" aria-labelledby="del-title">
+      <h2 id="del-title">Delete account</h2>
+      <p>This permanently deletes your account, contact details, message preferences and saved wishlist. It can't be undone.</p>
+      <form method="post" action="{{ url_for('accounts.delete') }}" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="gg-fields">
+          <div class="gg-field">
+            <label for="del-password">Password</label>
+            <input id="del-password" name="password" type="password" autocomplete="current-password" required maxlength="128">
+          </div>
+          <div class="gg-field">
+            <label for="confirm">Type DELETE to confirm</label>
+            <input id="confirm" name="confirm" type="text" autocomplete="off" required maxlength="10">
+          </div>
+        </div>
+        <button class="gg-button gg-button--outline gg-account__delete" type="submit">Delete my account</button>
+      </form>
+    </section>
+  </div>
+</div>
+{% endblock %}

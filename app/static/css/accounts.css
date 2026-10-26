@@ -1,0 +1,61 @@
+/* Customer account pages. Form field styles come from checkout.css. */
+
+.gg-account { padding-block: clamp(1.5rem, 4vw, 3rem) clamp(3rem, 6vw, 5rem); }
+
+.gg-account__card {
+	display: grid;
+	gap: 1.25rem;
+	max-width: 34rem;
+	margin-inline: auto;
+	padding: clamp(1.25rem, 3vw, 2rem);
+	border: 1px solid var(--gg-line);
+	border-radius: var(--gg-radius-md);
+	background: var(--gg-paper);
+}
+
+.gg-account__card h2 { margin: 0; font-size: 1.3rem; }
+.gg-account__card p { margin: 0; }
+.gg-account__card form { display: grid; gap: 1rem; }
+.gg-account__card form > .gg-button { justify-self: start; }
+.gg-account__card form > .gg-button--block { justify-self: stretch; }
+.gg-account__card .gg-check { margin-top: 0; }
+
+.gg-form-error {
+	padding: .8rem 1rem;
+	border-left: 4px solid var(--gg-sale);
+	border-radius: var(--gg-radius-sm);
+	color: var(--gg-sale);
+	background: var(--gg-err-bg);
+	font-weight: 700;
+}
+
+.gg-account__consent { display: grid; gap: .75rem; padding: 1rem; border: 1px solid var(--gg-line); border-radius: var(--gg-radius-sm); }
+.gg-account__consent legend { padding: 0 .4rem; font-weight: 700; }
+.gg-account__consent .gg-check span, .gg-account__card .gg-check span { font-size: .88rem; line-height: 1.5; }
+.gg-account__dest { display: block; margin-top: .2rem; color: var(--gg-muted); }
+.gg-account__row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; }
+.gg-account__row .gg-check { margin: 0; }
+.gg-account__switch { text-align: center; color: var(--gg-muted); }
+
+input[readonly] { color: var(--gg-muted); background: var(--gg-subtle-bg); }
+
+.gg-account__grid { display: grid; grid-template-columns: 14rem minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 3rem); align-items: start; }
+.gg-account__sections { display: grid; gap: 1.5rem; }
+.gg-account__sections .gg-account__card { max-width: none; margin: 0; }
+
+.gg-account__nav { position: sticky; top: calc(var(--gg-header-offset) + 1rem); display: grid; gap: .25rem; }
+.gg-account__nav a { display: flex; align-items: center; min-height: 2.75rem; padding: 0 .75rem; border-radius: var(--gg-radius-sm); color: var(--gg-ink); font-weight: 700; text-decoration: none; }
+.gg-account__nav a:hover { background: var(--gg-warm); }
+.gg-account__nav form { margin-top: .75rem; }
+
+.gg-account__card--danger { border-color: color-mix(in srgb, var(--gg-sale) 40%, var(--gg-line)); }
+.gg-account__delete { border-color: var(--gg-sale); color: var(--gg-sale); }
+.gg-account__delete:hover { color: #fff; background: var(--gg-sale); }
+
+[id] { scroll-margin-top: calc(var(--gg-header-offset) + 1rem); }
+
+@media (max-width: 48rem) {
+	.gg-account__grid { grid-template-columns: 1fr; }
+	.gg-account__nav { position: static; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.gg-account__nav form { grid-column: 1 / -1; margin-top: .25rem; }
+}

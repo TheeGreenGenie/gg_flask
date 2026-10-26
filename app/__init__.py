@@ -58,7 +58,10 @@ def create_app(config: BaseConfig | str | None = None) -> Flask:
 
     app.register_blueprint(store_bp)
 
+    from app.accounts import init_accounts
     from app.wishlist import init_wishlist
+
+    init_accounts(app)
 
     init_wishlist(app)
 

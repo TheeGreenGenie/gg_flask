@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='css/accounts.css') }}">{% endblock %}
+{% block content %}
+<div class="gg-page-title">
+  <div class="gg-container">
+    <h1>{% block heading %}{% endblock %}</h1>
+    {% block lede %}{% endblock %}
+  </div>
+</div>
+<div class="gg-container gg-account">
+  {% block body %}{% endblock %}
+</div>
+{% endblock %}

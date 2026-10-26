@@ -511,10 +511,10 @@
 
 /* Theme toggle: shows the moon in light mode and the sun in dark mode. */
 .gg-theme-btn[hidden], .gg-drawer__theme[hidden] { display: none; }
-.gg-theme-btn__sun { display: none; }
-.gg-theme-btn[aria-pressed="true"] .gg-theme-btn__sun { display: inline-flex; color: var(--gg-accent); }
-.gg-theme-btn[aria-pressed="true"] .gg-theme-btn__moon { display: none; }
 .gg-theme-btn span { display: inline-flex; }
+.gg-theme-btn .gg-theme-btn__sun,
+.gg-theme-btn[aria-pressed="true"] .gg-theme-btn__moon { display: none; }
+.gg-theme-btn[aria-pressed="true"] .gg-theme-btn__sun { display: inline-flex; color: var(--gg-accent); }
 
 .gg-drawer__theme {
 	width: 100%;

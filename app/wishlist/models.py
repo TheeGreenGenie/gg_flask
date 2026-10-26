@@ -17,6 +17,10 @@ class Wishlist(db.Model):  # type: ignore[name-defined]
 
     id: Mapped[int] = mapped_column(primary_key=True)
     token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    # Set once a signed-in customer owns the list; such lists are never found by cookie.
+    user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), unique=True
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     # Touched on every change; lists idle longer than RETENTION_DAYS are pruned.
     updated_at: Mapped[datetime] = mapped_column(

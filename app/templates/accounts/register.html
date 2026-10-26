@@ -1,0 +1,41 @@
+{% extends "accounts/_base.html" %}
+{% block title %}Create an account · GG Afrikan Eleganz{% endblock %}
+{% block heading %}Create an account{% endblock %}
+{% block lede %}<p class="gg-page-title__lede">Keep your wishlist on every device and hear first about new prints.</p>{% endblock %}
+{% block body %}
+<form class="gg-account__card" method="post" action="{{ url_for('accounts.register', next=request.args.get('next')) }}" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  {% include "accounts/_error.html" %}
+  <div class="gg-fields">
+    <div class="gg-field gg-field--wide">
+      <label for="first_name">First name <span class="gg-optional">(optional)</span></label>
+      <input id="first_name" name="first_name" type="text" autocomplete="given-name" maxlength="80" value="{{ form.get('first_name', '') }}">
+    </div>
+    <div class="gg-field gg-field--wide">
+      <label for="email">Email address <span class="gg-required" aria-hidden="true">*</span></label>
+      <input id="email" name="email" type="email" autocomplete="email" required maxlength="254" value="{{ form.get('email', '') }}">
+    </div>
+    <div class="gg-field gg-field--wide">
+      <label for="phone">Mobile number <span class="gg-optional">(optional, needed for texts)</span></label>
+      <input id="phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="25" value="{{ form.get('phone', '') }}" aria-describedby="phone-hint">
+      <p class="gg-field__hint" id="phone-hint">US numbers can be entered like 215-555-0123.</p>
+    </div>
+    <div class="gg-field gg-field--wide">
+      <label for="password">Password <span class="gg-required" aria-hidden="true">*</span></label>
+      <input id="password" name="password" type="password" autocomplete="new-password" required minlength="10" maxlength="128" aria-describedby="password-hint">
+      <p class="gg-field__hint" id="password-hint">At least 10 characters. A short phrase is easy to remember and hard to guess.</p>
+    </div>
+  </div>
+
+  <fieldset class="gg-account__consent">
+    <legend>Stay in touch <span class="gg-optional">(optional)</span></legend>
+    <label class="gg-check"><input type="checkbox" name="email_opt_in" value="1"{% if form.get('email_opt_in') == '1' %} checked{% endif %}> <span>{{ email_wording }}</span></label>
+    <label class="gg-check"><input type="checkbox" name="sms_opt_in" value="1"{% if form.get('sms_opt_in') == '1' %} checked{% endif %}> <span>{{ sms_wording }}</span></label>
+    <p class="gg-field__hint">See our <a href="/privacy-policy/">Privacy Policy</a>. You can change these choices any time in your account.</p>
+  </fieldset>
+
+  <label class="gg-check"><input type="checkbox" name="remember" value="1"{% if form.get('remember') == '1' %} checked{% endif %}> Keep me signed in on this device</label>
+  <button class="gg-button gg-button--accent gg-button--block gg-button--lg" type="submit">Create account</button>
+  <p class="gg-account__switch">Already have an account? <a class="gg-link" href="{{ url_for('accounts.login', next=request.args.get('next')) }}">Sign in</a></p>
+</form>
+{% endblock %}

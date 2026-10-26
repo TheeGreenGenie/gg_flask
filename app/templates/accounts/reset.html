@@ -1,0 +1,17 @@
+{% extends "accounts/_base.html" %}
+{% block title %}Choose a new password · GG Afrikan Eleganz{% endblock %}
+{% block heading %}Choose a new password{% endblock %}
+{% block body %}
+<form class="gg-account__card" method="post" action="{{ url_for('accounts.reset_password', token=token) }}" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  {% include "accounts/_error.html" %}
+  <div class="gg-fields">
+    <div class="gg-field gg-field--wide">
+      <label for="password">New password</label>
+      <input id="password" name="password" type="password" autocomplete="new-password" required minlength="10" maxlength="128" aria-describedby="password-hint">
+      <p class="gg-field__hint" id="password-hint">At least 10 characters. You'll be signed out on every other device.</p>
+    </div>
+  </div>
+  <button class="gg-button gg-button--accent gg-button--block gg-button--lg" type="submit">Save new password</button>
+</form>
+{% endblock %}

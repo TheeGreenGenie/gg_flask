@@ -183,6 +183,14 @@ POLICIES: Final = {
                 ),
             ),
             (
+                "Reviews, questions, and moderation",
+                (
+                    "Signed-in customers may post product reviews and questions. We store the post, rating, account, time, and limited technical information used to prevent abuse. A verified-buyer label may show when the account purchased the product.",
+                    "Automated checks look for prohibited text and whether a post is relevant to the product. Off-topic posts may be collapsed but remain readable; honest negative reviews are not hidden because of their rating. Staff may review, reply to, hide, restore, or correct an automated decision.",
+                    "Text removed by an automated safety check may be kept privately for up to 30 days for appeals and repeat-abuse prevention, then deleted. If the store enables review photos, images will be safely re-encoded and checked for prohibited content; flagged images will not be retained.",
+                ),
+            ),
+            (
                 "Your choices",
                 (
                     "You may update or delete a new-store account from the account page. Contact us for other privacy requests. Some records may need to be retained for legal, security, tax, fraud-prevention, or transaction purposes.",

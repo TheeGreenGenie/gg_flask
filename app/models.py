@@ -12,8 +12,26 @@ from app.catalog.models import (
     ProductImage,
     Variant,
 )
+from app.content.models import BlogPost, BlogRevision
 from app.media.models import MediaAsset
 from app.orders.models import Coupon, Order, OrderLine, OrderNote, PaymentEvent, StockHold
+from app.reviews.models import (
+    ModerationRemoval,
+    ModerationWord,
+    ProductPost,
+    ProductPostPhoto,
+    ProductPostReply,
+)
+from app.studio.models import (
+    InventoryHistory,
+    PriceHistory,
+    StudioAudit,
+    StudioLoginRequest,
+    StudioSale,
+    StudioSaleItem,
+    StudioSession,
+    StudioUser,
+)
 from app.wishlist.models import Wishlist, WishlistItem
 
 __all__ = [
@@ -28,6 +46,8 @@ __all__ = [
     "User",
     "Cart",
     "CartLine",
+    "BlogPost",
+    "BlogRevision",
     "Category",
     "Collection",
     "OptionAxis",
@@ -42,6 +62,19 @@ __all__ = [
     "OrderNote",
     "PaymentEvent",
     "StockHold",
+    "ProductPost",
+    "ProductPostReply",
+    "ProductPostPhoto",
+    "ModerationRemoval",
+    "ModerationWord",
+    "StudioUser",
+    "StudioLoginRequest",
+    "StudioSession",
+    "StudioAudit",
+    "InventoryHistory",
+    "PriceHistory",
+    "StudioSale",
+    "StudioSaleItem",
     "Wishlist",
     "WishlistItem",
 ]

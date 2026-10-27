@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import re
+from datetime import date
+from pathlib import Path
 
 import pytest
 from flask import Flask
@@ -318,3 +320,92 @@ def test_discovery_paginates_with_stable_cursor(catalog_app: Flask) -> None:
         first, nxt = queries.discovery(0, limit=1)
         assert len(first) == 1 and nxt is None
         assert queries.discovery(5, limit=1) == ([], None)
+
+
+def test_atelier_cards_are_find_fabrics_wishlist_prints_and_3d_soon(shop: FlaskClient) -> None:
+    html = shop.get("/").get_data(as_text=True)
+    section = html.split("Explore the atelier", 1)[1].split("</section>", 1)[0]
+    titles = ["Find Fabrics", "Wishlist", "African Prints", "3D Models"]
+    assert re.findall(r"<h3>([^<]+)</h3>", section) == titles
+    assert 'href="/find-fabrics/"' in section and 'href="/wishlist/"' in section
+    assert 'href="/shop/fabrics/"' in section
+    assert section.count("gg-home-opening-card--soon") == 1 and "Coming soon" in section
+    # The main menu is unchanged.
+    assert "Real African Prints Shop" in html
+
+
+@pytest.fixture
+def fabric_shop(app: Flask, tmp_path: Path) -> Flask:
+    """Catalog with several fabrics of different ages and prices (plus a cushion)."""
+    from app.catalog import manifest as mf
+    from tests.catalog_fixtures import make_image, manifest, write_assets
+
+    assets = tmp_path / "assets"
+    write_assets(assets)
+    data = manifest()
+    for slug, published, price in [
+        ("kente-old", date(2025, 1, 1), 1200),
+        ("kente-new", date(2026, 10, 20), 500),
+        ("kente-dear", date(2026, 9, 1), 2500),
+    ]:
+        make_image(assets / f"products/{slug}/01.png", (200, 160, 20))
+        data["products"].append(
+            {
+                "slug": slug,
+                "name": f"Kente Print - {slug}",
+                "type": "fabric",
+                "status": "active",
+                "published": published,
+                "categories": ["ankara"],
+                "images": [{"file": f"products/{slug}/01.png", "alt": slug}],
+                "variants": [{"sku": slug.upper(), "price_cents": price, "stock": 3}],
+            }
+        )
+    with app.app_context():
+        mf.load(data, assets, Path(app.config["MEDIA_ROOT"]))
+    return app
+
+
+def test_card_photos_newest_priciest_and_random(fabric_shop: Flask) -> None:
+    from app.catalog import queries
+
+    with fabric_shop.app_context():
+        assert [p.slug for p in queries.newest_fabrics(8)] == [
+            "kente-new",
+            "ankara-blue",
+            "kente-dear",
+            "kente-old",
+        ]
+        assert [p.slug for p in queries.priciest_fabrics(8)] == [
+            "kente-dear",
+            "kente-old",
+            "ankara-blue",
+            "kente-new",
+        ]
+        # Only active fabrics with photos: never the cushion or the draft.
+        picks = {queries.random_fabric().slug for _ in range(25)}  # type: ignore[union-attr]
+        assert picks <= {"kente-new", "ankara-blue", "kente-dear", "kente-old"} and len(picks) > 1
+
+
+def test_explore_cards_cycle_product_photos(fabric_shop: Flask) -> None:
+    html = fabric_shop.test_client().get("/").get_data(as_text=True)
+    section = html.split('id="home-explore"', 1)[1].split("</section>", 1)[0]
+    cards = re.split(r'<(?:a|article) class="gg-home-opening-card', section)[1:]
+    find, wish, prints, models = cards
+    assert find.count("data-gg-cycle-item") == 4 and "data-gg-cycle" in find
+    assert wish.count("data-gg-cycle-item") == 4
+    # Newest first on Find Fabrics, most expensive first on Wishlist.
+    assert find.index("kente-new") < find.index("kente-old")
+    assert wish.index("kente-dear") < wish.index("kente-new")
+    # 3D Models: one random print, not cycling; African Prints keeps its photo.
+    assert "data-gg-cycle" not in models and models.count("<img") == 1
+    assert "/media/" in models and "open-african-prints" in prints
+
+
+def test_home_is_eight_framed_slides_with_icon_pause(shop: FlaskClient) -> None:
+    html = shop.get("/").get_data(as_text=True)
+    assert (
+        html.count("data-gg-section>") == 8 and len(re.findall(r'class="gg-slide[ "]', html)) == 8
+    )
+    pause = html.split("data-gg-slider-pause ", 1)[1].split("</button>", 1)[0]
+    assert "Pause slideshow" in pause and "<svg" in pause

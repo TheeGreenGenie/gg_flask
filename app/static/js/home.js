@@ -150,6 +150,15 @@
 		sections.forEach(function (section) {
 			observer.observe(section);
 		});
+
+		// The dots belong to the slides: step aside once the footer scrolls into view.
+		var nav = home.querySelector('.gg-home-nav');
+		var footer = document.querySelector('.gg-footer');
+		if (nav && footer) {
+			new IntersectionObserver(function (entries) {
+				nav.classList.toggle('gg-home-nav--away', entries[entries.length - 1].isIntersecting);
+			}).observe(footer);
+		}
 		return true;
 	}
 
@@ -186,6 +195,7 @@
 		var slides = Array.prototype.slice.call(stage.querySelectorAll('[data-gg-slide]'));
 		var dots = Array.prototype.slice.call(controls.querySelectorAll('[data-gg-slider-dot]'));
 		var pause = controls.querySelector('[data-gg-slider-pause]');
+		var pauseLabel = controls.querySelector('[data-gg-slider-pause-label]');
 		if (slides.length < 2) {
 			return;
 		}
@@ -207,7 +217,7 @@
 			window.clearInterval(timer);
 			timer = paused ? null : window.setInterval(function () { show(current + 1); }, 6000);
 			pause.setAttribute('aria-pressed', paused ? 'true' : 'false');
-			pause.textContent = paused ? 'Play slideshow' : 'Pause slideshow';
+			pauseLabel.textContent = paused ? 'Play slideshow' : 'Pause slideshow';
 		}
 
 		dots.forEach(function (dot, i) {
@@ -220,6 +230,75 @@
 
 		controls.hidden = false;
 		schedule();
+	}
+
+	/* Explore cards: product photos slide through one after another (Find Fabrics newest to
+	   oldest, Wishlist most expensive first). Only while the card is on screen; never with
+	   reduced motion. Cards are staggered so they don't all move at once. */
+	function initCycles() {
+		if (reducedMotion.matches || !('IntersectionObserver' in window)) {
+			return;
+		}
+		var INTERVAL_MS = 3400;
+		home.querySelectorAll('[data-gg-cycle]').forEach(function (stage, stageIndex) {
+			var items = Array.prototype.slice.call(stage.querySelectorAll('[data-gg-cycle-item]'));
+			if (items.length < 2) {
+				return;
+			}
+			var current = 0;
+			var timer = null;
+			var started = false;
+
+			function jump(img, fn) {
+				img.style.transition = 'none';
+				fn();
+				void img.offsetWidth; // apply the position before re-enabling the transition
+				img.style.transition = '';
+			}
+
+			function step() {
+				var leaving = items[current];
+				current = (current + 1) % items.length;
+				var next = items[current];
+				jump(next, function () { next.classList.remove('is-leaving'); });
+				next.classList.add('is-active');
+				leaving.classList.remove('is-active');
+				leaving.classList.add('is-leaving');
+				window.setTimeout(function () {
+					if (!leaving.classList.contains('is-active')) {
+						jump(leaving, function () { leaving.classList.remove('is-leaving'); });
+					}
+				}, 1200);
+			}
+
+			function start() {
+				if (timer) { return; }
+				if (!started) {
+					started = true;
+					items.forEach(function (img) { img.loading = 'eager'; });
+					timer = window.setTimeout(function () {
+						timer = window.setInterval(step, INTERVAL_MS);
+						step();
+					}, 900 + stageIndex * 1100);
+					return;
+				}
+				timer = window.setInterval(step, INTERVAL_MS);
+			}
+
+			function stop() {
+				window.clearTimeout(timer);
+				window.clearInterval(timer);
+				timer = null;
+			}
+
+			new IntersectionObserver(function (entries) {
+				var visible = entries[entries.length - 1].isIntersecting;
+				if (visible && !document.hidden) { start(); } else { stop(); }
+			}, { threshold: 0.35 }).observe(stage);
+			document.addEventListener('visibilitychange', function () {
+				if (document.hidden) { stop(); }
+			});
+		});
 	}
 
 	/* Section snapping (owner request): after 1 s with no scrolling, glide smoothly to the
@@ -341,6 +420,7 @@
 	try {
 		initSnap();
 		initSlider();
+		initCycles();
 		initTabs();
 		initVideoFacades();
 		if (initSectionNavigation()) {

@@ -2,6 +2,10 @@
 
 Rebuild of ggafrikaneleganz.com as a Flask application.
 
+For a codebase map and junior-developer continuation assignments, read
+[architecture_walk_through.md](architecture_walk_through.md). Current completion and owner blockers
+are tracked only in [PROJECT_STATUS.md](PROJECT_STATUS.md).
+
 ## Run locally
 
 Requirements: Python 3.13, Docker Desktop.
@@ -26,6 +30,10 @@ Load the catalog (`flask --app wsgi catalog load`), then open http://127.0.0.1:5
 To run the production container locally: `docker compose --profile full up --build`, then run
 `docker compose exec web flask --app wsgi db upgrade` and `... catalog load`, and open
 http://127.0.0.1:8000/.
+
+**Deploying to a Linux server with Apache:** step-by-step in [deploy/DEPLOY.md](deploy/DEPLOY.md)
+(gunicorn service, Apache site with HTTPS and direct static/media serving, scheduled jobs,
+nightly backups, updates, rollback and restore).
 
 ## Catalog
 
@@ -58,6 +66,19 @@ fixed color list and counted, so the preview shows each color's share of the fab
 
 `scripts/export_manifest_draft.py` reads the old WordPress database (read-only) and drafts
 a manifest with converted photos for curation. Needs `pip install -e ".[tools]"`.
+
+### Reviewing and bulk-editing the catalog (before launch)
+
+- `python scripts/catalog_review.py [--wp-db new_wordpress_local]` writes
+  `instance/catalog_review.html` (+ `.csv`): every product with its photo, price and stock, and
+  what still needs a decision (per-yard prices sold as bundles, placeholder stock, missing
+  weights, single photos, placeholder SKUs), most-flagged first.
+- `python scripts/catalog_sheet.py export` writes `instance/catalog_sheet.csv` (one row per SKU)
+  for editing price, crossed-out price, stock, weight and selling unit in a spreadsheet;
+  `python scripts/catalog_sheet.py apply FILE.csv` previews the changes and `--write` saves them
+  to the manifest (an invalid sheet changes nothing). Then `flask catalog load`.
+
+Once staff work in the Studio, edit products there instead of the manifest.
 
 ## Marketing contacts
 
@@ -118,6 +139,7 @@ against analytics and backlink exports before launch.
 | `SHIPPING_BACKEND=shippo`, `SHIPPO_API_TOKEN`, `SHIP_FROM_*` | Live USPS rates from Shippo, cheapest USPS service, by parcel weight (product `weight_grams`, default 450 g each + 120 g packaging) and a 12×10×4 in box. Falls back to `FLAT_SHIPPING_CENTS` if Shippo is unavailable. `SHIPPING_HANDLING_CENTS` adds a fixed amount. |
 | `LOCAL_SHIPPING_CENTS` | Philadelphia ZIPs (191xx, 19019, 19092, 19093, 19099) always get this rate. |
 | `TAX_BACKEND=stripe` (+ `STRIPE_SECRET_KEY`) | Stripe Tax calculates tax at checkout for Stripe and PayPal orders, records a tax transaction after payment and reverses it on refund. If Stripe Tax is unreachable the order is refused rather than charged the wrong tax. |
+| `MAIL_BACKEND=smtp`, `SMTP_HOST/PORT/USERNAME/PASSWORD`, `SMTP_SECURITY`, `MAIL_FROM` | Password-reset, order and Studio-summary emails through any provider's SMTP relay (Postmark, Amazon SES, SendGrid, Google Workspace…). Always encrypted (STARTTLS on 587 or SSL on 465); production refuses `console`/`memory`. A failed send is logged without the message or address. Verify the sending domain with the provider (SPF/DKIM/DMARC DNS records) or mail lands in spam. |
 | `GA4_MEASUREMENT_ID=G-…` | Google Analytics 4 with a consent banner. Nothing is sent to Google until a visitor clicks Accept; Global Privacy Control counts as Decline. Reports `view_item`, `add_to_cart`, `begin_checkout`, `purchase`. |
 
 ## Media library
@@ -149,6 +171,45 @@ that folder (with the same `Content-Security-Policy: sandbox` and `nosniff` head
 Run daily: `flask --app wsgi wishlist-prune` deletes wishlists nobody has changed for 90 days.
 Run every 15 minutes: `flask --app wsgi orders release-expired-holds` releases abandoned
 checkout reservations.
+Run every minute: `flask --app wsgi studio sync-sales` activates and ends confirmed Staff Studio
+sales at their scheduled times. The command is idempotent.
+Run every minute: `flask --app wsgi studio sync-blog` publishes scheduled journal articles.
+Run daily: `flask --app wsgi reviews purge-removed` permanently deletes expired private copies of
+automatically removed text when `MODERATION_RETENTION_DAYS=15`.
+Run daily: `flask --app wsgi studio daily-summary` emails operational counts to
+`ORDER_NOTIFICATION_EMAIL` through the configured mail backend.
+
+## Staff Studio (in progress)
+
+The non-technical staff area is mounted at the private path in `STUDIO_PATH`; it is intentionally
+absent from public navigation, robots, and the sitemap. Production requires a random URL-safe path
+of at least 24 characters. Local development defaults to `/studio-local-development-only/`.
+
+Accounts are managed only on the server. Password options prompt securely and are never accepted as
+command-line arguments:
+
+```bash
+flask --app wsgi studio create
+flask --app wsgi studio list
+flask --app wsgi studio reset <username>
+flask --app wsgi studio disable <username>
+flask --app wsgi studio enable <username>
+flask --app wsgi studio sync-users --file config/studio_users.json
+flask --app wsgi studio sync-users --file config/studio_users.json --apply
+```
+
+`config/studio_users.json` is the editable roster for local and server environments. It contains
+only usernames, roles, and active state—never passwords. The first command previews changes. The
+second applies them and securely prompts for each new user's temporary password. Users removed
+from the file are disabled and signed out rather than deleted, preserving their audit history.
+
+`STUDIO_APPROVAL_BACKEND=console` logs the one-time owner approval URL during local development.
+`flask studio approve-local <request-id>` is also available outside production for testing. Neither
+is the production approval mechanism. The owner selected ntfy: production uses
+`STUDIO_APPROVAL_BACKEND=ntfy`, a long private `STUDIO_NTFY_TOPIC`, and optionally a protected-topic
+token. Launch still requires WebAuthn/passkey confirmation after the notification opens the approval
+page. See `deploy/htaccess.example` for edge-protection rules that must be adapted and verified on
+staging.
 
 ## Checks (same as CI)
 
@@ -182,6 +243,7 @@ Set `TRUSTED_PROXY_HOPS` to the number of reverse proxies in front of the app. W
 | `/wishlist/` | Anonymous wishlist (JSON: `/api/v1/wishlist`) |
 | `/account/` | Customer accounts: register, sign in, details, message preferences, password, delete |
 | `/admin/` | Private two-factor administration for catalog, orders, refunds, and coupons |
+| `/<STUDIO_PATH>/` | Hidden owner-approved Staff Studio (path comes only from the environment) |
 | `/sitemap.xml`, `/robots.txt` | Search-engine discovery rules |
 | `/media/<path>` | Product images in development (object storage/CDN in production) |
 

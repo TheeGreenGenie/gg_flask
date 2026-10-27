@@ -15,6 +15,7 @@ from app.legacy import init_legacy_redirects
 from app.log_config import configure_logging
 from app.security import init_security_headers
 from app.templating import init_templating
+from app.uploads import init_uploads
 
 
 def create_app(config: BaseConfig | str | None = None) -> Flask:
@@ -45,6 +46,7 @@ def create_app(config: BaseConfig | str | None = None) -> Flask:
     csrf.init_app(app)
     init_redis(app)
     init_security_headers(app)
+    init_uploads(app)
     init_templating(app)
     init_catalog(app)
     init_assets(app)
@@ -68,7 +70,9 @@ def create_app(config: BaseConfig | str | None = None) -> Flask:
     from app.admin import init_admin
     from app.media import init_media
     from app.orders import init_orders
+    from app.reviews import init_reviews
     from app.seo import init_seo
+    from app.studio import init_studio
     from app.wishlist import init_wishlist
 
     init_accounts(app)
@@ -76,6 +80,8 @@ def create_app(config: BaseConfig | str | None = None) -> Flask:
     init_media(app)
     init_orders(app)
     init_seo(app)
+    init_studio(app)
+    init_reviews(app)
 
     init_wishlist(app)
 

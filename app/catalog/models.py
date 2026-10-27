@@ -44,6 +44,12 @@ class ProductStatus(enum.StrEnum):
     ARCHIVED = "archived"
 
 
+class SaleUnit(enum.StrEnum):
+    FIXED_BUNDLE = "fixed_bundle"
+    YARD = "yard"
+    METRE = "metre"
+
+
 product_categories = Table(
     "product_categories",
     db.metadata,
@@ -114,6 +120,12 @@ class Collection(db.Model):  # type: ignore[name-defined]
 
 class Product(db.Model):  # type: ignore[name-defined]
     __tablename__ = "products"
+    __table_args__ = (
+        CheckConstraint(
+            "sale_unit IN ('fixed_bundle', 'yard', 'metre')",
+            name="product_sale_unit_valid",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     slug: Mapped[str] = mapped_column(String(120), unique=True)
@@ -129,6 +141,9 @@ class Product(db.Model):  # type: ignore[name-defined]
     summary: Mapped[str] = mapped_column(String(300), default="")
     description: Mapped[str] = mapped_column(Text, default="")
     featured: Mapped[bool] = mapped_column(default=False)
+    sale_unit: Mapped[str] = mapped_column(
+        String(20), default=SaleUnit.FIXED_BUNDLE.value, server_default="fixed_bundle"
+    )
     # Comma-separated names from naming.PALETTE (controlled vocabulary, future color filter).
     colors: Mapped[str] = mapped_column(String(200), default="", server_default="")
     legacy_wp_id: Mapped[int | None] = mapped_column(Integer)  # editorial traceability only
@@ -178,6 +193,14 @@ class Product(db.Model):  # type: ignore[name-defined]
     @property
     def in_stock(self) -> bool:
         return any(v.available_quantity > 0 for v in self.active_variants)
+
+    @property
+    def sale_unit_label(self) -> str:
+        return {
+            SaleUnit.FIXED_BUNDLE.value: "bundle",
+            SaleUnit.YARD.value: "yard",
+            SaleUnit.METRE.value: "metre",
+        }.get(self.sale_unit, "bundle")
 
     @property
     def color_list(self) -> list[str]:

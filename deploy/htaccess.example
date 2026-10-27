@@ -1,0 +1,71 @@
+# GG Afrikan Eleganz reverse-proxy protection example (Apache 2.4+)
+#
+# Copy the relevant rules into the site's real VirtualHost or .htaccess only after
+# replacing REPLACE_WITH_STUDIO_PATH and testing on staging. VirtualHost config is
+# preferred because it can use directives that shared-host .htaccess may forbid.
+# Do not commit the real Studio path, owner IP, VPN range, or credentials.
+
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # HTTPS only. When a trusted proxy terminates TLS, confirm that it sets
+  # X-Forwarded-Proto and that Flask TRUSTED_PROXY_HOPS matches the topology.
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=308,L]
+
+  # Never expose repository, application state, migrations, secrets, logs, or backups.
+  RewriteRule (^|/)(\.env(?:\..*)?|\.git|instance|migrations)(/|$) - [F,L,NC]
+  RewriteRule \.(?:bak|backup|dump|log|sql|sqlite3?|swp|tmp)$ - [F,L,NC]
+
+  # Reject common automated scanners only at the private Studio path. This is an
+  # extra noise filter, not authentication; user-agent strings are easy to fake.
+  RewriteCond %{REQUEST_URI} ^/REPLACE_WITH_STUDIO_PATH(?:/|$) [NC]
+  RewriteCond %{HTTP_USER_AGENT} (?:sqlmap|nikto|nmap|masscan|zgrab|gobuster|dirbuster|wpscan) [NC]
+  RewriteRule ^ - [F,L]
+
+  # Reject unknown pages beneath the private prefix before they reach Flask. Keep
+  # this allowlist synchronized with app/studio when routes are added.
+  RewriteCond %{REQUEST_URI} ^/REPLACE_WITH_STUDIO_PATH/ [NC]
+  RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/(?:password|home|inventory(?:\.csv|/history)?|prices|prices/history|products|sales|sales/new|blog|blog/new)/?$ [NC]
+  RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/(?:waiting|status)/[A-Za-z0-9_-]{20,64}/?$ [NC]
+  RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/approve/[A-Za-z0-9_-]{20,100}/?$ [NC]
+  RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/(?:inventory|prices|prices/history|products)/[0-9]+(?:/undo|/visibility)?/?$ [NC]
+  RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/inventory/history/[0-9]+/undo/?$ [NC]
+  RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/products/(?:[0-9]+/images|images/[0-9]+/remove)/?$ [NC]
+  RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/sales/[0-9]+(?:/confirm|/cancel)?/?$ [NC]
+  RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/blog/(?:[0-9]+(?:/publication)?|revisions/[0-9]+/restore)/?$ [NC]
+  RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/community(?:/[0-9]+/(?:reply|moderate)|/words(?:/[0-9]+/remove)?)?/?$ [NC]
+  RewriteRule ^ - [R=404,L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  # Flask also sets these. Edge headers cover errors produced before Flask.
+  SetEnvIf Request_URI "^/REPLACE_WITH_STUDIO_PATH(?:/|$)" is_staff_studio
+  Header always set X-Robots-Tag "noindex, nofollow, noarchive" env=is_staff_studio
+  Header always set Cache-Control "private, no-store" env=is_staff_studio
+</IfModule>
+
+# Place request-size control inside a Studio <Location> in VirtualHost config when possible.
+# <Location "/REPLACE_WITH_STUDIO_PATH">
+#   LimitRequestBody 8388608
+# </Location>
+
+# Restrict the technical /admin area at the edge. Prefer a VPN range; if the owner
+# has a stable public IP, replace the documentation address below.
+# <Location "/admin">
+#   Require ip 192.0.2.10
+#   # Or: Require ip 10.20.0.0/16   (example VPN range)
+# </Location>
+
+# Optional only when every staff location has a stable address. Do not enable this
+# for ordinary mobile/remote staff or it will lock them out.
+# <Location "/REPLACE_WITH_STUDIO_PATH">
+#   Require ip 192.0.2.0/24
+# </Location>
+
+# Rate limiting belongs in mod_evasive/mod_security or the upstream proxy. Suggested
+# edge policy: 20 login requests per IP per 15 minutes and a small concurrent request
+# limit for this prefix. Flask independently rate-limits by IP and username.

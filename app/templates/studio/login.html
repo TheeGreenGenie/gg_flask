@@ -1,0 +1,15 @@
+{% extends "studio/_base.html" %}
+{% block title %}Staff Studio sign in · GG Afrikan Eleganz{% endblock %}
+{% block studio_body %}
+<section class="gg-studio__auth" aria-labelledby="studio-title">
+  <p class="gg-eyebrow">Private staff area</p><h1 id="studio-title">Staff Studio</h1>
+  <p>Enter the username and password the owner gave you. The owner must approve every sign-in.</p>
+  {% if error %}<p class="gg-form-error" role="alert">{{ error }}</p>{% endif %}
+  <form method="post" class="gg-studio__form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Username<input name="username" value="{{ username }}" autocomplete="username" required maxlength="64"></label>
+    <label>Password<input type="password" name="password" autocomplete="current-password" required maxlength="128"></label>
+    <button class="gg-button" type="submit">Ask the owner to approve</button>
+  </form>
+</section>
+{% endblock %}

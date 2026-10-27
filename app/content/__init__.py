@@ -8,8 +8,8 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from werkzeug.wrappers import Response
 
 from app import mail, ratelimit, site_content
+from app.content import blog
 from app.content.data import FAQS, POLICIES
-from app.store.content import POSTS
 
 bp = Blueprint("content", __name__)
 
@@ -79,6 +79,11 @@ def privacy() -> str:
     return _policy("privacy")
 
 
+@bp.get("/review-rules/")
+def posting_rules() -> str:
+    return render_template("content/posting-rules.html")
+
+
 @bp.get("/terms-of-service/")
 def terms() -> str:
     return _policy("terms")
@@ -96,15 +101,14 @@ def returns() -> str:
 
 @bp.get("/blog/<slug>/")
 def post(slug: str) -> str | tuple[str, int]:
-    ordered = list(reversed(POSTS))  # POSTS is newest first; navigate oldest -> newest
-    index = next((i for i, entry in enumerate(ordered) if entry["slug"] == slug), None)
-    if index is None:
+    entry, previous, next_post = blog.public_post(slug)
+    if entry is None:
         return render_template("content/not_found.html"), 404
     return render_template(
         "content/post.html",
-        post=ordered[index],
-        previous_post=ordered[index - 1] if index > 0 else None,
-        next_post=ordered[index + 1] if index + 1 < len(ordered) else None,
+        post=entry,
+        previous_post=previous,
+        next_post=next_post,
     )
 
 

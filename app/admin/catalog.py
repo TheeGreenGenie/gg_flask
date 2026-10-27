@@ -3,24 +3,26 @@
 from __future__ import annotations
 
 import re
-import secrets
-import warnings
-from pathlib import Path
 
-from flask import current_app
-from PIL import Image, UnidentifiedImageError
 from sqlalchemy import select
 from werkzeug.datastructures import FileStorage
 
 from app import cache
 from app.admin import service
 from app.admin.models import AdminUser
-from app.catalog.models import Category, Product, ProductImage, ProductStatus, ProductType, Variant
+from app.catalog import images as image_service
+from app.catalog.models import (
+    Category,
+    Product,
+    ProductImage,
+    ProductStatus,
+    ProductType,
+    SaleUnit,
+    Variant,
+)
 from app.extensions import db
 
 SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-MAX_PIXELS = 36_000_000
-MAX_DIMENSION = 6_000
 
 
 class CatalogError(ValueError):
@@ -38,12 +40,14 @@ def update_product(admin: AdminUser, product: Product, form: dict[str, str]) -> 
     try:
         status = ProductStatus(form.get("status", ""))
         product_type = ProductType(form.get("product_type", ""))
+        sale_unit = SaleUnit(form.get("sale_unit", product.sale_unit))
     except ValueError:
         raise CatalogError("Choose a valid product type and status.") from None
     before = {
         "name": product.name,
         "status": product.status.value,
         "featured": product.featured,
+        "sale_unit": product.sale_unit,
     }
     product.name = name
     product.summary = summary
@@ -51,6 +55,7 @@ def update_product(admin: AdminUser, product: Product, form: dict[str, str]) -> 
     product.status = status
     product.product_type = product_type
     product.featured = form.get("featured") == "1"
+    product.sale_unit = sale_unit.value
     category_ids = _ids(form.get("category_ids", ""))
     categories = db.session.scalars(select(Category).where(Category.id.in_(category_ids))).all()
     if not categories:
@@ -63,7 +68,12 @@ def update_product(admin: AdminUser, product: Product, form: dict[str, str]) -> 
         str(product.id),
         {
             "before": before,
-            "after": {"name": name, "status": status.value, "featured": product.featured},
+            "after": {
+                "name": name,
+                "status": status.value,
+                "featured": product.featured,
+                "sale_unit": product.sale_unit,
+            },
         },
     )
     db.session.commit()
@@ -134,48 +144,10 @@ def update_category(admin: AdminUser, category: Category, form: dict[str, str]) 
 def upload_image(
     admin: AdminUser, product: Product, upload: FileStorage | None, alt: str
 ) -> ProductImage:
-    alt = alt.strip()
-    if not 3 <= len(alt) <= 255:
-        raise CatalogError("Alternative text must be between 3 and 255 characters.")
-    if upload is None or not upload.filename:
-        raise CatalogError("Choose an image to upload.")
     try:
-        upload.stream.seek(0)
-        with warnings.catch_warnings():
-            warnings.simplefilter("error", Image.DecompressionBombWarning)
-            image = Image.open(upload.stream)
-            if image.format not in {"JPEG", "PNG", "WEBP"}:
-                raise CatalogError("Upload a JPEG, PNG, or WebP image.")
-            if (
-                image.width > MAX_DIMENSION
-                or image.height > MAX_DIMENSION
-                or image.width * image.height > MAX_PIXELS
-            ):
-                raise CatalogError("Image dimensions are too large.")
-            image.load()
-    except CatalogError:
-        raise
-    except (
-        UnidentifiedImageError,
-        Image.DecompressionBombError,
-        Image.DecompressionBombWarning,
-        OSError,
-    ):
-        raise CatalogError("The uploaded file is not a safe, readable image.") from None
-
-    processed = image.convert("RGBA" if "A" in image.getbands() else "RGB")
-    processed.thumbnail((2400, 2400), Image.Resampling.LANCZOS)
-    relative = Path("products") / product.slug / "uploads" / f"{secrets.token_hex(12)}.webp"
-    root = Path(current_app.config["MEDIA_ROOT"]).resolve()
-    destination = (root / relative).resolve()
-    if root not in destination.parents:
-        raise CatalogError("Unsafe image destination.")
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    processed.save(destination, "WEBP", quality=88, method=6)
-    record = ProductImage(
-        product=product, path=relative.as_posix(), alt=alt, position=len(product.images)
-    )
-    db.session.add(record)
+        record, destination = image_service.prepare_upload(product, upload, alt)
+    except image_service.ImageError as exc:
+        raise CatalogError(str(exc)) from None
     service.audit(
         admin, "catalog.image.uploaded", "product", str(product.id), {"path": record.path}
     )
@@ -189,16 +161,17 @@ def upload_image(
 
 
 def delete_image(admin: AdminUser, image: ProductImage) -> None:
-    if db.session.scalar(select(Variant.id).where(Variant.image_id == image.id)) is not None:
-        raise CatalogError("This image is assigned to a variant and cannot be removed.")
+    try:
+        image_service.ensure_deletable(image)
+    except image_service.ImageError as exc:
+        raise CatalogError(str(exc)) from None
     path = image.path
     product_id = image.product_id
     db.session.delete(image)
     service.audit(admin, "catalog.image.deleted", "product", str(product_id), {"path": path})
     db.session.commit()
-    root = Path(current_app.config["MEDIA_ROOT"]).resolve()
-    target = (root / path).resolve()
-    if root in target.parents:
+    target = image_service.disk_path(path)
+    if target:
         target.unlink(missing_ok=True)
     cache.bump_catalog_version()
 

@@ -13,6 +13,7 @@
 <div class="gg-container gg-product" data-gg-product itemscope itemtype="https://schema.org/Product">
   <meta itemprop="name" content="{{ product.name }}">
   <meta itemprop="description" content="{{ product.summary or product.name }}">
+  {% if rating_count %}<div itemprop="aggregateRating" itemscope itemtype="https://schema.org/AggregateRating"><meta itemprop="ratingValue" content="{{ rating_average }}"><meta itemprop="reviewCount" content="{{ rating_count }}"></div>{% endif %}
   {% if main_image %}<link itemprop="image" href="{{ media_url(main_image) }}">{% endif %}
   <nav class="gg-breadcrumbs" aria-label="Breadcrumb">
     <ol>
@@ -51,7 +52,7 @@
         <details>
           <summary>Ask a question{{ icon('chevron-down', 16) }}</summary>
           <p>Have a question about this product? We're here to help!</p>
-          <p><a href="/contact-us/">Contact us</a> or email us at <a href="mailto:{{ site.CONTACT_EMAIL }}">{{ site.CONTACT_EMAIL }}</a></p>
+          <p><a href="#reviews">Ask below</a>, <a href="/contact-us/">contact us</a>, or email <a href="mailto:{{ site.CONTACT_EMAIL }}">{{ site.CONTACT_EMAIL }}</a>.</p>
         </details>
       </div>
 
@@ -86,6 +87,21 @@
       <p>See our <a href="/shipping-information/">shipping information</a> and <a href="/returns-exchanges/">returns &amp; exchanges</a> pages for details.</p>
     </section>
   </div>
+
+  <section class="gg-product-posts" id="reviews" aria-labelledby="reviews-title">
+    <header class="gg-product-posts__header"><div><p class="gg-eyebrow">Customer voices</p><h2 id="reviews-title">Reviews &amp; questions</h2>{% if rating_count %}<p><strong>{{ rating_average }} out of 5</strong> from {{ rating_count }} relevant review{{ '' if rating_count == 1 else 's' }}.</p>{% endif %}</div></header>
+    {% if current_user %}
+      <form method="post" action="{{ url_for('reviews.create', slug=product.slug) }}" class="gg-product-posts__form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>Post type<select name="kind" required><option value="review">Review</option><option value="question">Question</option></select></label><label>Star rating<select name="rating"><option value="5">5 · Excellent</option><option value="4">4 · Good</option><option value="3">3 · Okay</option><option value="2">2 · Poor</option><option value="1">1 · Very poor</option></select><small>Used for reviews; ignored for questions.</small></label><label>Title<input name="title" minlength="2" maxlength="160" required></label><label>Your review or question<textarea name="body" minlength="10" maxlength="3000" rows="5" required></textarea></label><p class="gg-form-hint">Keep it about this product. Links, abusive or sexual content, and inappropriate photos are not allowed. Honest negative reviews are welcome. Read the <a href="{{ url_for('content.posting_rules') }}">posting rules</a>.</p><button class="gg-button" type="submit">Post now</button></form>
+    {% else %}<p><a href="{{ url_for('accounts.login', next=url_for('store.product', slug=product.slug) + '#reviews') }}">Sign in</a> to write a review or ask a question.</p>{% endif %}
+    <div class="gg-product-posts__list">
+      {% for post in product_posts %}<article class="gg-product-post{% if post.status.value == 'collapsed' %} gg-product-post--collapsed{% endif %}">
+        {% if post.status.value == 'collapsed' %}<details><summary>These comments may not be relevant to the topic</summary>{% endif %}
+        <header><span class="gg-product-post__kind">{{ post.kind.value|title }}</span>{% if post.rating %}<span aria-label="{{ post.rating }} out of 5 stars">{{ '★' * post.rating }}{{ '☆' * (5 - post.rating) }}</span>{% endif %}{% if post.verified_buyer %}<span class="gg-product-post__verified">Verified buyer</span>{% endif %}<time datetime="{{ post.created_at.date().isoformat() }}">{{ post.created_at.strftime('%B %d, %Y') }}</time></header><h3>{{ post.title }}</h3><p>{{ post.body }}</p>
+        {% for reply in post.replies %}<div class="gg-product-post__reply"><strong>GG Afrikan Eleganz</strong><p>{{ reply.body }}</p></div>{% endfor %}
+        {% if post.status.value == 'collapsed' %}</details>{% endif %}
+      </article>{% else %}<p>No reviews or questions yet. Be the first to share something helpful.</p>{% endfor %}
+    </div>
+  </section>
 
   {% if related %}
     <section class="gg-related" aria-labelledby="related-title" data-gg-carousel>

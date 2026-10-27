@@ -1,0 +1,5 @@
+{% extends "content/_base.html" %}
+{% block title %}Upload Too Large · GG Afrikan Eleganz{% endblock %}
+{% block eyebrow %}Nothing was saved{% endblock %}
+{% block heading %}That file is too large{% endblock %}
+{% block body %}<p>{{ message }}</p><div class="gg-deco-actions"><a class="gg-button gg-button--accent" href="{{ url_for('store.home') }}">Back to the shop</a></div>{% endblock %}

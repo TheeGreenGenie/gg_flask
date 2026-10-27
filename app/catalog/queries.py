@@ -13,7 +13,9 @@ from app.catalog.models import (
     Category,
     Collection,
     Product,
+    ProductImage,
     ProductStatus,
+    ProductType,
     Variant,
     product_categories,
     product_collections,
@@ -157,6 +159,37 @@ def listing(
 def newest(limit: int) -> list[Product]:
     stmt = base_query().order_by(Product.published_at.desc().nulls_last(), Product.id.desc())
     return list(db.session.scalars(stmt.limit(limit)))
+
+
+def _fabrics_with_photos() -> Select[Product]:
+    return base_query().where(
+        Product.product_type == ProductType.FABRIC,
+        exists(select(ProductImage.id).where(ProductImage.product_id == Product.id)),
+    )
+
+
+def newest_fabrics(limit: int) -> list[Product]:
+    """Newest to oldest — the homepage Find Fabrics card cycles through these."""
+    stmt = _fabrics_with_photos().order_by(
+        Product.published_at.desc().nulls_last(), Product.id.desc()
+    )
+    return list(db.session.scalars(stmt.limit(limit)))
+
+
+def priciest_fabrics(limit: int) -> list[Product]:
+    """Most expensive first (by highest active variant price) — the homepage Wishlist card."""
+    top_price = (
+        select(func.max(Variant.price_cents))
+        .where(Variant.product_id == Product.id, Variant.active.is_(True))
+        .scalar_subquery()
+    )
+    stmt = _fabrics_with_photos().order_by(top_price.desc(), Product.id)
+    return list(db.session.scalars(stmt.limit(limit)))
+
+
+def random_fabric() -> Product | None:
+    """A different print on every load (homepage 3D Models card)."""
+    return db.session.scalar(_fabrics_with_photos().order_by(func.random()).limit(1))
 
 
 def featured(limit: int) -> list[Product]:

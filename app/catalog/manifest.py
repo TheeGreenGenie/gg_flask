@@ -26,6 +26,7 @@ from app.catalog.models import (
     ProductImage,
     ProductStatus,
     ProductType,
+    SaleUnit,
     Variant,
     combination_key,
 )
@@ -41,7 +42,7 @@ MAX_CATEGORY_DEPTH = 2  # D-003
 PRODUCT_KEYS = {
     "slug", "name", "type", "status", "featured", "published", "legacy_wp_id",
     "summary", "description", "categories", "collections", "images", "options", "variants",
-    "colors", "autoname",
+    "colors", "autoname", "sale_unit",
 }  # fmt: skip
 VARIANT_KEYS = {
     "sku", "options", "price_cents", "compare_at_cents", "stock", "track_inventory",
@@ -146,6 +147,7 @@ def validate(data: dict[str, Any], assets_dir: Path) -> list[str]:
             err(f"{loc}: name is required")
         _check_enum(p.get("type"), ProductType, f"{loc}.type", err)
         _check_enum(p.get("status", "draft"), ProductStatus, f"{loc}.status", err)
+        _check_enum(p.get("sale_unit", "fixed_bundle"), SaleUnit, f"{loc}.sale_unit", err)
         colors = p.get("colors") or []
         if not isinstance(colors, list) or any(c not in COLOR_NAMES for c in colors):
             err(f"{loc}.colors: must be a list of {sorted(COLOR_NAMES)}")
@@ -332,6 +334,7 @@ def _load_product(
     product.product_type = ProductType(p["type"])
     product.status = ProductStatus(p.get("status", "draft"))
     product.featured = bool(p.get("featured", False))
+    product.sale_unit = SaleUnit(p.get("sale_unit", "fixed_bundle")).value
     product.colors = ",".join(p.get("colors") or [])
     product.summary = (p.get("summary") or "").strip()
     product.description = (p.get("description") or "").strip()

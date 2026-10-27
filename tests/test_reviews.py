@@ -1,0 +1,184 @@
+from __future__ import annotations
+
+from datetime import timedelta
+
+import pytest
+from flask import Flask
+from sqlalchemy import select
+
+from app.accounts.models import User
+from app.catalog.models import Product, utcnow
+from app.extensions import db
+from app.reviews import service as reviews
+from app.reviews.models import ModerationRemoval, PostStatus, ProductPost
+from app.studio import service as studio
+from app.studio.models import StudioAudit
+
+
+def _customer(email: str = "reader@example.com") -> User:
+    user = User(
+        email=email,
+        password_hash="not-used-in-service-tests",  # noqa: S106 - no login in service tests
+        first_name="Reader",
+    )
+    db.session.add(user)
+    db.session.commit()
+    return user
+
+
+def _product() -> Product:
+    return db.session.scalar(select(Product).order_by(Product.id))  # type: ignore[return-value]
+
+
+def _form(**changes: str) -> dict[str, str]:
+    values = {
+        "kind": "review",
+        "rating": "4",
+        "title": "Beautiful fabric",
+        "body": "The cotton fabric has a beautiful color and feels soft.",
+    }
+    values.update(changes)
+    return values
+
+
+def test_relevant_review_is_public_and_counted(catalog_app: Flask) -> None:
+    with catalog_app.test_request_context("/", headers={"User-Agent": "review-test"}):
+        product = _product()
+        post = reviews.create_post(_customer(), product, _form())
+
+        assert post.status == PostStatus.VISIBLE
+        assert reviews.public_posts(product) == [post]
+        assert reviews.rating_summary(product) == (4.0, 1)
+
+
+def test_negative_relevant_review_is_not_hidden(catalog_app: Flask) -> None:
+    with catalog_app.test_request_context("/"):
+        post = reviews.create_post(
+            _customer(),
+            _product(),
+            _form(
+                rating="1",
+                title="Poor fabric quality",
+                body="The fabric color and quality were poor for this price.",
+            ),
+        )
+
+        assert post.status == PostStatus.VISIBLE
+        assert post.rating == 1
+
+
+def test_off_topic_post_is_collapsed_and_excluded_from_rating(catalog_app: Flask) -> None:
+    with catalog_app.test_request_context("/"):
+        product = _product()
+        post = reviews.create_post(
+            _customer(),
+            product,
+            _form(title="Unrelated thought", body="Tomorrow perhaps everybody visits elsewhere."),
+        )
+
+        assert post.status == PostStatus.COLLAPSED
+        assert reviews.rating_summary(product) == (0.0, 0)
+
+
+def test_links_duplicates_and_invalid_rating_are_rejected(catalog_app: Flask) -> None:
+    with catalog_app.test_request_context("/"):
+        user = _customer()
+        product = _product()
+        with pytest.raises(reviews.ReviewError, match="Links are not allowed"):
+            reviews.create_post(user, product, _form(body="See https://example.com for fabric."))
+        with pytest.raises(reviews.ReviewError, match="star rating"):
+            reviews.create_post(user, product, _form(rating="9"))
+        reviews.create_post(user, product, _form())
+        with pytest.raises(reviews.ReviewError, match="already submitted"):
+            reviews.create_post(user, product, _form())
+
+
+def test_obscenity_is_removed_and_private_copy_expires(catalog_app: Flask) -> None:
+    with catalog_app.test_request_context("/"):
+        with pytest.raises(reviews.ReviewError, match="posting rules"):
+            reviews.create_post(
+                _customer(),
+                _product(),
+                _form(title="Fabric", body="This fuuuuck fabric message should be removed."),
+            )
+
+        post = db.session.scalar(select(ProductPost))
+        removal = db.session.scalar(select(ModerationRemoval))
+        assert post is not None and post.status == PostStatus.REMOVED
+        assert post.title == "" and post.body == ""
+        assert removal is not None and "fuuuuck" in removal.original_body
+        assert removal.expires_at - removal.created_at >= timedelta(days=14)
+        assert reviews.public_posts(_product()) == []
+
+
+def test_zero_retention_discards_removed_text(catalog_app: Flask) -> None:
+    catalog_app.config["MODERATION_RETENTION_DAYS"] = 0
+    with catalog_app.test_request_context("/"):
+        with pytest.raises(reviews.ReviewError):
+            reviews.create_post(
+                _customer(),
+                _product(),
+                _form(title="Fabric", body="This shit fabric message should be removed."),
+            )
+        assert db.session.scalar(select(ModerationRemoval)) is None
+
+
+def test_expired_private_text_is_purged(catalog_app: Flask) -> None:
+    with catalog_app.test_request_context("/"):
+        with pytest.raises(reviews.ReviewError):
+            reviews.create_post(
+                _customer(),
+                _product(),
+                _form(title="Fabric", body="This shit fabric message should be removed."),
+            )
+        removal = db.session.scalar(select(ModerationRemoval))
+        assert removal is not None
+        removal.expires_at = utcnow() - timedelta(seconds=1)
+        db.session.commit()
+
+        assert reviews.purge_expired() == 1
+        assert db.session.scalar(select(ModerationRemoval)) is None
+
+
+def test_support_can_reply_and_override_relevance(catalog_app: Flask) -> None:
+    with catalog_app.test_request_context("/"):
+        post = reviews.create_post(
+            _customer(),
+            _product(),
+            _form(title="Different subject", body="Tomorrow perhaps everybody visits elsewhere."),
+        )
+        staff = studio.create_user("supporter", "A-strong-test-password!", "support")
+
+        studio.moderate_post(staff, post, "relevant")
+        reply = studio.reply_to_post(staff, post, "Thanks for sharing your experience.")
+
+        assert post.status == PostStatus.VISIBLE
+        assert post.staff_relevance_override is True
+        assert reply.body.startswith("Thanks")
+        assert db.session.scalar(
+            select(StudioAudit).where(StudioAudit.action == "studio.community.replied")
+        )
+
+
+def test_storefront_shows_collapsed_notice(catalog_app: Flask) -> None:
+    with catalog_app.test_request_context("/"):
+        product = _product()
+        reviews.create_post(
+            _customer(),
+            product,
+            _form(title="Different subject", body="Tomorrow perhaps everybody visits elsewhere."),
+        )
+        slug = product.slug
+
+    response = catalog_app.test_client().get(f"/product/{slug}/")
+    assert response.status_code == 200
+    assert b"These comments may not be relevant to the topic" in response.data
+
+
+def test_posting_rules_and_privacy_disclose_moderation(client) -> None:
+    rules = client.get("/review-rules/")
+    privacy = client.get("/privacy-policy/")
+    assert rules.status_code == 200
+    assert b"Positive and negative opinions are treated the same" in rules.data
+    assert privacy.status_code == 200
+    assert b"Reviews, questions, and moderation" in privacy.data

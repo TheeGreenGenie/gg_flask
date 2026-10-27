@@ -1,0 +1,39 @@
+# systemd unit for the GG Afrikan Eleganz Flask app (gunicorn behind Apache).
+# Install: sudo cp deploy/gg-flask.service /etc/systemd/system/ && sudo systemctl daemon-reload
+#          sudo systemctl enable --now gg-flask
+# Paths assume the code lives in /srv/gg_flask and secrets in /etc/gg-flask/env (see DEPLOY.md).
+
+[Unit]
+Description=GG Afrikan Eleganz storefront (gunicorn)
+After=network-online.target postgresql.service redis-server.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ggflask
+Group=ggflask
+WorkingDirectory=/srv/gg_flask
+# KEY=value lines, readable only by root and ggflask (chmod 640, owner root:ggflask).
+EnvironmentFile=/etc/gg-flask/env
+# Listen on localhost only; Apache is the public front door. 3 workers suits a small VPS
+# (rule of thumb: 2 x CPU cores + 1).
+ExecStart=/srv/gg_flask/.venv/bin/gunicorn --bind 127.0.0.1:8000 --workers 3 \
+    --timeout 30 --access-logfile - --error-logfile - wsgi:app
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=3
+
+# Hardening: the app may only write to its instance folder (media uploads).
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/gg_flask/instance
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target

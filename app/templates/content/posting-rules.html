@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Review &amp; Question Rules | {{ site.STORE_NAME }}{% endblock %}
+{% block content %}
+<main class="gg-policy">
+  <header class="gg-policy__hero"><p class="gg-eyebrow">Community guidelines</p><h1>Review &amp; question rules</h1><p>Share honest, useful experiences and questions about the product.</p></header>
+  <section class="gg-policy__body">
+    <h2>What belongs here</h2>
+    <p>Product quality, colour, pattern, sizing, fabric, packaging, delivery, value, and questions that help someone understand the item are welcome. Positive and negative opinions are treated the same.</p>
+    <h2>What is not allowed</h2>
+    <p>Do not post links, repeated messages, harassment, obscenity, sexual content, private information, advertising, or content unrelated to the product. Review photos, once enabled, must be appropriate for a general audience.</p>
+    <h2>How moderation works</h2>
+    <p>Automated checks remove prohibited content and collapse posts that may be off topic. A collapsed post remains available behind a notice. Store staff can correct a false positive, hide or restore a post, and reply publicly as GG Afrikan Eleganz.</p>
+    <h2>Questions or corrections</h2>
+    <p>If you believe a post was handled incorrectly, use the <a href="{{ url_for('content.contact') }}">Contact page</a>. See the <a href="{{ url_for('content.privacy') }}">Privacy Policy</a> for information about moderation records.</p>
+  </section>
+</main>
+{% endblock %}

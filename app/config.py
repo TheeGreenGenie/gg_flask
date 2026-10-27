@@ -55,6 +55,14 @@ class BaseConfig:
     # ends with the browser session.
     PERMANENT_SESSION_LIFETIME = timedelta(days=30)
     MAIL_BACKEND: str | None = None  # see app/mail.py
+    # SMTP works with any transactional provider (Postmark, SES, SendGrid, Workspace, own server).
+    MAIL_FROM: str | None = None  # e.g. "GG Afrikan Eleganz <orders@ggafrikaneleganz.com>"
+    MAIL_REPLY_TO: str | None = None
+    SMTP_HOST: str | None = None
+    SMTP_PORT = 587
+    SMTP_USERNAME: str | None = None
+    SMTP_PASSWORD: str | None = None
+    SMTP_SECURITY = "starttls"  # starttls (port 587) | ssl (port 465)
     SUPPORTED_COUNTRIES: tuple[str, ...] = ()
     FLAT_SHIPPING_CENTS: int | None = None
     # Lower rate for Philadelphia delivery addresses (owner, 2026-10-26). Unset = flat rate.
@@ -86,6 +94,20 @@ class BaseConfig:
     MAILCHIMP_LIST_ID: str | None = None
     APPLE_PAY_DOMAIN_ASSOCIATION: str | None = None
 
+    # Staff Studio. The private path must be supplied by the environment in
+    # production and is deliberately not linked from the public storefront.
+    STUDIO_PATH: str | None = None
+    STUDIO_APPROVAL_BACKEND = "console"
+    STUDIO_APPROVAL_WEBHOOK_URL: str | None = None
+    STUDIO_NTFY_SERVER = "https://ntfy.sh"
+    STUDIO_NTFY_TOPIC: str | None = None
+    STUDIO_NTFY_TOKEN: str | None = None
+    STUDIO_COOKIE_NAME = "gg_studio"
+    # None means removed text is discarded immediately; owner must explicitly
+    # choose a retention period before production moderation begins.
+    MODERATION_RETENTION_DAYS: int | None = None
+    STUDIO_USERS_FILE = "config/studio_users.json"
+
     WTF_CSRF_TIME_LIMIT = 3600
     MAX_CONTENT_LENGTH = 2 * 1024 * 1024  # request bodies; uploads get their own path later
 
@@ -114,11 +136,33 @@ class BaseConfig:
         self.PAYPAL_CLIENT_SECRET = _env("PAYPAL_CLIENT_SECRET")
         self.PAYPAL_WEBHOOK_ID = _env("PAYPAL_WEBHOOK_ID")
         self.PAYPAL_API_BASE = _env("PAYPAL_API_BASE", self.PAYPAL_API_BASE) or self.PAYPAL_API_BASE
+        self.MAIL_BACKEND = _env("MAIL_BACKEND") or self.MAIL_BACKEND
+        self.MAIL_FROM = _env("MAIL_FROM")
+        self.MAIL_REPLY_TO = _env("MAIL_REPLY_TO")
+        self.SMTP_HOST = _env("SMTP_HOST")
+        self.SMTP_PORT = _env_int("SMTP_PORT", self.SMTP_PORT)
+        self.SMTP_USERNAME = _env("SMTP_USERNAME")
+        self.SMTP_PASSWORD = _env("SMTP_PASSWORD")
+        self.SMTP_SECURITY = (_env("SMTP_SECURITY") or self.SMTP_SECURITY).lower()
         self.ORDER_NOTIFICATION_EMAIL = _env("ORDER_NOTIFICATION_EMAIL")
         self.MAILCHIMP_API_KEY = _env("MAILCHIMP_API_KEY")
         self.MAILCHIMP_SERVER_PREFIX = _env("MAILCHIMP_SERVER_PREFIX")
         self.MAILCHIMP_LIST_ID = _env("MAILCHIMP_LIST_ID")
         self.APPLE_PAY_DOMAIN_ASSOCIATION = _env("APPLE_PAY_DOMAIN_ASSOCIATION")
+        self.STUDIO_PATH = _env("STUDIO_PATH")
+        self.STUDIO_APPROVAL_BACKEND = (
+            _env("STUDIO_APPROVAL_BACKEND", self.STUDIO_APPROVAL_BACKEND) or "console"
+        )
+        self.STUDIO_APPROVAL_WEBHOOK_URL = _env("STUDIO_APPROVAL_WEBHOOK_URL")
+        self.STUDIO_NTFY_SERVER = (
+            _env("STUDIO_NTFY_SERVER", self.STUDIO_NTFY_SERVER) or self.STUDIO_NTFY_SERVER
+        )
+        self.STUDIO_NTFY_TOPIC = _env("STUDIO_NTFY_TOPIC")
+        self.STUDIO_NTFY_TOKEN = _env("STUDIO_NTFY_TOKEN")
+        self.MODERATION_RETENTION_DAYS = _env_optional_int("MODERATION_RETENTION_DAYS")
+        self.STUDIO_USERS_FILE = (
+            _env("STUDIO_USERS_FILE", self.STUDIO_USERS_FILE) or self.STUDIO_USERS_FILE
+        )
         media_root = _env("MEDIA_ROOT")
         if media_root:  # otherwise the app uses <instance>/media
             self.MEDIA_ROOT = media_root
@@ -142,6 +186,7 @@ class DevelopmentConfig(BaseConfig):
             self.SQLALCHEMY_DATABASE_URI or "postgresql+psycopg://gg:gg@localhost:55432/gg_site"
         )
         self.REDIS_URL = self.REDIS_URL or "redis://localhost:6379/0"
+        self.STUDIO_PATH = self.STUDIO_PATH or "studio-local-development-only"
 
 
 class TestingConfig(BaseConfig):
@@ -154,12 +199,15 @@ class TestingConfig(BaseConfig):
     def __init__(self) -> None:
         super().__init__()
         self.SECRET_KEY = "test-only-not-secret"  # noqa: S105
+        self.MAIL_BACKEND = "memory"  # never send real email from tests, whatever the shell says
         self.SQLALCHEMY_DATABASE_URI = _env("TEST_DATABASE_URL") or "sqlite:///:memory:"
         self.REDIS_URL = _env("TEST_REDIS_URL")
         self.SUPPORTED_COUNTRIES = ("US",)
         self.FLAT_SHIPPING_CENTS = 799
         self.LOCAL_SHIPPING_CENTS = 500
         self.TAX_BACKEND = "none"
+        self.STUDIO_PATH = "studio-testing-private-path"
+        self.MODERATION_RETENTION_DAYS = 15
 
 
 class ProductionConfig(BaseConfig):
@@ -186,8 +234,34 @@ class ProductionConfig(BaseConfig):
             raise ConfigError("TAX_BACKEND must be 'stripe' or 'none'")
         if self.SHIPPING_BACKEND not in ("flat", "shippo"):
             raise ConfigError("SHIPPING_BACKEND must be 'flat' or 'shippo'")
+        if self.MAIL_BACKEND not in (None, "smtp"):
+            # console/memory would print reset links and order details into server logs.
+            raise ConfigError("MAIL_BACKEND must be 'smtp' (or unset) in production")
+        if self.MAIL_BACKEND == "smtp":
+            if not self.SMTP_HOST or not self.MAIL_FROM:
+                raise ConfigError("MAIL_BACKEND=smtp needs SMTP_HOST and MAIL_FROM")
+            if self.SMTP_SECURITY not in ("starttls", "ssl"):
+                raise ConfigError("SMTP_SECURITY must be 'starttls' or 'ssl'")
         if self.GA4_MEASUREMENT_ID and not self.GA4_MEASUREMENT_ID.startswith("G-"):
             raise ConfigError("GA4_MEASUREMENT_ID must look like G-XXXXXXXXXX")
+        if self.STUDIO_PATH is not None:
+            path = self.STUDIO_PATH.strip("/")
+            if len(path) < 24 or not all(char.isalnum() or char in "-_" for char in path):
+                raise ConfigError("STUDIO_PATH must be a 24+ character URL-safe path segment")
+        if self.STUDIO_APPROVAL_BACKEND not in {"console", "webhook", "ntfy"}:
+            raise ConfigError("STUDIO_APPROVAL_BACKEND must be 'console', 'webhook', or 'ntfy'")
+        if self.STUDIO_APPROVAL_BACKEND == "webhook" and not self.STUDIO_APPROVAL_WEBHOOK_URL:
+            raise ConfigError("STUDIO_APPROVAL_WEBHOOK_URL is required for webhook approval")
+        if self.STUDIO_APPROVAL_WEBHOOK_URL and not self.STUDIO_APPROVAL_WEBHOOK_URL.startswith(
+            "https://"
+        ):
+            raise ConfigError("STUDIO_APPROVAL_WEBHOOK_URL must use HTTPS")
+        if self.STUDIO_APPROVAL_BACKEND == "ntfy" and not self.STUDIO_NTFY_TOPIC:
+            raise ConfigError("STUDIO_NTFY_TOPIC is required for ntfy approval")
+        if not self.STUDIO_NTFY_SERVER.startswith("https://"):
+            raise ConfigError("STUDIO_NTFY_SERVER must use HTTPS")
+        if self.MODERATION_RETENTION_DAYS not in {None, 0, 15}:
+            raise ConfigError("MODERATION_RETENTION_DAYS must be 0 or 15")
 
 
 CONFIGS: dict[str, type[BaseConfig]] = {

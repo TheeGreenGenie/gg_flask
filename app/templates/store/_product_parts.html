@@ -35,6 +35,7 @@
           {{ chosen.price_cents|money }}
         {% endif %}
       </p>
+      <p class="gg-product__unit">Price per {{ product.sale_unit_label }}.</p>
       {% if product.summary %}<p class="gg-product__lede">{{ product.summary }}</p>{% endif %}
 
       <form class="gg-buy" data-gg-buy method="post" action="{{ url_for('store.cart_add') }}">
@@ -82,7 +83,7 @@
         <div class="gg-buy__row">
           <div class="gg-qty" data-gg-qty>
             <button type="button" class="gg-qty__btn" data-gg-qty-step="-1" aria-label="Decrease quantity">{{ icon('minus', 16) }}</button>
-            <label class="gg-visually-hidden" for="{{ pfx }}qty">Quantity</label>
+            <label class="gg-visually-hidden" for="{{ pfx }}qty">Quantity in {{ product.sale_unit_label }}s</label>
             <input id="{{ pfx }}qty" data-gg-qty-input name="quantity" type="number" inputmode="numeric" min="1" max="{{ [stock, 99]|min if stock > 0 else 1 }}" value="1" required>
             <button type="button" class="gg-qty__btn" data-gg-qty-step="1" aria-label="Increase quantity">{{ icon('plus', 16) }}</button>
           </div>

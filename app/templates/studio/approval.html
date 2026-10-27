@@ -1,0 +1,12 @@
+{% extends "studio/_base.html" %}
+{% block title %}Approve Studio sign-in · GG Afrikan Eleganz{% endblock %}
+{% block studio_body %}
+<section class="gg-studio__auth">
+  <p class="gg-eyebrow">Owner confirmation</p><h1>Staff sign-in request</h1>
+  {% if error %}<p class="gg-form-error" role="alert">{{ error }}</p>{% endif %}
+  <dl class="gg-studio__facts"><div><dt>Staff member</dt><dd>{{ record.user.username }}</dd></div><div><dt>Matching letters</dt><dd>{{ record.match_code }}</dd></div><div><dt>Browser</dt><dd>{{ record.user_agent or 'Unknown' }}</dd></div><div><dt>Address</dt><dd>{{ record.ip_address or 'Unknown' }}</dd></div></dl>
+  {% if record.status.value != 'pending' %}<p>This request is {{ record.status.value }} and cannot be used again.</p>
+  {% elif not is_owner %}<p>Sign in to the technical owner account with two-factor authentication before deciding this request. Production will replace this interim gate with the owner's phone passkey.</p><a class="gg-button" href="{{ url_for('admin.login') }}">Owner sign in</a>
+  {% else %}<form method="post" class="gg-studio__decisions"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="gg-button" name="decision" value="approve" type="submit">Approve</button><button class="gg-button gg-button--outline" name="decision" value="deny" type="submit">Deny</button></form>{% endif %}
+</section>
+{% endblock %}

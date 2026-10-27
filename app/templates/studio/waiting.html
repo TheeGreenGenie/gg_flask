@@ -1,0 +1,14 @@
+{% extends "studio/_base.html" %}
+{% block title %}Waiting for approval · Staff Studio{% endblock %}
+{% block studio_body %}
+<section class="gg-studio__auth" aria-live="polite">
+  <p class="gg-eyebrow">Owner approval</p><h1>Check the matching letters</h1>
+  {% if error %}<p class="gg-form-error" role="alert">{{ error }}</p>{% endif %}
+  {% if record.status.value == 'pending' %}
+    <p class="gg-studio__match" aria-label="Matching letters {{ record.match_code }}">{{ record.match_code }}</p>
+    <p>Tell the owner these letters only if they match the notification on the owner's phone. This page will continue automatically.</p>
+  {% elif record.status.value == 'denied' %}<h2>Sign-in denied</h2><p>The owner did not approve this attempt.</p><a href="{{ url_for('studio.login') }}">Return to sign in</a>
+  {% elif record.status.value == 'expired' %}<h2>Request expired</h2><p>For safety, approval requests last two minutes.</p><a href="{{ url_for('studio.login') }}">Start again</a>
+  {% else %}<p>This request has already been used.</p><a href="{{ url_for('studio.login') }}">Return to sign in</a>{% endif %}
+</section>
+{% endblock %}

@@ -26,10 +26,12 @@ from app.assets import media_version
 from app.cart import service as cart_service
 from app.catalog import queries
 from app.catalog.models import Product
+from app.content import blog
 from app.extensions import csrf, db
 from app.orders import payments
 from app.orders import service as order_service
 from app.orders.models import Order, PaymentProvider
+from app.reviews import service as review_service
 from app.store import content
 from app.templating import money
 
@@ -68,7 +70,7 @@ def home() -> str:
     return render_template(
         "store/home.html",
         hero_slides=content.HERO_SLIDES,
-        opening_cards=content.OPENING_CARDS,
+        opening_cards=[(card, _card_photos(card.get("photos"))) for card in content.OPENING_CARDS],
         new_products=queries.newest(4),
         featured_products=queries.featured(4),
         # Sections skip categories that are not in the catalog (e.g. removed from the manifest).
@@ -83,8 +85,20 @@ def home() -> str:
             for key, label, title, slugs in content.SHOP_GROUPS
         ],
         counts=counts,
-        posts=content.POSTS,
+        posts=blog.public_posts(),
     )
+
+
+def _card_photos(kind: str | None) -> list[Product]:
+    """Products whose cover photos fill a homepage card (see content.OPENING_CARDS)."""
+    if kind == "newest":
+        return queries.newest_fabrics(content.CARD_CYCLE_LENGTH)
+    if kind == "priciest":
+        return queries.priciest_fabrics(content.CARD_CYCLE_LENGTH)
+    if kind == "random":
+        pick = queries.random_fabric()
+        return [pick] if pick else []
+    return []
 
 
 def _listing_args() -> dict[str, Any]:
@@ -155,12 +169,16 @@ def product(slug: str) -> str:
     item = queries.product_by_slug(slug)
     if item is None:
         abort(404)
+    rating_average, rating_count = review_service.rating_summary(item)
     return render_template(
         "store/product.html",
         product=item,
         category=item.primary_category,
         gallery=_gallery(item),
         related=queries.related(item),
+        product_posts=review_service.public_posts(item),
+        rating_average=rating_average,
+        rating_count=rating_count,
     )
 
 

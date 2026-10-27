@@ -1,0 +1,21 @@
+# Scheduled jobs for the GG Afrikan Eleganz Flask app.
+# Install: sudo cp deploy/gg-flask.cron /etc/cron.d/gg-flask && sudo chmod 644 /etc/cron.d/gg-flask
+# Check:   journalctl -t gg-flask-job --since today      (or grep gg-flask-job /var/log/syslog)
+# Every command is idempotent; run-job.sh skips a run if the previous one is still going.
+SHELL=/bin/sh
+PATH=/usr/local/bin:/usr/bin:/bin
+
+# Every minute: start/end scheduled Studio sales at their exact times.
+* * * * *    ggflask  /srv/gg_flask/deploy/run-job.sh studio sync-sales
+# Every minute: publish journal posts scheduled for later.
+* * * * *    ggflask  /srv/gg_flask/deploy/run-job.sh studio sync-blog
+# Every 15 minutes: release stock held by abandoned checkouts.
+*/15 * * * * ggflask  /srv/gg_flask/deploy/run-job.sh orders release-expired-holds
+# Daily 03:10: delete wishlists nobody has touched for 90 days.
+10 3 * * *   ggflask  /srv/gg_flask/deploy/run-job.sh wishlist-prune
+# Daily 03:20: permanently delete expired private copies of auto-removed review text.
+20 3 * * *   ggflask  /srv/gg_flask/deploy/run-job.sh reviews purge-removed
+# Daily 07:30: email the owner the Studio summary (needs MAIL_BACKEND=smtp).
+30 7 * * *   ggflask  /srv/gg_flask/deploy/run-job.sh studio daily-summary
+# Nightly 02:30: database + media backup (see DEPLOY.md "Backups"; runs as root for pg_dump access).
+30 2 * * *   root     /srv/gg_flask/deploy/backup.sh

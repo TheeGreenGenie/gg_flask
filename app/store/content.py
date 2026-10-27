@@ -11,13 +11,21 @@ IMG = "img/home/"
 
 HERO_SLIDES: Final = (IMG + "hero-1.webp", IMG + "hero-2.webp", IMG + "hero-3.webp")
 
+# "Explore the atelier" cards (owner, 2026-10-27). A card links to a category or a fixed
+# URL; one with neither is shown as "Coming soon". `photos` swaps the fixed image for product
+# photos: "newest" (cycles newest to oldest), "priciest" (cycles most expensive first) or
+# "random" (one random print per page load). `image` is the fallback when there are none.
 OPENING_CARDS: Final = (
+    {"title": "Find Fabrics", "status": "Start swiping", "image": IMG + "open-find-fabrics.webp",
+     "url": "/find-fabrics/", "photos": "newest"},
+    {"title": "Wishlist", "status": "Your saved prints", "image": IMG + "open-wishlist.webp",
+     "url": "/wishlist/", "photos": "priciest"},
     {"title": "African Prints", "status": "Shop now", "image": IMG + "open-african-prints.webp",
      "category": "fabrics"},
-    {"title": "Bags & Shoes", "status": "Coming soon", "image": IMG + "open-bags-shoes.webp"},
-    {"title": "Custom Sewing", "status": "Coming soon", "image": IMG + "open-custom-sewing.webp"},
-    {"title": "Beauty & Lifestyle", "status": "Coming soon", "image": IMG + "open-beauty.webp"},
+    {"title": "3D Models", "status": "Coming soon", "image": IMG + "open-3d-models.webp",
+     "photos": "random"},
 )  # fmt: skip
+CARD_CYCLE_LENGTH: Final = 8  # photos per cycling card
 
 STORY_COLLECTIONS: Final = (
     {

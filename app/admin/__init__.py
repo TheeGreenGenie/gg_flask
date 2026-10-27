@@ -15,7 +15,15 @@ from app.admin import catalog as catalog_service
 from app.admin import orders as order_service
 from app.admin import service
 from app.admin.models import AdminRole, AdminUser
-from app.catalog.models import Category, Product, ProductImage, ProductStatus, ProductType, Variant
+from app.catalog.models import (
+    Category,
+    Product,
+    ProductImage,
+    ProductStatus,
+    ProductType,
+    SaleUnit,
+    Variant,
+)
 from app.extensions import db
 from app.orders.models import Coupon, DiscountType, Order, OrderStatus
 
@@ -135,6 +143,7 @@ def product_edit(product_id: int) -> str | Response:
         categories=categories,
         statuses=ProductStatus,
         product_types=ProductType,
+        sale_units=SaleUnit,
         error=error,
     )
 

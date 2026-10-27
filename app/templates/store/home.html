@@ -3,13 +3,17 @@
 {% block scripts %}<script src="{{ url_for('static', filename='js/home.js') }}" defer></script>{% endblock %}
 {% block body_class %}gg-body--home{% endblock %}
 {% block content %}
+{#- Every section is a framed "slide" exactly one screen tall (below the header); see the
+    "Slide deck" part of home.css. Keep each slide's content short enough to fit. -#}
 {%- set sections = [
   ('home-hero', '01', 'Welcome'),
-  ('home-arrivals', '02', 'New arrivals'),
-  ('home-story', '03', 'Our story'),
-  ('home-categories', '04', 'Categories'),
-  ('home-shop', '05', 'Shop your way'),
-  ('home-journal', '06', 'Journal'),
+  ('home-explore', '02', 'Explore'),
+  ('home-arrivals', '03', 'New arrivals'),
+  ('home-story', '04', 'Our story'),
+  ('home-collections', '05', 'Collections'),
+  ('home-categories', '06', 'Categories'),
+  ('home-shop', '07', 'Shop your way'),
+  ('home-journal', '08', 'Journal'),
 ] -%}
 <div class="gg-home" data-gg-home>
   <nav class="gg-home-nav" aria-label="Homepage sections">
@@ -25,25 +29,29 @@
     </ol>
   </nav>
 
-  {# 01 — Hero and opening cards #}
+  {# 01 — Hero #}
   <section id="home-hero" class="gg-home__section gg-home-hero" aria-labelledby="home-hero-title" data-gg-section>
-    <div class="gg-home-hero__stage">
+    <div class="gg-slide gg-home-hero__stage">
       {# Image slider (#17): decorative photos crossfade behind the headline; first slide only without JS. #}
       <div class="gg-home-hero__media" aria-hidden="true" data-gg-slider>
         {% for img in hero_slides %}
           <img class="gg-home-hero__image{% if loop.first %} is-active{% endif %}" src="{{ url_for('static', filename=img) }}" width="1920" height="1080" alt=""{% if loop.first %} fetchpriority="high"{% else %} loading="lazy"{% endif %} decoding="async" data-gg-slide>
         {% endfor %}
       </div>
+      <div class="gg-home-hero__shade" aria-hidden="true"></div>
       <div class="gg-home-hero__slider-controls" data-gg-slider-controls hidden>
-        <button type="button" class="gg-home-hero__pause" data-gg-slider-pause aria-pressed="false">Pause slideshow</button>
         <div class="gg-home-hero__dots" role="group" aria-label="Choose slide">
           {% for img in hero_slides %}
             <button type="button" data-gg-slider-dot="{{ loop.index0 }}" aria-label="Show photo {{ loop.index }} of {{ hero_slides|length }}"{% if loop.first %} aria-current="true"{% endif %}></button>
           {% endfor %}
         </div>
+        <button type="button" class="gg-home-hero__pause" data-gg-slider-pause aria-pressed="false">
+          <svg class="gg-home-hero__pause-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+          <svg class="gg-home-hero__play-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M8 5l11 7-11 7z"/></svg>
+          <span class="gg-visually-hidden" data-gg-slider-pause-label>Pause slideshow</span>
+        </button>
       </div>
-      <div class="gg-home-hero__shade" aria-hidden="true"></div>
-      <div class="gg-home__inner gg-home-hero__content">
+      <div class="gg-slide__body gg-home-hero__content">
         <p class="gg-home__eyebrow">Authentic prints. Contemporary expression.</p>
         <h1 id="home-hero-title">Celebrate culture through bold African design</h1>
         <p class="gg-home-hero__lede">Discover vibrant fabrics and considered pieces selected to bring heritage, color, and confidence into everyday life.</p>
@@ -53,71 +61,85 @@
         </div>
       </div>
     </div>
+  </section>
 
-    <div class="gg-home__inner gg-home-hero__browse">
-      <header class="gg-home-heading gg-home-heading--compact">
-        <p class="gg-home__eyebrow">Explore the atelier</p>
-        <h2>Start with what inspires you</h2>
-      </header>
-      <div class="gg-home-hero__cards">
-        {% for card in opening_cards %}
-          {% set tag = 'a' if card.category else 'article' %}
-          <{{ tag }} class="gg-home-opening-card gg-home-card{% if not card.category %} gg-home-opening-card--soon{% endif %}"{% if card.category %} href="{{ url_for('store.category', slug=card.category) }}"{% endif %}>
-            <div class="gg-home-opening-card__media" aria-hidden="true">
-              <img class="gg-home-opening-card__image" src="{{ url_for('static', filename=card.image) }}" width="800" height="525" alt="" loading="lazy" decoding="async">
-            </div>
-            <div class="gg-home-opening-card__shade" aria-hidden="true"></div>
-            <div class="gg-home-opening-card__body">
-              <h3>{{ card.title }}</h3>
-              <span class="gg-home-opening-card__status">{{ card.status }}</span>
-            </div>
-          </{{ tag }}>
-        {% endfor %}
+  {# 02 — Explore the atelier #}
+  <section id="home-explore" class="gg-home__section gg-home-explore" aria-labelledby="home-explore-title" data-gg-section>
+    <div class="gg-slide">
+      <div class="gg-slide__body">
+        <header class="gg-home-heading">
+          <p class="gg-home__eyebrow">Explore the atelier</p>
+          <h2 id="home-explore-title">Start with what inspires you</h2>
+        </header>
+        <div class="gg-home-hero__cards gg-slide__fill">
+          {% for card, photos in opening_cards %}
+            {% set href = card.url or (url_for('store.category', slug=card.category) if card.category else '') %}
+            {% set tag = 'a' if href else 'article' %}
+            <{{ tag }} class="gg-home-opening-card gg-home-card{% if not href %} gg-home-opening-card--soon{% endif %}"{% if href %} href="{{ href }}"{% endif %}>
+              <div class="gg-home-opening-card__media" aria-hidden="true"{% if photos|length > 1 %} data-gg-cycle{% endif %}>
+                {% if photos %}
+                  {% for p in photos %}
+                    <img class="gg-home-opening-card__image{% if loop.first %} is-active{% endif %}" src="{{ media_url(p.cover.path) }}" width="400" height="500" alt="" loading="lazy" decoding="async"{% if photos|length > 1 %} data-gg-cycle-item{% endif %}>
+                  {% endfor %}
+                {% else %}
+                  <img class="gg-home-opening-card__image is-active" src="{{ url_for('static', filename=card.image) }}" width="800" height="525" alt="" loading="lazy" decoding="async">
+                {% endif %}
+              </div>
+              <div class="gg-home-opening-card__shade" aria-hidden="true"></div>
+              <div class="gg-home-opening-card__body">
+                <h3>{{ card.title }}</h3>
+                <span class="gg-home-opening-card__status">{{ card.status }}</span>
+              </div>
+            </{{ tag }}>
+          {% endfor %}
+        </div>
       </div>
     </div>
   </section>
 
-  {# 02 — Products #}
+  {# 03 — Products #}
   <section id="home-arrivals" class="gg-home__section gg-home-products" aria-labelledby="home-arrivals-title" data-gg-section>
-    <div class="gg-home__inner">
-      <header class="gg-home-heading gg-home-heading--split">
-        <div>
-          <p class="gg-home__eyebrow">Freshly curated</p>
-          <h2 id="home-arrivals-title">New energy for your wardrobe</h2>
-          <p>Explore recent arrivals and featured favorites, selected for pattern, quality, and unmistakable character.</p>
-        </div>
-        <a class="gg-home-text-link" href="{{ url_for('store.collection', slug='new-arrivals') }}">View all new arrivals <span aria-hidden="true">→</span></a>
-      </header>
-      <div class="gg-home-tabs gg-home-product-tabs" data-gg-tabs>
-        <div class="gg-home-tabs__list" data-gg-tabs-list data-gg-tabs-label="Product collections" hidden>
-          <button type="button" data-gg-tab-target="home-products-new">New arrivals</button>
-          <button type="button" data-gg-tab-target="home-products-featured">Featured</button>
-        </div>
-        {% for panel_id, panel_title, items in [('home-products-new', 'New arrivals', new_products), ('home-products-featured', 'Featured', featured_products)] %}
-          <div id="{{ panel_id }}" class="gg-home-tabs__panel" data-gg-tab-panel>
-            <h3 class="gg-home-tabs__fallback-title">{{ panel_title }}</h3>
-            <div class="gg-product-grid gg-product-grid--home">
-              {% for p in items %}{% include "partials/product_card.html" %}{% endfor %}
-            </div>
+    <div class="gg-slide">
+      <div class="gg-slide__body">
+        <header class="gg-home-heading gg-home-heading--split">
+          <div>
+            <p class="gg-home__eyebrow">Freshly curated</p>
+            <h2 id="home-arrivals-title">New energy for your wardrobe</h2>
+            <p class="gg-home-heading__lede">Explore recent arrivals and featured favorites, selected for pattern, quality, and unmistakable character.</p>
           </div>
-        {% endfor %}
+          <a class="gg-home-text-link" href="{{ url_for('store.collection', slug='new-arrivals') }}">View all new arrivals <span aria-hidden="true">→</span></a>
+        </header>
+        <div class="gg-home-tabs gg-home-product-tabs gg-slide__fill" data-gg-tabs>
+          <div class="gg-home-tabs__list" data-gg-tabs-list data-gg-tabs-label="Product collections" hidden>
+            <button type="button" data-gg-tab-target="home-products-new">New arrivals</button>
+            <button type="button" data-gg-tab-target="home-products-featured">Featured</button>
+          </div>
+          {% for panel_id, panel_title, items in [('home-products-new', 'New arrivals', new_products), ('home-products-featured', 'Featured', featured_products)] %}
+            <div id="{{ panel_id }}" class="gg-home-tabs__panel" data-gg-tab-panel>
+              <h3 class="gg-home-tabs__fallback-title">{{ panel_title }}</h3>
+              <div class="gg-product-grid gg-product-grid--home">
+                {% for p in items %}{% include "partials/product_card.html" %}{% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
       </div>
     </div>
   </section>
 
-  {# 03 — Story #}
+  {# 04 — Story #}
   <section id="home-story" class="gg-home__section gg-home-story" aria-labelledby="home-story-title" data-gg-section>
-    <div class="gg-home__inner">
-      <div class="gg-home-story__intro">
+    <div class="gg-slide">
+      <div class="gg-slide__body gg-home-story__intro">
         <div class="gg-home-story__copy">
           <p class="gg-home__eyebrow">Our story</p>
           <h2 id="home-story-title">From vision to legacy</h2>
           <p class="gg-home-story__lede">GG Afrikan Eleganz is built on African pride, culture, and bold personal expression. Every print is an invitation to carry that story forward in your own way.</p>
           <a class="gg-home-text-link gg-home-text-link--inverse" href="/about-us/">Meet the brand <span aria-hidden="true">→</span></a>
         </div>
-        <div class="gg-home-story__video">
+        <div class="gg-home-story__video gg-slide__fill">
           <button type="button" class="gg-home-video" data-gg-video data-gg-video-id="_wQiEZOHa7s" aria-label="Play the GG Afrikan Eleganz brand story">
-            <img src="{{ url_for('static', filename='img/home/video-story.webp') }}" width="480" height="360" loading="lazy" decoding="async" alt="">
+            <img src="{{ url_for('static', filename='img/home/video-story.webp') }}" width="480" height="270" loading="lazy" decoding="async" alt="">
             <span class="gg-home-video__shade" aria-hidden="true"></span>
             <span class="gg-home-video__play" aria-hidden="true">
               <svg viewBox="0 0 64 64" width="64" height="64" focusable="false" aria-hidden="true"><circle cx="32" cy="32" r="30"></circle><path d="M26 20l20 12-20 12z"></path></svg>
@@ -126,7 +148,13 @@
           </button>
         </div>
       </div>
-      <div class="gg-home-story__collections" aria-label="Featured collections">
+    </div>
+  </section>
+
+  {# 05 — Featured collections #}
+  <section id="home-collections" class="gg-home__section gg-home-collections" aria-label="Featured collections" data-gg-section>
+    <div class="gg-slide">
+      <div class="gg-slide__body gg-home-story__collections">
         {% for meta, cat in story_collections %}
           <a class="gg-home-collection-card gg-home-card" href="{{ url_for('store.category', slug=cat.slug) }}">
             <div class="gg-home-collection-card__media" aria-hidden="true">
@@ -145,104 +173,108 @@
     </div>
   </section>
 
-  {# 04 — Categories #}
+  {# 06 — Categories #}
   <section id="home-categories" class="gg-home__section gg-home-categories" aria-labelledby="home-categories-title" data-gg-section>
-    <div class="gg-home__inner">
-      <header class="gg-home-heading">
-        <p class="gg-home__eyebrow">Designed to be discovered</p>
-        <h2 id="home-categories-title">Find your signature piece</h2>
-        <p>Move from expressive fabric to finished statement pieces through a collection organized around how you want to wear it.</p>
-      </header>
-      <div class="gg-home-categories__grid">
-        {% for cat in featured_categories %}
-          <a class="gg-home-category-card gg-home-card" href="{{ url_for('store.category', slug=cat.slug) }}">
-            <div class="gg-home-category-card__media" aria-hidden="true">
-              <img class="gg-home-category-card__image" src="{{ media_url(cat.image) }}" width="900" height="600" alt="" loading="lazy" decoding="async">
-            </div>
-            <div class="gg-home-category-card__body">
-              <div>
-                <h3>{{ cat.name }}</h3>
-                {% set n = counts.get(cat.id, 0) %}<p>{{ n }} piece{{ '' if n == 1 else 's' }}</p>
+    <div class="gg-slide">
+      <div class="gg-slide__body">
+        <header class="gg-home-heading">
+          <p class="gg-home__eyebrow">Designed to be discovered</p>
+          <h2 id="home-categories-title">Find your signature piece</h2>
+          <p class="gg-home-heading__lede">Move from expressive fabric to finished statement pieces through a collection organized around how you want to wear it.</p>
+        </header>
+        <div class="gg-home-categories__grid gg-slide__fill">
+          {% for cat in featured_categories %}
+            <a class="gg-home-category-card gg-home-card" href="{{ url_for('store.category', slug=cat.slug) }}">
+              <div class="gg-home-category-card__media" aria-hidden="true">
+                <img class="gg-home-category-card__image" src="{{ media_url(cat.image) }}" width="900" height="600" alt="" loading="lazy" decoding="async">
               </div>
-              <span class="gg-home-category-card__action">Shop now <span aria-hidden="true">→</span></span>
-            </div>
-          </a>
-        {% endfor %}
-      </div>
-    </div>
-  </section>
-
-  {# 05 — Shop your way #}
-  <section id="home-shop" class="gg-home__section gg-home-shop" aria-labelledby="home-shop-title" data-gg-section>
-    <div class="gg-home__inner">
-      <header class="gg-home-heading gg-home-heading--center">
-        <p class="gg-home__eyebrow">A clearer path to the right print</p>
-        <h2 id="home-shop-title">Shop your way</h2>
-        <p>Browse by visual language, the amount you need, or the collection that fits your point of view.</p>
-      </header>
-      <div class="gg-home-tabs gg-home-shop__tabs" data-gg-tabs>
-        <div class="gg-home-tabs__list gg-home-tabs__list--center" data-gg-tabs-list data-gg-tabs-label="Shop categories" hidden>
-          {% for key, label, title, cats in shop_groups %}
-            <button type="button" data-gg-tab-target="home-shop-{{ key }}">{{ label }}</button>
+              <div class="gg-home-category-card__body">
+                <div>
+                  <h3>{{ cat.name }}</h3>
+                  {% set n = counts.get(cat.id, 0) %}<p>{{ n }} piece{{ '' if n == 1 else 's' }}</p>
+                </div>
+                <span class="gg-home-category-card__action">Shop now <span aria-hidden="true">→</span></span>
+              </div>
+            </a>
           {% endfor %}
         </div>
-        {% for key, label, title, cats in shop_groups %}
-          <div id="home-shop-{{ key }}" class="gg-home-tabs__panel gg-home-shop__panel" data-gg-tab-panel>
-            <h3 class="gg-home-shop__group-title">{{ title }}</h3>
-            <div class="gg-home-shop__grid">
-              {% for cat in cats %}
-                <a class="gg-home-shop-card gg-home-card" href="{{ url_for('store.category', slug=cat.slug) }}">
-                  <div class="gg-home-shop-card__media" aria-hidden="true">
-                    <img class="gg-home-shop-card__image" src="{{ media_url(cat.image) }}" width="900" height="600" alt="" loading="lazy" decoding="async">
-                  </div>
-                  <span class="gg-home-shop-card__name">{{ cat.name }}</span>
-                </a>
-              {% endfor %}
-            </div>
-          </div>
-        {% endfor %}
       </div>
     </div>
   </section>
 
-  {# 06 — Journal (post pages arrive in Phase 4) #}
+  {# 07 — Shop your way #}
+  <section id="home-shop" class="gg-home__section gg-home-shop" aria-labelledby="home-shop-title" data-gg-section>
+    <div class="gg-slide">
+      <div class="gg-slide__body">
+        <header class="gg-home-heading gg-home-heading--center">
+          <p class="gg-home__eyebrow">A clearer path to the right print</p>
+          <h2 id="home-shop-title">Shop your way</h2>
+          <p class="gg-home-heading__lede">Browse by visual language, the amount you need, or the collection that fits your point of view.</p>
+        </header>
+        <div class="gg-home-tabs gg-home-shop__tabs gg-slide__fill" data-gg-tabs>
+          <div class="gg-home-tabs__list gg-home-tabs__list--center" data-gg-tabs-list data-gg-tabs-label="Shop categories" hidden>
+            {% for key, label, title, cats in shop_groups %}
+              <button type="button" data-gg-tab-target="home-shop-{{ key }}">{{ label }}</button>
+            {% endfor %}
+          </div>
+          {% for key, label, title, cats in shop_groups %}
+            <div id="home-shop-{{ key }}" class="gg-home-tabs__panel gg-home-shop__panel" data-gg-tab-panel>
+              <h3 class="gg-home-shop__group-title">{{ title }}</h3>
+              <div class="gg-home-shop__grid">
+                {% for cat in cats %}
+                  <a class="gg-home-shop-card gg-home-card" href="{{ url_for('store.category', slug=cat.slug) }}">
+                    <div class="gg-home-shop-card__media" aria-hidden="true">
+                      <img class="gg-home-shop-card__image" src="{{ media_url(cat.image) }}" width="900" height="600" alt="" loading="lazy" decoding="async">
+                    </div>
+                    <span class="gg-home-shop-card__name">{{ cat.name }}</span>
+                  </a>
+                {% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {# 08 — Journal #}
   <section id="home-journal" class="gg-home__section gg-home-journal" aria-labelledby="home-journal-title" data-gg-section>
-    <div class="gg-home__inner">
-      <header class="gg-home-heading gg-home-heading--split">
-        <div>
+    <div class="gg-slide">
+      <div class="gg-slide__body">
+        <header class="gg-home-heading">
           <p class="gg-home__eyebrow">The journal</p>
           <h2 id="home-journal-title">Stories, culture, and style</h2>
-          <p>Go beyond the print with ideas, histories, and practical inspiration from the GG Afrikan Eleganz community.</p>
-        </div>
-      </header>
-      {% set lead = posts[0] %}
-      <div class="gg-home-journal__layout">
-        <article class="gg-home-journal-lead">
-          <a class="gg-home-journal-lead__link gg-home-card" href="{{ url_for('content.post', slug=lead.slug) }}">
-            <div class="gg-home-journal-lead__media">
-              <img class="gg-home-journal-lead__image" src="{{ url_for('static', filename=lead.image) }}" width="1200" height="675" alt="{{ lead.alt }}" loading="lazy" decoding="async">
-            </div>
-            <div class="gg-home-journal-lead__body">
-              <time datetime="{{ lead.date }}">{{ lead.date_label }}</time>
-              <h3>{{ lead.title }}</h3>
-              <p>{{ lead.excerpt }}</p>
-            </div>
-          </a>
-        </article>
-        <div class="gg-home-journal__more" aria-label="More from the journal">
-          {% for post in posts[1:] %}
-            <article class="gg-home-journal-card">
-              <a class="gg-home-journal-card__link gg-home-card" href="{{ url_for('content.post', slug=post.slug) }}">
-                <div class="gg-home-journal-card__media">
-                  <img class="gg-home-journal-card__image" src="{{ url_for('static', filename=post.image) }}" width="1200" height="675" alt="{{ post.alt }}" loading="lazy" decoding="async">
-                </div>
-                <div class="gg-home-journal-card__body">
-                  <time datetime="{{ post.date }}">{{ post.date_label }}</time>
-                  <h3>{{ post.title }}</h3>
-                </div>
-              </a>
-            </article>
-          {% endfor %}
+          <p class="gg-home-heading__lede">Go beyond the print with ideas, histories, and practical inspiration from the GG Afrikan Eleganz community.</p>
+        </header>
+        {% set lead = posts[0] %}
+        <div class="gg-home-journal__layout gg-slide__fill">
+          <article class="gg-home-journal-lead">
+            <a class="gg-home-journal-lead__link gg-home-card" href="{{ url_for('content.post', slug=lead.slug) }}">
+              <div class="gg-home-journal-lead__media">
+                <img class="gg-home-journal-lead__image" src="{{ media_url(lead.image) if lead.image_is_media else url_for('static', filename=lead.image) }}" width="1200" height="675" alt="{{ lead.alt }}" loading="lazy" decoding="async">
+              </div>
+              <div class="gg-home-journal-lead__body">
+                <time datetime="{{ lead.date }}">{{ lead.date_label }}</time>
+                <h3>{{ lead.title }}</h3>
+                <p>{{ lead.excerpt }}</p>
+              </div>
+            </a>
+          </article>
+          <div class="gg-home-journal__more" aria-label="More from the journal">
+            {% for post in posts[1:] %}
+              <article class="gg-home-journal-card">
+                <a class="gg-home-journal-card__link gg-home-card" href="{{ url_for('content.post', slug=post.slug) }}">
+                  <div class="gg-home-journal-card__media">
+                    <img class="gg-home-journal-card__image" src="{{ media_url(post.image) if post.image_is_media else url_for('static', filename=post.image) }}" width="1200" height="675" alt="{{ post.alt }}" loading="lazy" decoding="async">
+                  </div>
+                  <div class="gg-home-journal-card__body">
+                    <time datetime="{{ post.date }}">{{ post.date_label }}</time>
+                    <h3>{{ post.title }}</h3>
+                  </div>
+                </a>
+              </article>
+            {% endfor %}
+          </div>
         </div>
       </div>
     </div>

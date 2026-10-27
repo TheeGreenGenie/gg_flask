@@ -26,7 +26,7 @@
 
   <div class="gg-post-featured-image">
     <div class="gg-container">
-      <img class="gg-featured-img" src="{{ url_for('static', filename=post.image) }}" width="1200" height="760" alt="{{ post.alt }}" fetchpriority="high">
+      <img class="gg-featured-img" src="{{ media_url(post.image) if post.image_is_media else url_for('static', filename=post.image) }}" width="1200" height="760" alt="{{ post.alt }}" fetchpriority="high">
     </div>
   </div>
 
@@ -36,7 +36,8 @@
         {% for block in post.body %}
           {% if block[0] == 'h2' %}<h2>{{ block[1] }}</h2>
           {% elif block[0] == 'ul' %}<ul>{% for item in block[1] %}<li>{{ item }}</li>{% endfor %}</ul>
-          {% elif block[0] == 'img' %}<figure><img src="{{ url_for('static', filename=block[1]) }}" alt="{{ block[2] }}" loading="lazy"><figcaption>{{ block[3] }}</figcaption></figure>
+          {% elif block[0] == 'img' %}<figure><img src="{{ media_url(block[1][6:]) if block[1].startswith('media:') else url_for('static', filename=block[1][7:] if block[1].startswith('static:') else block[1]) }}" alt="{{ block[2] }}" loading="lazy"><figcaption>{{ block[3] }}</figcaption></figure>
+          {% elif block[0] == 'link' %}<p><a href="{{ block[2] }}" rel="noopener noreferrer">{{ block[1] }}</a></p>
           {% else %}<p>{{ block[1] }}</p>{% endif %}
         {% endfor %}
       </div>

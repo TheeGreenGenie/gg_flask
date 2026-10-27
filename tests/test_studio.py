@@ -73,6 +73,7 @@ def test_studio_uses_only_configured_hidden_path(app: Flask, client) -> None:
     assert response.headers["Cache-Control"] == "private, no-store"
     assert response.headers["X-Robots-Tag"] == "noindex, nofollow, noarchive"
     assert b"Staff Studio" in response.data
+    assert b"data-gg-newsletter" not in response.data
 
 
 def test_server_only_account_commands(app: Flask) -> None:

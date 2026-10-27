@@ -46,7 +46,7 @@
   </main>
 
   {% include "partials/footer.html" %}
-  {% if not hide_newsletter %}{% include "partials/newsletter_dialog.html" %}{% endif %}
+  {% if not hide_newsletter and request.blueprint not in ('admin', 'studio') %}{% include "partials/newsletter_dialog.html" %}{% endif %}
   {% if config.GA4_MEASUREMENT_ID %}
     <div class="gg-consent" data-gg-consent role="region" aria-label="Cookie choices" hidden>
       <p>We'd like to use Google Analytics cookies to understand how visitors use our store. They're only set if you accept. See our <a href="{{ url_for('content.privacy') }}">Privacy Policy</a>.</p>

@@ -50,6 +50,7 @@ def test_bad_password_is_generic(client: FlaskClient, app: Flask) -> None:
     make_admin(app)
     response = client.post("/admin/login", data={"username": "nope", "password": "bad"})
     assert b"Username or password is incorrect" in response.data
+    assert b"data-gg-newsletter" not in response.data
 
 
 def test_recovery_code_works_once(client: FlaskClient, app: Flask) -> None:

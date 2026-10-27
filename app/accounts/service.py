@@ -20,11 +20,11 @@ from datetime import timedelta
 
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError
-from flask import g, request, session, url_for
-from sqlalchemy import delete, select
+from flask import current_app, g, request, session, url_for
+from sqlalchemy import delete, func, select
 
 from app import mail, ratelimit
-from app.accounts.models import Channel, MarketingConsent, PasswordReset, User
+from app.accounts.models import Address, Channel, MarketingConsent, PasswordReset, User
 from app.catalog.models import utcnow
 from app.extensions import db
 
@@ -54,6 +54,7 @@ _hasher = PasswordHasher()  # Argon2id with the library's current recommended pa
 _DUMMY_HASH = _hasher.hash(secrets.token_urlsafe(16))
 
 EMAIL_RE = re.compile(r"^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$")
+POSTCODE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 -]{1,22}[A-Za-z0-9]$")
 
 
 class AccountError(ValueError):
@@ -272,6 +273,74 @@ def delete_account(user: User, password: str) -> None:
     db.session.delete(user)  # consents cascade with it
     db.session.commit()
     logout()
+
+
+# ---------- address book ----------
+
+
+def save_address(user: User, address: Address | None, form: dict[str, str]) -> Address:
+    is_first = not user.addresses
+    if address is None:
+        count = db.session.scalar(select(func.count(Address.id)).where(Address.user_id == user.id))
+        if int(count or 0) >= 20:
+            raise AccountError("You can save up to 20 addresses.")
+        address = Address(user=user)
+    elif address.user_id != user.id:
+        raise AccountError("Address not found.")
+    label = form.get("label", "").strip()
+    if not 1 <= len(label) <= 40:
+        raise AccountError("Give this address a label of 1 to 40 characters.")
+    values: dict[str, str] = {}
+    for key, limit, title in (
+        ("first_name", 80, "first name"),
+        ("last_name", 80, "last name"),
+        ("address1", 160, "street address"),
+        ("city", 100, "city"),
+        ("region", 100, "state or region"),
+    ):
+        value = form.get(key, "").strip()
+        if not value or len(value) > limit:
+            raise AccountError(f"Enter a valid {title}.")
+        values[key] = value
+    address2 = form.get("address2", "").strip()
+    if len(address2) > 160:
+        raise AccountError("Address line 2 is too long.")
+    postcode = form.get("postcode", "").strip().upper()
+    if not POSTCODE_RE.match(postcode):
+        raise AccountError("Enter a valid postal code.")
+    country = form.get("country", "").strip().upper()
+    if country not in current_app.config.get("SUPPORTED_COUNTRIES", ()):
+        raise AccountError("We do not currently ship to that country.")
+    address.label = label
+    address.address2 = address2
+    address.postcode = postcode
+    address.country = country
+    address.phone = normalize_phone(form.get("phone", ""))
+    for key, value in values.items():
+        setattr(address, key, value)
+    make_default = form.get("is_default") == "1" or is_first
+    if make_default:
+        for saved in user.addresses:
+            saved.is_default = False
+        address.is_default = True
+    db.session.add(address)
+    db.session.commit()
+    return address
+
+
+def delete_address(user: User, address: Address) -> None:
+    if address.user_id != user.id:
+        raise AccountError("Address not found.")
+    was_default = address.is_default
+    db.session.delete(address)
+    db.session.flush()
+    if was_default:
+        replacement = db.session.scalar(
+            select(Address).where(Address.user_id == user.id).order_by(Address.id)
+        )
+        if replacement:
+            replacement.is_default = True
+    db.session.commit()
 
 
 # ---------- password reset ----------

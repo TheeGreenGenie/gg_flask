@@ -3,12 +3,17 @@
 {%- from "store/_product_parts.html" import gallery_block, buy_box with context -%}
 {% block title %}{{ product.name }} · GG Afrikan Eleganz{% endblock %}
 {% block description %}{{ product.summary or product.name }}{% endblock %}
+{% block og_type %}product{% endblock %}
 {% block content %}
 {%- set variants = product.active_variants -%}
 {%- set chosen = (variants|selectattr('available_quantity', 'gt', 0)|first) or variants|first -%}
 {%- set main_image = (chosen.image.path if chosen and chosen.image else (gallery[0] if gallery else None)) -%}
 
-<div class="gg-container gg-product" data-gg-product>
+<div hidden data-gg-analytics-event='{{ {"name": "view_item", "params": {"currency": "USD", "value": chosen.price_cents / 100, "items": [{"item_id": chosen.sku, "item_name": product.name, "item_category": category.name if category else "", "price": chosen.price_cents / 100}]}}|tojson|forceescape }}'></div>
+<div class="gg-container gg-product" data-gg-product itemscope itemtype="https://schema.org/Product">
+  <meta itemprop="name" content="{{ product.name }}">
+  <meta itemprop="description" content="{{ product.summary or product.name }}">
+  {% if main_image %}<link itemprop="image" href="{{ media_url(main_image) }}">{% endif %}
   <nav class="gg-breadcrumbs" aria-label="Breadcrumb">
     <ol>
       <li><a href="{{ url_for('store.home') }}">Home</a></li>
@@ -22,7 +27,10 @@
   <div class="gg-product__top">
     {{ gallery_block(product, gallery, main_image) }}
 
-    <section class="gg-product__summary" aria-labelledby="product-title">
+    <section class="gg-product__summary" aria-labelledby="product-title" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+      <meta itemprop="priceCurrency" content="USD">
+      <meta itemprop="price" content="{{ '%.2f'|format(chosen.price_cents / 100) }}">
+      <link itemprop="availability" href="https://schema.org/{{ 'InStock' if chosen.available_quantity > 0 else 'OutOfStock' }}">
 {{ buy_box(product, chosen, variants) }}
 
       <div class="gg-accordions">

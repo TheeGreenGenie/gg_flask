@@ -1,0 +1,112 @@
+{% extends "layout.html" %}
+{%- from "partials/icons.html" import icon -%}
+{% block title %}Contact Us · GG Afrikan Eleganz{% endblock %}
+{% block description %}Contact GG Afrikan Eleganz by email, phone or text, or send us a message.{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/content-legacy.css') }}">{% endblock %}
+{% block content %}
+{#- Layout and wording from the previous site's Contact page (template-contact.php). -#}
+<div class="gg-contact-page">
+  <section class="gg-page-header gg-contact-header">
+    <div class="gg-container">
+      <h1 class="gg-page-title">Contact Us</h1>
+      <p class="gg-page-subtitle">We'd love to hear from you. Get in touch with us!</p>
+    </div>
+  </section>
+
+  <section class="gg-contact-section">
+    <div class="gg-container">
+      <div class="gg-contact-grid">
+        <div class="gg-contact-form-wrapper">
+          <h2 class="gg-form-title">Send Us a Message</h2>
+          <p class="gg-form-intro">Have a question about our products, shipping, or anything else? Fill out the form below and we'll get back to you within 24-48 hours.</p>
+          <form class="gg-contact-form" method="post" action="{{ url_for('content.contact') }}" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% if error %}<p class="gg-form-error" role="alert">{{ error }}</p>{% endif %}
+            <div class="gg-form-row">
+              <div class="gg-form-group">
+                <label for="contact_name">Your Name <span>*</span></label>
+                <input type="text" id="contact_name" name="name" value="{{ form.name }}" autocomplete="name" maxlength="100" required>
+              </div>
+              <div class="gg-form-group">
+                <label for="contact_email">Your Email <span>*</span></label>
+                <input type="email" id="contact_email" name="email" value="{{ form.email }}" autocomplete="email" maxlength="254" required>
+              </div>
+            </div>
+            <div class="gg-form-group">
+              <label for="contact_phone">Phone Number</label>
+              <input type="tel" id="contact_phone" name="phone" value="{{ form.phone }}" autocomplete="tel" maxlength="30">
+            </div>
+            <div class="gg-form-group">
+              <label for="contact_subject">Subject <span>*</span></label>
+              <select id="contact_subject" name="topic" required>
+                <option value="">Select a topic...</option>
+                {% for value, label in topics.items() %}<option value="{{ value }}"{% if form.topic == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+              </select>
+            </div>
+            <div class="gg-form-group">
+              <label for="contact_message">Your Message <span>*</span></label>
+              <textarea id="contact_message" name="message" rows="6" maxlength="4000" required>{{ form.message }}</textarea>
+            </div>
+            <button type="submit" class="gg-submit-btn">Send Message</button>
+          </form>
+        </div>
+
+        <div class="gg-contact-info">
+          <div class="gg-info-card">
+            <h2 class="gg-info-title">Get in Touch</h2>
+            <div class="gg-contact-item">
+              <div class="gg-contact-icon">{{ icon('mail', 20) }}</div>
+              <div class="gg-contact-details">
+                <h3>Email</h3>
+                <a href="mailto:{{ site.CONTACT_EMAIL }}">{{ site.CONTACT_EMAIL }}</a>
+              </div>
+            </div>
+            <div class="gg-contact-item">
+              <div class="gg-contact-icon">{{ icon('phone', 20) }}</div>
+              <div class="gg-contact-details">
+                <h3>Phone</h3>
+                <a href="tel:+12159842270">+1 (215) 984-2270</a>
+                <p>Call or Text</p>
+              </div>
+            </div>
+            <div class="gg-contact-item">
+              <div class="gg-contact-icon">{{ icon('pin', 20) }}</div>
+              <div class="gg-contact-details">
+                <h3>Location</h3>
+                <p>Philadelphia, PA<br>United States</p>
+              </div>
+            </div>
+            <div class="gg-contact-item">
+              <div class="gg-contact-icon">{{ icon('clock', 20) }}</div>
+              <div class="gg-contact-details">
+                <h3>Business Hours</h3>
+                <p>Monday - Friday: 9am - 6pm EST<br>Saturday: 10am - 4pm EST<br>Sunday: Closed</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="gg-info-card gg-social-card">
+            <h3>Follow Us</h3>
+            <p>Stay connected for the latest updates, new arrivals, and exclusive offers.</p>
+            <div class="gg-social-links">
+              {% for key, label, url in site.SOCIAL_LINKS %}
+                <a href="{{ url }}" target="_blank" rel="noopener noreferrer" class="gg-social-link" aria-label="{{ label }} (opens in a new tab)">{{ icon(key, 18) }}</a>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gg-contact-faq">
+    <div class="gg-container">
+      <div class="gg-faq-inner">
+        <h2>Have Questions?</h2>
+        <p>Check out our FAQ page for answers to common questions about orders, shipping, returns, and more.</p>
+        <a href="{{ url_for('content.faq') }}" class="gg-btn">View FAQ</a>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

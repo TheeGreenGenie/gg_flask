@@ -1,0 +1,6 @@
+{% extends "admin/_base.html" %}
+{% block title %}Edit {{ category.name }} · Administration{% endblock %}
+{% block admin_body %}
+<header class="gg-admin__header"><div><p class="gg-eyebrow">Category</p><h1>{{ category.name }}</h1><p>{{ category.slug }}</p></div></header>
+<form class="gg-admin__form" method="post" novalidate><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% if error %}<p class="gg-form-error" role="alert">{{ error }}</p>{% endif %}<div class="gg-fields"><div class="gg-field"><label for="name">Name</label><input id="name" name="name" value="{{ category.name }}" maxlength="120" required></div><div class="gg-field"><label for="position">Position</label><input id="position" name="position" type="number" min="0" value="{{ category.position }}" required></div><div class="gg-field gg-field--wide"><label for="description">Description</label><textarea id="description" name="description" rows="8">{{ category.description }}</textarea></div></div><button class="gg-button gg-button--accent" type="submit">Save category</button></form>
+{% endblock %}

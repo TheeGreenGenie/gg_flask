@@ -56,7 +56,7 @@
           <a href="{{ url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ label }} (opens in a new tab)">{{ icon(key, 16) }}</a>
         {% endfor %}
       </nav>
-      <p class="gg-footer__copyright">&copy; {{ current_year }} GG Afrikan Eleganz. All rights reserved.</p>
+      <p class="gg-footer__copyright">&copy; {{ current_year }} GG Afrikan Eleganz. All rights reserved.{% if config.GA4_MEASUREMENT_ID %} · <a href="#" data-gg-consent-open>Cookie settings</a>{% endif %}</p>
     </div>
   </div>
 </footer>

@@ -1,0 +1,26 @@
+/* Private administration shell. */
+.gg-admin-body .gg-footer, .gg-admin-body .gg-newsletter-modal { display: none; }
+.gg-admin { min-height: 70vh; padding-block: clamp(2rem, 6vw, 5rem); }
+.gg-admin__nav { display: flex; gap: .5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--gg-line); }
+.gg-admin__nav a { padding: .7rem .9rem; color: var(--gg-ink); font-weight: 700; text-decoration: none; }
+.gg-admin__nav a:hover { background: var(--gg-warm); }
+.gg-admin__login { display: grid; gap: 1.1rem; max-width: 30rem; margin-inline: auto; padding: clamp(1.5rem, 4vw, 2.5rem); border: 1px solid var(--gg-line); border-radius: var(--gg-radius-lg); box-shadow: var(--gg-shadow); }
+.gg-admin__login h1 { font-size: clamp(1.7rem, 4vw, 2.3rem); }
+.gg-admin__header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1.5rem; align-items: start; padding-bottom: 1.5rem; border-bottom: 1px solid var(--gg-line); }
+.gg-admin__cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 2rem; }
+.gg-admin__cards section { padding: 1.5rem; border: 1px solid var(--gg-line); border-radius: var(--gg-radius-md); }
+.gg-admin__section { margin-top: 2.5rem; }
+.gg-admin__form, .gg-admin__upload { display: grid; gap: 1.25rem; max-width: 54rem; margin-top: 2rem; }
+.gg-admin__form textarea { width: 100%; resize: vertical; }
+.gg-admin__checks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .4rem 1rem; }
+.gg-admin__table-wrap { overflow-x: auto; }
+.gg-admin__table { width: 100%; border-collapse: collapse; }
+.gg-admin__table th, .gg-admin__table td { padding: .8rem; border-bottom: 1px solid var(--gg-line); text-align: left; vertical-align: top; }
+.gg-admin__table th { color: var(--gg-muted); font-size: .78rem; text-transform: uppercase; }
+.gg-admin__table small { display: block; color: var(--gg-muted); }
+.gg-admin__images { display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: 1rem; }
+.gg-admin__images article { padding: .75rem; border: 1px solid var(--gg-line); border-radius: var(--gg-radius-sm); }
+.gg-admin__images img { width: 100%; aspect-ratio: 1; border-radius: var(--gg-radius-sm); object-fit: cover; }
+.gg-admin__images p { font-size: .82rem; }
+@media (max-width: 40rem) { .gg-admin__cards { grid-template-columns: 1fr; } }
+@media print { .gg-header, .gg-admin__nav, .gg-print-hide { display: none !important; } .gg-admin { padding: 0; } }

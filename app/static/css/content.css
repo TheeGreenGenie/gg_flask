@@ -1,0 +1,165 @@
+/* Policy and notice pages: centred, with small decorative touches taken from the previous
+   site's FAQ header (warm panel, soft gold circles, gold rules). Theme tokens only, so it
+   works in light and dark mode. */
+
+.gg-deco-page {
+	max-width: 1222px;
+	margin-inline: auto;
+	padding: 30px 15px clamp(48px, 7vw, 80px);
+	text-align: center;
+}
+
+/* Header panel with two soft circles in opposite corners. */
+.gg-deco-hero {
+	position: relative;
+	overflow: hidden;
+	padding: clamp(44px, 7vw, 72px) clamp(20px, 5vw, 48px);
+	border-radius: 4px;
+	background: var(--gg-warm);
+	isolation: isolate;
+}
+
+.gg-deco-hero::before,
+.gg-deco-hero::after {
+	position: absolute;
+	z-index: -1;
+	border-radius: 50%;
+	background: color-mix(in srgb, var(--gg-accent) 14%, transparent);
+	content: "";
+}
+
+.gg-deco-hero::before { top: -70px; left: -70px; width: 220px; height: 220px; }
+.gg-deco-hero::after { right: -50px; bottom: -80px; width: 200px; height: 200px; }
+
+.gg-deco-eyebrow {
+	margin: 0 0 10px;
+	color: var(--gg-link);
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: .18em;
+	text-transform: uppercase;
+}
+
+.gg-deco-hero h1 {
+	margin: 0;
+	font-size: clamp(30px, 5vw, 44px);
+	line-height: 1.15;
+	text-transform: uppercase;
+}
+
+.gg-deco-lede {
+	max-width: 620px;
+	margin: 0 auto;
+	color: var(--gg-muted);
+	font-size: 16px;
+	line-height: 1.7;
+}
+
+/* Gold line with a small diamond in the middle. */
+.gg-deco-rule {
+	position: relative;
+	display: block;
+	width: 120px;
+	height: 2px;
+	margin: 18px auto;
+	background: linear-gradient(90deg, transparent, var(--gg-accent) 20%, var(--gg-accent) 80%, transparent);
+}
+
+.gg-deco-rule::after {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 9px;
+	height: 9px;
+	background: var(--gg-accent);
+	content: "";
+	transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.gg-deco-body { margin-top: clamp(28px, 5vw, 44px); }
+
+/* Pill links between the four policy pages. */
+.gg-deco-links {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 8px;
+	margin-bottom: clamp(28px, 5vw, 44px);
+}
+
+.gg-deco-links a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 2.75rem;
+	padding: 6px 18px;
+	border: 1px solid var(--gg-line);
+	border-radius: 999px;
+	color: var(--gg-ink);
+	font-size: 13px;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.gg-deco-links a:hover { border-color: var(--gg-accent); }
+.gg-deco-links a[aria-current] { border-color: var(--gg-accent); color: var(--gg-accent-ink); background: var(--gg-accent); }
+
+/* Centred reading column; each section introduced by a small diamond. */
+.gg-deco-article { max-width: 760px; margin-inline: auto; }
+
+.gg-deco-section + .gg-deco-section { margin-top: 36px; }
+
+.gg-deco-section::before {
+	display: block;
+	width: 8px;
+	height: 8px;
+	margin: 0 auto 14px;
+	background: var(--gg-accent);
+	content: "";
+	transform: rotate(45deg);
+}
+
+.gg-deco-section h2 {
+	display: inline-block;
+	margin: 0 0 12px;
+	padding-bottom: 8px;
+	border-bottom: 2px solid var(--gg-accent);
+	font-size: 18px;
+}
+
+.gg-deco-section p {
+	margin: 0 0 12px;
+	color: var(--gg-muted);
+	font-size: 15px;
+	line-height: 1.8;
+}
+
+/* Black help banner like the previous site's "Need More Help?" sections. */
+.gg-deco-help {
+	margin-top: clamp(40px, 7vw, 64px);
+	padding: clamp(40px, 6vw, 64px) 20px;
+	color: rgba(255, 255, 255, .78);
+	background: #0d0d0d;
+}
+
+.gg-deco-help h2 { margin: 0 0 12px; color: #fff; font-size: clamp(24px, 3vw, 28px); }
+.gg-deco-help p { max-width: 560px; margin: 0 auto 24px; line-height: 1.7; }
+.gg-deco-help a:not(.gg-deco-help__btn) { color: var(--gg-accent); }
+
+.gg-deco-help__btn {
+	display: inline-block;
+	padding: 14px 38px;
+	border: 2px solid #fff;
+	border-radius: 3px;
+	color: #fff;
+	font-size: 14px;
+	font-weight: 600;
+	text-decoration: none;
+	text-transform: uppercase;
+	transition: all .3s;
+}
+
+.gg-deco-help__btn:hover { border-color: var(--gg-accent); color: #000; background: var(--gg-accent); }
+
+/* Notice pages (relaunch, retired, not found). */
+.gg-deco-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.gg-deco-note { max-width: 620px; margin: 0 auto 24px; color: var(--gg-muted); line-height: 1.7; }

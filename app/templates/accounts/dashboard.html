@@ -7,6 +7,9 @@
   <nav class="gg-account__nav" aria-label="Account sections">
     <a href="#details">My details</a>
     <a href="#preferences">Messages from us</a>
+    <a href="{{ url_for('accounts.addresses') }}">Address book</a>
+    <a href="{{ url_for('accounts.orders') }}">Order history</a>
+    <a href="{{ url_for('accounts.payment_methods') }}">Payment methods</a>
     <a href="{{ url_for('wishlist.page') }}">Wishlist ({{ wishlist_count }})</a>
     <a href="#password">Password</a>
     <a href="#delete">Delete account</a>

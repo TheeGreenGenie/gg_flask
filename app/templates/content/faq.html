@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block title %}Frequently Asked Questions · GG Afrikan Eleganz{% endblock %}
+{% block description %}Everything you need to know about GG Afrikan Eleganz — from ordering and shipping to returns and support.{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/content-legacy.css') }}">{% endblock %}
+{% block content %}
+{#- Layout and wording from the previous site's FAQ page (template-faq.php). Native
+    details/summary replaces the old script accordion so it works without JavaScript. -#}
+<div class="gg-faq-titlebar"><div class="gg-container">FAQ</div></div>
+<div class="gg-faq-page">
+
+  <section class="gg-faq-hero">
+    <div class="gg-container">
+      <div class="gg-faq-hero-inner">
+        <h1 class="gg-faq-hero-title">Frequently Asked Questions</h1>
+        <p class="gg-faq-hero-text">Everything you need to know about GG Afrikan Eleganz — from ordering and shipping to returns and support.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="gg-faq-grid-section">
+    <div class="gg-container">
+      <div class="gg-faq-grid">
+        {% for question, answer in faqs %}
+          <details class="gg-faq-card">
+            <summary class="gg-faq-card-header">
+              <h2 class="gg-faq-question">{{ question }}</h2>
+              <span class="gg-faq-toggle" aria-hidden="true"></span>
+            </summary>
+            <div class="gg-faq-card-body">
+              <p>{{ answer }}{% if 'Contact Us page' in answer %} <a href="{{ url_for('content.contact') }}">Contact us</a>{% elif 'Returns page' in answer %} <a href="{{ url_for('content.returns') }}">Returns &amp; Exchanges</a>{% endif %}</p>
+            </div>
+          </details>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="gg-faq-cta">
+    <div class="gg-container">
+      <h2>Need More Help?</h2>
+      <p>Can't find what you're looking for? Our team is here to assist you with any questions or concerns.</p>
+      <a href="{{ url_for('content.contact') }}" class="gg-cta-btn">Contact Us</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

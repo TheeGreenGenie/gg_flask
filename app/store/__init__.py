@@ -2,16 +2,34 @@
 
 from __future__ import annotations
 
+import secrets
 from typing import Any
 
-from flask import Blueprint, abort, flash, jsonify, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    abort,
+    current_app,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
+from sqlalchemy import select
 from werkzeug.wrappers import Response
 
-from app import cache, site_content
+from app import cache, marketing, ratelimit, site_content
+from app.accounts import service as account_service
 from app.assets import media_version
 from app.cart import service as cart_service
 from app.catalog import queries
 from app.catalog.models import Product
+from app.extensions import csrf, db
+from app.orders import payments
+from app.orders import service as order_service
+from app.orders.models import Order, PaymentProvider
 from app.store import content
 from app.templating import money
 
@@ -35,6 +53,8 @@ def store_globals() -> dict[str, Any]:
 
 @bp.after_app_request
 def _cart_cookie(response: Response) -> Response:
+    if request.path.startswith("/checkout"):
+        response.headers["Cache-Control"] = "private, no-store"
     return cart_service.set_cookie_if_new(response)
 
 
@@ -271,21 +291,172 @@ def cart_update() -> Response:
     return redirect(url_for("store.cart"))
 
 
-@bp.get("/checkout/")
+@bp.route("/checkout/", methods=["GET", "POST"])
 def checkout() -> Response | str:
     view = cart_service.view(cart_service.current_cart())
     if view.is_empty:
         flash("Your cart is empty.", "error")
         return redirect(url_for("store.cart"))
-    return render_template(
-        "store/checkout.html", hide_newsletter=True, us_states=site_content.US_STATES
+    error = ""
+    form: Any = request.form
+    if request.method == "GET":
+        user = account_service.current_user()
+        default_address = (
+            next((address for address in user.addresses if address.is_default), None)
+            if user
+            else None
+        )
+        if user:
+            form = {
+                "email": user.email,
+                "first_name": default_address.first_name if default_address else user.first_name,
+                "last_name": default_address.last_name if default_address else "",
+                "address1": default_address.address1 if default_address else "",
+                "address2": default_address.address2 if default_address else "",
+                "city": default_address.city if default_address else "",
+                "region": default_address.region if default_address else "",
+                "postcode": default_address.postcode if default_address else "",
+                "country": default_address.country if default_address else "",
+                "phone": (default_address.phone if default_address else user.phone) or "",
+            }
+    nonce = (
+        form.get("checkout_nonce", "") if request.method == "POST" else secrets.token_urlsafe(24)
     )
+    if request.method == "POST":
+        try:
+            if form.get("terms") != "1":
+                raise order_service.CheckoutError("You must agree to the terms and conditions.")
+            address = order_service.address_from_form(form.to_dict())
+            provider = PaymentProvider(form.get("payment", ""))
+            cart_model = cart_service.current_cart()
+            if cart_model is None:
+                raise order_service.CheckoutError("Your cart is empty.")
+            order = order_service.create_order(
+                cart_model, address, provider, nonce, form.get("coupon", "")
+            )
+        except (order_service.CheckoutError, ValueError) as exc:
+            db.session.rollback()
+            error = (
+                str(exc)
+                if isinstance(exc, order_service.CheckoutError)
+                else "Choose a payment method."
+            )
+        else:
+            allowed = set(session.get("checkout_orders", []))
+            allowed.add(order.public_id)
+            session["checkout_orders"] = list(allowed)[-10:]
+            return redirect(url_for("store.order_payment", public_id=order.public_id))
+    countries = [
+        (code, site_content.COUNTRY_NAMES.get(code, code))
+        for code in current_app.config.get("SUPPORTED_COUNTRIES", ())
+    ]
+    configured = (
+        current_app.config.get("FLAT_SHIPPING_CENTS") is not None
+        and current_app.config.get("TAX_BACKEND") is not None
+        and bool(countries)
+    )
+    return render_template(
+        "store/checkout.html",
+        hide_newsletter=True,
+        us_states=site_content.US_STATES,
+        countries=countries,
+        shipping_cents=current_app.config.get("FLAT_SHIPPING_CENTS"),
+        local_shipping_cents=current_app.config.get("LOCAL_SHIPPING_CENTS"),
+        shipping_backend=current_app.config.get("SHIPPING_BACKEND", "flat"),
+        configured=configured,
+        checkout_nonce=nonce,
+        error=error,
+        form=form,
+    )
+
+
+@bp.get("/checkout/order/<public_id>/payment")
+def order_payment(public_id: str) -> str:
+    order = db.session.scalar(select(Order).where(Order.public_id == public_id))
+    if order is None or public_id not in set(session.get("checkout_orders", [])):
+        abort(404)
+    return render_template(
+        "store/payment.html",
+        order=order,
+        provider_configured=payments.provider_configured(order.payment_provider),
+        hide_newsletter=True,
+    )
+
+
+@bp.post("/checkout/order/<public_id>/payment")
+def begin_order_payment(public_id: str) -> Response:
+    order = db.session.scalar(select(Order).where(Order.public_id == public_id))
+    if order is None or public_id not in set(session.get("checkout_orders", [])):
+        abort(404)
+    try:
+        hosted = payments.begin(
+            order,
+            url_for("store.payment_return", public_id=public_id, _external=True),
+            url_for("store.order_payment", public_id=public_id, _external=True),
+        )
+    except payments.PaymentError as exc:
+        flash(str(exc), "error")
+        return redirect(url_for("store.order_payment", public_id=public_id))
+    return redirect(hosted.url)
+
+
+@bp.get("/checkout/order/<public_id>/return")
+def payment_return(public_id: str) -> Response:
+    order = db.session.scalar(select(Order).where(Order.public_id == public_id))
+    if order is None or public_id not in set(session.get("checkout_orders", [])):
+        abort(404)
+    if order.payment_provider == PaymentProvider.PAYPAL and order.payment_status.value != "paid":
+        try:
+            payments.capture_paypal(order)
+        except payments.PaymentError as exc:
+            flash(str(exc), "error")
+            return redirect(url_for("store.order_payment", public_id=public_id))
+    return redirect(url_for("store.order_confirmation", public_id=public_id))
+
+
+@bp.get("/checkout/order/<public_id>/confirmation")
+def order_confirmation(public_id: str) -> str:
+    order = db.session.scalar(select(Order).where(Order.public_id == public_id))
+    if order is None or public_id not in set(session.get("checkout_orders", [])):
+        abort(404)
+    return render_template("store/confirmation.html", order=order, hide_newsletter=True)
+
+
+@bp.post("/webhooks/stripe")
+@csrf.exempt
+def stripe_webhook() -> tuple[dict[str, bool] | dict[str, str], int]:
+    try:
+        processed = payments.handle_stripe(
+            request.get_data(cache=False), request.headers.get("Stripe-Signature", "")
+        )
+    except payments.PaymentError as exc:
+        return {"error": str(exc)}, 400
+    return {"processed": processed}, 200
+
+
+@bp.post("/webhooks/paypal")
+@csrf.exempt
+def paypal_webhook() -> tuple[dict[str, bool] | dict[str, str], int]:
+    headers = {key.upper(): value for key, value in request.headers.items()}
+    try:
+        processed = payments.handle_paypal(request.get_data(cache=False), headers)
+    except payments.PaymentError as exc:
+        return {"error": str(exc)}, 400
+    return {"processed": processed}, 200
 
 
 @bp.post("/newsletter")
 def newsletter() -> Response:
-    # Mailchimp is connected in Phase 9; for now acknowledge without storing anything.
-    flash("Thanks for subscribing. Look out for our next email.", "success")
+    if not ratelimit.allow("newsletter", ratelimit.client_key(), 5, 3600):
+        flash("Too many signup attempts. Please try again later.", "error")
+        return redirect(_safe_back(url_for("store.home")))
+    try:
+        email = account_service.normalize_email(request.form.get("email", ""))
+        marketing.subscribe(email)
+    except (account_service.AccountError, marketing.MarketingError) as exc:
+        flash(str(exc), "error")
+    else:
+        flash("Check your email to confirm your subscription.", "success")
     return redirect(_safe_back(url_for("store.home")))
 
 

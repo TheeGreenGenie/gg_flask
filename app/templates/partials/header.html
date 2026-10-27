@@ -54,7 +54,7 @@
 
   <div class="gg-header__nav-row">
     <div class="gg-container gg-header__nav-inner">
-      <details class="gg-allcats" data-gg-dropdown>
+      <details class="gg-allcats" data-gg-dropdown data-gg-hover-menu>
         <summary>{{ icon('menu', 18) }}<span>All categories</span>{{ icon('chevron-down', 16) }}</summary>
         <ul class="gg-allcats__list">
           {% for item in site.MAIN_MENU if item.children %}
@@ -70,14 +70,34 @@
           {% for item in site.MAIN_MENU %}
             <li>
               {% if item.children %}
-                <details class="gg-mainnav__dd" data-gg-dropdown>
+                <details class="gg-mainnav__dd{% if loop.first %} gg-mainnav__mega{% endif %}" data-gg-dropdown data-gg-hover-menu>
                   <summary>{{ item.label }}{{ icon('chevron-down', 12) }}</summary>
-                  <ul>
-                    <li><a href="{{ menu_url(item) }}">Shop all {{ item.label|lower }}</a></li>
-                    {% for label, slug in item.children %}
-                      <li><a href="{{ cat_url(slug) }}">{{ label }}</a></li>
-                    {% endfor %}
-                  </ul>
+                  {% if loop.first %}
+                    <div class="gg-megamenu" aria-label="{{ item.label }} menu">
+                      <section>
+                        <p class="gg-megamenu__eyebrow">Shop authentic prints</p>
+                        <a class="gg-megamenu__heading" href="{{ menu_url(item) }}">All African fabrics</a>
+                        <p>Explore vivid prints, heritage-inspired patterns and limited fabric bundles.</p>
+                      </section>
+                      <section>
+                        <p class="gg-megamenu__title">Browse by print</p>
+                        <ul>{% for label, slug in item.children %}<li><a href="{{ cat_url(slug) }}">{{ label }}</a></li>{% endfor %}</ul>
+                      </section>
+                      <section>
+                        <p class="gg-megamenu__title">Discover</p>
+                        <ul>
+                          <li><a href="{{ url_for('store.find_fabrics') }}">Find Fabrics</a></li>
+                          <li><a href="{{ url_for('store.collection', slug='new-arrivals') }}">New Arrivals</a></li>
+                          <li><a href="{{ url_for('store.collection', slug='sale') }}">Sale</a></li>
+                        </ul>
+                      </section>
+                    </div>
+                  {% else %}
+                    <ul>
+                      <li><a href="{{ menu_url(item) }}">Shop all {{ item.label|lower }}</a></li>
+                      {% for label, slug in item.children %}<li><a href="{{ cat_url(slug) }}">{{ label }}</a></li>{% endfor %}
+                    </ul>
+                  {% endif %}
                 </details>
               {% else %}
                 <a href="{{ menu_url(item) }}">{{ item.label }}</a>

@@ -3,38 +3,32 @@
 {% block title %}Checkout · GG Afrikan Eleganz{% endblock %}
 {% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}">{% endblock %}
 {% block content %}
+<div hidden data-gg-analytics-event='{{ {"name": "begin_checkout", "params": {"currency": "USD", "value": cart.subtotal_cents / 100}}|tojson|forceescape }}'></div>
 {%- macro field(id, label, type='text', autocomplete='', required=true, wide=false, hint='') -%}
   <div class="gg-field{% if wide %} gg-field--wide{% endif %}">
     <label for="{{ id }}">{{ label }}{% if required %} <span class="gg-required" aria-hidden="true">*</span>{% else %} <span class="gg-optional">(optional)</span>{% endif %}</label>
-    <input id="{{ id }}" name="{{ id }}" type="{{ type }}"{% if autocomplete %} autocomplete="{{ autocomplete }}"{% endif %}{% if required %} required{% endif %}{% if hint %} aria-describedby="{{ id }}-hint"{% endif %}>
+    <input id="{{ id }}" name="{{ id }}" type="{{ type }}" value="{{ form.get(id, '') }}"{% if autocomplete %} autocomplete="{{ autocomplete }}"{% endif %}{% if required %} required{% endif %}{% if hint %} aria-describedby="{{ id }}-hint"{% endif %}>
     {% if hint %}<p class="gg-field__hint" id="{{ id }}-hint">{{ hint }}</p>{% endif %}
   </div>
 {%- endmacro -%}
 
-<div class="gg-page-title">
-  <div class="gg-container">
-    <h1>Checkout</h1>
-  </div>
-</div>
-
+<div class="gg-page-title"><div class="gg-container"><h1>Checkout</h1></div></div>
 <div class="gg-container gg-checkout">
   <details class="gg-checkout__mobile-summary">
-    <summary>
-      <span>{{ icon('cart', 18) }} Show order summary {{ icon('chevron-down', 14) }}</span>
-      <strong>{{ cart.subtotal_cents|money }}</strong>
-    </summary>
+    <summary><span>{{ icon('cart', 18) }} Show order summary {{ icon('chevron-down', 14) }}</span><strong>{{ cart.subtotal_cents|money }}</strong></summary>
     {% include "store/_order_summary.html" %}
   </details>
 
-  <form class="gg-checkout__form" method="post" action="#" novalidate>
+  <form class="gg-checkout__form" method="post" action="{{ url_for('store.checkout') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="checkout_nonce" value="{{ checkout_nonce }}">
+    {% if error %}<p class="gg-alert gg-alert--error" role="alert">{{ error }}</p>{% endif %}
+    {% if not configured %}<p class="gg-alert gg-alert--error" role="status">Checkout is not open yet because shipping destinations, shipping price, or tax handling still needs to be configured.</p>{% endif %}
 
     <section class="gg-checkout__step" aria-labelledby="step-contact">
       <h2 id="step-contact"><span class="gg-step-num" aria-hidden="true">1</span> Contact</h2>
-      <div class="gg-fields">
-        {{ field('email', 'Email address', 'email', 'email', wide=true, hint='We’ll send your order confirmation here.') }}
-      </div>
-      <label class="gg-check"><input type="checkbox" name="marketing" value="1"> Email me about new prints and offers</label>
+      <div class="gg-fields">{{ field('email', 'Email address', 'email', 'email', wide=true, hint='We’ll send your order confirmation here.') }}</div>
+      <label class="gg-check"><input type="checkbox" name="marketing" value="1"{% if form.get('marketing') %} checked{% endif %}> Email me about new prints and offers</label>
     </section>
 
     <section class="gg-checkout__step" aria-labelledby="step-shipping">
@@ -46,38 +40,42 @@
         {{ field('address2', 'Apartment, suite, etc.', autocomplete='shipping address-line2', required=false, wide=true) }}
         {{ field('city', 'City', autocomplete='shipping address-level2') }}
         <div class="gg-field">
-          <label for="state">State <span class="gg-required" aria-hidden="true">*</span></label>
-          <select id="state" name="state" autocomplete="shipping address-level1" required>
-            <option value="">Select a state</option>
-            {% for code, name in us_states %}<option value="{{ code }}">{{ name }}</option>{% endfor %}
+          <label for="region">State or region <span class="gg-required" aria-hidden="true">*</span></label>
+          <input id="region" name="region" value="{{ form.get('region', '') }}" list="us-states" autocomplete="shipping address-level1" required>
+          <datalist id="us-states">{% for code, name in us_states %}<option value="{{ code }}">{{ name }}</option>{% endfor %}</datalist>
+        </div>
+        {{ field('postcode', 'Postal code', autocomplete='shipping postal-code') }}
+        {{ field('phone', 'Phone', 'tel', 'shipping tel', required=false, hint='Only used if the carrier needs to reach you.') }}
+        <div class="gg-field gg-field--wide">
+          <label for="country">Country <span class="gg-required" aria-hidden="true">*</span></label>
+          <select id="country" name="country" autocomplete="shipping country" required>
+            <option value="">Select a country</option>
+            {% for code, name in countries %}<option value="{{ code }}"{% if form.get('country') == code %} selected{% endif %}>{{ name }}</option>{% endfor %}
           </select>
         </div>
-        {{ field('postcode', 'ZIP code', autocomplete='shipping postal-code') }}
-        {{ field('phone', 'Phone', 'tel', 'shipping tel', required=false, hint='Only used if the carrier needs to reach you.') }}
       </div>
-      <p class="gg-field__hint">Country: United States</p>
     </section>
 
     <section class="gg-checkout__step" aria-labelledby="step-delivery">
       <h2 id="step-delivery"><span class="gg-step-num" aria-hidden="true">3</span> Delivery</h2>
       <fieldset class="gg-options">
         <legend class="gg-visually-hidden">Shipping method</legend>
-        <label class="gg-option"><input type="radio" name="shipping" value="flat" checked> <span>Flat rate shipping</span> <strong>Rate confirmed in Phase 7</strong></label>
+        <label class="gg-option"><input type="radio" name="shipping" value="flat" checked> <span>{% if shipping_backend == 'shippo' %}USPS shipping<small>Calculated from your address and parcel weight — shown before you pay</small>{% else %}Flat rate shipping{% endif %}{% if local_shipping_cents is not none %}<small>Philadelphia addresses (ZIP 191xx): {{ local_shipping_cents|money }}, applied automatically</small>{% endif %}</span> <strong>{% if shipping_backend == 'shippo' %}Live rate{% elif shipping_cents is not none %}{{ shipping_cents|money }}{% else %}Not configured{% endif %}</strong></label>
       </fieldset>
+      {{ field('coupon', 'Coupon code', required=false, wide=true) }}
     </section>
 
     <section class="gg-checkout__step" aria-labelledby="step-payment">
       <h2 id="step-payment"><span class="gg-step-num" aria-hidden="true">4</span> Payment</h2>
-      <p class="gg-field__hint">{{ icon('lock', 14) }} Card details are entered in a secure Stripe form and never touch our servers.</p>
+      <p class="gg-field__hint">{{ icon('lock', 14) }} Payment details are entered with the selected provider and never stored by us.</p>
       <fieldset class="gg-options">
         <legend class="gg-visually-hidden">Payment method</legend>
-        <label class="gg-option"><input type="radio" name="payment" value="stripe" checked> <span>Card, Apple Pay, Google Pay, Link or Cash App</span></label>
-        <div class="gg-payment-placeholder">Stripe payment form appears here (Phase 7)</div>
-        <label class="gg-option"><input type="radio" name="payment" value="paypal"> <span>PayPal, Venmo or Pay Later</span></label>
+        <label class="gg-option"><input type="radio" name="payment" value="stripe"{% if form.get('payment', 'stripe') == 'stripe' %} checked{% endif %}> <span>Card, Apple Pay, Google Pay, Link or Cash App</span></label>
+        <label class="gg-option"><input type="radio" name="payment" value="paypal"{% if form.get('payment') == 'paypal' %} checked{% endif %}> <span>PayPal, Venmo or Pay Later (when offered)</span></label>
       </fieldset>
-      <label class="gg-check"><input type="checkbox" name="terms" value="1" required> I have read and agree to the <a href="/terms-of-service/">terms &amp; conditions</a> <span class="gg-required" aria-hidden="true">*</span></label>
-      <button class="gg-button gg-button--accent gg-button--block gg-button--lg" type="submit" disabled>Place order</button>
-      <p class="gg-field__hint">Ordering opens when payments are connected (Phase 7).</p>
+      <label class="gg-check"><input type="checkbox" name="terms" value="1" required{% if form.get('terms') %} checked{% endif %}> I have read and agree to the <a href="{{ url_for('content.terms') }}">terms &amp; conditions</a> <span class="gg-required" aria-hidden="true">*</span></label>
+      <button class="gg-button gg-button--accent gg-button--block gg-button--lg" type="submit"{% if not configured %} disabled{% endif %}>Continue to secure payment</button>
+      <p class="gg-field__hint">Your items are reserved for 60 minutes after you continue.</p>
     </section>
   </form>
 

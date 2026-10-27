@@ -142,6 +142,7 @@
 .gg-header__nav-row { border-top: 1px solid var(--gg-line-soft); }
 
 .gg-header__nav-inner {
+	position: relative;
 	display: grid;
 	grid-template-columns: 17rem 1fr;
 	align-items: stretch;
@@ -212,6 +213,7 @@
 }
 
 .gg-mainnav > ul > li { position: relative; }
+.gg-mainnav > ul > li:first-child { position: static; }
 
 .gg-mainnav > ul > li > a,
 .gg-mainnav__dd > summary {
@@ -234,6 +236,31 @@
 .gg-mainnav > ul > li > a:hover,
 .gg-mainnav__dd > summary:hover { color: var(--gg-ink); }
 .gg-mainnav__dd > ul { min-width: 14rem; border-top: 2px solid var(--gg-accent); }
+
+.gg-megamenu {
+	position: absolute;
+	z-index: 60;
+	top: 100%;
+	left: 17rem;
+	right: 0;
+	display: grid;
+	grid-template-columns: 1.25fr 1fr 1fr;
+	gap: clamp(1.5rem, 4vw, 3.5rem);
+	padding: clamp(1.5rem, 3vw, 2.5rem);
+	border: 1px solid var(--gg-line);
+	border-top: 2px solid var(--gg-accent);
+	background: var(--gg-paper);
+	box-shadow: var(--gg-shadow);
+}
+
+.gg-megamenu p { margin: 0; color: var(--gg-muted); line-height: 1.6; }
+.gg-megamenu__eyebrow,
+.gg-megamenu__title { margin-bottom: .7rem !important; color: var(--gg-ink) !important; font-size: .78rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.gg-megamenu__heading { display: inline-block; margin-bottom: .55rem; color: var(--gg-ink); font-family: var(--gg-font-display); font-size: clamp(1.25rem, 2vw, 1.7rem); text-decoration: none; }
+.gg-megamenu ul { display: grid; gap: .2rem; margin: 0; padding: 0; list-style: none; }
+.gg-megamenu li a { display: block; padding: .38rem 0; color: var(--gg-text-soft); font-weight: 700; text-decoration: none; }
+.gg-megamenu a:hover,
+.gg-megamenu a:focus-visible { color: var(--gg-accent-strong); text-decoration: underline; text-underline-offset: .2em; }
 
 /* ---------- Mobile drawer ---------- */
 .gg-drawer {
@@ -529,3 +556,30 @@
 	text-align: left;
 	text-transform: uppercase;
 }
+
+/* Analytics consent banner */
+.gg-consent {
+	position: fixed;
+	z-index: 70;
+	right: 1rem;
+	bottom: 1rem;
+	left: 1rem;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: .75rem 1.5rem;
+	max-width: 52rem;
+	margin-inline: auto;
+	padding: 1rem 1.25rem;
+	border: 1px solid var(--gg-line);
+	border-radius: var(--gg-radius-md);
+	background: var(--gg-paper);
+	box-shadow: var(--gg-shadow);
+}
+
+.gg-consent[hidden] { display: none; }
+.gg-consent p { flex: 1 1 22rem; margin: 0; font-size: .9rem; }
+.gg-consent a { color: var(--gg-link); }
+.gg-consent__actions { display: flex; gap: .5rem; }
+.gg-footer__copyright a { color: inherit; }

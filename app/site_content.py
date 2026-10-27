@@ -66,6 +66,12 @@ SOCIAL_LINKS: Final = (
 CONTACT_EMAIL: Final = "info@ggafrikaneleganz.com"
 CONTACT_PHONE: Final = "+1 215-984-2270"
 
+COUNTRY_NAMES: Final = {
+    "US": "United States",
+    "CA": "Canada",
+    "GB": "United Kingdom",
+}
+
 US_STATES: Final = (
     ("AL", "Alabama"), ("AK", "Alaska"), ("AZ", "Arizona"), ("AR", "Arkansas"),
     ("CA", "California"), ("CO", "Colorado"), ("CT", "Connecticut"), ("DE", "Delaware"),

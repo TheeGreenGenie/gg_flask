@@ -14,17 +14,21 @@ from flask import (
     Blueprint,
     Flask,
     abort,
+    current_app,
     flash,
     redirect,
     render_template,
     request,
     url_for,
 )
+from sqlalchemy import select
 from werkzeug.wrappers import Response
 
+from app import site_content
 from app.accounts import service
-from app.accounts.models import Channel, User
+from app.accounts.models import Address, Channel, StoredPaymentMethod, User
 from app.extensions import db
+from app.orders.models import Order
 
 bp = Blueprint("accounts", __name__, url_prefix="/account")
 
@@ -202,6 +206,109 @@ def delete() -> Response:
         return redirect(url_for("accounts.dashboard") + "#delete")
     flash("Your account and its details have been deleted.", "success")
     return redirect(url_for("store.home"))
+
+
+# ---------- addresses, orders and provider payment references ----------
+
+
+@bp.get("/addresses")
+@login_required
+def addresses() -> str:
+    return render_template("accounts/addresses.html", user=_user())
+
+
+@bp.route("/addresses/new", methods=["GET", "POST"])
+@bp.route("/addresses/<int:address_id>", methods=["GET", "POST"])
+@login_required
+def address_edit(address_id: int | None = None) -> str | Response:
+    user = _user()
+    address = (
+        db.session.scalar(
+            select(Address).where(Address.id == address_id, Address.user_id == user.id)
+        )
+        if address_id is not None
+        else None
+    )
+    if address_id is not None and address is None:
+        abort(404)
+    error = ""
+    if request.method == "POST":
+        try:
+            address = service.save_address(user, address, request.form.to_dict())
+        except service.AccountError as exc:
+            db.session.rollback()
+            error = str(exc)
+        else:
+            flash("Address saved.", "success")
+            return redirect(url_for("accounts.addresses"))
+    countries = [
+        (code, site_content.COUNTRY_NAMES.get(code, code))
+        for code in current_app.config.get("SUPPORTED_COUNTRIES", ())
+    ]
+    return render_template(
+        "accounts/address.html",
+        user=user,
+        address=address,
+        countries=countries,
+        error=error,
+        form=request.form,
+    )
+
+
+@bp.post("/addresses/<int:address_id>/delete")
+@login_required
+def address_delete(address_id: int) -> Response:
+    user = _user()
+    address = db.session.scalar(
+        select(Address).where(Address.id == address_id, Address.user_id == user.id)
+    )
+    if address is None:
+        abort(404)
+    service.delete_address(user, address)
+    flash("Address removed.", "success")
+    return redirect(url_for("accounts.addresses"))
+
+
+@bp.get("/orders")
+@login_required
+def orders() -> str:
+    records = db.session.scalars(
+        select(Order).where(Order.user_id == _user().id).order_by(Order.created_at.desc())
+    ).all()
+    return render_template("accounts/orders.html", user=_user(), orders=records)
+
+
+@bp.get("/orders/<public_id>")
+@login_required
+def order(public_id: str) -> str:
+    record = db.session.scalar(
+        select(Order).where(Order.public_id == public_id, Order.user_id == _user().id)
+    )
+    if record is None:
+        abort(404)
+    return render_template("accounts/order.html", user=_user(), order=record)
+
+
+@bp.get("/payment-methods")
+@login_required
+def payment_methods() -> str:
+    return render_template("accounts/payment_methods.html", user=_user())
+
+
+@bp.post("/payment-methods/<int:method_id>/delete")
+@login_required
+def payment_method_delete(method_id: int) -> Response:
+    method = db.session.scalar(
+        select(StoredPaymentMethod).where(
+            StoredPaymentMethod.id == method_id, StoredPaymentMethod.user_id == _user().id
+        )
+    )
+    if method is None:
+        abort(404)
+    db.session.delete(method)
+    db.session.commit()
+    flash("Saved payment method removed from this account.", "success")
+    return redirect(url_for("accounts.payment_methods"))
 
 
 # ---------- password reset ----------

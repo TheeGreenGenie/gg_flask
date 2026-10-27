@@ -1,0 +1,11 @@
+{% extends "accounts/_base.html" %}
+{% block title %}Address book · GG Afrikan Eleganz{% endblock %}
+{% block heading %}Address book{% endblock %}
+{% block lede %}<p class="gg-page-title__lede">Save up to 20 delivery addresses.</p>{% endblock %}
+{% block body %}
+<p><a class="gg-link" href="{{ url_for('accounts.dashboard') }}">← My account</a></p>
+<p><a class="gg-button gg-button--accent" href="{{ url_for('accounts.address_edit') }}">Add an address</a></p>
+<div class="gg-account__grid">
+{% for address in user.addresses %}<article class="gg-account__card"><h2>{{ address.label }}{% if address.is_default %} <small>(default)</small>{% endif %}</h2><address>{{ address.first_name }} {{ address.last_name }}<br>{{ address.address1 }}{% if address.address2 %}<br>{{ address.address2 }}{% endif %}<br>{{ address.city }}, {{ address.region }} {{ address.postcode }}<br>{{ address.country }}{% if address.phone %}<br>{{ address.phone }}{% endif %}</address><p><a class="gg-link" href="{{ url_for('accounts.address_edit', address_id=address.id) }}">Edit</a></p><form method="post" action="{{ url_for('accounts.address_delete', address_id=address.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="gg-button gg-button--outline" type="submit">Remove</button></form></article>{% else %}<p>You have no saved addresses.</p>{% endfor %}
+</div>
+{% endblock %}

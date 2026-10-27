@@ -46,8 +46,17 @@ collections:
 - slug: bhm-collection
   name: BHM Collection
   description: Celebrating Black History Month.
+- slug: final-cut
+  name: Final Cut
+  description: Last pieces of favourite prints.
+- slug: ankara-plus
+  name: Ankara Plus
+  description: ''
 - slug: classic-designs
   name: Classic Designs
+  description: ''
+- slug: floral-designs
+  name: Floral Designs
   description: ''
 products:
 - slug: adire-print-101219
@@ -75,7 +84,7 @@ products:
     alt: Adire Print - Orange & Tan - 101219
   options: []
   variants:
-  - sku: GG-30034
+  - sku: '101219'
     price_cents: 4000
     stock: 10
   colors:
@@ -106,7 +115,7 @@ products:
     alt: Adire Print - Pink & Cream - 101218
   options: []
   variants:
-  - sku: GG-30032
+  - sku: '101218'
     price_cents: 4000
     stock: 10
   colors:
@@ -137,7 +146,7 @@ products:
     alt: Adire Print - Cream - 101217
   options: []
   variants:
-  - sku: GG-30030
+  - sku: '101217'
     price_cents: 4000
     stock: 10
   colors:
@@ -167,7 +176,7 @@ products:
     alt: Adire Print - Burgundy & Cream - 101216
   options: []
   variants:
-  - sku: GG-30028
+  - sku: '101216'
     price_cents: 4000
     stock: 10
   colors:
@@ -198,12 +207,261 @@ products:
     alt: Adire Print - Gold & Brown - 101215
   options: []
   variants:
-  - sku: GG-30026
+  - sku: '101215'
     price_cents: 4000
     stock: 10
   colors:
   - Gold
   - Brown
+- slug: adire-print-101214
+  name: Adire Print - Navy & Teal - 101214
+  type: fabric
+  status: active
+  featured: true
+  published: 2025-01-30
+  legacy_wp_id: 30023
+  summary: Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments, headwraps,
+    and crafts.
+  description: 'Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments,
+    headwraps, and crafts.
+
+    Elevate your style with tradition and artistry.
+
+    100% Cotton.
+
+    Comes in 4 1/2 yards pack,'
+  categories:
+  - adire
+  collections: []
+  images:
+  - file: products/adire-print-101214/01.webp
+    alt: Adire Print - Navy & Teal - 101214
+  options: []
+  variants:
+  - sku: '101214'
+    price_cents: 4000
+    stock: 10
+  colors:
+  - Navy
+  - Teal
+- slug: adire-print-101213
+  name: Adire Print - Brown & Cream - 101213
+  type: fabric
+  status: active
+  featured: true
+  published: 2025-01-30
+  legacy_wp_id: 30020
+  summary: Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments, headwraps,
+    and crafts.
+  description: 'Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments,
+    headwraps, and crafts.
+
+    Elevate your style with tradition and artistry.
+
+    100% Cotton.
+
+    Comes in 4 1/2 yards pack,'
+  categories:
+  - adire
+  collections: []
+  images:
+  - file: products/adire-print-101213/01.webp
+    alt: Adire Print - Brown & Cream - 101213
+  options: []
+  variants:
+  - sku: '101213'
+    price_cents: 4000
+    stock: 10
+  colors:
+  - Brown
+  - Cream
+- slug: adire-print-101210
+  name: Adire Print - Cream & Brown - 101210
+  type: fabric
+  status: active
+  featured: true
+  published: 2025-01-30
+  legacy_wp_id: 30012
+  summary: Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments, headwraps,
+    and crafts.
+  description: 'Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments,
+    headwraps, and crafts.
+
+    Elevate your style with tradition and artistry.
+
+    100% Cotton.
+
+    Comes in 4 1/2 yards pack,'
+  categories:
+  - adire
+  collections: []
+  images:
+  - file: products/adire-print-101210/01.webp
+    alt: Adire Print - Cream & Brown - 101210
+  options: []
+  variants:
+  - sku: '101210'
+    price_cents: 4000
+    stock: 10
+  colors:
+  - Cream
+  - Brown
+- slug: adire-print-101208
+  name: Adire Print - Teal & Cream - 101208
+  type: fabric
+  status: active
+  featured: false
+  published: 2025-01-30
+  legacy_wp_id: 30009
+  summary: Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments, headwraps,
+    and crafts.
+  description: 'Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments,
+    headwraps, and crafts.
+
+    Elevate your style with tradition and artistry.
+
+    100% Cotton.
+
+    Comes in 4 1/2 yards pack,'
+  categories:
+  - adire
+  collections: []
+  images:
+  - file: products/adire-print-101208/01.webp
+    alt: Adire Print - Teal & Cream - 101208
+  options: []
+  variants:
+  - sku: '101208'
+    price_cents: 4000
+    stock: 10
+  colors:
+  - Teal
+  - Cream
+- slug: adire-print-101207
+  name: Adire Print - Navy & Cream - 101207
+  type: fabric
+  status: active
+  featured: false
+  published: 2025-01-30
+  legacy_wp_id: 30007
+  summary: Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments, headwraps,
+    and crafts.
+  description: 'Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments,
+    headwraps, and crafts.
+
+    Elevate your style with tradition and artistry.
+
+    100% Cotton.
+
+    Comes in 4 1/2 yards pack,'
+  categories:
+  - adire
+  collections: []
+  images:
+  - file: products/adire-print-101207/01.webp
+    alt: Adire Print - Navy & Cream - 101207
+  options: []
+  variants:
+  - sku: '101207'
+    price_cents: 4000
+    stock: 10
+  colors:
+  - Navy
+  - Cream
+- slug: adire-print-101206
+  name: Adire Print - Navy & Teal - 101206
+  type: fabric
+  status: active
+  featured: false
+  published: 2025-01-30
+  legacy_wp_id: 30005
+  summary: Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments, headwraps,
+    and crafts.
+  description: 'Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments,
+    headwraps, and crafts.
+
+    Elevate your style with tradition and artistry.
+
+    100% Cotton.
+
+    Comes in 4 1/2 yards pack,'
+  categories:
+  - adire
+  collections: []
+  images:
+  - file: products/adire-print-101206/01.webp
+    alt: Adire Print - Navy & Teal - 101206
+  options: []
+  variants:
+  - sku: '101206'
+    price_cents: 4000
+    stock: 10
+  colors:
+  - Navy
+  - Teal
+- slug: adire-print-101205
+  name: Adire Print - Navy & Teal - 101205
+  type: fabric
+  status: active
+  featured: false
+  published: 2025-01-30
+  legacy_wp_id: 29981
+  summary: Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments, headwraps,
+    and crafts.
+  description: 'Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments,
+    headwraps, and crafts.
+
+    Elevate your style with tradition and artistry.
+
+    100% Cotton.
+
+    Comes in 4 1/2 yards pack,'
+  categories:
+  - adire
+  collections: []
+  images:
+  - file: products/adire-print-101205/01.webp
+    alt: Adire Print - Navy & Teal - 101205
+  options: []
+  variants:
+  - sku: '101205'
+    price_cents: 4000
+    stock: 10
+  colors:
+  - Navy
+  - Teal
+- slug: adire-print-101204
+  name: Adire Print - Navy & Teal - 101204
+  type: fabric
+  status: active
+  featured: false
+  published: 2025-01-26
+  legacy_wp_id: 29970
+  summary: Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments, headwraps,
+    and crafts.
+  description: 'Authentic Nigerian tie-dye fabric with vibrant, unique patterns perfect for garments,
+    headwraps, and crafts.
+
+    Elevate your style with tradition and artistry.
+
+
+    100% Cotton.
+
+    Comes in 4 1/2 yards pack,'
+  categories:
+  - adire
+  collections: []
+  images:
+  - file: products/adire-print-101204/01.webp
+    alt: Adire Print - Navy & Teal - 101204
+  options: []
+  variants:
+  - sku: '101204'
+    price_cents: 4000
+    stock: 10
+  colors:
+  - Navy
+  - Teal
 - slug: african-ankara-print-101188
   name: African Ankara Print - Brown & Orange - 101188
   type: fabric
@@ -231,7 +489,7 @@ products:
     alt: African Ankara Print - Brown & Orange - 101188
   options: []
   variants:
-  - sku: GG-29517
+  - sku: '101188'
     price_cents: 899
     stock: 10
   colors:
@@ -264,7 +522,7 @@ products:
     alt: African Ankara Print - Brown & Olive - 101187
   options: []
   variants:
-  - sku: GG-29513
+  - sku: '101187'
     price_cents: 899
     stock: 10
   colors:
@@ -297,7 +555,7 @@ products:
     alt: African Ankara Print - Brown & Gold - 101186
   options: []
   variants:
-  - sku: GG-29510
+  - sku: '101186'
     price_cents: 899
     stock: 10
   colors:
@@ -330,7 +588,7 @@ products:
     alt: African Ankara Print - Multicolor - 101185
   options: []
   variants:
-  - sku: GG-29507
+  - sku: '101185'
     price_cents: 899
     stock: 10
   colors:
@@ -362,12 +620,4766 @@ products:
     alt: African Ankara Print - Navy & Gold - 101184
   options: []
   variants:
-  - sku: GG-29499
+  - sku: '101184'
     price_cents: 899
     stock: 10
   colors:
   - Navy
   - Gold
+- slug: african-ankara-print-101183
+  name: African Ankara Print - Yellow & Red - 101183
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-09-29
+  legacy_wp_id: 29497
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections:
+  - classic-designs
+  images:
+  - file: products/african-ankara-print-101183/01.webp
+    alt: African Ankara Print - Yellow & Red - 101183
+  options: []
+  variants:
+  - sku: '101183'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Yellow
+  - Red
+- slug: floral-pattern-101182
+  name: African Ankara Print - Brown & Olive - 101182
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-09-29
+  legacy_wp_id: 29495
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections:
+  - floral-designs
+  images:
+  - file: products/floral-pattern-101182/01.webp
+    alt: African Ankara Print - Brown & Olive - 101182
+  options: []
+  variants:
+  - sku: '101182'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Olive
+- slug: african-ankara-print-101181
+  name: African Ankara Print - Gold & Brown - 101181
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-09-29
+  legacy_wp_id: 29493
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections:
+  - floral-designs
+  images:
+  - file: products/african-ankara-print-101181/01.webp
+    alt: African Ankara Print - Gold & Brown - 101181
+  options: []
+  variants:
+  - sku: '101181'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Gold
+  - Brown
+- slug: african-ankara-print-101180
+  name: African Ankara Print - Teal & Navy - 101180
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-09-29
+  legacy_wp_id: 29490
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections:
+  - floral-designs
+  images:
+  - file: products/african-ankara-print-101180/01.webp
+    alt: African Ankara Print - Teal & Navy - 101180
+  options: []
+  variants:
+  - sku: '101180'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Teal
+  - Navy
+- slug: african-ankara-print-101179
+  name: African Ankara Print - Gold & Teal - 101179
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-09-29
+  legacy_wp_id: 29488
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections:
+  - floral-designs
+  images:
+  - file: products/african-ankara-print-101179/01.webp
+    alt: African Ankara Print - Gold & Teal - 101179
+  options: []
+  variants:
+  - sku: '101179'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Gold
+  - Teal
+- slug: african-ankara-print-101178
+  name: African Ankara Print - Brown & Yellow - 101178
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-09-23
+  legacy_wp_id: 29452
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections:
+  - floral-designs
+  images:
+  - file: products/african-ankara-print-101178/01.webp
+    alt: African Ankara Print - Brown & Yellow - 101178
+  options: []
+  variants:
+  - sku: '101178'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Yellow
+- slug: african-ankara-print-101168
+  name: African Ankara Print - Brown & Yellow - 101168
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-11
+  legacy_wp_id: 29189
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101168/01.webp
+    alt: African Ankara Print - Brown & Yellow - 101168
+  options: []
+  variants:
+  - sku: '101168'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Yellow
+- slug: african-ankara-print-101167
+  name: African Ankara Print - Olive & Brown - 101167
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-11
+  legacy_wp_id: 29187
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101167/01.webp
+    alt: African Ankara Print - Olive & Brown - 101167
+  options: []
+  variants:
+  - sku: '101167'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Olive
+  - Brown
+- slug: african-ankara-print-101169
+  name: African Ankara Print - Navy - 101169
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-11
+  legacy_wp_id: 29185
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101169/01.webp
+    alt: African Ankara Print - Navy - 101169
+  options: []
+  variants:
+  - sku: '101169'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+- slug: african-ankara-print-101166
+  name: African Ankara Print - Navy - 101166
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-11
+  legacy_wp_id: 29182
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101166/01.webp
+    alt: African Ankara Print - Navy - 101166
+  options: []
+  variants:
+  - sku: '101166'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+- slug: african-ankara-print-101170
+  name: African Ankara Print - Teal & Yellow - 101170
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-11
+  legacy_wp_id: 29180
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101170/01.webp
+    alt: African Ankara Print - Teal & Yellow - 101170
+  options: []
+  variants:
+  - sku: '101170'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Teal
+  - Yellow
+- slug: african-ankara-print-101171
+  name: African Ankara Print - Red & Burgundy - 101171
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-11
+  legacy_wp_id: 29177
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101171/01.webp
+    alt: African Ankara Print - Red & Burgundy - 101171
+  options: []
+  variants:
+  - sku: '101171'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Red
+  - Burgundy
+- slug: african-ankara-print-101165
+  name: African Ankara Print - Red & Burgundy - 101165
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-11
+  legacy_wp_id: 29176
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101165/01.webp
+    alt: African Ankara Print - Red & Burgundy - 101165
+  options: []
+  variants:
+  - sku: '101165'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Red
+  - Burgundy
+- slug: african-ankara-print-101172
+  name: African Ankara Print - Navy - 101172
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-11
+  legacy_wp_id: 29174
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101172/01.webp
+    alt: African Ankara Print - Navy - 101172
+  options: []
+  variants:
+  - sku: '101172'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+- slug: african-ankara-print-101173
+  name: African Ankara Print - Brown & Burgundy - 101173
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-11
+  legacy_wp_id: 29172
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101173/01.webp
+    alt: African Ankara Print - Brown & Burgundy - 101173
+  options: []
+  variants:
+  - sku: '101173'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Burgundy
+- slug: african-ankara-print-101174
+  name: African Ankara Print - Brown & Cream - 101174
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-11
+  legacy_wp_id: 29170
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101174/01.webp
+    alt: African Ankara Print - Brown & Cream - 101174
+  options: []
+  variants:
+  - sku: '101174'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Cream
+- slug: african-ankara-print-101175
+  name: African Ankara Print - Orange & Brown - 101175
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-11
+  legacy_wp_id: 29168
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101175/01.webp
+    alt: African Ankara Print - Orange & Brown - 101175
+  options: []
+  variants:
+  - sku: '101175'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Orange
+  - Brown
+- slug: african-ankara-print-101176
+  name: African Ankara Print - Teal & Cream - 101176
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-11
+  legacy_wp_id: 29166
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101176/01.webp
+    alt: African Ankara Print - Teal & Cream - 101176
+  options: []
+  variants:
+  - sku: '101176'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Teal
+  - Cream
+- slug: african-ankara-print-101177
+  name: African Ankara Print - Navy & Burgundy - 101177
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-11
+  legacy_wp_id: 29164
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101177/01.webp
+    alt: African Ankara Print - Navy & Burgundy - 101177
+  options: []
+  variants:
+  - sku: '101177'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Burgundy
+- slug: african-ankara-print-101164
+  name: African Ankara Print - Teal & Navy - 101164
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-11
+  legacy_wp_id: 29162
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101164/01.webp
+    alt: African Ankara Print - Teal & Navy - 101164
+  options: []
+  variants:
+  - sku: '101164'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Teal
+  - Navy
+- slug: african-ankara-print-101163
+  name: African Ankara Print - Navy - 101163
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-11
+  legacy_wp_id: 29160
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101163/01.webp
+    alt: African Ankara Print - Navy - 101163
+  options: []
+  variants:
+  - sku: '101163'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+- slug: african-ankara-print-101162
+  name: African Ankara Print - Cream & Navy - 101162
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-11
+  legacy_wp_id: 29158
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101162/01.webp
+    alt: African Ankara Print - Cream & Navy - 101162
+  options: []
+  variants:
+  - sku: '101162'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Cream
+  - Navy
+- slug: african-ankara-print-101161
+  name: African Ankara Print - Brown & Yellow - 101161
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-11
+  legacy_wp_id: 29136
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101161/01.webp
+    alt: African Ankara Print - Brown & Yellow - 101161
+  options: []
+  variants:
+  - sku: '101161'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Yellow
+- slug: african-ankara-print-101160
+  name: African Ankara Print - Brown & Navy - 101160
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29116
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101160/01.webp
+    alt: African Ankara Print - Brown & Navy - 101160
+  options: []
+  variants:
+  - sku: '101160'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Navy
+- slug: african-ankara-print-101159
+  name: African Ankara Print - Cream & Brown - 101159
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29114
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101159/01.webp
+    alt: African Ankara Print - Cream & Brown - 101159
+  options: []
+  variants:
+  - sku: '101159'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Cream
+  - Brown
+- slug: african-ankara-print-101158
+  name: African Ankara Print - Navy & Cream - 101158
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29112
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101158/01.webp
+    alt: African Ankara Print - Navy & Cream - 101158
+  options: []
+  variants:
+  - sku: '101158'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Cream
+- slug: african-ankara-print-101157
+  name: African Ankara Print - Navy & Yellow - 101157
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29109
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101157/01.webp
+    alt: African Ankara Print - Navy & Yellow - 101157
+  options: []
+  variants:
+  - sku: '101157'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Yellow
+- slug: african-ankara-print-101155
+  name: African Ankara Print - Pink & Navy - 101155
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29107
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101155/01.webp
+    alt: African Ankara Print - Pink & Navy - 101155
+  options: []
+  variants:
+  - sku: '101155'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Pink
+  - Navy
+- slug: african-ankara-print-101156
+  name: African Ankara Print - Teal & Brown - 101156
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29105
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101156/01.webp
+    alt: African Ankara Print - Teal & Brown - 101156
+  options: []
+  variants:
+  - sku: '101156'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Teal
+  - Brown
+- slug: african-ankara-print-101154
+  name: African Ankara Print - Navy & Blue - 101154
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29103
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101154/01.webp
+    alt: African Ankara Print - Navy & Blue - 101154
+  options: []
+  variants:
+  - sku: '101154'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Blue
+- slug: african-ankara-print-101153
+  name: African Ankara Print - Yellow & Brown - 101153
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29101
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101153/01.webp
+    alt: African Ankara Print - Yellow & Brown - 101153
+  options: []
+  variants:
+  - sku: '101153'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Yellow
+  - Brown
+- slug: african-ankara-print-101152
+  name: African Ankara Print - Multicolor - 101152
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29099
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101152/01.webp
+    alt: African Ankara Print - Multicolor - 101152
+  options: []
+  variants:
+  - sku: '101152'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Multicolor
+- slug: african-ankara-print-101151
+  name: African Ankara Print - Navy & Burgundy - 101151
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29097
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101151/01.webp
+    alt: African Ankara Print - Navy & Burgundy - 101151
+  options: []
+  variants:
+  - sku: '101151'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Burgundy
+- slug: african-ankara-print-101150
+  name: African Ankara Print - Brown & Burgundy - 101150
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29095
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101150/01.webp
+    alt: African Ankara Print - Brown & Burgundy - 101150
+  options: []
+  variants:
+  - sku: '101150'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Burgundy
+- slug: african-ankara-print-101149
+  name: African Ankara Print - Burgundy & Cream - 101149
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29093
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101149/01.webp
+    alt: African Ankara Print - Burgundy & Cream - 101149
+  options: []
+  variants:
+  - sku: '101149'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Burgundy
+  - Cream
+- slug: african-ankara-print-101148
+  name: African Ankara Print - Cream & Black - 101148
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29091
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101148/01.webp
+    alt: African Ankara Print - Cream & Black - 101148
+  options: []
+  variants:
+  - sku: '101148'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Cream
+  - Black
+- slug: african-ankara-print-101147
+  name: African Ankara Print - Navy & Cream - 101147
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29089
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101147/01.webp
+    alt: African Ankara Print - Navy & Cream - 101147
+  options: []
+  variants:
+  - sku: '101147'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Cream
+- slug: african-ankara-print-101146
+  name: African Ankara Print - Burgundy & Brown - 101146
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29087
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101146/01.webp
+    alt: African Ankara Print - Burgundy & Brown - 101146
+  options: []
+  variants:
+  - sku: '101146'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Burgundy
+  - Brown
+- slug: african-ankara-print-101145
+  name: African Ankara Print - Navy & Brown - 101145
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29085
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101145/01.webp
+    alt: African Ankara Print - Navy & Brown - 101145
+  options: []
+  variants:
+  - sku: '101145'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Brown
+- slug: african-ankara-print-101144
+  name: African Ankara Print - Brown & Navy - 101144
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29083
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101144/01.webp
+    alt: African Ankara Print - Brown & Navy - 101144
+  options: []
+  variants:
+  - sku: '101144'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Navy
+- slug: african-ankara-print-101143
+  name: African Ankara Print - Navy & Teal - 101143
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29081
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101143/01.webp
+    alt: African Ankara Print - Navy & Teal - 101143
+  options: []
+  variants:
+  - sku: '101143'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Teal
+- slug: african-ankara-print-101142
+  name: African Ankara Print - Red & Cream - 101142
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29060
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101142/01.webp
+    alt: African Ankara Print - Red & Cream - 101142
+  options: []
+  variants:
+  - sku: '101142'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Red
+  - Cream
+- slug: african-ankara-print-101141
+  name: African Ankara Print - Navy & Cream - 101141
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29056
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101141/01.webp
+    alt: African Ankara Print - Navy & Cream - 101141
+  options: []
+  variants:
+  - sku: '101141'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Cream
+- slug: african-ankara-print-101140
+  name: African Ankara Print - Teal & Navy - 101140
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29054
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - final-cut
+  images:
+  - file: products/african-ankara-print-101140/01.webp
+    alt: African Ankara Print - Teal & Navy - 101140
+  options: []
+  variants:
+  - sku: '101140'
+    price_cents: 799
+    stock: 10
+  colors:
+  - Teal
+  - Navy
+- slug: african-ankara-print-101139
+  name: African Ankara Print - Burgundy & Red - 101139
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29052
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - final-cut
+  images:
+  - file: products/african-ankara-print-101139/01.webp
+    alt: African Ankara Print - Burgundy & Red - 101139
+  options: []
+  variants:
+  - sku: '101139'
+    price_cents: 799
+    stock: 10
+  colors:
+  - Burgundy
+  - Red
+- slug: african-ankara-print-101138
+  name: African Ankara Print - Navy & Cream - 101138
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29045
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - final-cut
+  images:
+  - file: products/african-ankara-print-101138/01.webp
+    alt: African Ankara Print - Navy & Cream - 101138
+  options: []
+  variants:
+  - sku: '101138'
+    price_cents: 799
+    stock: 10
+  colors:
+  - Navy
+  - Cream
+- slug: african-ankara-print-101137
+  name: African Ankara Print - Burgundy & Cream - 101137
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29043
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - final-cut
+  images:
+  - file: products/african-ankara-print-101137/01.webp
+    alt: African Ankara Print - Burgundy & Cream - 101137
+  options: []
+  variants:
+  - sku: '101137'
+    price_cents: 799
+    stock: 0
+  colors:
+  - Burgundy
+  - Cream
+- slug: african-ankara-print-101136
+  name: African Ankara Print - Red & Navy - 101136
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29040
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - final-cut
+  images:
+  - file: products/african-ankara-print-101136/01.webp
+    alt: African Ankara Print - Red & Navy - 101136
+  options: []
+  variants:
+  - sku: '101136'
+    price_cents: 799
+    stock: 10
+  colors:
+  - Red
+  - Navy
+- slug: african-ankara-print-101135
+  name: African Ankara Print - Multicolor - 101135
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-08-05
+  legacy_wp_id: 29025
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - final-cut
+  images:
+  - file: products/african-ankara-print-101135/01.webp
+    alt: African Ankara Print - Multicolor - 101135
+  options: []
+  variants:
+  - sku: '101135'
+    price_cents: 799
+    stock: 10
+  colors:
+  - Multicolor
+- slug: african-ankara-print-101134-3
+  name: African Ankara Print - Brown & Gold - 101134-3
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-24
+  legacy_wp_id: 28819
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 3 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101134-3/01.webp
+    alt: African Ankara Print - Brown & Gold - 101134-3
+  options: []
+  variants:
+  - sku: 101134-3
+    price_cents: 2100
+    compare_at_cents: 2300
+    stock: 10
+  colors:
+  - Brown
+  - Gold
+- slug: african-ankara-print-101133-3
+  name: African Ankara Print - Multicolor - 101133-3
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-24
+  legacy_wp_id: 28817
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 3 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101133-3/01.webp
+    alt: African Ankara Print - Multicolor - 101133-3
+  options: []
+  variants:
+  - sku: 101133-3
+    price_cents: 2100
+    compare_at_cents: 2300
+    stock: 10
+  colors:
+  - Multicolor
+- slug: african-ankara-print-101132-3
+  name: African Ankara Print - Burgundy & Cream - 101132-3
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-24
+  legacy_wp_id: 28814
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 3 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101132-3/01.webp
+    alt: African Ankara Print - Burgundy & Cream - 101132-3
+  options: []
+  variants:
+  - sku: 101132-3
+    price_cents: 2100
+    compare_at_cents: 2300
+    stock: 10
+  colors:
+  - Burgundy
+  - Cream
+- slug: african-ankara-print-101130-3
+  name: African Ankara Print - Brown & Cream - 101130-3
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-24
+  legacy_wp_id: 28810
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 3 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101130-3/01.webp
+    alt: African Ankara Print - Brown & Cream - 101130-3
+  options: []
+  variants:
+  - sku: 101130-3
+    price_cents: 2100
+    compare_at_cents: 2300
+    stock: 10
+  colors:
+  - Brown
+  - Cream
+- slug: african-ankara-print-101129-3
+  name: African Ankara Print - Multicolor - 101129-3
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-24
+  legacy_wp_id: 28806
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 3 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101129-3/01.webp
+    alt: African Ankara Print - Multicolor - 101129-3
+  options: []
+  variants:
+  - sku: 101129-3
+    price_cents: 2100
+    compare_at_cents: 2300
+    stock: 10
+  colors:
+  - Multicolor
+- slug: african-ankara-print-101128-3
+  name: African Ankara Print - Gold & Olive - 101128-3
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-24
+  legacy_wp_id: 28804
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 3 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - bhm-collection
+  images:
+  - file: products/african-ankara-print-101128-3/01.webp
+    alt: African Ankara Print - Gold & Olive - 101128-3
+  options: []
+  variants:
+  - sku: 101128-3
+    price_cents: 2100
+    compare_at_cents: 2300
+    stock: 10
+  colors:
+  - Gold
+  - Olive
+- slug: african-ankara-print-101127-3
+  name: African Ankara Print - Brown & Burgundy - 101127-3
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-24
+  legacy_wp_id: 28802
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 3 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101127-3/01.webp
+    alt: African Ankara Print - Brown & Burgundy - 101127-3
+  options: []
+  variants:
+  - sku: 101127-3
+    price_cents: 2100
+    compare_at_cents: 2300
+    stock: 10
+  colors:
+  - Brown
+  - Burgundy
+- slug: african-ankara-print-101126-3
+  name: African Ankara Print - Multicolor - 101126-3
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-24
+  legacy_wp_id: 28800
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 3 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101126-3/01.webp
+    alt: African Ankara Print - Multicolor - 101126-3
+  options: []
+  variants:
+  - sku: 101126-3
+    price_cents: 2100
+    compare_at_cents: 2300
+    stock: 10
+  colors:
+  - Multicolor
+- slug: african-ankara-print-101125-3
+  name: African Ankara Print - Navy & Red - 101125-3
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-24
+  legacy_wp_id: 28798
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 3 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101125-3/01.webp
+    alt: African Ankara Print - Navy & Red - 101125-3
+  options: []
+  variants:
+  - sku: 101125-3
+    price_cents: 2100
+    compare_at_cents: 2300
+    stock: 10
+  colors:
+  - Navy
+  - Red
+- slug: african-ankara-print-101124-3
+  name: African Ankara Print - Teal & Brown - 101124-3
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-24
+  legacy_wp_id: 28792
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 3 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101124-3/01.webp
+    alt: African Ankara Print - Teal & Brown - 101124-3
+  options: []
+  variants:
+  - sku: 101124-3
+    price_cents: 2100
+    compare_at_cents: 2300
+    stock: 10
+  colors:
+  - Teal
+  - Brown
+- slug: african-ankara-print-101123-3
+  name: African Ankara Print - Cream & Navy - 101123-3
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-24
+  legacy_wp_id: 28791
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 3 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101123-3/01.webp
+    alt: African Ankara Print - Cream & Navy - 101123-3
+  options: []
+  variants:
+  - sku: 101123-3
+    price_cents: 2100
+    compare_at_cents: 2300
+    stock: 10
+  colors:
+  - Cream
+  - Navy
+- slug: african-ankara-print-101122-3
+  name: African Ankara Print - Navy & Cream - 101122-3
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-24
+  legacy_wp_id: 28768
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 3 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101122-3/01.webp
+    alt: African Ankara Print - Navy & Cream - 101122-3
+  options: []
+  variants:
+  - sku: 101122-3
+    price_cents: 2100
+    compare_at_cents: 2300
+    stock: 10
+  colors:
+  - Navy
+  - Cream
+- slug: african-ankara-print-101121-3
+  name: African Ankara Print - Teal & Green - 101121-3
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-22
+  legacy_wp_id: 28763
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 3 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101121-3/01.webp
+    alt: African Ankara Print - Teal & Green - 101121-3
+  options: []
+  variants:
+  - sku: 101121-3
+    price_cents: 2100
+    compare_at_cents: 2300
+    stock: 10
+  colors:
+  - Teal
+  - Green
+- slug: african-ankara-print-101120-3
+  name: African Ankara Print - Teal & Navy - 101120-3
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-22
+  legacy_wp_id: 28759
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 3 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101120-3/01.webp
+    alt: African Ankara Print - Teal & Navy - 101120-3
+  - file: products/african-ankara-print-101120-3/02.webp
+    alt: African Ankara Print - Teal & Navy - 101120-3
+  options: []
+  variants:
+  - sku: 101120-3
+    price_cents: 2100
+    compare_at_cents: 2300
+    stock: 10
+  colors:
+  - Teal
+  - Navy
+- slug: african-ankara-print-101119
+  name: African Ankara Print - Teal & Green - 101119
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-17
+  legacy_wp_id: 28711
+  summary: Authentic African Ankara Wax Print Fabric.
+  description: 'Authentic African Ankara Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101119/01.webp
+    alt: African Ankara Print - Teal & Green - 101119
+  options: []
+  variants:
+  - sku: '101119'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Teal
+  - Green
+- slug: african-ankara-print-101118
+  name: African Ankara Print - Multicolor - 101118
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28709
+  summary: Authentic African Ankara Wax Print Fabric.
+  description: 'Authentic African Ankara Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101118/01.webp
+    alt: African Ankara Print - Multicolor - 101118
+  options: []
+  variants:
+  - sku: '101118'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Multicolor
+- slug: african-ankara-print-101117
+  name: African Ankara Print - Orange & Brown - 101117
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28707
+  summary: Authentic African Ankara Wax Print Fabric.
+  description: 'Authentic African Ankara Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101117/01.webp
+    alt: African Ankara Print - Orange & Brown - 101117
+  - file: products/african-ankara-print-101117/02.webp
+    alt: African Ankara Print - Orange & Brown - 101117
+  options: []
+  variants:
+  - sku: '101117'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Orange
+  - Brown
+- slug: african-ankara-print-101116
+  name: African Ankara Print - Navy & Orange - 101116
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28705
+  summary: Authentic African Ankara Wax Print Fabric.
+  description: 'Authentic African Ankara Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101116/01.webp
+    alt: African Ankara Print - Navy & Orange - 101116
+  options: []
+  variants:
+  - sku: '101116'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Orange
+- slug: african-ankara-print-101115
+  name: African Ankara Print - Cream - 101115
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28703
+  summary: Authentic African Ankara Wax Print Fabric.
+  description: 'Authentic African Ankara Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101115/01.webp
+    alt: African Ankara Print - Cream - 101115
+  options: []
+  variants:
+  - sku: '101115'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Cream
+- slug: african-ankara-print-101114
+  name: African Ankara Print - Navy & Cream - 101114
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28701
+  summary: Authentic African Ankara Wax Print Fabric.
+  description: 'Authentic African Ankara Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101114/01.webp
+    alt: African Ankara Print - Navy & Cream - 101114
+  options: []
+  variants:
+  - sku: '101114'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Cream
+- slug: african-ankara-print-101113
+  name: African Ankara Print - Yellow & Brown - 101113
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28699
+  summary: Authentic African Ankara Wax Print Fabric.
+  description: 'Authentic African Ankara Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101113/01.webp
+    alt: African Ankara Print - Yellow & Brown - 101113
+  options: []
+  variants:
+  - sku: '101113'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Yellow
+  - Brown
+- slug: african-ankara-print-101112
+  name: African Ankara Print - Brown & Green - 101112
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28697
+  summary: Authentic African Ankara Wax Print Fabric.
+  description: 'Authentic African Ankara Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101112/01.webp
+    alt: African Ankara Print - Brown & Green - 101112
+  options: []
+  variants:
+  - sku: '101112'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Green
+- slug: african-ankara-print-101111
+  name: African Ankara Print - Cream & Navy - 101111
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28695
+  summary: Authentic African Ankara Wax Print Fabric.
+  description: 'Authentic African Ankara Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101111/01.webp
+    alt: African Ankara Print - Cream & Navy - 101111
+  options: []
+  variants:
+  - sku: '101111'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Cream
+  - Navy
+- slug: african-ankara-print-101110
+  name: African Ankara Print - Orange & Brown - 101110
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28693
+  summary: Authentic African Ankara Wax Print Fabric.
+  description: 'Authentic African Ankara Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101110/01.webp
+    alt: African Ankara Print - Orange & Brown - 101110
+  options: []
+  variants:
+  - sku: '101110'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Orange
+  - Brown
+- slug: african-ankara-print-101109
+  name: African Ankara Print - Brown & Yellow - 101109
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28691
+  summary: Authentic African Ankara Wax Print Fabric.
+  description: 'Authentic African Ankara Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101109/01.webp
+    alt: African Ankara Print - Brown & Yellow - 101109
+  options: []
+  variants:
+  - sku: '101109'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Yellow
+- slug: african-ankara-print-101108
+  name: African Ankara Print - Navy & Olive - 101108
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28689
+  summary: Authentic African Ankara Wax Print Fabric.
+  description: 'Authentic African Ankara Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101108/01.webp
+    alt: African Ankara Print - Navy & Olive - 101108
+  options: []
+  variants:
+  - sku: '101108'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Olive
+- slug: african-ankara-print-101107
+  name: African Ankara Print - Teal & Navy - 101107
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28687
+  summary: Authentic African Ankara Wax Print Fabric.
+  description: 'Authentic African Ankara Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101107/01.webp
+    alt: African Ankara Print - Teal & Navy - 101107
+  options: []
+  variants:
+  - sku: '101107'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Teal
+  - Navy
+- slug: african-ankara-print-101106
+  name: African Ankara Print - Grey - 101106
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28685
+  summary: Authentic African Ankara Wax Print Fabric.
+  description: 'Authentic African Ankara Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101106/01.webp
+    alt: African Ankara Print - Grey - 101106
+  options: []
+  variants:
+  - sku: '101106'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Grey
+- slug: african-ankara-print-101105
+  name: African Ankara Print - Teal & Green - 101105
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28665
+  summary: Authentic African Ankara Wax Print Fabric.
+  description: 'Authentic African Ankara Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101105/01.webp
+    alt: African Ankara Print - Teal & Green - 101105
+  options: []
+  variants:
+  - sku: '101105'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Teal
+  - Green
+- slug: african-ankara-print-101103
+  name: African Ankara Print - Gold & Orange - 101103
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28660
+  summary: Authentic African Ankara Wax Print Fabric.
+  description: 'Authentic African Ankara Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101103/01.webp
+    alt: African Ankara Print - Gold & Orange - 101103
+  options: []
+  variants:
+  - sku: 101026-2-1
+    price_cents: 899
+    stock: 10
+  colors:
+  - Gold
+  - Orange
+- slug: african-ankara-print-101104
+  name: African Ankara Print - Cream & Navy - 101104
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28655
+  summary: Authentic African Ankara Wax Print Fabric.
+  description: 'Authentic African Ankara Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101104/01.webp
+    alt: African Ankara Print - Cream & Navy - 101104
+  options: []
+  variants:
+  - sku: 101026-2
+    price_cents: 899
+    stock: 10
+  colors:
+  - Cream
+  - Navy
+- slug: african-ankara-print-101012-6
+  name: African Ankara Print - Multicolor - 101012-6
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-11
+  legacy_wp_id: 28450
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 6 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - ankara-plus
+  images:
+  - file: products/african-ankara-print-101012-6/01.webp
+    alt: African Ankara Print - Multicolor - 101012-6
+  - file: products/african-ankara-print-101012-6/02.webp
+    alt: African Ankara Print - Multicolor - 101012-6
+  options: []
+  variants:
+  - sku: 101012-6
+    price_cents: 6599
+    stock: 10
+  colors:
+  - Multicolor
+- slug: african-ankara-print-01068-og
+  name: African Ankara Print - Multicolor - 01068-OG
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28221
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-01068-og/01.webp
+    alt: African Ankara Print - Multicolor - 01068-OG
+  - file: products/african-ankara-print-01068-og/02.webp
+    alt: African Ankara Print - Multicolor - 01068-OG
+  options: []
+  variants:
+  - sku: 01068-OG
+    price_cents: 899
+    stock: 10
+  colors:
+  - Multicolor
+- slug: african-ankara-print-101066-y1
+  name: African Ankara Print - Blue & Navy - 101066-Y1
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28214
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101066-y1/01.webp
+    alt: African Ankara Print - Blue & Navy - 101066-Y1
+  - file: products/african-ankara-print-101066-y1/02.webp
+    alt: African Ankara Print - Blue & Navy - 101066-Y1
+  options: []
+  variants:
+  - sku: 101066-Y1
+    price_cents: 899
+    stock: 10
+  colors:
+  - Blue
+  - Navy
+- slug: african-ankara-print-101068-og
+  name: African Ankara Print - Gold & Brown - 101068-OG
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28208
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101068-og/01.webp
+    alt: African Ankara Print - Gold & Brown - 101068-OG
+  - file: products/african-ankara-print-101068-og/02.webp
+    alt: African Ankara Print - Gold & Brown - 101068-OG
+  - file: products/african-ankara-print-101068-og/03.webp
+    alt: African Ankara Print - Gold & Brown - 101068-OG
+  - file: products/african-ankara-print-101068-og/04.webp
+    alt: African Ankara Print - Gold & Brown - 101068-OG
+  - file: products/african-ankara-print-101068-og/05.webp
+    alt: African Ankara Print - Gold & Brown - 101068-OG
+  options:
+  - name: Colorway
+    values:
+    - Colorway 3
+    - Colorway 1
+    - Colorway 2
+  variants:
+  - sku: 101068-OG-1
+    options:
+      Colorway: Colorway 3
+    price_cents: 899
+    stock: 10
+    image: products/african-ankara-print-101068-og/05.webp
+  - sku: 101068-OG-2
+    options:
+      Colorway: Colorway 1
+    price_cents: 899
+    stock: 10
+    image: products/african-ankara-print-101068-og/01.webp
+  - sku: 101068-OG-3
+    options:
+      Colorway: Colorway 2
+    price_cents: 899
+    stock: 10
+    image: products/african-ankara-print-101068-og/02.webp
+  colors:
+  - Gold
+  - Brown
+- slug: african-ankara-print-101054-y2
+  name: African Ankara Print - Gold & Brown - 101054-Y2
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28198
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - bhm-collection
+  images:
+  - file: products/african-ankara-print-101054-y2/01.webp
+    alt: African Ankara Print - Gold & Brown - 101054-Y2
+  - file: products/african-ankara-print-101054-y2/02.webp
+    alt: African Ankara Print - Gold & Brown - 101054-Y2
+  options: []
+  variants:
+  - sku: 101054-Y2
+    price_cents: 899
+    stock: 10
+  colors:
+  - Gold
+  - Brown
+- slug: african-ankara-print-101065
+  name: African Ankara Print - Navy & Yellow - 101065
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28195
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101065/01.webp
+    alt: African Ankara Print - Navy & Yellow - 101065
+  - file: products/african-ankara-print-101065/02.webp
+    alt: African Ankara Print - Navy & Yellow - 101065
+  options: []
+  variants:
+  - sku: '101065'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Yellow
+- slug: african-ankara-print-101054-y1
+  name: African Ankara Print - Yellow & Olive - 101054-Y1
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28191
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - bhm-collection
+  images:
+  - file: products/african-ankara-print-101054-y1/01.webp
+    alt: African Ankara Print - Yellow & Olive - 101054-Y1
+  - file: products/african-ankara-print-101054-y1/02.webp
+    alt: African Ankara Print - Yellow & Olive - 101054-Y1
+  options: []
+  variants:
+  - sku: 101054-Y1
+    price_cents: 899
+    stock: 10
+  colors:
+  - Yellow
+  - Olive
+- slug: african-ankara-print-101064
+  name: African Ankara Print - Olive & Yellow - 101064
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28190
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101064/01.webp
+    alt: African Ankara Print - Olive & Yellow - 101064
+  - file: products/african-ankara-print-101064/02.webp
+    alt: African Ankara Print - Olive & Yellow - 101064
+  options: []
+  variants:
+  - sku: '101064'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Olive
+  - Yellow
+- slug: african-ankara-print-101054-r1
+  name: African Ankara Print - Red & Burgundy - 101054-R1
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28175
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - bhm-collection
+  images:
+  - file: products/african-ankara-print-101054-r1/01.webp
+    alt: African Ankara Print - Red & Burgundy - 101054-R1
+  - file: products/african-ankara-print-101054-r1/02.webp
+    alt: African Ankara Print - Red & Burgundy - 101054-R1
+  options: []
+  variants:
+  - sku: 101054-R1
+    price_cents: 899
+    stock: 10
+  colors:
+  - Red
+  - Burgundy
+- slug: african-ankara-print-101063
+  name: African Ankara Print - Brown & Red - 101063
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28171
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101063/01.webp
+    alt: African Ankara Print - Brown & Red - 101063
+  - file: products/african-ankara-print-101063/02.webp
+    alt: African Ankara Print - Brown & Red - 101063
+  options: []
+  variants:
+  - sku: '101063'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Red
+- slug: african-ankara-print-101062
+  name: African Ankara Print - Brown & Yellow - 101062
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28169
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101062/01.webp
+    alt: African Ankara Print - Brown & Yellow - 101062
+  - file: products/african-ankara-print-101062/02.webp
+    alt: African Ankara Print - Brown & Yellow - 101062
+  options: []
+  variants:
+  - sku: '101062'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Yellow
+- slug: african-ankara-print-101061
+  name: African Ankara Print - Multicolor - 101061
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28167
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101061/01.webp
+    alt: African Ankara Print - Multicolor - 101061
+  - file: products/african-ankara-print-101061/02.webp
+    alt: African Ankara Print - Multicolor - 101061
+  options: []
+  variants:
+  - sku: '101061'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Multicolor
+- slug: african-ankara-print-101060
+  name: African Ankara Print - Green & Cream - 101060
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28165
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101060/01.webp
+    alt: African Ankara Print - Green & Cream - 101060
+  - file: products/african-ankara-print-101060/02.webp
+    alt: African Ankara Print - Green & Cream - 101060
+  options: []
+  variants:
+  - sku: '101060'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Green
+  - Cream
+- slug: african-ankara-print-101059
+  name: African Ankara Print - Red & Burgundy - 101059
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28163
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101059/01.webp
+    alt: African Ankara Print - Red & Burgundy - 101059
+  - file: products/african-ankara-print-101059/02.webp
+    alt: African Ankara Print - Red & Burgundy - 101059
+  options: []
+  variants:
+  - sku: '101059'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Red
+  - Burgundy
+- slug: african-ankara-print-101058
+  name: African Ankara Print - Gold & Brown - 101058
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28161
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101058/01.webp
+    alt: African Ankara Print - Gold & Brown - 101058
+  - file: products/african-ankara-print-101058/02.webp
+    alt: African Ankara Print - Gold & Brown - 101058
+  options: []
+  variants:
+  - sku: '101058'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Gold
+  - Brown
+- slug: african-ankara-print-101054-b1
+  name: African Ankara Print - Blue & Navy - 101054-B1
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28160
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - bhm-collection
+  images:
+  - file: products/african-ankara-print-101054-b1/01.webp
+    alt: African Ankara Print - Blue & Navy - 101054-B1
+  - file: products/african-ankara-print-101054-b1/02.webp
+    alt: African Ankara Print - Blue & Navy - 101054-B1
+  options: []
+  variants:
+  - sku: 101054-b1
+    price_cents: 899
+    stock: 10
+  colors:
+  - Blue
+  - Navy
+- slug: african-ankara-print-101057
+  name: African Ankara Print - Brown & Cream - 101057
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28150
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101057/01.webp
+    alt: African Ankara Print - Brown & Cream - 101057
+  - file: products/african-ankara-print-101057/02.webp
+    alt: African Ankara Print - Brown & Cream - 101057
+  options: []
+  variants:
+  - sku: '101057'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Cream
+- slug: african-ankara-print-101056
+  name: African Ankara Print - Navy & Yellow - 101056
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28146
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101056/01.webp
+    alt: African Ankara Print - Navy & Yellow - 101056
+  - file: products/african-ankara-print-101056/02.webp
+    alt: African Ankara Print - Navy & Yellow - 101056
+  options: []
+  variants:
+  - sku: '101056'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Yellow
+- slug: african-ankara-print-101055
+  name: African Ankara Print - Navy & Tan - 101055
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28121
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101055/01.webp
+    alt: African Ankara Print - Navy & Tan - 101055
+  - file: products/african-ankara-print-101055/02.webp
+    alt: African Ankara Print - Navy & Tan - 101055
+  options: []
+  variants:
+  - sku: '101055'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Tan
+- slug: african-ankara-print-101051
+  name: African Ankara Print - Brown & Tan - 101051
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28117
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101051/01.webp
+    alt: African Ankara Print - Brown & Tan - 101051
+  - file: products/african-ankara-print-101051/02.webp
+    alt: African Ankara Print - Brown & Tan - 101051
+  options: []
+  variants:
+  - sku: '101051'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Tan
+- slug: african-ankara-print-101050
+  name: African Ankara Print - Cream & Burgundy - 101050
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28115
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101050/01.webp
+    alt: African Ankara Print - Cream & Burgundy - 101050
+  - file: products/african-ankara-print-101050/02.webp
+    alt: African Ankara Print - Cream & Burgundy - 101050
+  options: []
+  variants:
+  - sku: '101050'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Cream
+  - Burgundy
+- slug: african-ankara-print-101049
+  name: African Ankara Print - Green & Teal - 101049
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28113
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101049/01.webp
+    alt: African Ankara Print - Green & Teal - 101049
+  - file: products/african-ankara-print-101049/02.webp
+    alt: African Ankara Print - Green & Teal - 101049
+  options: []
+  variants:
+  - sku: '101049'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Green
+  - Teal
+- slug: african-ankara-print-101048
+  name: African Ankara Print - Navy & Blue - 101048
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28109
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101048/01.webp
+    alt: African Ankara Print - Navy & Blue - 101048
+  - file: products/african-ankara-print-101048/02.webp
+    alt: African Ankara Print - Navy & Blue - 101048
+  options: []
+  variants:
+  - sku: '101048'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Blue
+- slug: african-ankara-print-101046
+  name: African Ankara Print - Navy & Cream - 101046
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28090
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101046/01.webp
+    alt: African Ankara Print - Navy & Cream - 101046
+  - file: products/african-ankara-print-101046/02.webp
+    alt: African Ankara Print - Navy & Cream - 101046
+  options: []
+  variants:
+  - sku: '101046'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Cream
+- slug: african-ankara-print-101045
+  name: African Ankara Print - Brown & Olive - 101045
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28088
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101045/01.webp
+    alt: African Ankara Print - Brown & Olive - 101045
+  - file: products/african-ankara-print-101045/02.webp
+    alt: African Ankara Print - Brown & Olive - 101045
+  options: []
+  variants:
+  - sku: '101045'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Olive
+- slug: african-ankara-print-101044
+  name: African Ankara Print - Navy & Cream - 101044
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28086
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101044/01.webp
+    alt: African Ankara Print - Navy & Cream - 101044
+  - file: products/african-ankara-print-101044/02.webp
+    alt: African Ankara Print - Navy & Cream - 101044
+  options: []
+  variants:
+  - sku: '101044'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Cream
+- slug: african-ankara-print-101043
+  name: African Ankara Print - Cream & Brown - 101043
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28084
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101043/01.webp
+    alt: African Ankara Print - Cream & Brown - 101043
+  - file: products/african-ankara-print-101043/02.webp
+    alt: African Ankara Print - Cream & Brown - 101043
+  options: []
+  variants:
+  - sku: '101043'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Cream
+  - Brown
+- slug: african-ankara-print-101041
+  name: African Ankara Print - Navy & Cream - 101041
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28080
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101041/01.webp
+    alt: African Ankara Print - Navy & Cream - 101041
+  - file: products/african-ankara-print-101041/02.webp
+    alt: African Ankara Print - Navy & Cream - 101041
+  options: []
+  variants:
+  - sku: '101041'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Cream
+- slug: african-ankara-print-101039
+  name: African Ankara Print - Brown & Olive - 101039
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28076
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101039/01.webp
+    alt: African Ankara Print - Brown & Olive - 101039
+  - file: products/african-ankara-print-101039/02.webp
+    alt: African Ankara Print - Brown & Olive - 101039
+  options: []
+  variants:
+  - sku: '101039'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Olive
+- slug: african-ankara-print-101038
+  name: African Ankara Print - Cream & Olive - 101038
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28058
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101038/01.webp
+    alt: African Ankara Print - Cream & Olive - 101038
+  - file: products/african-ankara-print-101038/02.webp
+    alt: African Ankara Print - Cream & Olive - 101038
+  options: []
+  variants:
+  - sku: '101038'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Cream
+  - Olive
+- slug: african-ankara-print-101037
+  name: African Ankara Print - Multicolor - 101037
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28056
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101037/01.webp
+    alt: African Ankara Print - Multicolor - 101037
+  - file: products/african-ankara-print-101037/02.webp
+    alt: African Ankara Print - Multicolor - 101037
+  options: []
+  variants:
+  - sku: '101037'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Multicolor
+- slug: african-ankara-print-101035
+  name: African Ankara Print - Gold & Cream - 101035
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28054
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101035/01.webp
+    alt: African Ankara Print - Gold & Cream - 101035
+  - file: products/african-ankara-print-101035/02.webp
+    alt: African Ankara Print - Gold & Cream - 101035
+  options: []
+  variants:
+  - sku: '101035'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Gold
+  - Cream
+- slug: african-ankara-print-101036
+  name: African Ankara Print - Navy & Brown - 101036
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28044
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101036/01.webp
+    alt: African Ankara Print - Navy & Brown - 101036
+  - file: products/african-ankara-print-101036/02.webp
+    alt: African Ankara Print - Navy & Brown - 101036
+  options: []
+  variants:
+  - sku: '101036'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Brown
+- slug: african-ankara-print-101034
+  name: African Ankara Print - Yellow & Cream - 101034
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28041
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101034/01.webp
+    alt: African Ankara Print - Yellow & Cream - 101034
+  - file: products/african-ankara-print-101034/02.webp
+    alt: African Ankara Print - Yellow & Cream - 101034
+  options: []
+  variants:
+  - sku: '101034'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Yellow
+  - Cream
+- slug: african-ankara-print-101033
+  name: African Ankara Print - Grey & Tan - 101033
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28037
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101033/01.webp
+    alt: African Ankara Print - Grey & Tan - 101033
+  - file: products/african-ankara-print-101033/02.webp
+    alt: African Ankara Print - Grey & Tan - 101033
+  options: []
+  variants:
+  - sku: '101033'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Grey
+  - Tan
+- slug: african-ankara-print-101032
+  name: African Ankara Print - Cream & Green - 101032
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28030
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101032/01.webp
+    alt: African Ankara Print - Cream & Green - 101032
+  - file: products/african-ankara-print-101032/02.webp
+    alt: African Ankara Print - Cream & Green - 101032
+  options: []
+  variants:
+  - sku: '101032'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Cream
+  - Green
+- slug: african-ankara-print-101042
+  name: African Ankara Print - Cream & Yellow - 101042
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28082
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45"..'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101042/01.webp
+    alt: African Ankara Print - Cream & Yellow - 101042
+  - file: products/african-ankara-print-101042/02.webp
+    alt: African Ankara Print - Cream & Yellow - 101042
+  options: []
+  variants:
+  - sku: '101042'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Cream
+  - Yellow
+- slug: african-ankara-print-101040
+  name: African Ankara Print - Navy & Cream - 101040
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28078
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101040/01.webp
+    alt: African Ankara Print - Navy & Cream - 101040
+  - file: products/african-ankara-print-101040/02.webp
+    alt: African Ankara Print - Navy & Cream - 101040
+  options: []
+  variants:
+  - sku: '101040'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Cream
+- slug: african-ankara-print-101031
+  name: African Ankara Print - Green & Olive - 101031
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28028
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101031/01.webp
+    alt: African Ankara Print - Green & Olive - 101031
+  - file: products/african-ankara-print-101031/02.webp
+    alt: African Ankara Print - Green & Olive - 101031
+  options: []
+  variants:
+  - sku: '101031'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Green
+  - Olive
+- slug: african-ankara-print-101030
+  name: African Ankara Print - Green & Teal - 101030
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28023
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101030/01.webp
+    alt: African Ankara Print - Green & Teal - 101030
+  - file: products/african-ankara-print-101030/02.webp
+    alt: African Ankara Print - Green & Teal - 101030
+  options: []
+  variants:
+  - sku: '101030'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Green
+  - Teal
+- slug: african-ankara-print-101054
+  name: African Ankara Print - Blue & Navy - 101054
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28140
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - bhm-collection
+  images:
+  - file: products/african-ankara-print-101054/01.webp
+    alt: African Ankara Print - Blue & Navy - 101054
+  - file: products/african-ankara-print-101054/02.webp
+    alt: African Ankara Print - Blue & Navy - 101054
+  - file: products/african-ankara-print-101054/03.webp
+    alt: African Ankara Print - Blue & Navy - 101054
+  - file: products/african-ankara-print-101054/04.webp
+    alt: African Ankara Print - Blue & Navy - 101054
+  - file: products/african-ankara-print-101054/05.webp
+    alt: African Ankara Print - Blue & Navy - 101054
+  - file: products/african-ankara-print-101054/06.webp
+    alt: African Ankara Print - Blue & Navy - 101054
+  - file: products/african-ankara-print-101054/07.webp
+    alt: African Ankara Print - Blue & Navy - 101054
+  - file: products/african-ankara-print-101054/08.webp
+    alt: African Ankara Print - Blue & Navy - 101054
+  options:
+  - name: Colorway
+    values:
+    - Colorway 1
+    - Colorway 2
+    - Colorway 3
+    - Colorway 4
+  variants:
+  - sku: 101054-1
+    options:
+      Colorway: Colorway 1
+    price_cents: 899
+    stock: 10
+    image: products/african-ankara-print-101054/01.webp
+  - sku: 101054-2
+    options:
+      Colorway: Colorway 2
+    price_cents: 899
+    stock: 10
+    image: products/african-ankara-print-101054/06.webp
+  - sku: 101054-3
+    options:
+      Colorway: Colorway 3
+    price_cents: 899
+    stock: 10
+    image: products/african-ankara-print-101054/07.webp
+  - sku: 101054-4
+    options:
+      Colorway: Colorway 4
+    price_cents: 899
+    stock: 10
+    image: products/african-ankara-print-101054/08.webp
+  colors:
+  - Blue
+  - Navy
+- slug: african-ankara-print-101052
+  name: African Ankara Print - Navy & Cream - 101052
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28119
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101052/01.webp
+    alt: African Ankara Print - Navy & Cream - 101052
+  - file: products/african-ankara-print-101052/02.webp
+    alt: African Ankara Print - Navy & Cream - 101052
+  options: []
+  variants:
+  - sku: '101052'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Cream
+- slug: african-ankara-print-101026
+  name: African Ankara Print - Navy & Cream - 101026
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 27996
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101026/01.webp
+    alt: African Ankara Print - Navy & Cream - 101026
+  - file: products/african-ankara-print-101026/02.webp
+    alt: African Ankara Print - Navy & Cream - 101026
+  options: []
+  variants:
+  - sku: '101026'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Cream
+- slug: african-ankara-print-101029
+  name: African Ankara Print - Navy & Brown - 101029
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28015
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - bhm-collection
+  images:
+  - file: products/african-ankara-print-101029/01.webp
+    alt: African Ankara Print - Navy & Brown - 101029
+  - file: products/african-ankara-print-101029/02.webp
+    alt: African Ankara Print - Navy & Brown - 101029
+  options: []
+  variants:
+  - sku: '101029'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Brown
+- slug: african-ankara-print-101025-2
+  name: African Ankara Print - Teal & Navy - 101025
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 27963
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101025-2/01.webp
+    alt: African Ankara Print - Teal & Navy - 101025
+  - file: products/african-ankara-print-101025-2/02.webp
+    alt: African Ankara Print - Teal & Navy - 101025
+  - file: products/african-ankara-print-101025-2/03.webp
+    alt: African Ankara Print - Teal & Navy - 101025
+  - file: products/african-ankara-print-101025-2/04.webp
+    alt: African Ankara Print - Teal & Navy - 101025
+  - file: products/african-ankara-print-101025-2/05.webp
+    alt: African Ankara Print - Teal & Navy - 101025
+  - file: products/african-ankara-print-101025-2/06.webp
+    alt: African Ankara Print - Teal & Navy - 101025
+  options:
+  - name: Colorway
+    values:
+    - Colorway 5
+    - Colorway 1
+    - Colorway 2
+    - Colorway 3
+    - Colorway 4
+  variants:
+  - sku: 101024-1-1
+    options:
+      Colorway: Colorway 5
+    price_cents: 899
+    stock: 10
+    image: products/african-ankara-print-101025-2/02.webp
+  - sku: 101024-1-2
+    options:
+      Colorway: Colorway 1
+    price_cents: 899
+    stock: 10
+    image: products/african-ankara-print-101025-2/04.webp
+  - sku: 101024-1-3
+    options:
+      Colorway: Colorway 2
+    price_cents: 899
+    stock: 10
+    image: products/african-ankara-print-101025-2/03.webp
+  - sku: 101024-1-4
+    options:
+      Colorway: Colorway 3
+    price_cents: 899
+    stock: 10
+    image: products/african-ankara-print-101025-2/05.webp
+  - sku: 101024-1-5
+    options:
+      Colorway: Colorway 4
+    price_cents: 899
+    stock: 10
+    image: products/african-ankara-print-101025-2/06.webp
+  colors:
+  - Teal
+  - Navy
+- slug: african-ankara-print-101066-o1
+  name: African Ankara Print - Blue & Navy - 101066-O1
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28200
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101066-o1/01.webp
+    alt: African Ankara Print - Blue & Navy - 101066-O1
+  - file: products/african-ankara-print-101066-o1/02.webp
+    alt: African Ankara Print - Blue & Navy - 101066-O1
+  - file: products/african-ankara-print-101066-o1/03.webp
+    alt: African Ankara Print - Blue & Navy - 101066-O1
+  - file: products/african-ankara-print-101066-o1/04.webp
+    alt: African Ankara Print - Blue & Navy - 101066-O1
+  options:
+  - name: Colorway
+    values:
+    - Colorway 1
+    - Colorway 2
+  variants:
+  - sku: 101066-O1-1
+    options:
+      Colorway: Colorway 1
+    price_cents: 899
+    stock: 10
+    image: products/african-ankara-print-101066-o1/01.webp
+  - sku: 101066-O1-2
+    options:
+      Colorway: Colorway 2
+    price_cents: 899
+    stock: 10
+    image: products/african-ankara-print-101066-o1/04.webp
+  colors:
+  - Blue
+  - Navy
+- slug: african-ankara-print-101008-6
+  name: African Ankara Print - Cream & Teal - 101008-6
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-07
+  legacy_wp_id: 27882
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 6 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - ankara-plus
+  images:
+  - file: products/african-ankara-print-101008-6/01.webp
+    alt: African Ankara Print - Cream & Teal - 101008-6
+  - file: products/african-ankara-print-101008-6/02.webp
+    alt: African Ankara Print - Cream & Teal - 101008-6
+  options: []
+  variants:
+  - sku: '101008'
+    price_cents: 6599
+    stock: 10
+  colors:
+  - Cream
+  - Teal
+- slug: african-ankara-print-101009-6
+  name: African Ankara Print - Olive & Yellow - 101009-6
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-07
+  legacy_wp_id: 27881
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 6 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - ankara-plus
+  images:
+  - file: products/african-ankara-print-101009-6/01.webp
+    alt: African Ankara Print - Olive & Yellow - 101009-6
+  - file: products/african-ankara-print-101009-6/02.webp
+    alt: African Ankara Print - Olive & Yellow - 101009-6
+  options: []
+  variants:
+  - sku: '101009'
+    price_cents: 6599
+    stock: 10
+  colors:
+  - Olive
+  - Yellow
+- slug: african-ankara-print-101010-6
+  name: African Ankara Print - Teal & Cream - 101010-6
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-07
+  legacy_wp_id: 27880
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 6 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - ankara-plus
+  images:
+  - file: products/african-ankara-print-101010-6/01.webp
+    alt: African Ankara Print - Teal & Cream - 101010-6
+  - file: products/african-ankara-print-101010-6/02.webp
+    alt: African Ankara Print - Teal & Cream - 101010-6
+  options: []
+  variants:
+  - sku: '101010'
+    price_cents: 6599
+    stock: 10
+  colors:
+  - Teal
+  - Cream
+- slug: african-ankara-print-101007-6
+  name: African Ankara Print - Burgundy & Cream - 101007-6
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-07
+  legacy_wp_id: 27875
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 6 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - ankara-plus
+  images:
+  - file: products/african-ankara-print-101007-6/01.webp
+    alt: African Ankara Print - Burgundy & Cream - 101007-6
+  - file: products/african-ankara-print-101007-6/02.webp
+    alt: African Ankara Print - Burgundy & Cream - 101007-6
+  options: []
+  variants:
+  - sku: 101007-6
+    price_cents: 6599
+    stock: 10
+  colors:
+  - Burgundy
+  - Cream
+- slug: african-ankara-print-101004-6
+  name: African Ankara Print - Yellow & Gold - 101004-6
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-07
+  legacy_wp_id: 27873
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 6 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - ankara-plus
+  images:
+  - file: products/african-ankara-print-101004-6/01.webp
+    alt: African Ankara Print - Yellow & Gold - 101004-6
+  - file: products/african-ankara-print-101004-6/02.webp
+    alt: African Ankara Print - Yellow & Gold - 101004-6
+  options: []
+  variants:
+  - sku: 101004-6
+    price_cents: 6599
+    stock: 10
+  colors:
+  - Yellow
+  - Gold
+- slug: african-ankara-print-101005
+  name: African Ankara Print - Multicolor - 101005
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-07
+  legacy_wp_id: 27872
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 6 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101005/01.webp
+    alt: African Ankara Print - Multicolor - 101005
+  - file: products/african-ankara-print-101005/02.webp
+    alt: African Ankara Print - Multicolor - 101005
+  options: []
+  variants:
+  - sku: '101005'
+    price_cents: 6599
+    stock: 10
+  colors:
+  - Multicolor
+- slug: african-ankara-print-101006-6
+  name: African Ankara Print - Navy & Teal - 101006-6
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-07
+  legacy_wp_id: 27871
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 6 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - ankara-plus
+  images:
+  - file: products/african-ankara-print-101006-6/01.webp
+    alt: African Ankara Print - Navy & Teal - 101006-6
+  - file: products/african-ankara-print-101006-6/02.webp
+    alt: African Ankara Print - Navy & Teal - 101006-6
+  options: []
+  variants:
+  - sku: 101006-6
+    price_cents: 6599
+    stock: 10
+  colors:
+  - Navy
+  - Teal
+- slug: african-ankara-print-101003-6
+  name: African Ankara Print - Teal & Tan - 101003-6
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-07
+  legacy_wp_id: 27869
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 6 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - ankara-plus
+  images:
+  - file: products/african-ankara-print-101003-6/01.webp
+    alt: African Ankara Print - Teal & Tan - 101003-6
+  - file: products/african-ankara-print-101003-6/02.webp
+    alt: African Ankara Print - Teal & Tan - 101003-6
+  options: []
+  variants:
+  - sku: 101003-6
+    price_cents: 6599
+    stock: 10
+  colors:
+  - Teal
+  - Tan
+- slug: african-ankara-print-101002-6
+  name: African Ankara Print - Navy & Olive - 101002-6
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-07
+  legacy_wp_id: 27867
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 6 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - ankara-plus
+  images:
+  - file: products/african-ankara-print-101002-6/01.webp
+    alt: African Ankara Print - Navy & Olive - 101002-6
+  - file: products/african-ankara-print-101002-6/02.webp
+    alt: African Ankara Print - Navy & Olive - 101002-6
+  options: []
+  variants:
+  - sku: 101002-6
+    price_cents: 6599
+    stock: 10
+  colors:
+  - Navy
+  - Olive
+- slug: african-ankara-print-101001
+  name: African Ankara Print - Navy & Cream - 101001-6
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-07
+  legacy_wp_id: 27836
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 6 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - ankara-plus
+  images:
+  - file: products/african-ankara-print-101001/01.webp
+    alt: African Ankara Print - Navy & Cream - 101001-6
+  - file: products/african-ankara-print-101001/02.webp
+    alt: African Ankara Print - Navy & Cream - 101001-6
+  options: []
+  variants:
+  - sku: 101001-6
+    price_cents: 6599
+    stock: 10
+  colors:
+  - Navy
+  - Cream
+- slug: african-ankara-print-101013
+  name: African Ankara Print - Teal & Navy - 101013
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-07
+  legacy_wp_id: 27891
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 6 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101013/01.webp
+    alt: African Ankara Print - Teal & Navy - 101013
+  - file: products/african-ankara-print-101013/02.webp
+    alt: African Ankara Print - Teal & Navy - 101013
+  options: []
+  variants:
+  - sku: 101008-1
+    price_cents: 6599
+    stock: 10
+  colors:
+  - Teal
+  - Navy
+- slug: african-ankara-print-101011-6
+  name: African Ankara Print - Multicolor - 101011-6
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-07
+  legacy_wp_id: 27890
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Measures 6 yards, 36" by 45".'
+  categories:
+  - ankara
+  collections:
+  - ankara-plus
+  images:
+  - file: products/african-ankara-print-101011-6/01.webp
+    alt: African Ankara Print - Multicolor - 101011-6
+  - file: products/african-ankara-print-101011-6/02.webp
+    alt: African Ankara Print - Multicolor - 101011-6
+  options: []
+  variants:
+  - sku: 101010-1
+    price_cents: 6599
+    stock: 10
+  colors:
+  - Multicolor
+- slug: african-ankara-print-101027
+  name: African Ankara Print - Navy & Cream - 101027
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-06
+  legacy_wp_id: 28010
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101027/01.webp
+    alt: African Ankara Print - Navy & Cream - 101027
+  - file: products/african-ankara-print-101027/02.webp
+    alt: African Ankara Print - Navy & Cream - 101027
+  options: []
+  variants:
+  - sku: 101026-1
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+  - Cream
+- slug: african-ankara-print-101068-oy1
+  name: African Ankara Print - Gold & Brown - 101068-OY1
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-06-18
+  legacy_wp_id: 28218
+  summary: Authentic African Wax Print Fabric.
+  description: 'Authentic African Wax Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. 36" by 45".'
+  categories:
+  - ankara
+  collections: []
+  images:
+  - file: products/african-ankara-print-101068-oy1/01.webp
+    alt: African Ankara Print - Gold & Brown - 101068-OY1
+  - file: products/african-ankara-print-101068-oy1/02.webp
+    alt: African Ankara Print - Gold & Brown - 101068-OY1
+  options: []
+  variants:
+  - sku: 101068-OY1
+    price_cents: 899
+    stock: 10
+  colors:
+  - Gold
+  - Brown
 - slug: cushion-cover-g-6
   name: Cushion Cover - Brown & Tan - G-6
   type: home_accessories
@@ -400,14 +5412,14 @@ products:
     - Style 1
     - Style 2
   variants:
-  - sku: GG-28543-1
+  - sku: G-6-1
     options:
       Style: Style 1
     price_cents: 750
     compare_at_cents: 950
     stock: 10
     image: products/cushion-cover-g-6/02.webp
-  - sku: GG-28543-2
+  - sku: G-6-2
     options:
       Style: Style 2
     price_cents: 750
@@ -455,28 +5467,28 @@ products:
     - Style 3
     - Style 4
   variants:
-  - sku: GG-27797-1
+  - sku: G-4-1
     options:
       Style: Style 1
     price_cents: 750
     compare_at_cents: 950
     stock: 10
     image: products/cushion-cover-g-4/02.webp
-  - sku: GG-27797-2
+  - sku: G-4-2
     options:
       Style: Style 2
     price_cents: 750
     compare_at_cents: 950
     stock: 10
     image: products/cushion-cover-g-4/03.webp
-  - sku: GG-27797-3
+  - sku: G-4-3
     options:
       Style: Style 3
     price_cents: 750
     compare_at_cents: 950
     stock: 10
     image: products/cushion-cover-g-4/04.webp
-  - sku: GG-27797-4
+  - sku: G-4-4
     options:
       Style: Style 4
     price_cents: 750
@@ -523,27 +5535,27 @@ products:
     - Style 3
     - Style 4
   variants:
-  - sku: GG-27804-1
+  - sku: G-5-1
     options:
       Style: Style 1
     price_cents: 750
     compare_at_cents: 950
     stock: 10
     image: products/cushion-cover-g-5/02.webp
-  - sku: GG-27804-2
+  - sku: G-5-2
     options:
       Style: Style 2
     price_cents: 750
     compare_at_cents: 950
     stock: 10
-  - sku: GG-27804-3
+  - sku: G-5-3
     options:
       Style: Style 3
     price_cents: 750
     compare_at_cents: 950
     stock: 10
     image: products/cushion-cover-g-5/04.webp
-  - sku: GG-27804-4
+  - sku: G-5-4
     options:
       Style: Style 4
     price_cents: 750
@@ -590,28 +5602,28 @@ products:
     - Style 3
     - Style 4
   variants:
-  - sku: GG-27791-1
+  - sku: G-3-1
     options:
       Style: Style 1
     price_cents: 750
     compare_at_cents: 950
     stock: 10
     image: products/cushion-cover-g-3/02.webp
-  - sku: GG-27791-2
+  - sku: G-3-2
     options:
       Style: Style 2
     price_cents: 750
     compare_at_cents: 950
     stock: 10
     image: products/cushion-cover-g-3/03.webp
-  - sku: GG-27791-3
+  - sku: G-3-3
     options:
       Style: Style 3
     price_cents: 750
     compare_at_cents: 950
     stock: 10
     image: products/cushion-cover-g-3/04.webp
-  - sku: GG-27791-4
+  - sku: G-3-4
     options:
       Style: Style 4
     price_cents: 750
@@ -658,28 +5670,28 @@ products:
     - Style 3
     - Style 4
   variants:
-  - sku: GG-27784-1
+  - sku: G-2-1
     options:
       Style: Style 1
     price_cents: 750
     compare_at_cents: 950
     stock: 10
     image: products/cushion-cover-g-2/02.webp
-  - sku: GG-27784-2
+  - sku: G-2-2
     options:
       Style: Style 2
     price_cents: 750
     compare_at_cents: 950
     stock: 10
     image: products/cushion-cover-g-2/03.webp
-  - sku: GG-27784-3
+  - sku: G-2-3
     options:
       Style: Style 3
     price_cents: 750
     compare_at_cents: 950
     stock: 10
     image: products/cushion-cover-g-2/04.webp
-  - sku: GG-27784-4
+  - sku: G-2-4
     options:
       Style: Style 4
     price_cents: 750
@@ -688,6 +5700,74 @@ products:
   colors:
   - Brown
   - Cream
+- slug: cushion-cover-g-1
+  name: Cushion Cover - Cream & Brown - G-1
+  type: home_accessories
+  status: active
+  featured: false
+  published: 2023-01-04
+  legacy_wp_id: 27747
+  summary: African Ethnic Pillowcase.
+  description: 'African Ethnic Pillowcase.
+
+    Perfect for home decor or sofa cushion covers.
+
+    Enhance your space with these stylish textile pillow covers.
+
+
+    Size: 450mm x 450mm'
+  categories:
+  - cushion-covers
+  collections: []
+  images:
+  - file: products/cushion-cover-g-1/01.webp
+    alt: Cushion Cover - Cream & Brown - G-1
+  - file: products/cushion-cover-g-1/02.webp
+    alt: Cushion Cover - Cream & Brown - G-1
+  - file: products/cushion-cover-g-1/03.webp
+    alt: Cushion Cover - Cream & Brown - G-1
+  - file: products/cushion-cover-g-1/04.webp
+    alt: Cushion Cover - Cream & Brown - G-1
+  - file: products/cushion-cover-g-1/05.webp
+    alt: Cushion Cover - Cream & Brown - G-1
+  options:
+  - name: Style
+    values:
+    - Style 1
+    - Style 2
+    - Style 3
+    - Style 4
+  variants:
+  - sku: G-1-1
+    options:
+      Style: Style 1
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+    image: products/cushion-cover-g-1/04.webp
+  - sku: G-1-2
+    options:
+      Style: Style 2
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+  - sku: G-1-3
+    options:
+      Style: Style 3
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+    image: products/cushion-cover-g-1/05.webp
+  - sku: G-1-4
+    options:
+      Style: Style 4
+    price_cents: 750
+    compare_at_cents: 950
+    stock: 10
+    image: products/cushion-cover-g-1/03.webp
+  colors:
+  - Cream
+  - Brown
 - slug: ethnic-print-101203
   name: Ethnic Print - Black & Burgundy - 101203
   type: fabric
@@ -718,7 +5798,7 @@ products:
     alt: Ethnic Print - Black & Burgundy - 101203
   options: []
   variants:
-  - sku: GG-28843
+  - sku: '101203'
     price_cents: 899
     stock: 10
   colors:
@@ -823,7 +5903,7 @@ products:
     alt: Ethnic Print - Black & Brown - 101201
   options: []
   variants:
-  - sku: GG-28836
+  - sku: '101201'
     price_cents: 899
     stock: 10
   colors:
@@ -862,6 +5942,431 @@ products:
   colors:
   - Black
   - Navy
+- slug: ethnic-print-101202
+  name: Ethnic Print - Black & Navy - 101202
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-24
+  legacy_wp_id: 28832
+  summary: Genuine African Ethnic Print Fabric.
+  description: 'Genuine African Ethnic Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. Width: 45".'
+  categories:
+  - ethnic-prints
+  collections:
+  - bhm-collection
+  images:
+  - file: products/ethnic-print-101202/01.webp
+    alt: Ethnic Print - Black & Navy - 101202
+  options: []
+  variants:
+  - sku: '101202'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Black
+  - Navy
+- slug: ethnic-print-101135
+  name: Ethnic Print - Navy - 101135
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-24
+  legacy_wp_id: 28823
+  summary: Genuine African Ethnic Print Fabric.
+  description: 'Genuine African Ethnic Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. Width: 45".'
+  categories:
+  - ethnic-prints
+  collections:
+  - bhm-collection
+  images:
+  - file: products/ethnic-print-101135/01.webp
+    alt: Ethnic Print - Navy - 101135
+  options: []
+  variants:
+  - sku: GG-28823
+    price_cents: 899
+    stock: 10
+  colors:
+  - Navy
+- slug: ethnic-print-101078
+  name: Ethnic Print - Cream - 101078
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28651
+  summary: Genuine African Ethnic Print Fabric.
+  description: 'Genuine African Ethnic Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. Width: 45".'
+  categories:
+  - ethnic-prints
+  collections:
+  - bhm-collection
+  images:
+  - file: products/ethnic-print-101078/01.webp
+    alt: Ethnic Print - Cream - 101078
+  options: []
+  variants:
+  - sku: '101078'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Cream
+- slug: ethnic-print-101079
+  name: Ethnic Print - Burgundy & Tan - 101079
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28649
+  summary: Genuine African Ethnic Print Fabric.
+  description: 'Genuine African Ethnic Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. Width: 45".'
+  categories:
+  - ethnic-prints
+  collections:
+  - bhm-collection
+  images:
+  - file: products/ethnic-print-101079/01.webp
+    alt: Ethnic Print - Burgundy & Tan - 101079
+  options: []
+  variants:
+  - sku: '101079'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Burgundy
+  - Tan
+- slug: ethnic-print-101077
+  name: Ethnic Print - Brown - 101077
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28647
+  summary: Genuine African Ethnic Print Fabric.
+  description: 'Genuine African Ethnic Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. Width: 45".'
+  categories:
+  - ethnic-prints
+  collections:
+  - bhm-collection
+  images:
+  - file: products/ethnic-print-101077/01.webp
+    alt: Ethnic Print - Brown - 101077
+  options: []
+  variants:
+  - sku: '101077'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+- slug: ethnic-print-101076
+  name: Ethnic Print - Gold & Olive - 101076
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28645
+  summary: Genuine African Ethnic Print Fabric.
+  description: 'Genuine African Ethnic Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. Width: 45".'
+  categories:
+  - ethnic-prints
+  collections:
+  - bhm-collection
+  images:
+  - file: products/ethnic-print-101076/01.webp
+    alt: Ethnic Print - Gold & Olive - 101076
+  options: []
+  variants:
+  - sku: '101076'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Gold
+  - Olive
+- slug: ethnic-print-101075
+  name: Ethnic Print - Cream & Brown - 101075
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28643
+  summary: Genuine African Ethnic Print Fabric.
+  description: 'Genuine African Ethnic Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. Width: 45".'
+  categories:
+  - ethnic-prints
+  collections:
+  - bhm-collection
+  images:
+  - file: products/ethnic-print-101075/01.webp
+    alt: Ethnic Print - Cream & Brown - 101075
+  options: []
+  variants:
+  - sku: '101075'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Cream
+  - Brown
+- slug: ethnic-print-101074
+  name: Ethnic Print - Gold & Brown - 101074
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28641
+  summary: Genuine African Ethnic Print Fabric.
+  description: 'Genuine African Ethnic Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. Width: 45".'
+  categories:
+  - ethnic-prints
+  collections:
+  - bhm-collection
+  images:
+  - file: products/ethnic-print-101074/01.webp
+    alt: Ethnic Print - Gold & Brown - 101074
+  options: []
+  variants:
+  - sku: '101074'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Gold
+  - Brown
+- slug: ethnic-print-101073
+  name: Ethnic Print - Cream & Brown - 101073
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28639
+  summary: Genuine African Ethnic Print Fabric.
+  description: 'Genuine African Ethnic Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. Width: 45".'
+  categories:
+  - ethnic-prints
+  collections:
+  - bhm-collection
+  images:
+  - file: products/ethnic-print-101073/01.webp
+    alt: Ethnic Print - Cream & Brown - 101073
+  options: []
+  variants:
+  - sku: '101073'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Cream
+  - Brown
+- slug: ethnic-print-101072
+  name: Ethnic Print - Tan & Cream - 101072
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28637
+  summary: Genuine African Ethnic Print Fabric.
+  description: 'Genuine African Ethnic Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. Width: 45".'
+  categories:
+  - ethnic-prints
+  collections:
+  - bhm-collection
+  images:
+  - file: products/ethnic-print-101072/01.webp
+    alt: Ethnic Print - Tan & Cream - 101072
+  options: []
+  variants:
+  - sku: '101072'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Tan
+  - Cream
+- slug: ethnic-print-101071
+  name: Ethnic Print - Multicolor - 101071
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28634
+  summary: Genuine African Ethnic Print Fabric.
+  description: 'Genuine African Ethnic Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. Width: 45".'
+  categories:
+  - ethnic-prints
+  collections:
+  - bhm-collection
+  images:
+  - file: products/ethnic-print-101071/01.webp
+    alt: Ethnic Print - Multicolor - 101071
+  options: []
+  variants:
+  - sku: '101071'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Multicolor
+- slug: ethnic-print-101070
+  name: Ethnic Print - Yellow & Cream - 101070
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28622
+  summary: Genuine African Ethnic Print Fabric.
+  description: 'Genuine African Ethnic Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. Width: 45".'
+  categories:
+  - ethnic-prints
+  collections:
+  - bhm-collection
+  images:
+  - file: products/ethnic-print-101070/01.webp
+    alt: Ethnic Print - Yellow & Cream - 101070
+  options: []
+  variants:
+  - sku: '101070'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Yellow
+  - Cream
+- slug: ethnic-print-101069
+  name: Ethnic Print - Cream & Green - 101069
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 28157
+  summary: Genuine African Ethnic Print Fabric.
+  description: 'Genuine African Ethnic Print Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    100% Cotton.
+
+
+    Sold by the yard. Width: 45".'
+  categories:
+  - ethnic-prints
+  collections:
+  - bhm-collection
+  images:
+  - file: products/ethnic-print-101069/01.webp
+    alt: Ethnic Print - Cream & Green - 101069
+  options: []
+  variants:
+  - sku: '101069'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Cream
+  - Green
 - slug: reversible-jacket-tmb-1-1015
   name: Reversible Jacket TMB-1 - Grey - 1015
   type: clothing
@@ -885,7 +6390,7 @@ products:
     alt: Reversible Jacket TMB-1 - Grey - 1015
   options: []
   variants:
-  - sku: GG-29649
+  - sku: '1015'
     price_cents: 4000
     stock: 10
   colors:
@@ -913,7 +6418,7 @@ products:
     alt: Reversible Jacket TMB-4 - Brown & Cream - 1012
   options: []
   variants:
-  - sku: GG-29643
+  - sku: '1012'
     price_cents: 4000
     stock: 10
   colors:
@@ -950,7 +6455,7 @@ products:
     alt: Reversible Jacket TMB-4 - Grey & Brown - 1010
   options: []
   variants:
-  - sku: GG-29639
+  - sku: '1010'
     price_cents: 4000
     stock: 10
   colors:
@@ -1008,7 +6513,7 @@ products:
     alt: Reversible Jacket TMB-4 - Brown & Cream - 1011
   options: []
   variants:
-  - sku: GG-29630
+  - sku: '1011'
     price_cents: 4000
     stock: 10
   colors:
@@ -1202,6 +6707,195 @@ products:
     stock: 10
   colors:
   - Multicolor
+- slug: kente-print-101019
+  name: Kente Print - Gold & Olive - 101019
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 27944
+  summary: Authentic Kente Fabric.
+  description: 'Authentic Kente Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    Features vibrant colors and traditional patterns.
+
+
+    Perfect for creating unique garments and home decor items.
+
+
+    100% Cotton. Width: 45". Sold by the Yard.'
+  categories:
+  - kente
+  collections:
+  - bhm-collection
+  images:
+  - file: products/kente-print-101019/01.webp
+    alt: Kente Print - Gold & Olive - 101019
+  - file: products/kente-print-101019/02.webp
+    alt: Kente Print - Gold & Olive - 101019
+  options: []
+  variants:
+  - sku: '101019'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Gold
+  - Olive
+- slug: kente-print-101016
+  name: Kente Print - Orange & Gold - 101016
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 27941
+  summary: Authentic Kente Fabric.
+  description: 'Authentic Kente Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    Features vibrant colors and traditional patterns.
+
+
+    Perfect for creating unique garments and home decor items.
+
+
+    100% Cotton. Width: 45". Sold by the Yard.'
+  categories:
+  - kente
+  collections:
+  - bhm-collection
+  images:
+  - file: products/kente-print-101016/01.webp
+    alt: Kente Print - Orange & Gold - 101016
+  - file: products/kente-print-101016/02.webp
+    alt: Kente Print - Orange & Gold - 101016
+  options: []
+  variants:
+  - sku: '101016'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Orange
+  - Gold
+- slug: kente-print-101017
+  name: Kente Print - Tan & Brown - 101017
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 27940
+  summary: Authentic Kente Fabric.
+  description: 'Authentic Kente Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    Features vibrant colors and traditional patterns.
+
+
+    Perfect for creating unique garments and home decor items.
+
+
+    100% Cotton. Width: 45". Sold by the Yard.'
+  categories:
+  - kente
+  collections:
+  - bhm-collection
+  images:
+  - file: products/kente-print-101017/01.webp
+    alt: Kente Print - Tan & Brown - 101017
+  - file: products/kente-print-101017/02.webp
+    alt: Kente Print - Tan & Brown - 101017
+  options: []
+  variants:
+  - sku: '101017'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Tan
+  - Brown
+- slug: kente-print-101015
+  name: Kente Print - Brown & Tan - 101015
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 27934
+  summary: Authentic Kente Fabric.
+  description: 'Authentic Kente Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    Features vibrant colors and traditional patterns.
+
+
+    Perfect for creating unique garments and home decor items.
+
+
+    100% Cotton. Width: 45". Sold by the Yard.'
+  categories:
+  - kente
+  collections:
+  - bhm-collection
+  images:
+  - file: products/kente-print-101015/01.webp
+    alt: Kente Print - Brown & Tan - 101015
+  - file: products/kente-print-101015/02.webp
+    alt: Kente Print - Brown & Tan - 101015
+  options: []
+  variants:
+  - sku: '101015'
+    price_cents: 899
+    stock: 10
+  colors:
+  - Brown
+  - Tan
+- slug: african-ankara-print-101014
+  name: Kente Print - Multicolor - 101014
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-08
+  legacy_wp_id: 27889
+  summary: Authentic Kente Fabric.
+  description: 'Authentic Kente Fabric.
+
+
+    Ideal for crafting, quilting, head wraps, and masks.
+
+
+    Features vibrant colors and traditional patterns.
+
+
+    Perfect for creating unique garments and home decor items.
+
+
+    100% Cotton. Width: 45". Sold by the Yard.'
+  categories:
+  - kente
+  collections:
+  - bhm-collection
+  images:
+  - file: products/african-ankara-print-101014/01.webp
+    alt: Kente Print - Multicolor - 101014
+  - file: products/african-ankara-print-101014/02.webp
+    alt: Kente Print - Multicolor - 101014
+  options: []
+  variants:
+  - sku: 101009-1
+    price_cents: 899
+    stock: 10
+  colors:
+  - Multicolor
 - slug: bob-marley-sarong-wrap-101200
   name: Bob Marley Sarong Wrap - Green & Brown - 101200
   type: home_accessories
@@ -1222,7 +6916,7 @@ products:
     alt: Bob Marley Sarong Wrap - Green & Brown - 101200
   options: []
   variants:
-  - sku: GG-29837
+  - sku: '101200'
     price_cents: 1000
     stock: 10
   colors:
@@ -1248,7 +6942,7 @@ products:
     alt: Bob Marley Sarong Wrap - Green & Yellow - 101199
   options: []
   variants:
-  - sku: GG-29835
+  - sku: '101199'
     price_cents: 1000
     stock: 10
   colors:
@@ -1274,7 +6968,7 @@ products:
     alt: Bob Marley Sarong Wrap - Brown & Yellow - 101198
   options: []
   variants:
-  - sku: GG-29833
+  - sku: '101198'
     price_cents: 1000
     stock: 10
   colors:
@@ -1300,7 +6994,7 @@ products:
     alt: Bob Marley Sarong Wrap - Multicolor - 101197
   options: []
   variants:
-  - sku: GG-29818
+  - sku: '101197'
     price_cents: 1000
     stock: 10
   colors:
@@ -1333,7 +7027,7 @@ products:
     alt: Satin/Chiffon - Black & Brown - 101102
   options: []
   variants:
-  - sku: GG-28615
+  - sku: '101102'
     price_cents: 4199
     stock: 10
   colors:
@@ -1367,7 +7061,7 @@ products:
     alt: Satin/Chiffon - Multicolor - 101101
   options: []
   variants:
-  - sku: GG-28613
+  - sku: '101101'
     price_cents: 4199
     stock: 10
   colors:
@@ -1400,7 +7094,7 @@ products:
     alt: Satin/Chiffon - Teal & Brown - 101100
   options: []
   variants:
-  - sku: GG-28611
+  - sku: '101100'
     price_cents: 4199
     stock: 10
   colors:
@@ -1434,7 +7128,7 @@ products:
     alt: Satin/Chiffon - Red & Cream - 101099
   options: []
   variants:
-  - sku: GG-28609
+  - sku: '101099'
     price_cents: 4199
     stock: 10
   colors:
@@ -1468,11 +7162,556 @@ products:
     alt: Satin/Chiffon - Red - 101098
   options: []
   variants:
-  - sku: GG-28606
+  - sku: '101098'
     price_cents: 4199
     stock: 10
   colors:
   - Red
+- slug: satin-chiffon-101097
+  name: Satin/Chiffon - Blue & Yellow - 101097
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28604
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards.
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections: []
+  images:
+  - file: products/satin-chiffon-101097/01.webp
+    alt: Satin/Chiffon - Blue & Yellow - 101097
+  options: []
+  variants:
+  - sku: '101097'
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Blue
+  - Yellow
+- slug: satin-chiffon-101096
+  name: Satin/Chiffon - Orange & Gold - 101096
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28602
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards.
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections: []
+  images:
+  - file: products/satin-chiffon-101096/01.webp
+    alt: Satin/Chiffon - Orange & Gold - 101096
+  options: []
+  variants:
+  - sku: '101096'
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Orange
+  - Gold
+- slug: satin-chiffon-101095
+  name: Satin/Chiffon - Navy & Cream - 101095
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28600
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards.
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections: []
+  images:
+  - file: products/satin-chiffon-101095/01.webp
+    alt: Satin/Chiffon - Navy & Cream - 101095
+  options: []
+  variants:
+  - sku: '101095'
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Navy
+  - Cream
+- slug: satin-chiffon-101094
+  name: Satin/Chiffon - Black - 101094
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28598
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards.
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections:
+  - bhm-collection
+  images:
+  - file: products/satin-chiffon-101094/01.webp
+    alt: Satin/Chiffon - Black - 101094
+  options: []
+  variants:
+  - sku: '101094'
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Black
+- slug: satin-chiffon-101093
+  name: Satin/Chiffon - Green & Cream - 101093
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28596
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards.
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections: []
+  images:
+  - file: products/satin-chiffon-101093/01.webp
+    alt: Satin/Chiffon - Green & Cream - 101093
+  options: []
+  variants:
+  - sku: '101093'
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Green
+  - Cream
+- slug: satin-chiffon-101092
+  name: Satin/Chiffon - Cream - 101092
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28594
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards.
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections: []
+  images:
+  - file: products/satin-chiffon-101092/01.webp
+    alt: Satin/Chiffon - Cream - 101092
+  options: []
+  variants:
+  - sku: '101092'
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Cream
+- slug: satin-chiffon-101091
+  name: Satin/Chiffon - Red & Brown - 101091
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28592
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards.
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections: []
+  images:
+  - file: products/satin-chiffon-101091/01.webp
+    alt: Satin/Chiffon - Red & Brown - 101091
+  options: []
+  variants:
+  - sku: '101091'
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Red
+  - Brown
+- slug: satin-chiffon-101090
+  name: Satin/Chiffon - Navy & Blue - 101090
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28590
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards.
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections: []
+  images:
+  - file: products/satin-chiffon-101090/01.webp
+    alt: Satin/Chiffon - Navy & Blue - 101090
+  options: []
+  variants:
+  - sku: '101090'
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Navy
+  - Blue
+- slug: satin-chiffon-101088
+  name: Satin/Chiffon - Navy & Blue - 101088
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28588
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards.
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections: []
+  images:
+  - file: products/satin-chiffon-101088/01.webp
+    alt: Satin/Chiffon - Navy & Blue - 101088
+  options: []
+  variants:
+  - sku: '101088'
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Navy
+  - Blue
+- slug: satin-chiffon-101089
+  name: Satin/Chiffon - Navy & Blue - 101089
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28569
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards.
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections: []
+  images:
+  - file: products/satin-chiffon-101089/01.webp
+    alt: Satin/Chiffon - Navy & Blue - 101089
+  options: []
+  variants:
+  - sku: '101089'
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Navy
+  - Blue
+- slug: satin-chiffon-101087
+  name: Satin/Chiffon - Navy & Cream - 101087
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-16
+  legacy_wp_id: 28566
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards. 35" by 45".
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections: []
+  images:
+  - file: products/satin-chiffon-101087/01.webp
+    alt: Satin/Chiffon - Navy & Cream - 101087
+  options: []
+  variants:
+  - sku: '101087'
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Navy
+  - Cream
+- slug: satin-chiffon-101082
+  name: Satin/Chiffon - Navy & Cream - 101082
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-14
+  legacy_wp_id: 28484
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards.
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections: []
+  images:
+  - file: products/satin-chiffon-101082/01.webp
+    alt: Satin/Chiffon - Navy & Cream - 101082
+  options: []
+  variants:
+  - sku: '101082'
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Navy
+  - Cream
+- slug: satin-chiffon-101085
+  name: Satin/Chiffon - Navy & Yellow - 101085
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-09
+  legacy_wp_id: 28338
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards.
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections: []
+  images:
+  - file: products/satin-chiffon-101085/01.webp
+    alt: Satin/Chiffon - Navy & Yellow - 101085
+  options: []
+  variants:
+  - sku: '101085'
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Navy
+  - Yellow
+- slug: satin-chiffon-101083
+  name: Satin/Chiffon - Yellow & Navy - 101083
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-09
+  legacy_wp_id: 28336
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards.
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections: []
+  images:
+  - file: products/satin-chiffon-101083/01.webp
+    alt: Satin/Chiffon - Yellow & Navy - 101083
+  - file: products/satin-chiffon-101083/02.webp
+    alt: Satin/Chiffon - Yellow & Navy - 101083
+  options: []
+  variants:
+  - sku: '101083'
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Yellow
+  - Navy
+- slug: satin-chiffon-101084
+  name: Satin/Chiffon - Gold & Olive - 101084
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-09
+  legacy_wp_id: 28328
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards.
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections: []
+  images:
+  - file: products/satin-chiffon-101084/01.webp
+    alt: Satin/Chiffon - Gold & Olive - 101084
+  options: []
+  variants:
+  - sku: '101084'
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Gold
+  - Olive
+- slug: satin-chiffon-101086
+  name: Satin/Chiffon - Pink & Navy - 101086
+  type: fabric
+  status: active
+  featured: false
+  published: 2024-07-09
+  legacy_wp_id: 28223
+  summary: African Print Satin and Chiffon Combination
+  description: 'African Print Satin and Chiffon Combination
+
+
+    Luxurious, smooth satin combined with lightweight, sheer chiffon. These fabrics offer an exquisite
+    drape and fluidity, ideal for creating blouses, dresses, skirts, jumpsuits, and more.
+
+
+    Fabric: Satin (4 yards), Soft Chiffon (2 yards), totaling 6 yards.
+
+    Fiber: Polyester
+
+    Width: 44 inches'
+  categories:
+  - satin-chiffon
+  collections: []
+  images:
+  - file: products/satin-chiffon-101086/01.webp
+    alt: Satin/Chiffon - Pink & Navy - 101086
+  options: []
+  variants:
+  - sku: '101086'
+    price_cents: 4199
+    stock: 10
+  colors:
+  - Pink
+  - Navy
 - slug: wrap-skirt-wr-2002-101196
   name: Wrap Skirt WR 2002 - Brown & Cream - 101196
   type: clothing
@@ -1505,28 +7744,28 @@ products:
     - Colorway 4
     - Colorway 5
   variants:
-  - sku: GG-29804-1
+  - sku: 101196-1
     options:
       Colorway: Colorway 1
     price_cents: 2500
     stock: 10
-  - sku: GG-29804-2
+  - sku: 101196-2
     options:
       Colorway: Colorway 2
     price_cents: 2500
     stock: 10
-  - sku: GG-29804-3
+  - sku: 101196-3
     options:
       Colorway: Colorway 3
     price_cents: 2500
     stock: 10
-  - sku: GG-29804-4
+  - sku: 101196-4
     options:
       Colorway: Colorway 4
     price_cents: 2500
     stock: 10
     image: products/wrap-skirt-wr-2002-101196/03.webp
-  - sku: GG-29804-5
+  - sku: 101196-5
     options:
       Colorway: Colorway 5
     price_cents: 2500
@@ -1557,7 +7796,7 @@ products:
     alt: Wrap Skirt WC 1202 - Navy & Purple - 101195
   options: []
   variants:
-  - sku: GG-29801
+  - sku: '101195'
     price_cents: 2500
     stock: 10
   colors:
@@ -1586,7 +7825,7 @@ products:
     alt: Wrap Skirt WC 1202 - Olive & Red - 101194
   options: []
   variants:
-  - sku: GG-29617
+  - sku: '101194'
     price_cents: 2500
     stock: 10
   colors:
@@ -1615,7 +7854,7 @@ products:
     alt: Wrap Skirt WC 1202 - Orange & Cream - 101193
   options: []
   variants:
-  - sku: GG-29615
+  - sku: '101193'
     price_cents: 2500
     stock: 10
   colors:
@@ -1644,9 +7883,90 @@ products:
     alt: Wrap Skirt WC 1202 - Olive & Yellow - 101192
   options: []
   variants:
-  - sku: GG-29613
+  - sku: '101192'
     price_cents: 2500
     stock: 10
   colors:
   - Olive
   - Yellow
+- slug: wrap-skirt-wc-1202-101191
+  name: Wrap Skirt WC 1202 - Navy & Teal - 101191
+  type: clothing
+  status: active
+  featured: false
+  published: 2024-10-03
+  legacy_wp_id: 29609
+  summary: Stylish African wrap skirt with bold African prints, adjustable for a perfect fit. A blend
+    of comfort and elegance for any occasion.
+  description: 'The many ways you can wear your wrap skirt
+
+
+    https://youtu.be/D311K8Sw5p4'
+  categories:
+  - skirts
+  collections: []
+  images:
+  - file: products/wrap-skirt-wc-1202-101191/01.webp
+    alt: Wrap Skirt WC 1202 - Navy & Teal - 101191
+  options: []
+  variants:
+  - sku: '101191'
+    price_cents: 2500
+    stock: 10
+  colors:
+  - Navy
+  - Teal
+- slug: wrap-skirt-wc-1202-101190
+  name: Wrap Skirt WC 1202 - Brown & Olive - 101190
+  type: clothing
+  status: active
+  featured: false
+  published: 2024-10-03
+  legacy_wp_id: 29607
+  summary: Stylish African wrap skirt with bold African prints, adjustable for a perfect fit. A blend
+    of comfort and elegance for any occasion.
+  description: 'The many ways you can wear your wrap skirt
+
+
+    https://youtu.be/D311K8Sw5p4'
+  categories:
+  - skirts
+  collections: []
+  images:
+  - file: products/wrap-skirt-wc-1202-101190/01.webp
+    alt: Wrap Skirt WC 1202 - Brown & Olive - 101190
+  options: []
+  variants:
+  - sku: '101190'
+    price_cents: 2500
+    stock: 10
+  colors:
+  - Brown
+  - Olive
+- slug: wrap-skirt-wc-1202-101189
+  name: Wrap Skirt WC 1202 - Olive & Teal - 101189
+  type: clothing
+  status: active
+  featured: false
+  published: 2024-10-03
+  legacy_wp_id: 29597
+  summary: Stylish African wrap skirt with bold African prints, adjustable for a perfect fit. A blend
+    of comfort and elegance for any occasion.
+  description: 'The many ways you can wear your wrap skirt
+
+
+    https://youtu.be/D311K8Sw5p4'
+  categories:
+  - skirts
+  collections: []
+  images:
+  - file: products/wrap-skirt-wc-1202-101189/01.webp
+    alt: Wrap Skirt WC 1202 - Olive & Teal - 101189
+  options: []
+  variants:
+  - sku: '101189'
+    price_cents: 2500
+    stock: 10
+  colors:
+  - Olive
+  - Teal

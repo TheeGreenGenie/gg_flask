@@ -134,7 +134,7 @@
 }
 
 .gg-option span { flex: 1; }
-.gg-option small { color: var(--gg-muted); }
+.gg-option small { display: block; color: var(--gg-muted); }
 .gg-option:has(input:checked) { border-color: var(--gg-ink); background: var(--gg-subtle-bg); }
 
 .gg-payment-placeholder {
@@ -195,3 +195,5 @@
 .gg-cart-line__problem { margin: .3rem 0 0; color: var(--gg-sale); font-size: .85rem; font-weight: 700; }
 .gg-summary__warning { color: var(--gg-sale); font-weight: 700; }
 .gg-cart__empty { grid-column: 1 / -1; }
+
+.gg-payment-summary { max-width: 26rem; margin: 1rem 0 1.5rem; padding: 1.25rem; border-radius: var(--gg-radius-md); background: var(--gg-warm); }

@@ -6,9 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta name="color-scheme" content="light dark">
+  {% if config.GA4_MEASUREMENT_ID %}<meta name="gg-ga4" content="{{ config.GA4_MEASUREMENT_ID }}">{% endif %}
   <script src="{{ url_for('static', filename='js/theme-init.js') }}"></script>
   <title>{% block title %}GG Afrikan Eleganz{% endblock %}</title>
   <meta name="description" content="{% block description %}Authentic African prints, fabrics and considered pieces from GG Afrikan Eleganz.{% endblock %}">
+  <link rel="canonical" href="{{ request.base_url }}">
+  <meta property="og:site_name" content="GG Afrikan Eleganz">
+  <meta property="og:url" content="{{ request.base_url }}">
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
   <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" sizes="any">
   <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
   <link rel="preload" href="{{ url_for('static', filename='fonts/lato-400.woff2') }}" as="font" type="font/woff2" crossorigin>
@@ -19,6 +24,7 @@
   {% block styles %}{% endblock %}
   <script src="{{ url_for('static', filename='js/product.js') }}" defer></script>
   <script src="{{ url_for('static', filename='js/site.js') }}" defer></script>
+  {% if config.GA4_MEASUREMENT_ID %}<script src="{{ url_for('static', filename='js/analytics.js') }}" defer></script>{% endif %}
   {% block scripts %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -41,6 +47,15 @@
 
   {% include "partials/footer.html" %}
   {% if not hide_newsletter %}{% include "partials/newsletter_dialog.html" %}{% endif %}
+  {% if config.GA4_MEASUREMENT_ID %}
+    <div class="gg-consent" data-gg-consent role="region" aria-label="Cookie choices" hidden>
+      <p>We'd like to use Google Analytics cookies to understand how visitors use our store. They're only set if you accept. See our <a href="{{ url_for('content.privacy') }}">Privacy Policy</a>.</p>
+      <div class="gg-consent__actions">
+        <button type="button" class="gg-button gg-button--outline" data-gg-consent-decline>Decline</button>
+        <button type="button" class="gg-button gg-button--accent" data-gg-consent-accept>Accept</button>
+      </div>
+    </div>
+  {% endif %}
   <dialog class="gg-modal gg-quickview" id="gg-quickview" aria-label="Product preview" data-gg-quickview>
     <button class="gg-icon-btn gg-modal__close" type="button" data-gg-modal-close aria-label="Close preview">{{ icon('close', 22) }}</button>
     <div class="gg-quickview__body" data-gg-quickview-body></div>

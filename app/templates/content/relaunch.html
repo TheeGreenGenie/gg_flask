@@ -1,0 +1,12 @@
+{% extends "content/_base.html" %}
+{% block title %}A Fresh Start · GG Afrikan Eleganz{% endblock %}
+{% block eyebrow %}Account update{% endblock %}
+{% block heading %}Welcome to our new store{% endblock %}
+{% block lede %}<p class="gg-deco-lede">The shop has been rebuilt, and older store accounts and order histories were not imported.</p>{% endblock %}
+{% block body %}
+<p class="gg-deco-note">You can create a new account to keep your wishlist and manage your preferences. For help with an order from the previous store, contact us directly.</p>
+<div class="gg-deco-actions">
+  <a class="gg-button gg-button--accent" href="{{ url_for('accounts.register') }}">Create account</a>
+  <a class="gg-button gg-button--outline" href="{{ url_for('content.contact') }}">Ask about an old order</a>
+</div>
+{% endblock %}

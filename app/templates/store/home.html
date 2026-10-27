@@ -218,29 +218,29 @@
       {% set lead = posts[0] %}
       <div class="gg-home-journal__layout">
         <article class="gg-home-journal-lead">
-          <div class="gg-home-journal-lead__link gg-home-card">
+          <a class="gg-home-journal-lead__link gg-home-card" href="{{ url_for('content.post', slug=lead.slug) }}">
             <div class="gg-home-journal-lead__media">
-              <img class="gg-home-journal-lead__image" src="{{ url_for('static', filename=lead.image) }}" width="1200" height="675" alt="" loading="lazy" decoding="async">
+              <img class="gg-home-journal-lead__image" src="{{ url_for('static', filename=lead.image) }}" width="1200" height="675" alt="{{ lead.alt }}" loading="lazy" decoding="async">
             </div>
             <div class="gg-home-journal-lead__body">
               <time datetime="{{ lead.date }}">{{ lead.date_label }}</time>
               <h3>{{ lead.title }}</h3>
               <p>{{ lead.excerpt }}</p>
             </div>
-          </div>
+          </a>
         </article>
         <div class="gg-home-journal__more" aria-label="More from the journal">
           {% for post in posts[1:] %}
             <article class="gg-home-journal-card">
-              <div class="gg-home-journal-card__link gg-home-card">
+              <a class="gg-home-journal-card__link gg-home-card" href="{{ url_for('content.post', slug=post.slug) }}">
                 <div class="gg-home-journal-card__media">
-                  <img class="gg-home-journal-card__image" src="{{ url_for('static', filename=post.image) }}" width="1200" height="675" alt="" loading="lazy" decoding="async">
+                  <img class="gg-home-journal-card__image" src="{{ url_for('static', filename=post.image) }}" width="1200" height="675" alt="{{ post.alt }}" loading="lazy" decoding="async">
                 </div>
                 <div class="gg-home-journal-card__body">
                   <time datetime="{{ post.date }}">{{ post.date_label }}</time>
                   <h3>{{ post.title }}</h3>
                 </div>
-              </div>
+              </a>
             </article>
           {% endfor %}
         </div>

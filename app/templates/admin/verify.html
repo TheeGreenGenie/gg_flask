@@ -1,0 +1,12 @@
+{% extends "admin/_base.html" %}
+{% block title %}Verify Sign In · GG Afrikan Eleganz{% endblock %}
+{% block admin_body %}
+<form class="gg-admin__login" method="post" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <p class="gg-eyebrow">Two-factor authentication</p><h1>Enter your verification code</h1>
+  <p>Use the six-digit code from your authenticator, or one unused recovery code.</p>
+  {% if error %}<p class="gg-form-error" role="alert">{{ error }}</p>{% endif %}
+  <div class="gg-field"><label for="code">Verification code</label><input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="9" autofocus required></div>
+  <button class="gg-button gg-button--accent gg-button--block" type="submit">Verify and sign in</button>
+</form>
+{% endblock %}

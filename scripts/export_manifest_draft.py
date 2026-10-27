@@ -39,7 +39,12 @@ CATEGORY_MAP: dict[str, tuple[str, str]] = {
     "reversible-jacket": ("clothing", "jackets"),
     "cushion-cover": ("home-accessories", "cushion-covers"),
     "sarong-wrap": ("home-accessories", "sarong-wraps"),
+    # Old ankara-only groupings with no category of their own; also kept as collections.
+    "ankara-plus": ("fabrics", "ankara"),
+    "final-cut": ("fabrics", "ankara"),
 }
+# Product code at the end of an old title: "… - 101219", "… - 101068-OG", "… - G-6".
+TITLE_CODE = re.compile(r"(?:^|\s)([A-Z]{0,3}-?\d{1,6}(?:-[A-Z0-9]{1,4})?)\s*$")
 # Checked in this order so the most specific old category wins (Adire is under Ethnic).
 CATEGORY_PRIORITY = list(CATEGORY_MAP)
 
@@ -125,7 +130,7 @@ def convert(uploads: Path, rel: str, dest: Path, max_width: int = 1600) -> bool:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("uploads", type=Path)
-    ap.add_argument("--per-category", type=int, default=4)
+    ap.add_argument("--per-category", type=int, default=100_000, help="Cap per category.")
     ap.add_argument("--db", default="new_wordpress_local")
     args = ap.parse_args()
 
@@ -211,6 +216,9 @@ def main() -> int:
                 continue
 
             base_sku = (m.get("_sku") or "").strip()
+            if not base_sku:  # most old products only carry their code in the title
+                code = TITLE_CODE.search(row["post_title"])
+                base_sku = code.group(1) if code else ""
             if (
                 not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,40}", base_sku)
                 or base_sku in used_skus

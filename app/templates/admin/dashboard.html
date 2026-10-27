@@ -1,0 +1,10 @@
+{% extends "admin/_base.html" %}
+{% block title %}Administration · GG Afrikan Eleganz{% endblock %}
+{% block admin_body %}
+<header class="gg-admin__header"><div><p class="gg-eyebrow">Store administration</p><h1>Dashboard</h1><p>Signed in as {{ admin.email }} · {{ admin.role.value|title }}</p></div><form method="post" action="{{ url_for('admin.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="gg-button gg-button--outline" type="submit">Sign out</button></form></header>
+<div class="gg-admin__cards">
+  <section><h2>Catalog</h2><p>Edit products, categories, prices, inventory, and safely processed images.</p>{% if admin.role.value in ('owner', 'catalog') %}<a class="gg-link" href="{{ url_for('admin.catalog') }}">Open catalog administration</a>{% endif %}</section>
+  <section><h2>Orders</h2><p>Review payments, progress fulfilment, add private notes, and print documents.</p>{% if admin.role.value in ('owner', 'support') %}<a class="gg-link" href="{{ url_for('admin.orders') }}">Open orders</a>{% endif %}</section>
+  <section><h2>Security</h2><p>Two-factor authentication is active. Sessions expire after 30 minutes idle or eight hours total.</p></section>
+</div>
+{% endblock %}

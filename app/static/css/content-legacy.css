@@ -1,0 +1,1166 @@
+/* About / Contact / FAQ / blog post layouts ported from the previous site's child theme
+   (style.css), scoped to each page and switched to theme colours for dark mode. */
+
+.gg-about-page {
+	background: var(--gg-paper);
+}
+.gg-about-page .gg-about-hero {
+	padding: 60px 0;
+	background: var(--gg-warm);
+}
+.gg-about-page .gg-about-hero-inner {
+	display: flex;
+	align-items: center;
+	gap: 50px;
+}
+.gg-about-page .gg-about-hero-content {
+	flex: 1;
+}
+.gg-about-page .gg-about-hero-title {
+	font-size: 48px;
+	font-weight: 700;
+	color: var(--gg-ink);
+	margin: 0 0 20px;
+	text-transform: uppercase;
+}
+.gg-about-page .gg-about-hero-text {
+	font-size: 16px;
+	line-height: 1.8;
+	color: var(--gg-muted);
+	margin: 0;
+}
+.gg-about-page .gg-about-hero-image {
+	flex: 1;
+	max-width: 500px;
+}
+.gg-about-page .gg-about-hero-image img {
+	width: 100%;
+	height: auto;
+	border-radius: 8px;
+	box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+.gg-about-page .gg-about-grid-section {
+	padding: 60px 0;
+}
+.gg-about-page .gg-about-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 40px;
+}
+.gg-about-page .gg-about-card {
+	background: var(--gg-paper);
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+	transition: transform 0.3s, box-shadow 0.3s;
+}
+.gg-about-page .gg-about-card:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+.gg-about-page .gg-about-card-image {
+	height: 250px;
+	overflow: hidden;
+}
+.gg-about-page .gg-about-card-image img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform 0.3s;
+}
+.gg-about-page .gg-about-card:hover .gg-about-card-image img {
+	transform: scale(1.05);
+}
+.gg-about-page .gg-about-card-content {
+	padding: 25px;
+}
+.gg-about-page .gg-about-card-title {
+	font-size: 22px;
+	font-weight: 600;
+	color: var(--gg-ink);
+	margin: 0 0 15px;
+	position: relative;
+	padding-bottom: 10px;
+}
+.gg-about-page .gg-about-card-title::after {
+	content: '';
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 50px;
+	height: 3px;
+	background: var(--gg-accent);
+}
+.gg-about-page .gg-about-card-content p {
+	font-size: 14px;
+	line-height: 1.7;
+	color: var(--gg-muted);
+	margin: 0;
+}
+.gg-about-page .gg-about-cta {
+	padding: 80px 0;
+	background: #0E0E0E;
+	text-align: center;
+}
+.gg-about-page .gg-about-cta h2 {
+	color: #fff;
+	font-size: 32px;
+	margin: 0 0 15px;
+}
+.gg-about-page .gg-about-cta p {
+	color: rgba(255,255,255,0.7);
+	font-size: 16px;
+	margin: 0 0 30px;
+	max-width: 500px;
+	margin-left: auto;
+	margin-right: auto;
+}
+@media (max-width: 991px) {
+	.gg-about-page .gg-about-hero-inner {
+		flex-direction: column;
+		text-align: center;
+	}
+	.gg-about-page .gg-about-hero-image {
+		max-width: 100%;
+	}
+	.gg-about-page .gg-about-hero-title {
+		font-size: 36px;
+	}
+}
+@media (max-width: 768px) {
+	.gg-about-page .gg-about-grid {
+		grid-template-columns: 1fr;
+	}
+	.gg-about-page .gg-about-hero-title {
+		font-size: 28px;
+	}
+	.gg-about-page .gg-about-cta h2 {
+		font-size: 24px;
+	}
+}
+.gg-contact-page .gg-page-subtitle {
+	font-size: 16px;
+	color: var(--gg-muted);
+	margin: 0;
+}
+.gg-contact-page .gg-blog-page .gg-page-header {
+	padding: 40px 0;
+	background: #f9f9f9;
+	text-align: center;
+}
+.gg-contact-page .gg-blog-page .gg-page-header {
+	padding: 50px 0;
+	background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+	text-align: center;
+}
+.gg-contact-page .gg-blog-page .gg-page-subtitle {
+	color: rgba(255, 255, 255, 0.8);
+	font-size: 16px;
+	margin: 0;
+}
+.gg-single-post {
+	background: var(--gg-paper);
+}
+.gg-single-post .gg-post-header {
+	padding: 60px 0;
+	background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+	text-align: center;
+}
+.gg-single-post .gg-post-header .gg-container {
+	max-width: 900px;
+	margin: 0 auto;
+}
+.gg-single-post .gg-post-meta-top {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 15px;
+	margin-bottom: 20px;
+}
+.gg-single-post .gg-post-category {
+	background: var(--gg-accent);
+	color: var(--gg-accent-ink);
+	padding: 5px 15px;
+	border-radius: 3px;
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+	text-decoration: none;
+	letter-spacing: 0.5px;
+}
+.gg-single-post .gg-post-date {
+	color: rgba(255, 255, 255, 0.7);
+	font-size: 14px;
+}
+.gg-single-post .gg-post-title {
+	color: var(--gg-paper);
+	font-size: 42px;
+	font-weight: 700;
+	line-height: 1.25;
+	margin: 0 0 20px;
+}
+.gg-single-post .gg-post-intro {
+	color: rgba(255, 255, 255, 0.85);
+	font-size: 18px;
+	line-height: 1.6;
+	margin: 0 0 25px;
+}
+.gg-single-post .gg-post-author {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 15px;
+}
+.gg-single-post .gg-post-author img {
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+	border: 2px solid rgba(255, 255, 255, 0.3);
+}
+.gg-single-post .gg-author-info {
+	text-align: left;
+}
+.gg-single-post .gg-author-name {
+	display: block;
+	color: var(--gg-paper);
+	font-weight: 600;
+	font-size: 14px;
+}
+.gg-single-post .gg-read-time {
+	color: rgba(255, 255, 255, 0.6);
+	font-size: 13px;
+}
+.gg-single-post .gg-post-featured-image {
+	margin-top: -30px;
+	position: relative;
+	z-index: 2;
+}
+.gg-single-post .gg-post-featured-image .gg-container {
+	max-width: 1000px;
+	margin: 0 auto;
+}
+.gg-single-post .gg-post-content {
+	padding: 60px 0 40px;
+}
+.gg-single-post .gg-post-content .gg-container {
+	max-width: 800px;
+	margin: 0 auto;
+}
+.gg-single-post .gg-post-body {
+	font-size: 18px;
+	line-height: 1.85;
+	color: var(--gg-ink);
+	text-align: left;
+}
+.gg-single-post .gg-post-body p {
+	margin-bottom: 1.5em;
+}
+.gg-single-post .gg-post-body h2 {
+	font-size: 28px;
+	font-weight: 700;
+	margin: 2em 0 1em;
+	color: var(--gg-ink);
+}
+.gg-single-post .gg-post-body h3 {
+	font-size: 22px;
+	font-weight: 600;
+	margin: 1.5em 0 0.8em;
+	color: var(--gg-ink);
+}
+.gg-single-post .gg-post-body h4 {
+	font-size: 18px;
+	font-weight: 600;
+	margin: 1.3em 0 0.6em;
+	color: var(--gg-ink);
+}
+.gg-single-post .gg-post-body img {
+	max-width: 100%;
+	height: auto;
+	border-radius: 6px;
+	margin: 2em 0;
+}
+.gg-single-post .gg-post-body blockquote {
+	border-left: 4px solid var(--gg-accent);
+	padding: 20px 30px;
+	margin: 2em 0;
+	background: var(--gg-warm);
+	font-style: italic;
+	font-size: 20px;
+	color: #444;
+}
+.gg-single-post .gg-post-body ul,
+.gg-single-post .gg-post-body ol {
+	margin: 1.5em 0;
+	padding-left: 2em;
+}
+.gg-single-post .gg-post-body li {
+	margin-bottom: 0.5em;
+}
+.gg-single-post .gg-post-body a {
+	color: var(--gg-accent);
+	text-decoration: none;
+	border-bottom: 1px solid transparent;
+	transition: border-color 0.3s ease;
+}
+.gg-single-post .gg-post-body a:hover {
+	border-bottom-color: var(--gg-accent);
+}
+.gg-single-post .gg-post-tags {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+	margin: 40px 0;
+	padding-top: 30px;
+	border-top: 1px solid var(--gg-line);
+}
+.gg-single-post .gg-tags-label {
+	font-weight: 600;
+	color: var(--gg-ink);
+}
+.gg-single-post .gg-post-share {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	margin: 30px 0;
+	padding: 25px;
+	background: var(--gg-warm);
+	border-radius: 6px;
+}
+.gg-single-post .gg-share-label {
+	font-weight: 600;
+	color: var(--gg-ink);
+	font-size: 14px;
+}
+.gg-single-post .gg-share-buttons {
+	display: flex;
+	gap: 10px;
+}
+.gg-single-post .gg-share-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	color: var(--gg-paper);
+	text-decoration: none;
+	transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.gg-single-post .gg-share-btn:hover {
+	transform: scale(1.1);
+	opacity: 0.9;
+}
+.gg-single-post .gg-share-facebook {
+	background: #1877f2;
+}
+.gg-single-post .gg-share-twitter {
+	background: #1da1f2;
+}
+.gg-single-post .gg-share-pinterest {
+	background: #e60023;
+}
+.gg-single-post .gg-share-email {
+	background: var(--gg-ink);
+}
+.gg-single-post .gg-author-bio {
+	padding: 50px 0;
+	background: var(--gg-warm);
+}
+.gg-single-post .gg-author-bio .gg-container {
+	max-width: 800px;
+	margin: 0 auto;
+}
+.gg-single-post .gg-author-bio-inner {
+	display: flex;
+	gap: 30px;
+	align-items: flex-start;
+	background: var(--gg-paper);
+	padding: 35px;
+	border-radius: 8px;
+	box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+.gg-single-post .gg-author-bio-inner img {
+	width: 100px;
+	height: 100px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+.gg-single-post .gg-author-bio-content h3 {
+	font-size: 20px;
+	font-weight: 600;
+	margin: 0 0 12px;
+	color: var(--gg-ink);
+}
+.gg-single-post .gg-author-bio-content p {
+	font-size: 15px;
+	line-height: 1.7;
+	color: var(--gg-muted);
+	margin: 0;
+}
+.gg-single-post .gg-post-navigation {
+	padding: 40px 0;
+	border-top: 1px solid var(--gg-line);
+}
+.gg-single-post .gg-post-navigation .gg-container {
+	max-width: 900px;
+	margin: 0 auto;
+}
+.gg-single-post .gg-nav-links {
+	display: flex;
+	justify-content: space-between;
+	gap: 30px;
+}
+.gg-single-post .gg-nav-prev,
+.gg-single-post .gg-nav-next {
+	flex: 1;
+	max-width: 45%;
+}
+.gg-single-post .gg-nav-next {
+	text-align: right;
+}
+.gg-single-post .gg-nav-label {
+	display: block;
+	font-size: 13px;
+	color: var(--gg-muted);
+	margin-bottom: 8px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+.gg-single-post .gg-nav-title {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--gg-ink);
+	text-decoration: none;
+	display: inline-block;
+	transition: color 0.3s ease;
+}
+.gg-single-post .gg-nav-title:hover {
+	color: var(--gg-accent);
+}
+.gg-single-post .gg-related-posts {
+	padding: 60px 0;
+	background: var(--gg-paper);
+}
+.gg-single-post .gg-related-posts .gg-container {
+	max-width: 1200px;
+	margin: 0 auto;
+}
+.gg-single-post .gg-related-title {
+	font-size: 28px;
+	font-weight: 700;
+	text-align: center;
+	margin: 0 0 40px;
+	color: var(--gg-ink);
+}
+.gg-single-post .gg-related-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 30px;
+}
+.gg-single-post .gg-related-card {
+	background: var(--gg-paper);
+	border-radius: 6px;
+	overflow: hidden;
+	box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.gg-single-post .gg-related-card:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+.gg-single-post .gg-related-image {
+	display: block;
+	overflow: hidden;
+	height: 180px;
+}
+.gg-single-post .gg-related-img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform 0.4s ease;
+}
+.gg-single-post .gg-related-card:hover .gg-related-img {
+	transform: scale(1.08);
+}
+.gg-single-post .gg-related-content {
+	padding: 20px;
+}
+.gg-single-post .gg-related-date {
+	font-size: 12px;
+	color: var(--gg-muted);
+	display: block;
+	margin-bottom: 8px;
+}
+.gg-single-post .gg-related-content h3 {
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 1.4;
+	margin: 0;
+}
+.gg-single-post .gg-related-content h3 a {
+	color: var(--gg-ink);
+	text-decoration: none;
+	transition: color 0.3s ease;
+}
+.gg-single-post .gg-related-content h3 a:hover {
+	color: var(--gg-accent);
+}
+@media (max-width: 991px) {
+	.gg-single-post .gg-post-title {
+		font-size: 34px;
+	}
+	.gg-single-post .gg-related-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+@media (max-width: 768px) {
+	.gg-single-post .gg-post-header {
+		padding: 40px 0;
+	}
+	.gg-single-post .gg-post-title {
+		font-size: 28px;
+	}
+	.gg-single-post .gg-post-intro {
+		font-size: 16px;
+	}
+	.gg-single-post .gg-post-body {
+		font-size: 16px;
+	}
+	.gg-single-post .gg-post-body h2 {
+		font-size: 24px;
+	}
+	.gg-single-post .gg-author-bio-inner {
+		flex-direction: column;
+		text-align: center;
+		align-items: center;
+	}
+	.gg-single-post .gg-nav-links {
+		flex-direction: column;
+	}
+	.gg-single-post .gg-nav-prev,
+	.gg-single-post .gg-nav-next {
+		max-width: 100%;
+		text-align: left;
+	}
+	.gg-single-post .gg-nav-next {
+		padding-top: 20px;
+		border-top: 1px solid var(--gg-line);
+	}
+	.gg-single-post .gg-related-grid {
+		grid-template-columns: 1fr;
+	}
+	.gg-single-post .gg-post-share {
+		flex-direction: column;
+		text-align: center;
+	}
+}
+.gg-contact-page {
+	background: var(--gg-paper);
+}
+.gg-contact-page .gg-contact-header {
+	padding: 60px 0;
+	background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+	text-align: center;
+}
+.gg-contact-page .gg-contact-header .gg-page-title {
+	color: #fff;
+}
+.gg-contact-page .gg-contact-header .gg-page-subtitle {
+	color: rgba(255, 255, 255, 0.8);
+}
+.gg-contact-page .gg-contact-section {
+	padding: 60px 0;
+}
+.gg-contact-page .gg-contact-grid {
+	display: grid;
+	grid-template-columns: 1.4fr 1fr;
+	gap: 50px;
+	align-items: start;
+}
+.gg-contact-page .gg-contact-form-wrapper {
+	background: var(--gg-paper);
+	padding: 40px;
+	border-radius: 8px;
+	box-shadow: 0 5px 30px rgba(0, 0, 0, 0.08);
+}
+.gg-contact-page .gg-form-title {
+	font-size: 26px;
+	font-weight: 700;
+	margin: 0 0 10px;
+	color: var(--gg-ink);
+}
+.gg-contact-page .gg-form-intro {
+	font-size: 15px;
+	color: var(--gg-muted);
+	line-height: 1.6;
+	margin: 0 0 30px;
+}
+.gg-contact-page .gg-contact-form {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+.gg-contact-page .gg-form-row {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 20px;
+}
+.gg-contact-page .gg-form-group {
+	display: flex;
+	flex-direction: column;
+}
+.gg-contact-page .gg-form-group label {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--gg-ink);
+	margin-bottom: 8px;
+}
+.gg-contact-page .gg-form-group label span {
+	color: #c00;
+}
+.gg-contact-page .gg-form-group input,
+.gg-contact-page .gg-form-group select,
+.gg-contact-page .gg-form-group textarea {
+	padding: 14px 16px;
+	border: 1px solid var(--gg-line);
+	border-radius: 4px;
+	font-size: 15px;
+	transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.gg-contact-page .gg-form-group input:focus,
+.gg-contact-page .gg-form-group select:focus,
+.gg-contact-page .gg-form-group textarea:focus {
+	outline: none;
+	border-color: var(--gg-accent);
+	box-shadow: 0 0 0 3px rgba(251, 188, 52, 0.15);
+}
+.gg-contact-page .gg-form-group textarea {
+	resize: vertical;
+	min-height: 150px;
+}
+.gg-contact-page .gg-contact-form-wrapper .wpcf7 {
+	margin-top: 20px;
+}
+.gg-contact-page .gg-contact-form-wrapper .wpcf7-form-control-wrap {
+	display: block;
+	margin-bottom: 20px;
+}
+.gg-contact-page .gg-contact-form-wrapper .wpcf7-form p {
+	margin-bottom: 20px;
+}
+.gg-contact-page .gg-contact-form-wrapper .wpcf7-text,
+.gg-contact-page .gg-contact-form-wrapper .wpcf7-email,
+.gg-contact-page .gg-contact-form-wrapper .wpcf7-tel,
+.gg-contact-page .gg-contact-form-wrapper .wpcf7-textarea {
+	width: 100%;
+	padding: 14px 16px;
+	border: 1px solid var(--gg-line);
+	border-radius: 4px;
+	font-size: 15px;
+	transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.gg-contact-page .gg-contact-form-wrapper .wpcf7-text:focus,
+.gg-contact-page .gg-contact-form-wrapper .wpcf7-email:focus,
+.gg-contact-page .gg-contact-form-wrapper .wpcf7-textarea:focus {
+	outline: none;
+	border-color: var(--gg-accent);
+	box-shadow: 0 0 0 3px rgba(251, 188, 52, 0.15);
+}
+.gg-contact-page .gg-contact-form-wrapper .wpcf7-submit {
+	padding: 14px 40px;
+	background: var(--gg-accent);
+	color: var(--gg-ink);
+	border: 2px solid var(--gg-accent);
+	border-radius: 4px;
+	font-size: 14px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	cursor: pointer;
+	transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.gg-contact-page .gg-contact-form-wrapper .wpcf7-submit:hover {
+	background: var(--gg-ink);
+	color: var(--gg-accent);
+	border-color: var(--gg-ink);
+}
+.gg-contact-page .gg-contact-info {
+	display: flex;
+	flex-direction: column;
+	gap: 30px;
+}
+.gg-contact-page .gg-info-card {
+	background: var(--gg-warm);
+	padding: 35px;
+	border-radius: 8px;
+}
+.gg-contact-page .gg-info-title {
+	font-size: 22px;
+	font-weight: 700;
+	margin: 0 0 25px;
+	color: var(--gg-ink);
+}
+.gg-contact-page .gg-contact-item {
+	display: flex;
+	gap: 15px;
+	margin-bottom: 25px;
+}
+.gg-contact-page .gg-contact-item:last-of-type {
+	margin-bottom: 0;
+}
+.gg-contact-page .gg-contact-icon {
+	width: 48px;
+	height: 48px;
+	background: var(--gg-paper);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	color: var(--gg-accent);
+	box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+.gg-contact-page .gg-contact-details h3 {
+	font-size: 16px;
+	font-weight: 600;
+	margin: 0 0 5px;
+	color: var(--gg-ink);
+}
+.gg-contact-page .gg-contact-details a {
+	color: var(--gg-accent);
+	text-decoration: none;
+	font-size: 15px;
+	font-weight: 500;
+}
+.gg-contact-page .gg-contact-details a:hover {
+	text-decoration: underline;
+}
+.gg-contact-page .gg-contact-details p {
+	font-size: 14px;
+	color: var(--gg-muted);
+	margin: 5px 0 0;
+	line-height: 1.5;
+}
+.gg-contact-page .gg-social-card h3 {
+	font-size: 18px;
+	font-weight: 600;
+	margin: 0 0 8px;
+	color: var(--gg-ink);
+}
+.gg-contact-page .gg-social-card p {
+	font-size: 14px;
+	color: var(--gg-muted);
+	margin: 0 0 20px;
+	line-height: 1.5;
+}
+.gg-contact-page .gg-social-links {
+	display: flex;
+	gap: 12px;
+}
+.gg-contact-page .gg-social-link {
+	width: 44px;
+	height: 44px;
+	background: var(--gg-ink);
+	color: var(--gg-paper);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-decoration: none;
+	transition: background 0.3s ease, transform 0.3s ease;
+}
+.gg-contact-page .gg-social-link:hover {
+	background: var(--gg-accent);
+	transform: translateY(-3px);
+}
+.gg-contact-page .gg-contact-faq {
+	padding: 60px 0;
+	background: #1a1a1a;
+}
+.gg-contact-page .gg-faq-inner {
+	text-align: center;
+	max-width: 600px;
+	margin: 0 auto;
+}
+.gg-contact-page .gg-faq-inner h2 {
+	font-size: 28px;
+	color: #fff;
+	margin: 0 0 15px;
+}
+.gg-contact-page .gg-faq-inner p {
+	font-size: 16px;
+	color: rgba(255, 255, 255, 0.75);
+	margin: 0 0 25px;
+	line-height: 1.6;
+}
+.gg-contact-page .gg-contact-faq .gg-btn {
+	display: inline-block;
+	padding: 14px 35px;
+	background: transparent;
+	border: 2px solid #fff;
+	color: #fff;
+	font-size: 14px;
+	font-weight: 600;
+	text-transform: uppercase;
+	text-decoration: none;
+	border-radius: 4px;
+	transition: all 0.3s ease;
+}
+.gg-contact-page .gg-contact-faq .gg-btn:hover {
+	background: #fbbc34;
+	border-color: #fbbc34;
+	color: #000;
+}
+@media (max-width: 991px) {
+	.gg-contact-page .gg-contact-grid {
+		grid-template-columns: 1fr;
+	}
+	.gg-contact-page .gg-contact-info {
+		order: -1;
+	}
+}
+@media (max-width: 768px) {
+	.gg-contact-page .gg-contact-form-wrapper {
+		padding: 30px 20px;
+	}
+	.gg-contact-page .gg-form-row {
+		grid-template-columns: 1fr;
+	}
+	.gg-contact-page .gg-info-card {
+		padding: 25px;
+	}
+}
+.gg-faq-page {
+	background: var(--gg-paper);
+}
+.gg-faq-page .gg-faq-hero {
+	padding: 70px 0;
+	background: var(--gg-warm);
+	text-align: center;
+	position: relative;
+	overflow: hidden;
+}
+.gg-faq-page .gg-faq-hero::before {
+	content: '';
+	position: absolute;
+	top: -50%;
+	left: -10%;
+	width: 300px;
+	height: 300px;
+	background: rgba(251, 188, 52, 0.08);
+	border-radius: 50%;
+	pointer-events: none;
+}
+.gg-faq-page .gg-faq-hero::after {
+	content: '';
+	position: absolute;
+	bottom: -40%;
+	right: -5%;
+	width: 250px;
+	height: 250px;
+	background: rgba(251, 188, 52, 0.06);
+	border-radius: 50%;
+	pointer-events: none;
+}
+.gg-faq-page .gg-faq-hero-inner {
+	position: relative;
+	z-index: 1;
+	max-width: 650px;
+	margin: 0 auto;
+}
+.gg-faq-page .gg-faq-hero-title {
+	font-size: 48px;
+	font-weight: 700;
+	color: var(--gg-ink);
+	margin: 0 0 20px;
+	text-transform: uppercase;
+}
+.gg-faq-page .gg-faq-hero-text {
+	font-size: 16px;
+	line-height: 1.8;
+	color: var(--gg-muted);
+	margin: 0;
+}
+.gg-faq-page .gg-faq-grid-section {
+	padding: 60px 0;
+}
+.gg-faq-page .gg-faq-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 24px;
+}
+.gg-faq-page .gg-faq-card {
+	background: var(--gg-paper);
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: 0 3px 15px rgba(0, 0, 0, 0.06);
+	transition: transform 0.3s, box-shadow 0.3s;
+	border: 1px solid var(--gg-line);
+}
+.gg-faq-page .gg-faq-card:hover {
+	transform: translateY(-3px);
+	box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+.gg-faq-page .gg-faq-card-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 22px 25px;
+	cursor: pointer;
+	user-select: none;
+	gap: 15px;
+	transition: background 0.3s;
+}
+.gg-faq-page .gg-faq-card-header:hover {
+	background: var(--gg-warm);
+}
+.gg-faq-page .gg-faq-question {
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--gg-ink);
+	margin: 0;
+	line-height: 1.5;
+	position: relative;
+	padding-left: 18px;
+}
+.gg-faq-page .gg-faq-question::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 4px;
+	width: 4px;
+	height: 16px;
+	background: var(--gg-accent);
+	border-radius: 2px;
+}
+.gg-faq-page .gg-faq-toggle {
+	flex-shrink: 0;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	background: var(--gg-warm);
+	position: relative;
+	transition: background 0.3s, transform 0.3s;
+}
+.gg-faq-page .gg-faq-toggle::before,
+.gg-faq-page .gg-faq-toggle::after {
+	content: '';
+	position: absolute;
+	background: var(--gg-muted);
+	transition: transform 0.3s, opacity 0.3s;
+}
+.gg-faq-page .gg-faq-toggle::before {
+	width: 12px;
+	height: 2px;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+.gg-faq-page .gg-faq-toggle::after {
+	width: 2px;
+	height: 12px;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+.gg-faq-page .gg-faq-card.gg-faq-active .gg-faq-toggle {
+	background: var(--gg-accent);
+	transform: rotate(45deg);
+}
+.gg-faq-page .gg-faq-card.gg-faq-active .gg-faq-toggle::before,
+.gg-faq-page .gg-faq-card.gg-faq-active .gg-faq-toggle::after {
+	background: var(--gg-paper);
+}
+.gg-faq-page .gg-faq-card.gg-faq-active {
+	border-color: var(--gg-accent);
+	box-shadow: 0 8px 25px rgba(251, 188, 52, 0.15);
+}
+.gg-faq-page .gg-faq-card-body {
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height 0.4s ease, padding 0.3s ease;
+	padding: 0 25px;
+}
+.gg-faq-page .gg-faq-card.gg-faq-active .gg-faq-card-body {
+	max-height: 300px;
+	padding: 0 25px 25px;
+}
+.gg-faq-page .gg-faq-card-body p {
+	font-size: 14px;
+	line-height: 1.8;
+	color: var(--gg-muted);
+	margin: 0;
+	border-top: 1px solid var(--gg-line);
+	padding-top: 18px;
+}
+.gg-faq-page .gg-faq-card-body a {
+	color: var(--gg-accent);
+	text-decoration: none;
+	font-weight: 600;
+	transition: color 0.3s;
+}
+.gg-faq-page .gg-faq-card-body a:hover {
+	color: #e5a820;
+}
+.gg-faq-page .gg-faq-cta {
+	padding: 80px 0;
+	background: #0E0E0E;
+	text-align: center;
+}
+.gg-faq-page .gg-faq-cta h2 {
+	color: #fff;
+	font-size: 32px;
+	margin: 0 0 15px;
+}
+.gg-faq-page .gg-faq-cta p {
+	color: rgba(255, 255, 255, 0.7);
+	font-size: 16px;
+	margin: 0 0 30px;
+	max-width: 500px;
+	margin-left: auto;
+	margin-right: auto;
+}
+@media (max-width: 991px) {
+	.gg-faq-page .gg-faq-hero-title {
+		font-size: 36px;
+	}
+	.gg-faq-page .gg-faq-grid {
+		grid-template-columns: 1fr;
+		gap: 18px;
+	}
+}
+@media (max-width: 768px) {
+	.gg-faq-page .gg-faq-hero {
+		padding: 50px 0;
+	}
+	.gg-faq-page .gg-faq-hero-title {
+		font-size: 28px;
+	}
+	.gg-faq-page .gg-faq-grid-section {
+		padding: 40px 0;
+	}
+	.gg-faq-page .gg-faq-card-header {
+		padding: 18px 20px;
+	}
+	.gg-faq-page .gg-faq-question {
+		font-size: 14px;
+	}
+	.gg-faq-page .gg-faq-cta {
+		padding: 60px 0;
+	}
+	.gg-faq-page .gg-faq-cta h2 {
+		font-size: 24px;
+	}
+}
+@media (max-width: 480px) {
+	.gg-about-page .gg-about-hero,
+	.gg-contact-page .gg-contact-hero,
+	.gg-faq-page .gg-faq-hero {
+		padding: 40px 0;
+	}
+	.gg-faq-page .gg-faq-cta {
+		padding: 40px 0;
+	}
+	.gg-faq-page .gg-faq-cta h2 {
+		font-size: 20px;
+	}
+	.gg-faq-page .gg-faq-card-header {
+		padding: 14px 15px;
+	}
+	.gg-faq-page .gg-faq-question {
+		font-size: 13px;
+	}
+}
+.gg-faq-page .gg-faq-card {
+	border-radius: 14px !important;
+	border: none !important;
+	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+	transition: box-shadow 0.2s ease !important;
+}
+.gg-faq-page .gg-faq-card:hover,
+.gg-faq-page .gg-faq-card.active {
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.09), 0 2px 6px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Previous site's site-wide outline button (used on dark banners), scoped here. */
+.gg-about-page .gg-cta-btn,
+.gg-faq-page .gg-cta-btn {
+	display: inline-block;
+	padding: 15px 40px;
+	background: transparent;
+	border: 2px solid #fff;
+	color: #fff;
+	font-size: 14px;
+	font-weight: 600;
+	text-transform: uppercase;
+	text-decoration: none;
+	border-radius: 3px;
+	transition: all 0.3s;
+}
+.gg-about-page .gg-cta-btn:hover,
+.gg-faq-page .gg-cta-btn:hover {
+	background: #fbbc34;
+	border-color: #fbbc34;
+	color: #000;
+}
+
+/* Contact form button (old Contact Form 7 submit style). */
+.gg-contact-page .gg-submit-btn {
+	padding: 14px 40px;
+	background: var(--gg-accent);
+	color: var(--gg-accent-ink);
+	border: 2px solid var(--gg-accent);
+	border-radius: 4px;
+	font-size: 14px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	cursor: pointer;
+	transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.gg-contact-page .gg-submit-btn:hover { background: var(--gg-ink); color: var(--gg-accent); border-color: var(--gg-ink); }
+.gg-contact-page .gg-form-error { margin: 0 0 18px; padding: 12px 16px; border-left: 4px solid var(--gg-sale); border-radius: 4px; color: var(--gg-sale); background: var(--gg-err-bg); font-weight: 700; }
+.gg-contact-page .gg-contact-icon svg { display: block; }
+
+/* FAQ: native <details> cards behave like the old script accordion. */
+.gg-faq-page details.gg-faq-card > summary { list-style: none; }
+.gg-faq-page details.gg-faq-card > summary::-webkit-details-marker { display: none; }
+.gg-faq-page details.gg-faq-card[open] { border-color: var(--gg-accent); box-shadow: 0 8px 25px rgba(251, 188, 52, 0.15); }
+.gg-faq-page details.gg-faq-card[open] .gg-faq-toggle { background: var(--gg-accent); transform: rotate(45deg); }
+.gg-faq-page details.gg-faq-card[open] .gg-faq-toggle::before,
+.gg-faq-page details.gg-faq-card[open] .gg-faq-toggle::after { background: var(--gg-paper); }
+.gg-faq-page details.gg-faq-card .gg-faq-card-body { max-height: none; }
+.gg-faq-page details.gg-faq-card[open] .gg-faq-card-body { padding: 0 25px 25px; }
+.gg-faq-page .gg-faq-question { margin: 0; }
+
+/* Thin black title bar the old theme showed above the FAQ hero. */
+.gg-faq-titlebar { padding: 14px 0; background: #000; color: var(--gg-accent); font-family: var(--gg-font-heading); font-size: 30px; font-weight: 600; line-height: 1.2; }
+
+/* Policy pages: the previous site's plain content-page layout. */
+.gg-policy-page { padding-block: 32px 64px; color: var(--gg-muted); font-size: 14px; line-height: 1.7; }
+.gg-policy-page h1 { margin: 0 0 16px; color: var(--gg-ink); font-size: 26px; }
+.gg-policy-page h2 { margin: 26px 0 8px; color: var(--gg-ink); font-family: var(--gg-font-body); font-size: 15px; font-weight: 700; }
+.gg-policy-page p { margin: 0 0 12px; }
+.gg-policy-page a { color: var(--gg-ink); font-weight: 700; }
+
+/* Post body extras: in-article figure and lists. */
+.gg-single-post .gg-post-body figure { margin: 32px 0; text-align: center; }
+.gg-single-post .gg-post-body figure img { max-width: 100%; height: auto; border-radius: 8px; }
+.gg-single-post .gg-post-body figcaption { margin-top: 10px; color: var(--gg-muted); font-size: 14px; font-style: italic; }
+.gg-single-post .gg-share-twitter { font-weight: 700; }
+
+/* The old pages sat inside the theme's centred content box rather than running full width. */
+.gg-about-page, .gg-contact-page, .gg-faq-page { max-width: 1222px; margin-inline: auto; padding-inline: 15px; }
+.gg-about-page { padding-top: 30px; }
+.gg-contact-page { padding-top: 40px; }
+
+/* The old class name gg-page-title collides with the new site's title band: undo the band here. */
+.gg-contact-page .gg-contact-header .gg-page-title {
+	margin: 0 0 10px;
+	padding: 0;
+	background: none;
+	font-size: clamp(30px, 4vw, 38px);
+	line-height: 1.2;
+	text-transform: uppercase;
+}

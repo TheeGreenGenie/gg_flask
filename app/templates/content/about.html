@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block title %}About Us · GG Afrikan Eleganz{% endblock %}
+{% block description %}Welcome to GG Afrikan Eleganz, where African heritage meets contemporary fashion, based in Philadelphia.{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/content-legacy.css') }}">{% endblock %}
+{% block content %}
+{#- Layout and wording from the previous site's About page (template-about.php). -#}
+{%- set cards = [
+  ('The Vision', 'img/content/about-vision.webp', "Our vision at GG Afrikan Eleganz is deeply rooted in celebrating Africa's beauty and diversity. We see fashion as a powerful tool to share the stories of our ancestors, our lands, and our artistry with the world. Our vision is to make African-inspired fashion a global phenomenon, where every piece you wear resonates with the strength, pride, and elegance that defines the African spirit."),
+  ('Motivation & Inspiration', 'img/content/about-motivation.webp', "Africa is a land of many cultures, each with its own rich history, colors, and patterns. Our motivation is driven by a love for these traditions and the incredible stories they tell. We are inspired by the hands of the artisans who craft each fabric, by the vibrant patterns that reflect life and culture, and by the legacy that our fashion carries forward."),
+  ('The Goal', 'img/content/about-goal.webp', "Our goal is simple but powerful: to offer you authentic African fashion that speaks to your identity and honors Africa's diverse heritage. Every garment, every accessory in our collection is carefully chosen to reflect the depth and beauty of African craftsmanship. We aim to provide not just clothing, but pieces of art that connect you to Africa's soul."),
+  ('Our Dedicated Team', 'img/content/about-hero.webp', "At the heart of GG Afrikan Eleganz is a team dedicated to the craft and spirit of African fashion. We are more than just curators; we are storytellers who honor Africa's past while embracing its future. Every piece we offer reflects our commitment to authenticity, quality, and style."),
+] -%}
+<div class="gg-about-page">
+  <section class="gg-about-hero">
+    <div class="gg-container">
+      <div class="gg-about-hero-inner">
+        <div class="gg-about-hero-content">
+          <h1 class="gg-about-hero-title">About Us</h1>
+          <p class="gg-about-hero-text">Welcome to GG Afrikan Eleganz, where African heritage meets contemporary fashion. Based in the vibrant city of Philadelphia, we are proud to bring you the richness of Africa's cultural fabric through our exquisite collections of authentic African-inspired fashion and accessories.</p>
+        </div>
+        <div class="gg-about-hero-image">
+          <img src="{{ url_for('static', filename='img/content/about-hero.webp') }}" width="850" height="779" alt="" fetchpriority="high">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gg-about-grid-section">
+    <div class="gg-container">
+      <div class="gg-about-grid">
+        {% for title, image, text in cards %}
+          <div class="gg-about-card">
+            <div class="gg-about-card-image"><img src="{{ url_for('static', filename=image) }}" width="850" height="779" alt="" loading="lazy"></div>
+            <div class="gg-about-card-content">
+              <h2 class="gg-about-card-title">{{ title }}</h2>
+              <p>{{ text }}</p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="gg-about-cta">
+    <div class="gg-container">
+      <h2>Experience African Elegance</h2>
+      <p>Explore our collection and discover the beauty of authentic African fashion that tells a story.</p>
+      <a href="{{ url_for('store.shop') }}" class="gg-cta-btn">Shop now</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

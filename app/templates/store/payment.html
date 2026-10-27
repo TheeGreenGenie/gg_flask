@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block title %}Secure payment · GG Afrikan Eleganz{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}">{% endblock %}
+{% block content %}
+<div class="gg-page-title"><div class="gg-container"><h1>Secure payment</h1></div></div>
+<main class="gg-container gg-content-page">
+  <p>Order <strong>{{ order.public_id }}</strong></p>
+  <dl class="gg-summary__rows gg-payment-summary">
+    <div><dt>Items</dt><dd>{{ order.subtotal_cents|money }}</dd></div>
+    {% if order.discount_cents %}<div><dt>Discount{% if order.coupon_code %} ({{ order.coupon_code }}){% endif %}</dt><dd>−{{ order.discount_cents|money }}</dd></div>{% endif %}
+    <div><dt>Shipping{% if order.shipping_service %} · {{ order.shipping_service }}{% endif %}</dt><dd>{{ order.shipping_cents|money }}</dd></div>
+    <div><dt>Sales tax</dt><dd>{{ order.tax_cents|money }}</dd></div>
+    <div class="gg-summary__total"><dt>Total</dt><dd>{{ order.total_cents|money }}</dd></div>
+  </dl>
+  <p>Your items are reserved until {{ order.hold_expires_at.strftime('%I:%M %p UTC') }}.</p>
+  {% if provider_configured %}
+    <p>You’ll continue to {{ order.payment_provider.value|title }} to enter payment details securely.</p>
+    <form method="post" action="{{ url_for('store.begin_order_payment', public_id=order.public_id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="gg-button gg-button--accent" type="submit">Pay securely with {{ order.payment_provider.value|title }}</button>
+    </form>
+  {% else %}
+    <p role="status">The {{ order.payment_provider.value|title }} connection is not configured yet. Your card or account has not been charged.</p>
+  {% endif %}
+  <p><a href="{{ url_for('store.checkout') }}">Return to checkout</a></p>
+</main>
+{% endblock %}

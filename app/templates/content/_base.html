@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/content.css') }}">{% endblock %}
+{% block content %}
+{#- Centred, lightly decorated layout for policy and notice pages, styled after the
+    previous site's FAQ header (warm panel, soft gold circles, gold accents). -#}
+<div class="gg-deco-page">
+  <header class="gg-deco-hero">
+    {% block eyebrow_wrap %}<p class="gg-deco-eyebrow">{% block eyebrow %}GG Afrikan Eleganz{% endblock %}</p>{% endblock %}
+    <h1>{% block heading %}{% endblock %}</h1>
+    <span class="gg-deco-rule" aria-hidden="true"></span>
+    {% block lede %}{% endblock %}
+  </header>
+  <div class="gg-deco-body">{% block body %}{% endblock %}</div>
+</div>
+{% endblock %}

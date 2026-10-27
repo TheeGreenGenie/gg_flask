@@ -10,7 +10,7 @@ from __future__ import annotations
 import enum
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.catalog.models import utcnow
@@ -39,6 +39,12 @@ class User(db.Model):  # type: ignore[name-defined]
         back_populates="user",
         order_by="MarketingConsent.id",
         cascade="all, delete-orphan",
+    )
+    addresses: Mapped[list[Address]] = relationship(
+        back_populates="user", cascade="all, delete-orphan", order_by="Address.id"
+    )
+    payment_methods: Mapped[list[StoredPaymentMethod]] = relationship(
+        back_populates="user", cascade="all, delete-orphan", order_by="StoredPaymentMethod.id"
     )
 
     def consented(self, channel: Channel) -> bool:
@@ -79,3 +85,50 @@ class PasswordReset(db.Model):  # type: ignore[name-defined]
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     user: Mapped[User] = relationship()
+
+
+class Address(db.Model):  # type: ignore[name-defined]
+    __tablename__ = "addresses"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    label: Mapped[str] = mapped_column(String(40), default="Home")
+    first_name: Mapped[str] = mapped_column(String(80))
+    last_name: Mapped[str] = mapped_column(String(80))
+    address1: Mapped[str] = mapped_column(String(160))
+    address2: Mapped[str] = mapped_column(String(160), default="")
+    city: Mapped[str] = mapped_column(String(100))
+    region: Mapped[str] = mapped_column(String(100))
+    postcode: Mapped[str] = mapped_column(String(24))
+    country: Mapped[str] = mapped_column(String(2))
+    phone: Mapped[str | None] = mapped_column(String(30))
+    is_default: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow, onupdate=utcnow
+    )
+
+    user: Mapped[User] = relationship(back_populates="addresses")
+
+
+class StoredPaymentMethod(db.Model):  # type: ignore[name-defined]
+    """Provider token and display metadata only; never card/account credentials."""
+
+    __tablename__ = "stored_payment_methods"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    provider: Mapped[str] = mapped_column(String(20))
+    provider_customer_ref: Mapped[str] = mapped_column(String(160))
+    provider_method_ref: Mapped[str] = mapped_column(String(160), unique=True)
+    kind: Mapped[str] = mapped_column(String(30))
+    brand: Mapped[str] = mapped_column(String(40), default="")
+    last4: Mapped[str] = mapped_column(String(4), default="")
+    expiry_month: Mapped[int | None] = mapped_column(Integer)
+    expiry_year: Mapped[int | None] = mapped_column(Integer)
+    is_default: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    user: Mapped[User] = relationship(back_populates="payment_methods")
+
+    __table_args__ = (UniqueConstraint("user_id", "provider", "provider_method_ref"),)

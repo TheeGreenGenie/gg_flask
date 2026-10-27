@@ -1,0 +1,33 @@
+{% extends "content/_base.html" %}
+{% block title %}{{ page.title }} · GG Afrikan Eleganz{% endblock %}
+{% block eyebrow %}Store policies{% endblock %}
+{% block heading %}{{ page.title }}{% endblock %}
+{% block lede %}{% if page.lede %}<p class="gg-deco-lede">{{ page.lede }}</p>{% endif %}{% endblock %}
+{% block body %}
+{%- set policy_links = [
+  ('content.shipping', 'Shipping Information'),
+  ('content.returns', 'Returns & Exchanges'),
+  ('content.privacy', 'Privacy Policy'),
+  ('content.terms', 'Terms & Conditions'),
+] -%}
+<nav class="gg-deco-links" aria-label="Store policies">
+  {% for endpoint, label in policy_links %}
+    <a href="{{ url_for(endpoint) }}"{% if label == page.title or (label == 'Terms & Conditions' and page.title.startswith('Terms')) %} aria-current="page"{% endif %}>{{ label }}</a>
+  {% endfor %}
+</nav>
+
+<article class="gg-deco-article">
+  {% for title, paragraphs in page.sections %}
+    <section class="gg-deco-section">
+      <h2>{{ title }}</h2>
+      {% for paragraph in paragraphs %}<p>{{ paragraph }}</p>{% endfor %}
+    </section>
+  {% endfor %}
+</article>
+
+<section class="gg-deco-help">
+  <h2>Need More Help?</h2>
+  <p>Questions about this policy or an order? Email <a href="mailto:{{ site.CONTACT_EMAIL }}">{{ site.CONTACT_EMAIL }}</a>, or call or text {{ site.CONTACT_PHONE }}.</p>
+  <a class="gg-deco-help__btn" href="{{ url_for('content.contact') }}">Contact us</a>
+</section>
+{% endblock %}

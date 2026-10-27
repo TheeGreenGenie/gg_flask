@@ -1,0 +1,26 @@
+{% extends "accounts/_base.html" %}
+{% block title %}{{ 'Edit address' if address else 'Add address' }} · GG Afrikan Eleganz{% endblock %}
+{% block heading %}{{ 'Edit address' if address else 'Add address' }}{% endblock %}
+{% block body %}
+{% set saved = address %}
+{% macro value(name) %}{{ form.get(name, saved|attr(name) if saved else '') }}{% endmacro %}
+<p><a class="gg-link" href="{{ url_for('accounts.addresses') }}">← Address book</a></p>
+{% if error %}<p class="gg-alert gg-alert--error" role="alert">{{ error }}</p>{% endif %}
+<form class="gg-account__card" method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="gg-fields">
+    <div class="gg-field gg-field--wide"><label for="label">Label</label><input id="label" name="label" maxlength="40" value="{{ value('label') or 'Home' }}" required></div>
+    <div class="gg-field"><label for="first_name">First name</label><input id="first_name" name="first_name" autocomplete="shipping given-name" value="{{ value('first_name') }}" required></div>
+    <div class="gg-field"><label for="last_name">Last name</label><input id="last_name" name="last_name" autocomplete="shipping family-name" value="{{ value('last_name') }}" required></div>
+    <div class="gg-field gg-field--wide"><label for="address1">Street address</label><input id="address1" name="address1" autocomplete="shipping address-line1" value="{{ value('address1') }}" required></div>
+    <div class="gg-field gg-field--wide"><label for="address2">Apartment, suite, etc. (optional)</label><input id="address2" name="address2" autocomplete="shipping address-line2" value="{{ value('address2') }}"></div>
+    <div class="gg-field"><label for="city">City</label><input id="city" name="city" autocomplete="shipping address-level2" value="{{ value('city') }}" required></div>
+    <div class="gg-field"><label for="region">State or region</label><input id="region" name="region" autocomplete="shipping address-level1" value="{{ value('region') }}" required></div>
+    <div class="gg-field"><label for="postcode">Postal code</label><input id="postcode" name="postcode" autocomplete="shipping postal-code" value="{{ value('postcode') }}" required></div>
+    <div class="gg-field"><label for="country">Country</label><select id="country" name="country" autocomplete="shipping country" required><option value="">Select</option>{% for code, name in countries %}<option value="{{ code }}"{% if form.get('country', saved.country if saved else '') == code %} selected{% endif %}>{{ name }}</option>{% endfor %}</select></div>
+    <div class="gg-field gg-field--wide"><label for="phone">Phone (optional)</label><input id="phone" name="phone" type="tel" autocomplete="shipping tel" value="{{ value('phone') }}"></div>
+  </div>
+  <label class="gg-check"><input type="checkbox" name="is_default" value="1"{% if form.get('is_default') or (saved and saved.is_default) %} checked{% endif %}> Make this my default delivery address</label>
+  <button class="gg-button gg-button--accent" type="submit">Save address</button>
+</form>
+{% endblock %}

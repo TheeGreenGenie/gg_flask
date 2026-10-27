@@ -185,6 +185,34 @@ def test_checkout_requires_items(shop: FlaskClient, catalog_app: Flask) -> None:
     assert "Shipping address" in html and 'value="WY"' in html
 
 
+def test_checkout_creates_order_and_private_payment_page(
+    shop: FlaskClient, catalog_app: Flask
+) -> None:
+    shop.post("/cart/add", data={"variant": variant_id(catalog_app, "101001"), "quantity": 1})
+    html = shop.get("/checkout/").get_data(as_text=True)
+    nonce = re.search(r'name="checkout_nonce" value="([^"]+)"', html)
+    assert nonce
+    response = shop.post(
+        "/checkout/",
+        data={
+            "checkout_nonce": nonce.group(1),
+            "email": "buyer@example.com",
+            "first_name": "Ada",
+            "last_name": "Buyer",
+            "address1": "123 Market Street",
+            "city": "Philadelphia",
+            "region": "PA",
+            "postcode": "19103",
+            "country": "US",
+            "payment": "stripe",
+            "terms": "1",
+        },
+    )
+    assert response.status_code == 302 and "/payment" in response.location
+    assert "not configured" in shop.get(response.location).get_data(as_text=True)
+    assert catalog_app.test_client().get(response.location).status_code == 404
+
+
 def test_unavailable_line_is_flagged_and_excluded(shop: FlaskClient, catalog_app: Flask) -> None:
     shop.post("/cart/add", data={"variant": variant_id(catalog_app, "G1-1"), "quantity": 2})
     with catalog_app.app_context():
@@ -240,6 +268,13 @@ def test_socials_are_inside_sticky_header_and_no_account_links(shop: FlaskClient
     header = html.split("<header", 1)[1].split("</header>", 1)[0]
     assert "gg-topbar__social" in header
     assert "/my-account/" not in html
+
+
+def test_desktop_navigation_has_hover_mega_menu(shop: FlaskClient) -> None:
+    html = shop.get("/").get_data(as_text=True)
+    assert 'class="gg-mainnav__dd gg-mainnav__mega"' in html
+    assert "gg-megamenu" in html and "Browse by print" in html
+    assert "data-gg-hover-menu" in html
 
 
 @pytest.mark.parametrize(

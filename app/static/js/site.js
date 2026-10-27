@@ -70,6 +70,30 @@
 		});
 	}
 
+	/* Desktop menus open on hover; details preserves click, touch and no-JS support. */
+	function initHoverMenus() {
+		if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) { return; }
+		document.querySelectorAll('details[data-gg-hover-menu]').forEach(function (menu) {
+			var closeTimer;
+			menu.addEventListener('pointerenter', function () {
+				window.clearTimeout(closeTimer);
+				menu.open = true;
+			});
+			menu.addEventListener('pointerleave', function () {
+				closeTimer = window.setTimeout(function () { menu.open = false; }, 140);
+			});
+			menu.addEventListener('focusin', function () {
+				window.clearTimeout(closeTimer);
+				menu.open = true;
+			});
+			menu.addEventListener('focusout', function () {
+				window.setTimeout(function () {
+					if (!menu.contains(document.activeElement)) { menu.open = false; }
+				}, 0);
+			});
+		});
+	}
+
 	/* Modal dialogs: close button, backdrop click. Escape is native. */
 	function wireDialog(dialog, onClose) {
 		dialog.querySelectorAll('[data-gg-modal-close], [data-gg-drawer-close]').forEach(function (btn) {
@@ -405,6 +429,7 @@
 					message.textContent = data.message + ' ';
 					if (data.ok) {
 						updateCartLink(data.count, data.subtotal);
+						if (window.GGAnalytics) { window.GGAnalytics.event('add_to_cart', { currency: 'USD' }); }
 						var view = document.createElement('a');
 						view.href = data.cart_url;
 						view.className = 'gg-link';
@@ -417,7 +442,11 @@
 		});
 	}
 
-	[initHeader, initDropdowns, initDrawer, initNewsletter, initQuantity, initAutosubmit, initFilters, initTabs, initQuickView, initWish, initTheme].forEach(function (fn) {
+	document.querySelectorAll('[data-gg-print]').forEach(function (button) {
+		button.addEventListener('click', function () { window.print(); });
+	});
+
+	[initHeader, initDropdowns, initHoverMenus, initDrawer, initNewsletter, initQuantity, initAutosubmit, initFilters, initTabs, initQuickView, initWish, initTheme].forEach(function (fn) {
 		try { fn(); } catch (error) {
 			if (window.console) { window.console.error('GG enhancement failed safely:', fn.name, error); }
 		}

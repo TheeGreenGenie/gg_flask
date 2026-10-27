@@ -14,12 +14,17 @@ from app import cache
 from app.catalog import manifest, naming
 
 media_bp = Blueprint("media", __name__)
+MEDIA_CSP = "default-src 'none'; style-src 'unsafe-inline'; sandbox"
 
 
 @media_bp.get("/media/<path:path>")
 def media_file(path: str) -> Response:
     """Serve uploaded/seeded media locally. Production serves this path from object storage/CDN."""
-    return send_from_directory(current_app.config["MEDIA_ROOT"], path, max_age=7 * 86400)
+    resp = send_from_directory(current_app.config["MEDIA_ROOT"], path, max_age=7 * 86400)
+    # Media is inert: even an SVG opened directly may not run script or load anything.
+    resp.headers["Content-Security-Policy"] = MEDIA_CSP
+    resp.headers["X-Content-Type-Options"] = "nosniff"
+    return resp
 
 
 def init_catalog(app: Flask) -> None:

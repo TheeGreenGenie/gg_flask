@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from datetime import timedelta
 
 import pytest
 from flask import Flask
@@ -8,8 +9,17 @@ from flask.testing import FlaskClient
 from sqlalchemy import func, select
 
 from app.accounts import service
-from app.accounts.models import Channel, MarketingConsent, PasswordReset, User
+from app.accounts.models import (
+    Address,
+    Channel,
+    MarketingConsent,
+    PasswordReset,
+    StoredPaymentMethod,
+    User,
+)
+from app.catalog.models import utcnow
 from app.extensions import db
+from app.orders.models import Order, OrderStatus, PaymentProvider, PaymentStatus
 from app.wishlist.models import Wishlist
 
 PASSWORD = "kente-sunrise-2026"  # noqa: S105 (test fixture)
@@ -186,6 +196,118 @@ def test_changing_phone_withdraws_sms_consent(shop: FlaskClient, catalog_app: Fl
         assert not u.consented(Channel.SMS)
         assert u.consents[-1].source == "phone-changed"
         assert u.consents[-1].destination == "+12155550123"
+
+
+# ---------- address book, order history, payment references ----------
+
+
+def _address(**overrides: str) -> dict[str, str]:
+    data = {
+        "label": "Home",
+        "first_name": "Ada",
+        "last_name": "Buyer",
+        "address1": "123 Market Street",
+        "address2": "",
+        "city": "Philadelphia",
+        "region": "PA",
+        "postcode": "19103",
+        "country": "US",
+        "phone": "215-555-0123",
+    }
+    data.update(overrides)
+    return data
+
+
+def test_address_book_defaults_edit_delete_and_checkout_prefill(
+    shop: FlaskClient, catalog_app: Flask
+) -> None:
+    register(shop)
+    assert shop.post("/account/addresses/new", data=_address()).status_code == 302
+    assert (
+        shop.post(
+            "/account/addresses/new",
+            data=_address(label="Studio", address1="500 Fabric Avenue"),
+        ).status_code
+        == 302
+    )
+    with catalog_app.app_context():
+        saved = db.session.scalars(select(Address).order_by(Address.id)).all()
+        first_id, second_id = saved[0].id, saved[1].id
+        assert saved[0].is_default and not saved[1].is_default
+    shop.post(
+        f"/account/addresses/{second_id}",
+        data=_address(label="Studio", address1="500 Fabric Avenue", is_default="1"),
+    )
+    shop.post("/cart/add", data={"variant": 1, "quantity": 1})
+    checkout = shop.get("/checkout/").get_data(as_text=True)
+    assert 'value="500 Fabric Avenue"' in checkout
+    shop.post(f"/account/addresses/{second_id}/delete")
+    with catalog_app.app_context():
+        remaining = db.session.get(Address, first_id)
+        assert remaining and remaining.is_default
+
+
+def test_address_and_order_history_are_private(shop: FlaskClient, catalog_app: Flask) -> None:
+    register(shop)
+    shop.post("/account/addresses/new", data=_address())
+    with catalog_app.app_context():
+        address_id = db.session.scalar(select(Address.id))
+        u = user(catalog_app)
+        order = Order(
+            public_id="private-order",
+            idempotency_key="f" * 64,
+            user_id=u.id,
+            status=OrderStatus.PENDING_PAYMENT,
+            payment_provider=PaymentProvider.STRIPE,
+            payment_status=PaymentStatus.PENDING,
+            email=u.email,
+            first_name="Ada",
+            last_name="Buyer",
+            address1="123 Market Street",
+            address2="",
+            city="Philadelphia",
+            region="PA",
+            postcode="19103",
+            country="US",
+            subtotal_cents=1000,
+            shipping_cents=799,
+            tax_cents=0,
+            total_cents=1799,
+            hold_expires_at=utcnow() + timedelta(hours=1),
+        )
+        db.session.add(order)
+        db.session.commit()
+    assert b"private-order" in shop.get("/account/orders").data
+    assert shop.get("/account/orders/private-order").status_code == 200
+    other = catalog_app.test_client()
+    register(other, email="other@example.com", phone="")
+    assert other.get(f"/account/addresses/{address_id}").status_code == 404
+    assert other.get("/account/orders/private-order").status_code == 404
+
+
+def test_saved_payment_reference_can_be_removed(shop: FlaskClient, catalog_app: Flask) -> None:
+    register(shop)
+    with catalog_app.app_context():
+        method = StoredPaymentMethod(
+            user=user(catalog_app),
+            provider="stripe",
+            provider_customer_ref="cus_test",
+            provider_method_ref="pm_test",
+            kind="card",
+            brand="visa",
+            last4="4242",
+            expiry_month=12,
+            expiry_year=2030,
+            is_default=True,
+        )
+        db.session.add(method)
+        db.session.commit()
+        method_id = method.id
+    page = shop.get("/account/payment-methods")
+    assert b"4242" in page.data
+    assert shop.post(f"/account/payment-methods/{method_id}/delete").status_code == 302
+    with catalog_app.app_context():
+        assert db.session.get(StoredPaymentMethod, method_id) is None
 
 
 # ---------- password reset ----------

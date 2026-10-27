@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+{%- from "partials/icons.html" import icon -%}
+{% block title %}{{ post.title }} · GG Afrikan Eleganz{% endblock %}
+{% block description %}{{ post.excerpt }}{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/content-legacy.css') }}">{% endblock %}
+{% block content %}
+{#- Layout from the previous site's single-post template (single.php); text is the original article. -#}
+{%- set words = post.body|selectattr(0, 'in', ['p', 'h2'])|map(attribute=1)|join(' ')|wordcount -%}
+{%- set page_url = url_for('content.post', slug=post.slug, _external=True) -%}
+<div class="gg-single-post">
+  <header class="gg-post-header">
+    <div class="gg-container">
+      <div class="gg-post-meta-top">
+        <span class="gg-post-category">{{ post.category }}</span>
+        <span class="gg-post-date"><time datetime="{{ post.date }}">{{ post.date|long_date }}</time></span>
+      </div>
+      <h1 class="gg-post-title">{{ post.title }}</h1>
+      <div class="gg-post-author">
+        <div class="gg-author-info">
+          <span class="gg-author-name">By ggafrikaneleganz.com</span>
+          <span class="gg-read-time">{{ [1, (words / 200)|round(0, 'ceil')|int]|max }} min read</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="gg-post-featured-image">
+    <div class="gg-container">
+      <img class="gg-featured-img" src="{{ url_for('static', filename=post.image) }}" width="1200" height="760" alt="{{ post.alt }}" fetchpriority="high">
+    </div>
+  </div>
+
+  <article class="gg-post-content">
+    <div class="gg-container">
+      <div class="gg-post-body">
+        {% for block in post.body %}
+          {% if block[0] == 'h2' %}<h2>{{ block[1] }}</h2>
+          {% elif block[0] == 'ul' %}<ul>{% for item in block[1] %}<li>{{ item }}</li>{% endfor %}</ul>
+          {% elif block[0] == 'img' %}<figure><img src="{{ url_for('static', filename=block[1]) }}" alt="{{ block[2] }}" loading="lazy"><figcaption>{{ block[3] }}</figcaption></figure>
+          {% else %}<p>{{ block[1] }}</p>{% endif %}
+        {% endfor %}
+      </div>
+
+      <div class="gg-post-share">
+        <span class="gg-share-label">Share this article:</span>
+        <div class="gg-share-buttons">
+          <a href="https://www.facebook.com/sharer/sharer.php?u={{ page_url|urlencode }}" target="_blank" rel="noopener noreferrer" class="gg-share-btn gg-share-facebook" aria-label="Share on Facebook (opens in a new tab)">{{ icon('facebook', 16) }}</a>
+          <a href="https://twitter.com/intent/tweet?url={{ page_url|urlencode }}&amp;text={{ post.title|urlencode }}" target="_blank" rel="noopener noreferrer" class="gg-share-btn gg-share-twitter" aria-label="Share on X (opens in a new tab)">X</a>
+          <a href="https://pinterest.com/pin/create/button/?url={{ page_url|urlencode }}&amp;description={{ post.title|urlencode }}" target="_blank" rel="noopener noreferrer" class="gg-share-btn gg-share-pinterest" aria-label="Share on Pinterest (opens in a new tab)">{{ icon('pinterest', 16) }}</a>
+          <a href="mailto:?subject={{ post.title|urlencode }}&amp;body={{ page_url|urlencode }}" class="gg-share-btn gg-share-email" aria-label="Share by email">{{ icon('mail', 16) }}</a>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <section class="gg-author-bio">
+    <div class="gg-container">
+      <div class="gg-author-bio-inner">
+        <div class="gg-author-bio-content">
+          <h3>About ggafrikaneleganz.com</h3>
+          <p>The author is a contributor to GG Afrikan Eleganz, passionate about African fashion, culture, and bringing authentic African prints to the world.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {% if previous_post or next_post %}
+    <nav class="gg-post-navigation" aria-label="More articles">
+      <div class="gg-container">
+        <div class="gg-nav-links">
+          <div class="gg-nav-prev">
+            {% if previous_post %}<span class="gg-nav-label">&larr; Previous Article</span><a href="{{ url_for('content.post', slug=previous_post.slug) }}" class="gg-nav-title">{{ previous_post.title }}</a>{% endif %}
+          </div>
+          <div class="gg-nav-next">
+            {% if next_post %}<span class="gg-nav-label">Next Article &rarr;</span><a href="{{ url_for('content.post', slug=next_post.slug) }}" class="gg-nav-title">{{ next_post.title }}</a>{% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
+  {% endif %}
+</div>
+{% endblock %}

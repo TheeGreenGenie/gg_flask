@@ -1,0 +1,4 @@
+{% extends "accounts/_base.html" %}
+{% block title %}Order history · GG Afrikan Eleganz{% endblock %}
+{% block heading %}Order history{% endblock %}
+{% block body %}<p><a class="gg-link" href="{{ url_for('accounts.dashboard') }}">← My account</a></p><div class="gg-account__sections">{% for order in orders %}<article class="gg-account__card"><h2><a href="{{ url_for('accounts.order', public_id=order.public_id) }}">Order {{ order.public_id }}</a></h2><p>{{ order.created_at.strftime('%B %d, %Y') }} · {{ order.status.value|replace('_', ' ')|title }} · <strong>{{ order.total_cents|money }}</strong></p></article>{% else %}<p>You have not placed any orders with this account yet.</p>{% endfor %}</div>{% endblock %}

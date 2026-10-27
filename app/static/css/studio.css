@@ -30,6 +30,9 @@
 .gg-studio__visibility { display: flex; flex-wrap: wrap; gap: .5rem; min-width: 13rem; }
 .gg-studio__visibility input { min-height: 2.6rem; }
 .gg-studio__form--wide { max-width: 56rem; }
+.gg-studio__password-result { max-width: 40rem; margin-top: 1.5rem; padding: 1.25rem; border: 2px solid var(--gg-gold); border-radius: var(--gg-radius-md); background: var(--gg-warm); }
+.gg-studio__password-result code { display: block; padding: .9rem; overflow-wrap: anywhere; border: 1px solid var(--gg-line); background: var(--gg-paper); font-size: 1.1rem; user-select: all; }
+.gg-studio__actions { display: flex; flex-wrap: wrap; gap: .75rem; }
 .gg-studio__two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
 .gg-studio__checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: .6rem; }
 .gg-studio__photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr)); gap: 1rem; }

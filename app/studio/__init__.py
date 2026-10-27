@@ -339,6 +339,59 @@ def key_approval(token: str) -> str | Response:
     )
 
 
+@bp.get("/password-swaps")
+@login_required
+def password_swaps() -> str:
+    user = _user()
+    if not service.can_swap_passwords(user):
+        abort(403)
+    users = db.session.scalars(
+        select(StudioUser)
+        .where(StudioUser.id != user.id, StudioUser.active.is_(True))
+        .order_by(StudioUser.username)
+    ).all()
+    return render_template("studio/password_swaps.html", staff=user, users=users)
+
+
+@bp.get("/password-swaps/key-options")
+@login_required
+def password_swap_key_options() -> Response:
+    user = _user()
+    if not service.can_swap_passwords(user):
+        abort(403)
+    try:
+        return _json_response(passkeys.password_swap_options(user))
+    except passkeys.PasskeyError as exc:
+        return _json_error(str(exc))
+
+
+@bp.post("/password-swaps")
+@login_required
+def password_swap() -> Response:
+    user = _user()
+    if not service.can_swap_passwords(user):
+        abort(403)
+    body = _json_body()
+    credential = body.get("credential")
+    if not isinstance(credential, dict):
+        return _json_error("Use tgg's phone key to approve this password swap.")
+    try:
+        username = service.normalize_username(str(body.get("username") or ""))
+        target = db.session.scalar(select(StudioUser).where(StudioUser.username == username))
+        if target is None:
+            raise service.StudioError("Studio username not found.")
+        passkeys.verify_password_swap_key(user, credential)
+        temporary = service.issue_temporary_password(user, target)
+    except (passkeys.PasskeyError, service.StudioError) as exc:
+        db.session.rollback()
+        return _json_error(str(exc))
+    return jsonify(
+        ok=True,
+        username=target.username,
+        temporary_password=temporary,
+    )
+
+
 PAGE_SIZE = 25  # rows per Studio list page (comfortable on a phone)
 
 

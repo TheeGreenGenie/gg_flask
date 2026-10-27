@@ -53,6 +53,7 @@ ENROLLMENT_TTL = timedelta(hours=24)
 RP_NAME = "GG Afrikan Eleganz Staff Studio"
 _REG = "studio_key_reg"
 _AUTH = "studio_key_auth"
+_SWAP_AUTH = "studio_password_swap_auth"
 
 
 class PasskeyError(ValueError):
@@ -314,6 +315,64 @@ def self_approve(record: StudioLoginRequest, credential: dict[str, Any]) -> None
         "If this wasn't her, disable the account on the server:"
         f" `flask --app wsgi studio disable {user.username}`\n",
     )
+
+
+def password_swap_options(user: StudioUser) -> str:
+    """Create a new phone-key challenge for one tgg password swap."""
+    from app.studio import service
+
+    if not service.can_swap_passwords(user):
+        raise PasskeyError("This Studio account cannot swap passwords.")
+    if not can_self_approve(user):
+        raise PasskeyError("Set up tgg's phone sign-in key before swapping passwords.")
+    options = generate_authentication_options(
+        rp_id=rp_id(),
+        allow_credentials=[
+            PublicKeyCredentialDescriptor(id=base64url_to_bytes(key.credential_id))
+            for key in keys_for(user)
+        ],
+        user_verification=UserVerificationRequirement.REQUIRED,
+    )
+    session[_SWAP_AUTH] = {
+        "user": user.id,
+        "challenge": bytes_to_base64url(options.challenge),
+    }
+    return options_to_json(options)
+
+
+def verify_password_swap_key(user: StudioUser, credential: dict[str, Any]) -> None:
+    """Consume the challenge and verify tgg's key immediately before a swap."""
+    from app.studio import service
+
+    pending = session.pop(_SWAP_AUTH, None)
+    if not isinstance(pending, dict) or pending.get("user") != user.id:
+        raise PasskeyError("Start the phone-key check again.")
+    if not service.can_swap_passwords(user) or not can_self_approve(user):
+        raise PasskeyError("This Studio account cannot swap passwords.")
+    credential_id = str(credential.get("id") or credential.get("rawId") or "")
+    key = db.session.scalar(
+        select(StudioPasskey).where(
+            StudioPasskey.user_id == user.id,
+            StudioPasskey.credential_id == credential_id,
+        )
+    )
+    if key is None:
+        raise PasskeyError("That key is not registered for tgg.")
+    try:
+        verified = verify_authentication_response(
+            credential=credential,
+            expected_challenge=base64url_to_bytes(pending["challenge"]),
+            expected_rp_id=rp_id(),
+            expected_origin=origin(),
+            credential_public_key=key.public_key,
+            credential_current_sign_count=key.sign_count,
+            require_user_verification=True,
+        )
+    except InvalidAuthenticationResponse:
+        raise PasskeyError("The phone key could not be verified. Please try again.") from None
+    key.sign_count = verified.new_sign_count
+    key.last_used_at = utcnow()
+    service.audit(user, "studio.password_swap.key_verified", "studio_user", str(user.id))
 
 
 def remove_keys(user: StudioUser) -> int:

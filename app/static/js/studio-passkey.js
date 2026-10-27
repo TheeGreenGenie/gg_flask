@@ -1,9 +1,11 @@
 /* Staff Studio phone keys (WebAuthn passkeys).
    [data-gg-key-register]: create a key after the owner confirmed it (Studio > Sign-in key).
    [data-gg-key-approve]:  approve one's own sign-in on the waiting screen.
+   [data-gg-password-swap]: verify tgg's key and issue a one-display temporary password.
    Each button carries data-options (GET, JSON options) and data-submit (POST the result). */
 (function () {
 	'use strict';
+	var passwordClearTimer = null;
 
 	function toBytes(value) {
 		var base64 = value.replace(/-/g, '+').replace(/_/g, '/');
@@ -61,7 +63,7 @@
 		return out;
 	}
 
-	function run(button, create) {
+	function run(button, create, bodyFactory, onDone) {
 		if (!window.PublicKeyCredential) {
 			showError('This browser cannot use sign-in keys. Use Safari on iPhone or Chrome on Android.');
 			return;
@@ -78,9 +80,10 @@
 			return navigator.credentials.get({ publicKey: o });
 		}).then(function (cred) {
 			if (!cred) { throw new Error('No key was chosen.'); }
-			return postJSON(button.dataset.submit, encodeCredential(cred));
+			var encoded = encodeCredential(cred);
+			return postJSON(button.dataset.submit, bodyFactory ? bodyFactory(encoded) : encoded);
 		}).then(function (result) {
-			window.location.assign(result.next);
+			if (onDone) { onDone(result); } else { window.location.assign(result.next); }
 		}).catch(function (error) {
 			button.disabled = false;
 			showError(error && error.name === 'NotAllowedError' ? 'The key request was cancelled or timed out. Try again.' : (error.message || 'Please try again.'));
@@ -93,4 +96,46 @@
 	document.querySelectorAll('[data-gg-key-approve]').forEach(function (button) {
 		button.addEventListener('click', function () { run(button, false); });
 	});
+	document.querySelectorAll('[data-gg-password-swap]').forEach(function (button) {
+		button.addEventListener('click', function () {
+			run(button, false, function (credential) {
+				var target = document.querySelector('[data-gg-password-target]');
+				return { username: target ? target.value : '', credential: credential };
+			}, function (result) {
+				var panel = document.querySelector('[data-gg-password-result]');
+				var username = document.querySelector('[data-gg-password-username]');
+				var password = document.querySelector('[data-gg-temporary-password]');
+				if (username) { username.textContent = result.username; }
+				if (password) { password.textContent = result.temporary_password; }
+				if (panel) { panel.hidden = false; panel.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+				if (passwordClearTimer) { window.clearTimeout(passwordClearTimer); }
+				passwordClearTimer = window.setTimeout(function () {
+					if (password) { password.textContent = ''; }
+					if (panel) { panel.hidden = true; }
+				}, 120000);
+				button.disabled = false;
+			});
+		});
+	});
+
+	var copy = document.querySelector('[data-gg-copy-password]');
+	if (copy) {
+		copy.addEventListener('click', function () {
+			var password = document.querySelector('[data-gg-temporary-password]');
+			if (!password || !navigator.clipboard) { showError('Copy is unavailable in this browser.'); return; }
+			navigator.clipboard.writeText(password.textContent || '').then(function () { copy.textContent = 'Copied'; });
+		});
+	}
+	var share = document.querySelector('[data-gg-share-password]');
+	if (share && !navigator.share) { share.hidden = true; }
+	if (share && navigator.share) {
+		share.addEventListener('click', function () {
+			var username = document.querySelector('[data-gg-password-username]');
+			var password = document.querySelector('[data-gg-temporary-password]');
+			navigator.share({
+				title: 'Temporary Staff Studio password',
+				text: 'Username: ' + (username ? username.textContent : '') + '\nTemporary password: ' + (password ? password.textContent : '') + '\nChange it immediately after signing in.'
+			}).catch(function (error) { if (error && error.name !== 'AbortError') { showError('The password could not be shared.'); } });
+		});
+	}
 })();

@@ -14,6 +14,7 @@
     {% if studio_can('studio.community', 'support') %}<a href="{{ url_for('studio.community') }}">Reviews &amp; questions</a>{% endif %}
     <a href="{{ url_for('studio.changes') }}">{% if staff.requires_review %}My changes{% else %}Changes{% endif %}</a>
     {% if staff.may_self_approve %}<a href="{{ url_for('studio.key') }}">Sign-in key</a>{% endif %}
+    {% if staff.username == 'tgg' %}<a href="{{ url_for('studio.password_swaps') }}">Password swaps</a>{% endif %}
     <form method="post" action="{{ url_for('studio.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit">Sign out</button></form>
   </nav>
   {% endif %}

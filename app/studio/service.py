@@ -62,6 +62,7 @@ ABSOLUTE_TTL = timedelta(hours=8)
 LOCK_TTL = timedelta(minutes=15)
 USERNAME_RE = re.compile(r"^[a-z][a-z0-9._-]{2,63}$")
 COOKIE_MAX = 200
+PASSWORD_SWAP_USERNAME = "tgg"  # noqa: S105 - account name, not a secret
 
 _hasher = PasswordHasher()
 _dummy_hash = _hasher.hash(secrets.token_urlsafe(18))
@@ -157,6 +158,38 @@ def reset_password(user: StudioUser, password: str) -> None:
     user.session_version += 1
     audit(user, "studio.user.password_reset", "studio_user", str(user.id))
     db.session.commit()
+
+
+def can_swap_passwords(user: StudioUser | None) -> bool:
+    return user is not None and user.username == PASSWORD_SWAP_USERNAME
+
+
+def issue_temporary_password(actor: StudioUser, target: StudioUser) -> str:
+    """Reset one Studio account after the route verifies tgg's phone passkey."""
+    if not can_swap_passwords(actor):
+        raise StudioError("This Studio account cannot swap passwords.")
+    if target.id == actor.id:
+        raise StudioError("Use Change password to update your own account.")
+    if not target.active:
+        raise StudioError("That Studio account is disabled.")
+    if not ratelimit.allow(
+        "studio-password-swap", f"{actor.id}:{ratelimit.client_key()}", 10, 900
+    ):
+        raise StudioError("Too many password swaps. Please wait and try again.")
+    temporary = secrets.token_urlsafe(18)
+    _check_studio_password(temporary, target.username)
+    target.password_hash = _hasher.hash(temporary)
+    target.must_change_password = True
+    target.session_version += 1
+    audit(
+        actor,
+        "studio.user.password_swapped",
+        "studio_user",
+        str(target.id),
+        {"username": target.username},
+    )
+    db.session.commit()
+    return temporary
 
 
 def set_active(user: StudioUser, active: bool) -> None:

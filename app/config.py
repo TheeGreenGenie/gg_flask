@@ -139,7 +139,7 @@ class DevelopmentConfig(BaseConfig):
         # Local-only fallbacks so `flask run` works out of the box.
         self.SECRET_KEY = self.SECRET_KEY or "dev-only-not-secret"  # noqa: S105
         self.SQLALCHEMY_DATABASE_URI = (
-            self.SQLALCHEMY_DATABASE_URI or "postgresql+psycopg://gg:gg@localhost:55432/gg_dev"
+            self.SQLALCHEMY_DATABASE_URI or "postgresql+psycopg://gg:gg@localhost:55432/gg_site"
         )
         self.REDIS_URL = self.REDIS_URL or "redis://localhost:6379/0"
 

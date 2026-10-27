@@ -33,6 +33,10 @@ log = logging.getLogger(__name__)
 
 SHIPPO_API = "https://api.goshippo.com"
 STRIPE_API = "https://api.stripe.com/v1"
+# Customer-selectable speeds (owner, 2026-10-27). Standard = cheapest USPS service (Ground
+# Advantage); Express = USPS Priority Mail Express, only with live Shippo rates.
+STANDARD, EXPRESS = "standard", "express"
+SHIPPING_SPEEDS = (STANDARD, EXPRESS)
 DEFAULT_ITEM_WEIGHT_GRAMS = 450  # used when a product has no shipping weight yet
 PACKAGING_WEIGHT_GRAMS = 120
 
@@ -82,16 +86,37 @@ def parcel_weight_grams(lines: list[tuple[Variant, int]]) -> int:
     return items + PACKAGING_WEIGHT_GRAMS
 
 
-def quote_shipping(address: Address, lines: list[tuple[Variant, int]]) -> ShippingQuote:
+def express_available() -> bool:
+    cfg = current_app.config
+    return cfg.get("SHIPPING_BACKEND") == "shippo" and bool(cfg.get("SHIPPO_API_TOKEN"))
+
+
+def quote_shipping(
+    address: Address, lines: list[tuple[Variant, int]], speed: str = STANDARD
+) -> ShippingQuote:
     from app.orders.service import CheckoutError, is_philadelphia
 
     cfg = current_app.config
+    if speed not in SHIPPING_SPEEDS:
+        raise CheckoutError("Choose Standard or Express shipping.")
+    if speed == EXPRESS:
+        unavailable = CheckoutError(
+            "Express shipping isn't available for this address right now. Please choose Standard."
+        )
+        if not express_available():
+            raise unavailable
+        try:
+            return _shippo_quote(address, parcel_weight_grams(lines), express=True)
+        except ProviderError as exc:
+            log.warning("shippo_express_failed", extra={"reason": str(exc)[:200]})
+            raise unavailable from None
+
     flat = cfg.get("FLAT_SHIPPING_CENTS")
     local = cfg.get("LOCAL_SHIPPING_CENTS")
     if isinstance(local, int) and local >= 0 and is_philadelphia(address):
         return ShippingQuote(local, "Local", "Philadelphia local rate")
 
-    if cfg.get("SHIPPING_BACKEND") == "shippo" and cfg.get("SHIPPO_API_TOKEN"):
+    if express_available():
         try:
             return _shippo_quote(address, parcel_weight_grams(lines))
         except ProviderError as exc:
@@ -102,7 +127,12 @@ def quote_shipping(address: Address, lines: list[tuple[Variant, int]]) -> Shippi
     return ShippingQuote(flat, "USPS", "Flat rate")
 
 
-def _shippo_quote(address: Address, weight_grams: int) -> ShippingQuote:
+def _is_express(rate: dict[str, Any]) -> bool:
+    level = rate.get("servicelevel") or {}
+    return "express" in f"{level.get('token', '')} {level.get('name', '')}".lower()
+
+
+def _shippo_quote(address: Address, weight_grams: int, express: bool = False) -> ShippingQuote:
     cfg = current_app.config
     length, width, height = cfg.get("SHIPPO_PARCEL_INCHES") or (12, 10, 4)
     payload = {
@@ -143,14 +173,19 @@ def _shippo_quote(address: Address, weight_grams: int) -> ShippingQuote:
     rates = [
         r
         for r in data.get("rates") or []
-        if str(r.get("provider", "")).upper() in allowed and r.get("currency") == "USD"
+        if str(r.get("provider", "")).upper() in allowed
+        and r.get("currency") == "USD"
+        and _is_express(r) == express
     ]
     if not rates:
-        raise ProviderError("no USPS rates returned")
+        raise ProviderError("no express rates returned" if express else "no USPS rates returned")
     best = min(rates, key=lambda r: Decimal(str(r["amount"])))
     cents = int((Decimal(str(best["amount"])) * 100).quantize(Decimal("1"), ROUND_HALF_UP))
     handling = cfg.get("SHIPPING_HANDLING_CENTS") or 0
     service = (best.get("servicelevel") or {}).get("name") or "USPS"
+    days = best.get("estimated_days")
+    if isinstance(days, int) and days > 0:
+        service = f"{service} (about {days} business day{'s' if days != 1 else ''})"
     return ShippingQuote(
         cents + int(handling), str(best.get("provider")), str(service), best.get("object_id")
     )

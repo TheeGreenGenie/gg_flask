@@ -5,7 +5,17 @@ from __future__ import annotations
 import enum
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import (
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    LargeBinary,
+    String,
+    Text,
+    UniqueConstraint,
+)
+from sqlalchemy import false as sa_false
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.catalog.models import Variant, utcnow
@@ -17,6 +27,10 @@ class StudioRole(enum.StrEnum):
     EDITOR = "editor"
     INVENTORY = "inventory"
     SUPPORT = "support"
+    # Scoped staff roles (owner, 2026-10-27); their pages are listed in studio/permissions.py.
+    BRANDING = "branding"
+    MAINTENANCE = "maintenance"
+    SALES = "sales"
 
 
 class ApprovalStatus(enum.StrEnum):
@@ -24,6 +38,22 @@ class ApprovalStatus(enum.StrEnum):
     APPROVED = "approved"
     DENIED = "denied"
     CONSUMED = "consumed"
+    EXPIRED = "expired"
+
+
+class ChangeStatus(enum.StrEnum):
+    PENDING = "pending"
+    APPLIED = "applied"
+    REJECTED = "rejected"
+    CONFLICT = "conflict"  # the item changed after the request; nothing was overwritten
+    FAILED = "failed"  # the action itself refused when replayed (validation)
+
+
+class KeyEnrollmentStatus(enum.StrEnum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    DENIED = "denied"
+    REGISTERED = "registered"
     EXPIRED = "expired"
 
 
@@ -56,6 +86,10 @@ class StudioUser(db.Model):  # type: ignore[name-defined]
     locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Owner, 2026-10-27: these staff's changes wait for the owner's emailed approval.
+    requires_review: Mapped[bool] = mapped_column(default=False, server_default=sa_false())
+    # May approve their own sign-ins with a phone passkey the owner confirmed (co-owner).
+    may_self_approve: Mapped[bool] = mapped_column(default=False, server_default=sa_false())
 
     approvals: Mapped[list[StudioLoginRequest]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
@@ -218,3 +252,89 @@ class StudioSaleItem(db.Model):  # type: ignore[name-defined]
 
     sale: Mapped[StudioSale] = relationship(back_populates="items")
     variant: Mapped[Variant] = relationship()
+
+
+class StudioChange(db.Model):  # type: ignore[name-defined]
+    """A change by a reviewed staff member, held until the owner approves it.
+
+    The submitted form (and any uploaded file, kept privately) is replayed through the same
+    Studio action when approved, so every check, history entry and undo still applies.
+    """
+
+    __tablename__ = "studio_changes"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("studio_users.id", ondelete="CASCADE"), index=True
+    )
+    endpoint: Mapped[str] = mapped_column(String(80))
+    view_args: Mapped[str] = mapped_column(Text, default="{}")
+    form_data: Mapped[str] = mapped_column(Text, default="[]")
+    upload: Mapped[str | None] = mapped_column(Text)  # JSON: field, stored name, filename, type
+    summary: Mapped[str] = mapped_column(Text)
+    fingerprint: Mapped[str | None] = mapped_column(String(64))
+    status: Mapped[ChangeStatus] = mapped_column(
+        Enum(
+            ChangeStatus,
+            name="studio_change_status",
+            values_callable=lambda values: [value.value for value in values],
+        ),
+        default=ChangeStatus.PENDING,
+        index=True,
+    )
+    result: Mapped[str] = mapped_column(Text, default="")
+    decided_by: Mapped[str | None] = mapped_column(String(254))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow, index=True
+    )
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    user: Mapped[StudioUser] = relationship()
+
+
+class StudioPasskey(db.Model):  # type: ignore[name-defined]
+    """A WebAuthn credential (public key only) that lets its owner approve their own sign-in."""
+
+    __tablename__ = "studio_passkeys"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("studio_users.id", ondelete="CASCADE"), index=True
+    )
+    credential_id: Mapped[str] = mapped_column(String(512), unique=True)  # base64url
+    public_key: Mapped[bytes] = mapped_column(LargeBinary)
+    sign_count: Mapped[int] = mapped_column(Integer, default=0)
+    label: Mapped[str] = mapped_column(String(120), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    user: Mapped[StudioUser] = relationship()
+
+
+class StudioKeyEnrollment(db.Model):  # type: ignore[name-defined]
+    """Request to add a passkey; the owner must confirm it (email) before it can be registered."""
+
+    __tablename__ = "studio_key_enrollments"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("studio_users.id", ondelete="CASCADE"), index=True
+    )
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    status: Mapped[KeyEnrollmentStatus] = mapped_column(
+        Enum(
+            KeyEnrollmentStatus,
+            name="studio_key_enrollment_status",
+            values_callable=lambda values: [value.value for value in values],
+        ),
+        default=KeyEnrollmentStatus.PENDING,
+        index=True,
+    )
+    device: Mapped[str] = mapped_column(String(300), default="")
+    ip_address: Mapped[str | None] = mapped_column(String(45))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    user: Mapped[StudioUser] = relationship()

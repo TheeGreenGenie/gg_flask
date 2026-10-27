@@ -1,10 +1,15 @@
 {% extends "studio/_base.html" %}
 {% block title %}Waiting for approval · Staff Studio{% endblock %}
+{% block scripts %}{% if own_key %}<script src="{{ url_for('static', filename='js/studio-passkey.js') }}" defer></script>{% endif %}{% endblock %}
 {% block studio_body %}
 <section class="gg-studio__auth" aria-live="polite">
-  <p class="gg-eyebrow">Owner approval</p><h1>Check the matching letters</h1>
+  <p class="gg-eyebrow">{% if own_key %}Your sign-in key{% else %}Owner approval{% endif %}</p><h1>{% if own_key and record.status.value == 'pending' %}Approve your sign-in{% else %}Check the matching letters{% endif %}</h1>
   {% if error %}<p class="gg-form-error" role="alert">{{ error }}</p>{% endif %}
-  {% if record.status.value == 'pending' %}
+  {% if record.status.value == 'pending' and own_key %}
+    <p>Approve this sign-in with the key on your phone.</p>
+    <p class="gg-form-error" role="alert" data-gg-key-error hidden></p>
+    <button class="gg-button" type="button" data-gg-key-approve data-options="{{ url_for('studio.waiting_key_options', request_id=record.request_id) }}" data-submit="{{ url_for('studio.waiting_key', request_id=record.request_id) }}">Approve with my key</button>
+  {% elif record.status.value == 'pending' %}
     <p class="gg-studio__match" aria-label="Matching letters {{ record.match_code }}">{{ record.match_code }}</p>
     <p>Tell the owner these letters only if they match the notification on the owner's phone. This page will continue automatically.</p>
   {% elif record.status.value == 'denied' %}<h2>Sign-in denied</h2><p>The owner did not approve this attempt.</p><a href="{{ url_for('studio.login') }}">Return to sign in</a>

@@ -110,7 +110,14 @@ def _check_studio_password(password: str, username: str) -> None:
         raise StudioError(str(exc)) from None
 
 
-def create_user(username_raw: str, password: str, roles_raw: str | list[str]) -> StudioUser:
+def create_user(
+    username_raw: str,
+    password: str,
+    roles_raw: str | list[str],
+    *,
+    requires_review: bool = False,
+    may_self_approve: bool = False,
+) -> StudioUser:
     username = normalize_username(username_raw)
     _check_studio_password(password, username)
     roles = parse_roles(roles_raw)
@@ -120,10 +127,18 @@ def create_user(username_raw: str, password: str, roles_raw: str | list[str]) ->
         username=username,
         password_hash=_hasher.hash(password),
         roles=",".join(sorted(role.value for role in roles)),
+        requires_review=requires_review,
+        may_self_approve=may_self_approve,
     )
     db.session.add(user)
     db.session.flush()
-    audit(user, "studio.user.created", "studio_user", str(user.id), {"roles": user.roles})
+    audit(
+        user,
+        "studio.user.created",
+        "studio_user",
+        str(user.id),
+        {"roles": user.roles, "review": requires_review, "self_approve": may_self_approve},
+    )
     db.session.commit()
     return user
 
@@ -149,21 +164,37 @@ def set_active(user: StudioUser, active: bool) -> None:
     db.session.commit()
 
 
-def configure_user(user: StudioUser, roles_raw: str | list[str], active: bool) -> bool:
+def configure_user(
+    user: StudioUser,
+    roles_raw: str | list[str],
+    active: bool,
+    requires_review: bool | None = None,
+    may_self_approve: bool | None = None,
+) -> bool:
     """Apply non-secret manifest fields and revoke sessions when access changes."""
     roles = ",".join(sorted(role.value for role in parse_roles(roles_raw)))
-    before = {"roles": user.roles, "active": user.active}
-    if user.roles == roles and user.active == active:
+    review = user.requires_review if requires_review is None else requires_review
+    self_approve = user.may_self_approve if may_self_approve is None else may_self_approve
+    before = {
+        "roles": user.roles,
+        "active": user.active,
+        "review": user.requires_review,
+        "self_approve": user.may_self_approve,
+    }
+    after = {"roles": roles, "active": active, "review": review, "self_approve": self_approve}
+    if before == after:
         return False
     user.roles = roles
     user.active = active
+    user.requires_review = review
+    user.may_self_approve = self_approve
     user.session_version += 1
     audit(
         user,
         "studio.user.manifest_updated",
         "studio_user",
         str(user.id),
-        {"before": before, "after": {"roles": roles, "active": active}},
+        {"before": before, "after": after},
     )
     db.session.commit()
     return True
@@ -216,7 +247,10 @@ def begin_login(username_raw: str, password: str) -> tuple[StudioLoginRequest, s
     db.session.add(record)
     audit(user, "studio.login.requested", "login_request", record.request_id)
     db.session.commit()
-    _send_approval(record, token)
+    from app.studio import passkeys
+
+    if not passkeys.can_self_approve(user):  # a co-owner approves with her own phone key
+        _send_approval(record, token)
     return record, token
 
 

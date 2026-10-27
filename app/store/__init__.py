@@ -28,7 +28,7 @@ from app.catalog import queries
 from app.catalog.models import Product
 from app.content import blog
 from app.extensions import csrf, db
-from app.orders import payments
+from app.orders import payments, providers
 from app.orders import service as order_service
 from app.orders.models import Order, PaymentProvider
 from app.reviews import service as review_service
@@ -350,7 +350,12 @@ def checkout() -> Response | str:
             if cart_model is None:
                 raise order_service.CheckoutError("Your cart is empty.")
             order = order_service.create_order(
-                cart_model, address, provider, nonce, form.get("coupon", "")
+                cart_model,
+                address,
+                provider,
+                nonce,
+                form.get("coupon", ""),
+                form.get("shipping", providers.STANDARD),
             )
         except (order_service.CheckoutError, ValueError) as exc:
             db.session.rollback()
@@ -381,6 +386,7 @@ def checkout() -> Response | str:
         shipping_cents=current_app.config.get("FLAT_SHIPPING_CENTS"),
         local_shipping_cents=current_app.config.get("LOCAL_SHIPPING_CENTS"),
         shipping_backend=current_app.config.get("SHIPPING_BACKEND", "flat"),
+        express_available=providers.express_available(),
         configured=configured,
         checkout_nonce=nonce,
         error=error,

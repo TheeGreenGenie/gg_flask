@@ -78,7 +78,8 @@ POLICIES: Final = {
             (
                 "Shipping charges",
                 (
-                    "Shipping charges are shown before you place an order. We use flat-rate shipping where offered; the displayed checkout amount is the amount charged for shipping.",
+                    "We offer Standard shipping (USPS Ground Advantage, usually 2–5 business days) and Express shipping (USPS Priority Mail Express, usually 1–2 business days). The price of each is calculated from your address and the weight of your order, and Philadelphia addresses receive a lower local Standard rate.",
+                    "The shipping charge is shown before you pay; that displayed amount is the amount charged for shipping.",
                 ),
             ),
             (

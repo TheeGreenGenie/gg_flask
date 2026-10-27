@@ -6,12 +6,14 @@
   {% if staff %}
   <nav class="gg-studio__nav" aria-label="Staff Studio">
     <a href="{{ url_for('studio.dashboard') }}">Studio home</a>
-    {% if 'owner' in staff.roles or 'editor' in staff.roles or 'inventory' in staff.roles %}<a href="{{ url_for('studio.inventory') }}">Inventory</a>{% endif %}
-    {% if 'owner' in staff.roles or 'editor' in staff.roles %}<a href="{{ url_for('studio.prices') }}">Prices</a>{% endif %}
-    {% if 'owner' in staff.roles or 'editor' in staff.roles %}<a href="{{ url_for('studio.sales') }}">Sales</a>{% endif %}
-    {% if 'owner' in staff.roles or 'editor' in staff.roles %}<a href="{{ url_for('studio.products') }}">Products</a>{% endif %}
-    {% if 'owner' in staff.roles or 'editor' in staff.roles %}<a href="{{ url_for('studio.blog_posts') }}">Blog</a>{% endif %}
-    {% if 'owner' in staff.roles or 'support' in staff.roles %}<a href="{{ url_for('studio.community') }}">Reviews &amp; questions</a>{% endif %}
+    {% if studio_can('studio.inventory', 'editor', 'inventory') %}<a href="{{ url_for('studio.inventory') }}">Inventory</a>{% endif %}
+    {% if studio_can('studio.prices', 'editor') %}<a href="{{ url_for('studio.prices') }}">Prices</a>{% endif %}
+    {% if studio_can('studio.sales', 'editor') %}<a href="{{ url_for('studio.sales') }}">Sales</a>{% endif %}
+    {% if studio_can('studio.products', 'editor') %}<a href="{{ url_for('studio.products') }}">Products</a>{% endif %}
+    {% if studio_can('studio.blog_posts', 'editor') %}<a href="{{ url_for('studio.blog_posts') }}">Blog</a>{% endif %}
+    {% if studio_can('studio.community', 'support') %}<a href="{{ url_for('studio.community') }}">Reviews &amp; questions</a>{% endif %}
+    <a href="{{ url_for('studio.changes') }}">{% if staff.requires_review %}My changes{% else %}Changes{% endif %}</a>
+    {% if staff.may_self_approve %}<a href="{{ url_for('studio.key') }}">Sign-in key</a>{% endif %}
     <form method="post" action="{{ url_for('studio.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit">Sign out</button></form>
   </nav>
   {% endif %}

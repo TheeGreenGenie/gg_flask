@@ -102,6 +102,10 @@ class BaseConfig:
     STUDIO_NTFY_SERVER = "https://ntfy.sh"
     STUDIO_NTFY_TOPIC: str | None = None
     STUDIO_NTFY_TOKEN: str | None = None
+    # Where held staff changes and key requests are emailed (default: ORDER_NOTIFICATION_EMAIL).
+    STUDIO_APPROVER_EMAIL: str | None = None
+    # WebAuthn relying-party ID for Studio phone keys (default: the request's host name).
+    STUDIO_RP_ID: str | None = None
     STUDIO_COOKIE_NAME = "gg_studio"
     # None means removed text is discarded immediately; owner must explicitly
     # choose a retention period before production moderation begins.
@@ -160,6 +164,8 @@ class BaseConfig:
         )
         self.STUDIO_NTFY_TOPIC = _env("STUDIO_NTFY_TOPIC")
         self.STUDIO_NTFY_TOKEN = _env("STUDIO_NTFY_TOKEN")
+        self.STUDIO_APPROVER_EMAIL = _env("STUDIO_APPROVER_EMAIL")
+        self.STUDIO_RP_ID = _env("STUDIO_RP_ID")
         self.MODERATION_RETENTION_DAYS = _env_optional_int("MODERATION_RETENTION_DAYS")
         self.STUDIO_USERS_FILE = (
             _env("STUDIO_USERS_FILE", self.STUDIO_USERS_FILE) or self.STUDIO_USERS_FILE

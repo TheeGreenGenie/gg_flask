@@ -45,3 +45,14 @@
 .gg-studio__community-actions label { width: 100%; }
 .gg-studio__community-actions textarea { width: 100%; }
 @media (max-width: 42rem) { .gg-studio__nav form { margin-left: 0; } .gg-studio__search, .gg-studio__two { grid-template-columns: 1fr; } .gg-studio__row-form { grid-template-columns: 1fr; min-width: 14rem; } .gg-studio__facts div { grid-template-columns: 1fr; gap: .15rem; } }
+
+/* Owner approval of held changes */
+.gg-studio__change-lines { margin: 0; padding-left: 1.1rem; }
+.gg-studio__change-lines li { margin: .15rem 0; overflow-wrap: anywhere; }
+.gg-studio__review .gg-studio__change-lines { margin: .5rem 0 1rem; text-align: left; }
+.gg-studio__change-result { padding: .6rem .8rem; border-radius: .5rem; background: var(--gg-warm); }
+.gg-studio__change-status { display: inline-block; padding: .2rem .55rem; border-radius: 999px; font-size: .8rem; font-weight: 700; white-space: nowrap; background: var(--gg-warm); }
+.gg-studio__change-status--applied { background: color-mix(in srgb, #2c7a3f 18%, var(--gg-paper)); }
+.gg-studio__change-status--rejected,
+.gg-studio__change-status--conflict,
+.gg-studio__change-status--failed { background: color-mix(in srgb, #b3261e 16%, var(--gg-paper)); }

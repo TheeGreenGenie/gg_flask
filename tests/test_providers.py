@@ -268,3 +268,60 @@ def test_product_page_describes_view_item_event(catalog_app: Flask) -> None:
     catalog_app.config["GA4_MEASUREMENT_ID"] = "G-TEST123"
     html = catalog_app.test_client().get("/product/ankara-blue/").get_data(as_text=True)
     assert "data-gg-analytics-event" in html and "view_item" in html and "101001" in html
+
+
+# ---------- Standard / Express (owner, 2026-10-27) ----------
+
+EXPRESS_RATES = {
+    "rates": [
+        {**_rate("USPS", "9.35", "r_ground", "Ground Advantage"), "estimated_days": 4,
+         "servicelevel": {"name": "Ground Advantage", "token": "usps_ground_advantage"}},
+        {**_rate("USPS", "34.10", "r_express", "Priority Mail Express"), "estimated_days": 1,
+         "servicelevel": {"name": "Priority Mail Express", "token": "usps_priority_express"}},
+    ]
+}  # fmt: skip
+
+
+def test_standard_never_picks_express_and_shows_days(
+    shippo: Flask, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(providers, "_http", FakeHTTP({"/shipments/": EXPRESS_RATES}))
+    with shippo.app_context():
+        quote = providers.quote_shipping(address(), [], providers.STANDARD)
+    assert (quote.cents, quote.rate_ref) == (935, "r_ground")
+    assert quote.service == "Ground Advantage (about 4 business days)"
+
+
+def test_express_picks_priority_mail_express(
+    shippo: Flask, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(providers, "_http", FakeHTTP({"/shipments/": EXPRESS_RATES}))
+    with shippo.app_context():
+        quote = providers.quote_shipping(address("Philadelphia", "19103"), [], providers.EXPRESS)
+    # The Philadelphia local rate is a standard rate; express always uses the live price.
+    assert (quote.cents, quote.rate_ref) == (3410, "r_express")
+    assert quote.service.startswith("Priority Mail Express")
+
+
+def test_express_unavailable_is_a_clear_checkout_error(
+    shippo: Flask, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(providers, "_http", FakeHTTP({"/shipments/": SHIPPO_RATES}))
+    with shippo.app_context(), pytest.raises(service.CheckoutError, match="choose Standard"):
+        providers.quote_shipping(address(), [], providers.EXPRESS)
+    shippo.config["SHIPPING_BACKEND"] = "flat"
+    with shippo.app_context(), pytest.raises(service.CheckoutError, match="choose Standard"):
+        providers.quote_shipping(address(), [], providers.EXPRESS)
+    with shippo.app_context(), pytest.raises(service.CheckoutError, match="Standard or Express"):
+        providers.quote_shipping(address(), [], "overnight-please")
+
+
+def test_checkout_offers_express_only_with_live_rates(
+    shop: FlaskClient, catalog_app: Flask
+) -> None:
+    shop.post("/cart/add", data={"variant": _variant_id(catalog_app, "101001"), "quantity": 1})
+    html = shop.get("/checkout/").get_data(as_text=True)
+    assert 'value="standard"' in html and 'value="express"' not in html
+    catalog_app.config.update(SHIPPING_BACKEND="shippo", SHIPPO_API_TOKEN="t")
+    html = shop.get("/checkout/").get_data(as_text=True)
+    assert 'value="express"' in html and "Priority Mail Express" in html

@@ -130,6 +130,7 @@ def create_order(
     provider: PaymentProvider,
     idempotency_token: str,
     coupon_code: str = "",
+    shipping_speed: str = providers.STANDARD,
 ) -> Order:
     if len(idempotency_token) < 20:
         raise CheckoutError("Checkout session expired. Refresh the page and try again.")
@@ -173,7 +174,7 @@ def create_order(
     coupon, discount = coupon_discount(coupon_code, subtotal)
     taxable = max(subtotal - discount, 0)
     parcel = [(variants[line.variant.id], line.line.quantity) for line in cart_view.lines]
-    shipping_quote = providers.quote_shipping(address, parcel)
+    shipping_quote = providers.quote_shipping(address, parcel, shipping_speed)
     parcel_weight = providers.parcel_weight_grams(parcel)
     shipping = shipping_quote.cents
     line_amounts = providers.allocate_discount(

@@ -60,7 +60,9 @@
       <h2 id="step-delivery"><span class="gg-step-num" aria-hidden="true">3</span> Delivery</h2>
       <fieldset class="gg-options">
         <legend class="gg-visually-hidden">Shipping method</legend>
-        <label class="gg-option"><input type="radio" name="shipping" value="flat" checked> <span>{% if shipping_backend == 'shippo' %}USPS shipping<small>Calculated from your address and parcel weight — shown before you pay</small>{% else %}Flat rate shipping{% endif %}{% if local_shipping_cents is not none %}<small>Philadelphia addresses (ZIP 191xx): {{ local_shipping_cents|money }}, applied automatically</small>{% endif %}</span> <strong>{% if shipping_backend == 'shippo' %}Live rate{% elif shipping_cents is not none %}{{ shipping_cents|money }}{% else %}Not configured{% endif %}</strong></label>
+        {%- set speed = form.get('shipping', 'standard') %}
+        <label class="gg-option"><input type="radio" name="shipping" value="standard"{% if speed != 'express' %} checked{% endif %}> <span>Standard{% if shipping_backend == 'shippo' %} · USPS Ground Advantage<small>Usually 2–5 business days. Calculated from your address and parcel weight — shown before you pay</small>{% else %} · flat rate{% endif %}{% if local_shipping_cents is not none %}<small>Philadelphia addresses (ZIP 191xx): {{ local_shipping_cents|money }}, applied automatically</small>{% endif %}</span> <strong>{% if shipping_backend == 'shippo' %}Live rate{% elif shipping_cents is not none %}{{ shipping_cents|money }}{% else %}Not configured{% endif %}</strong></label>
+        {% if express_available %}<label class="gg-option"><input type="radio" name="shipping" value="express"{% if speed == 'express' %} checked{% endif %}> <span>Express · USPS Priority Mail Express<small>Usually 1–2 business days. Price shown before you pay</small></span> <strong>Live rate</strong></label>{% endif %}
       </fieldset>
       {{ field('coupon', 'Coupon code', required=false, wide=true) }}
     </section>

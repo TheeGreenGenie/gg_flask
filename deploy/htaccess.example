@@ -29,9 +29,9 @@ Options -Indexes
   # Reject unknown pages beneath the private prefix before they reach Flask. Keep
   # this allowlist synchronized with app/studio when routes are added.
   RewriteCond %{REQUEST_URI} ^/REPLACE_WITH_STUDIO_PATH/ [NC]
-  RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/(?:password|home|inventory(?:\.csv|/history)?|prices|prices/history|products|sales|sales/new|blog|blog/new)/?$ [NC]
-  RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/(?:waiting|status)/[A-Za-z0-9_-]{20,64}/?$ [NC]
-  RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/approve/[A-Za-z0-9_-]{20,100}/?$ [NC]
+  RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/(?:|logout|password|home|changes|key|key/request|key/register(?:/options)?|inventory(?:\.csv|/history)?|prices|prices/history|products|sales|sales/new|blog|blog/new)/?$ [NC]
+  RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/(?:waiting|status)/[A-Za-z0-9_-]{20,64}(?:/key(?:-options)?)?/?$ [NC]
+  RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/(?:approve|review|key-approval)/[A-Za-z0-9_-]{20,100}/?$ [NC]
   RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/(?:inventory|prices|prices/history|products)/[0-9]+(?:/undo|/visibility)?/?$ [NC]
   RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/inventory/history/[0-9]+/undo/?$ [NC]
   RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/products/(?:[0-9]+/images|images/[0-9]+/remove)/?$ [NC]

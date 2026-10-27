@@ -15,6 +15,7 @@ dependencies = [
     "pyyaml>=6.0",
     "argon2-cffi>=23.1",
     "pillow>=11.0",
+    "webauthn>=2.7,<3",  # Staff Studio passkeys (owner device keys)
 ]
 
 [project.optional-dependencies]

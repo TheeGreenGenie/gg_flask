@@ -1,0 +1,15 @@
+{% extends "studio/_base.html" %}
+{% block title %}Approve a Studio change · GG Afrikan Eleganz{% endblock %}
+{% block studio_body %}
+<section class="gg-studio__auth gg-studio__review">
+  <p class="gg-eyebrow">Owner approval</p><h1>Change by {{ change.user.username }}</h1>
+  {% if error %}<p class="gg-form-error" role="alert">{{ error }}</p>{% endif %}
+  <dl class="gg-studio__facts"><div><dt>Requested</dt><dd>{{ change.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</dd></div><div><dt>Status</dt><dd>{{ change.status.value|title }}</dd></div>{% if change.decided_at %}<div><dt>Decided</dt><dd>{{ change.decided_at.strftime('%Y-%m-%d %H:%M') }} UTC by {{ change.decided_by }}</dd></div>{% endif %}</dl>
+  <h2>What would change</h2>
+  <ul class="gg-studio__change-lines">{% for line in change.summary.splitlines() %}<li>{{ line }}</li>{% endfor %}</ul>
+  {% if change.result %}<p class="gg-studio__change-result"><strong>Result:</strong> {{ change.result }}</p>{% endif %}
+  {% if change.status.value != 'pending' %}<p>This change has been decided.</p>
+  {% elif not is_owner %}<p>Sign in to the owner account (password and authenticator code) to approve or reject. You will come straight back here.</p><a class="gg-button" href="{{ url_for('admin.login', next=request.path) }}">Owner sign in</a>
+  {% else %}<p>Nothing is on the website until you approve. If the item was changed by someone else since, it will not be overwritten.</p><form method="post" class="gg-studio__decisions"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="gg-button" name="decision" value="approve" type="submit">Approve and publish</button><button class="gg-button gg-button--outline" name="decision" value="reject" type="submit">Reject</button></form>{% endif %}
+</section>
+{% endblock %}

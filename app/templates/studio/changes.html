@@ -1,0 +1,10 @@
+{% extends "studio/_base.html" %}
+{% block title %}Changes · Staff Studio{% endblock %}
+{% block studio_body %}
+<header class="gg-studio__header"><div><p class="gg-eyebrow">Owner approval</p><h1>{% if 'owner' in staff.roles %}Changes from reviewed staff{% else %}My changes{% endif %}</h1>
+<p>{% if staff.requires_review %}Your changes go to the owner by email and appear on the website only after approval.{% else %}Changes made by staff whose work the owner approves.{% endif %}</p></div></header>
+<div class="gg-studio__table-wrap"><table><thead><tr><th>Requested</th>{% if 'owner' in staff.roles %}<th>Person</th>{% endif %}<th>Change</th><th>Status</th></tr></thead><tbody>
+{% for change in changes %}<tr><td>{{ change.created_at.strftime('%Y-%m-%d %H:%M') }}</td>{% if 'owner' in staff.roles %}<td>{{ change.user.username }}</td>{% endif %}<td><ul class="gg-studio__change-lines">{% for line in change.summary.splitlines() %}<li>{{ line }}</li>{% endfor %}</ul>{% if change.result %}<small>{{ change.result }}</small>{% endif %}</td><td><span class="gg-studio__change-status gg-studio__change-status--{{ change.status.value }}">{{ {'pending': 'Waiting for the owner', 'applied': 'Approved and live', 'rejected': 'Rejected', 'conflict': 'Not applied (item changed)', 'failed': 'Not applied'}[change.status.value] }}</span></td></tr>
+{% else %}<tr><td colspan="4">No changes yet.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

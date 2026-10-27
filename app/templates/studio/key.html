@@ -1,0 +1,19 @@
+{% extends "studio/_base.html" %}
+{% block title %}Sign-in key · Staff Studio{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/studio-passkey.js') }}" defer></script>{% endblock %}
+{% block studio_body %}
+<section class="gg-studio__auth">
+  <p class="gg-eyebrow">Sign-in key</p><h1>Approve your own sign-ins</h1>
+  <p>A sign-in key lives on your phone and is unlocked with Face ID, your fingerprint or your phone's passcode. With it, you approve your own Studio sign-ins; the owner gets an email each time.</p>
+  {% if keys %}<h2>Your keys</h2><ul>{% for item in keys %}<li>{{ item.label or 'Phone key' }} — added {{ item.created_at.strftime('%Y-%m-%d') }}{% if item.last_used_at %}, last used {{ item.last_used_at.strftime('%Y-%m-%d') }}{% endif %}</li>{% endfor %}</ul>{% endif %}
+  {% if enrollment and enrollment.status.value == 'approved' %}
+    <p>The owner confirmed your request. Do this <strong>on your phone</strong>:</p>
+    <p class="gg-form-error" role="alert" data-gg-key-error hidden></p>
+    <button class="gg-button" type="button" data-gg-key-register data-options="{{ url_for('studio.key_register_options') }}" data-submit="{{ url_for('studio.key_register') }}">Create my sign-in key</button>
+  {% elif enrollment and enrollment.status.value == 'pending' %}
+    <p>Your request is waiting for the owner to confirm it from their email. Come back to this page after they do.</p>
+  {% else %}
+    <form method="post" action="{{ url_for('studio.key_request') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="gg-button" type="submit">{% if keys %}Add a key on another phone{% else %}Ask the owner to allow a key on this phone{% endif %}</button></form>
+  {% endif %}
+</section>
+{% endblock %}

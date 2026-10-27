@@ -7,7 +7,17 @@ from collections.abc import Callable
 from typing import Any
 
 import click
-from flask import Blueprint, Flask, abort, flash, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    Flask,
+    abort,
+    flash,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from sqlalchemy import select
 from werkzeug.wrappers import Response
 
@@ -64,8 +74,12 @@ def _admin_headers(response: Response) -> Response:
 
 @bp.route("/login", methods=["GET", "POST"])
 def login() -> str | Response:
+    wanted = _safe_next(request.args.get("next"))
     if service.current_admin():
-        return redirect(url_for("admin.dashboard"))
+        return redirect(wanted or url_for("admin.dashboard"))
+    if wanted:
+        # Remembered outside the admin_* keys, which sign-in clears (e.g. a Studio approval page).
+        session["owner_return_to"] = wanted
     error = ""
     if request.method == "POST":
         try:
@@ -88,7 +102,8 @@ def verify() -> str | Response:
         except service.AdminError as exc:
             error = str(exc)
         else:
-            return redirect(url_for("admin.dashboard"))
+            wanted = _safe_next(session.pop("owner_return_to", None))
+            return redirect(wanted or url_for("admin.dashboard"))
     return render_template("admin/verify.html", error=error)
 
 
@@ -323,6 +338,13 @@ def coupon_edit(coupon_id: int | None = None) -> str | Response:
         discount_types=DiscountType,
         error=error,
     )
+
+
+def _safe_next(value: str | None) -> str | None:
+    """A same-site path only (no scheme, host, backslashes or protocol-relative //)."""
+    if not value or not value.startswith("/") or value.startswith("//") or "\\" in value:
+        return None
+    return value[:500]
 
 
 def _admin() -> AdminUser:

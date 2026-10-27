@@ -9,7 +9,7 @@ import json
 from collections.abc import Callable
 from datetime import timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 from zoneinfo import ZoneInfo
 
 import click
@@ -45,7 +45,7 @@ from app.content import blog as blog_service
 from app.content.models import BlogPost, BlogRevision
 from app.extensions import db
 from app.reviews.models import ModerationWord, PostStatus, ProductPost
-from app.studio import service
+from app.studio import passkeys, permissions, review, service
 from app.studio.models import (
     ApprovalStatus,
     InventoryHistory,
@@ -53,6 +53,7 @@ from app.studio.models import (
     SaleDiscountKind,
     SaleStatus,
     StudioAudit,
+    StudioChange,
     StudioRole,
     StudioSale,
     StudioUser,
@@ -80,13 +81,25 @@ def roles(*allowed: StudioRole) -> Callable[[Callable[..., Any]], Callable[..., 
         @login_required
         def wrapped(*args: Any, **kwargs: Any) -> Any:
             user = service.current_user()
-            if user is None or not service.allows(user, *allowed):
+            if user is None or not (
+                service.allows(user, *allowed) or permissions.scoped_allows(user, request.endpoint)
+            ):
                 abort(403)
             return view(*args, **kwargs)
 
         return wrapped
 
     return decorate
+
+
+@bp.context_processor
+def studio_helpers() -> dict[str, Any]:
+    def studio_can(endpoint: str, *legacy: str) -> bool:
+        return permissions.can(
+            service.current_user(), endpoint, tuple(StudioRole(role) for role in legacy)
+        )
+
+    return {"studio_can": studio_can}
 
 
 @bp.after_request
@@ -137,10 +150,37 @@ def waiting(request_id: str) -> str | Response:
             path=url_for("studio.login"),
         )
         return response
-    response = make_response(render_template("studio/waiting.html", record=record, error=""))
-    if record.status == ApprovalStatus.PENDING:
-        response.headers["Refresh"] = "2"
+    own_key = passkeys.can_self_approve(record.user)
+    response = make_response(
+        render_template("studio/waiting.html", record=record, error="", own_key=own_key)
+    )
+    if record.status == ApprovalStatus.PENDING and not own_key:
+        response.headers["Refresh"] = "2"  # (not while a phone key prompt may be open)
     return response
+
+
+@bp.get("/waiting/<request_id>/key-options")
+def waiting_key_options(request_id: str) -> Response:
+    record = service.find_request(request_id)
+    if record is None or record.status != ApprovalStatus.PENDING:
+        abort(404)
+    try:
+        return _json_response(passkeys.authentication_options(record))
+    except passkeys.PasskeyError as exc:
+        return _json_error(str(exc))
+
+
+@bp.post("/waiting/<request_id>/key")
+def waiting_key(request_id: str) -> Response:
+    record = service.find_request(request_id)
+    if record is None or record.status != ApprovalStatus.PENDING:
+        abort(404)
+    try:
+        passkeys.self_approve(record, _json_body())
+    except (passkeys.PasskeyError, service.StudioError) as exc:
+        db.session.rollback()
+        return _json_error(str(exc))
+    return jsonify(ok=True, next=url_for("studio.waiting", request_id=request_id))
 
 
 @bp.get("/status/<request_id>")
@@ -172,6 +212,127 @@ def approval(token: str) -> str | Response:
             return render_template("studio/approval_done.html", record=record)
     return render_template(
         "studio/approval.html", record=record, token=token, is_owner=is_owner, error=error
+    )
+
+
+@bp.route("/review/<token>", methods=["GET", "POST"])
+def review_change(token: str) -> str | Response:
+    """The owner's approve/reject page for a held change (link from the email)."""
+    change = review.change_by_token(token)
+    if change is None:
+        abort(404)
+    owner = admin_service.current_admin()
+    is_owner = bool(owner and owner.role == AdminRole.OWNER)
+    error = ""
+    if request.method == "POST":
+        if not is_owner or owner is None:
+            abort(403)
+        try:
+            review.decide(change, request.form.get("decision") == "approve", owner.email)
+        except service.StudioError as exc:
+            error = str(exc)
+    return render_template(
+        "studio/review.html", change=change, token=token, is_owner=is_owner, error=error
+    )
+
+
+@bp.get("/key")
+@login_required
+def key() -> str:
+    user = _user()
+    if not user.may_self_approve:
+        abort(404)
+    return render_template(
+        "studio/key.html",
+        staff=user,
+        keys=passkeys.keys_for(user),
+        enrollment=passkeys.open_enrollment(user),
+    )
+
+
+@bp.post("/key/request")
+@login_required
+def key_request() -> Response:
+    try:
+        passkeys.request_enrollment(_user())
+        flash("Request sent. The owner will confirm it from their email.", "success")
+    except passkeys.PasskeyError as exc:
+        flash(str(exc), "error")
+    return redirect(url_for("studio.key"))
+
+
+@bp.get("/key/register/options")
+@login_required
+def key_register_options() -> Response:
+    try:
+        return _json_response(passkeys.registration_options(_user()))
+    except passkeys.PasskeyError as exc:
+        return _json_error(str(exc))
+
+
+@bp.post("/key/register")
+@login_required
+def key_register() -> Response:
+    try:
+        passkeys.register(_user(), _json_body(), request.headers.get("X-Key-Label", ""))
+    except passkeys.PasskeyError as exc:
+        db.session.rollback()
+        return _json_error(str(exc))
+    flash("Your sign-in key is ready. Next time, approve your sign-in with it.", "success")
+    return jsonify(ok=True, next=url_for("studio.key"))
+
+
+@bp.route("/key-approval/<token>", methods=["GET", "POST"])
+def key_approval(token: str) -> str | Response:
+    """The owner confirms or refuses a co-owner's request to add a sign-in key."""
+    record = passkeys.enrollment_by_token(token)
+    if record is None:
+        abort(404)
+    owner = admin_service.current_admin()
+    is_owner = bool(owner and owner.role == AdminRole.OWNER)
+    error = ""
+    if request.method == "POST":
+        if not is_owner or owner is None:
+            abort(403)
+        try:
+            passkeys.decide_enrollment(
+                record, request.form.get("decision") == "approve", owner.email
+            )
+        except passkeys.PasskeyError as exc:
+            error = str(exc)
+    return render_template(
+        "studio/key_approval.html", record=record, is_owner=is_owner, error=error
+    )
+
+
+def _json_body() -> dict[str, Any]:
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        abort(400)
+    return body
+
+
+def _json_response(payload: str) -> Response:
+    response = current_app.response_class(payload, mimetype="application/json")
+    response.headers["Cache-Control"] = "private, no-store"
+    return response
+
+
+def _json_error(message: str) -> Response:
+    response = jsonify(error=message)
+    response.status_code = 400
+    return response
+
+
+@bp.get("/changes")
+@login_required
+def changes() -> str:
+    user = _user()
+    query = select(StudioChange).order_by(StudioChange.created_at.desc()).limit(200)
+    if StudioRole.OWNER not in user.role_set:
+        query = query.where(StudioChange.user_id == user.id)
+    return render_template(
+        "studio/changes.html", staff=user, changes=db.session.scalars(query).all()
     )
 
 
@@ -245,6 +406,7 @@ def dashboard() -> str:
         upcoming_sales=int(upcoming_sales or 0),
         community_attention=int(community_attention or 0),
         recent=recent,
+        my_pending=review.pending_count(user),
     )
 
 
@@ -780,6 +942,7 @@ def init_studio(app: Flask) -> None:
     path = str(app.config.get("STUDIO_PATH") or "").strip("/")
     if path:
         app.register_blueprint(bp, url_prefix=f"/{path}")
+        review.install(app)  # hold reviewed staff's changes for the owner's approval
 
     @app.cli.group("studio")
     def studio_cli() -> None:
@@ -789,17 +952,31 @@ def init_studio(app: Flask) -> None:
     @click.option("--username", prompt=True)
     @click.option(
         "--roles",
-        prompt="Roles (owner,editor,inventory,support; comma-separated)",
+        prompt=(
+            "Roles (owner,editor,inventory,support,branding,maintenance,sales; comma-separated)"
+        ),
         default="editor",
     )
+    @click.option(
+        "--review/--no-review",
+        default=False,
+        help="Hold this person's changes until the owner approves them by email.",
+    )
+    @click.option(
+        "--self-approve",
+        is_flag=True,
+        help="Allow approving their own sign-ins with a phone key the owner confirms.",
+    )
     @click.password_option(confirmation_prompt=True)
-    def create(username: str, roles: str, password: str) -> None:
+    def create(username: str, roles: str, review: bool, self_approve: bool, password: str) -> None:
         """Create a Studio user who must change the temporary password."""
         try:
-            user = service.create_user(username, password, roles)
+            user = service.create_user(
+                username, password, roles, requires_review=review, may_self_approve=self_approve
+            )
         except (service.StudioError, ValueError) as exc:
             raise click.ClickException(str(exc)) from None
-        click.echo(f"Created {user.username} with roles: {user.roles}")
+        click.echo(f"Created {user.username} with roles: {user.roles}{_flag_text(user)}")
 
     @studio_cli.command("reset")
     @click.argument("username")
@@ -831,7 +1008,8 @@ def init_studio(app: Flask) -> None:
     def list_users() -> None:
         users = db.session.scalars(select(StudioUser).order_by(StudioUser.username)).all()
         for user in users:
-            click.echo(f"{user.username}\t{user.roles}\t{'active' if user.active else 'disabled'}")
+            status = "active" if user.active else "disabled"
+            click.echo(f"{user.username}\t{user.roles}\t{status}{_flag_text(user)}")
 
     @studio_cli.command("sync-users")
     @click.option(
@@ -849,43 +1027,68 @@ def init_studio(app: Flask) -> None:
             user.username: user
             for user in db.session.scalars(select(StudioUser).order_by(StudioUser.username)).all()
         }
-        desired_names = {entry[0] for entry in entries}
-        plan: list[tuple[str, str, str, bool]] = []
-        for username, role_values, active in entries:
-            user = existing.get(username)
+        desired_names = {entry.username for entry in entries}
+        plan: list[tuple[str, UserEntry]] = []
+        for entry in entries:
+            user = existing.get(entry.username)
             if user is None:
-                plan.append(
-                    ("create" if active else "skip-disabled", username, role_values, active)
-                )
-            elif user.roles != role_values or user.active != active:
-                plan.append(("update", username, role_values, active))
+                plan.append(("create" if entry.active else "skip-disabled", entry))
+            elif (user.roles, user.active, user.requires_review, user.may_self_approve) != (
+                entry.roles,
+                entry.active,
+                entry.review,
+                entry.self_approve,
+            ):
+                plan.append(("update", entry))
         for username, user in existing.items():
             if username not in desired_names and user.active:
-                plan.append(("disable-missing", username, user.roles, False))
+                missing = UserEntry(username, user.roles, False, user.requires_review, False)
+                plan.append(("disable-missing", missing))
         if not plan:
             click.echo("No Studio user changes.")
             return
-        for action, username, role_values, active in plan:
-            click.echo(
-                f"{action}: {username} roles={role_values} status="
-                f"{'active' if active else 'disabled'}"
+        for action, entry in plan:
+            flags = (" review" if entry.review else "") + (
+                " self-approve" if entry.self_approve else ""
             )
+            status = "active" if entry.active else "disabled"
+            click.echo(f"{action}: {entry.username} roles={entry.roles} status={status}{flags}")
         if not apply:
             click.echo("Preview only. Run again with --apply to make these changes.")
             return
-        for action, username, role_values, active in plan:
+        for action, entry in plan:
             if action == "create":
                 password = click.prompt(
-                    f"Temporary password for {username}",
+                    f"Temporary password for {entry.username}",
                     hide_input=True,
                     confirmation_prompt=True,
                 )
-                service.create_user(username, password, role_values)
+                service.create_user(
+                    entry.username,
+                    password,
+                    entry.roles,
+                    requires_review=entry.review,
+                    may_self_approve=entry.self_approve,
+                )
             elif action == "update":
-                service.configure_user(existing[username], role_values, active)
+                service.configure_user(
+                    existing[entry.username],
+                    entry.roles,
+                    entry.active,
+                    entry.review,
+                    entry.self_approve,
+                )
             elif action == "disable-missing":
-                service.set_active(existing[username], False)
+                service.set_active(existing[entry.username], False)
         click.echo("Studio users synchronized. Removed entries were disabled, never deleted.")
+
+    @studio_cli.command("remove-keys")
+    @click.argument("username")
+    def remove_keys(username: str) -> None:
+        """Delete a person's sign-in keys (lost phone) and sign them out everywhere."""
+        user = _cli_user(username)
+        count = passkeys.remove_keys(user)
+        click.echo(f"Removed {count} key(s) for {user.username}; their sessions were ended.")
 
     @studio_cli.command("approve-local")
     @click.argument("request_id")
@@ -938,7 +1141,27 @@ def _cli_user(username: str) -> StudioUser:
     return user
 
 
-def _read_user_manifest(path: Path) -> list[tuple[str, str, bool]]:
+class UserEntry(NamedTuple):
+    username: str
+    roles: str
+    active: bool
+    review: bool
+    self_approve: bool
+
+
+def _flag_text(user: StudioUser) -> str:
+    flags = [
+        label
+        for label, on in (
+            ("changes need owner approval", user.requires_review),
+            ("may approve own sign-in with a key", user.may_self_approve),
+        )
+        if on
+    ]
+    return f" ({'; '.join(flags)})" if flags else ""
+
+
+def _read_user_manifest(path: Path) -> list[UserEntry]:
     try:
         if path.stat().st_size > 1_000_000:
             raise click.ClickException("Studio user manifest is unexpectedly large.")
@@ -950,10 +1173,11 @@ def _read_user_manifest(path: Path) -> list[tuple[str, str, bool]]:
     raw_users = payload.get("users")
     if not isinstance(raw_users, list):
         raise click.ClickException("Studio user manifest users must be a list.")
-    entries: list[tuple[str, str, bool]] = []
+    entries: list[UserEntry] = []
     seen: set[str] = set()
     for index, item in enumerate(raw_users, start=1):
-        if not isinstance(item, dict) or set(item) - {"username", "roles", "active"}:
+        allowed = {"username", "roles", "active", "review", "self_approve"}
+        if not isinstance(item, dict) or set(item) - allowed:
             raise click.ClickException(f"User {index} has unknown or invalid fields.")
         try:
             username = service.normalize_username(str(item.get("username", "")))
@@ -963,8 +1187,13 @@ def _read_user_manifest(path: Path) -> list[tuple[str, str, bool]]:
         if username in seen:
             raise click.ClickException(f"Studio username appears twice: {username}")
         active = item.get("active", True)
-        if not isinstance(active, bool):
-            raise click.ClickException(f"User {index}: active must be true or false.")
+        review_on = item.get("review", False)
+        self_approve = item.get("self_approve", False)
+        if not all(isinstance(flag, bool) for flag in (active, review_on, self_approve)):
+            raise click.ClickException(
+                f"User {index}: active, review and self_approve must be true or false."
+            )
         seen.add(username)
-        entries.append((username, ",".join(sorted(role.value for role in roles)), active))
+        role_values = ",".join(sorted(role.value for role in roles))
+        entries.append(UserEntry(username, role_values, active, review_on, self_approve))
     return entries

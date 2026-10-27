@@ -1,0 +1,13 @@
+{% extends "studio/_base.html" %}
+{% block title %}Confirm a sign-in key · GG Afrikan Eleganz{% endblock %}
+{% block studio_body %}
+<section class="gg-studio__auth">
+  <p class="gg-eyebrow">Owner confirmation</p><h1>Sign-in key for {{ record.user.username }}</h1>
+  {% if error %}<p class="gg-form-error" role="alert">{{ error }}</p>{% endif %}
+  <dl class="gg-studio__facts"><div><dt>Requested</dt><dd>{{ record.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</dd></div><div><dt>Device</dt><dd>{{ record.device or 'Unknown' }}</dd></div><div><dt>Address</dt><dd>{{ record.ip_address or 'Unknown' }}</dd></div><div><dt>Status</dt><dd>{{ record.status.value|title }}</dd></div></dl>
+  <p>Confirming lets {{ record.user.username }} create a key on that phone and approve her own Studio sign-ins. You'll get an email every time she uses it, and you can remove it on the server at any time.</p>
+  {% if record.status.value != 'pending' %}<p>This request has been decided.</p>
+  {% elif not is_owner %}<a class="gg-button" href="{{ url_for('admin.login', next=request.path) }}">Owner sign in</a>
+  {% else %}<form method="post" class="gg-studio__decisions"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="gg-button" name="decision" value="approve" type="submit">Confirm</button><button class="gg-button gg-button--outline" name="decision" value="deny" type="submit">Refuse</button></form>{% endif %}
+</section>
+{% endblock %}

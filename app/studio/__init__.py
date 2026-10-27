@@ -457,6 +457,8 @@ def product_edit(product_id: int) -> str | Response:
                 request.form.get("description", ""),
                 request.form.getlist("category_ids"),
                 request.form.get("sale_unit"),
+                request.form.get("piece_length_yards"),
+                request.form.get("width_inches"),
             )
         except service.StudioError as exc:
             db.session.rollback()

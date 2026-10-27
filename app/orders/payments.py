@@ -17,6 +17,7 @@ from flask import current_app
 from sqlalchemy import select
 
 from app import mail
+from app.catalog import units
 from app.catalog.models import Variant, utcnow
 from app.extensions import db
 from app.orders import providers
@@ -408,4 +409,12 @@ def send_order_emails(order: Order) -> None:
     mail.send(order.email, f"Order {order.public_id} confirmed", body)
     owner = current_app.config.get("ORDER_NOTIFICATION_EMAIL")
     if owner:
-        mail.send(owner, f"New order {order.public_id}", body)
+        service = order.shipping_service or "flat rate"
+        shipping = f"Shipping: {service} ${order.shipping_cents / 100:.2f}"
+        if order.parcel_weight_grams:
+            weight = order.parcel_weight_grams
+            shipping += (
+                f"\nEstimated parcel weight: {units.format_weight(weight)}"
+                f" (USPS price step {units.usps_weight_step(weight)})"
+            )
+        mail.send(owner, f"New order {order.public_id}", f"{body}{shipping}\n")

@@ -77,7 +77,8 @@ class TaxLine:
 
 
 def parcel_weight_grams(lines: list[tuple[Variant, int]]) -> int:
-    items = sum((v.weight_grams or DEFAULT_ITEM_WEIGHT_GRAMS) * qty for v, qty in lines)
+    """Entered weight, else the fabric estimate (16 oz/sq yd), else 450 g; plus packaging."""
+    items = sum((v.shipping_weight_grams or DEFAULT_ITEM_WEIGHT_GRAMS) * qty for v, qty in lines)
     return items + PACKAGING_WEIGHT_GRAMS
 
 

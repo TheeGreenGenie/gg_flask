@@ -11,6 +11,7 @@ from app import cache
 from app.admin import service
 from app.admin.models import AdminUser
 from app.catalog import images as image_service
+from app.catalog import units
 from app.catalog.models import (
     Category,
     Product,
@@ -43,11 +44,18 @@ def update_product(admin: AdminUser, product: Product, form: dict[str, str]) -> 
         sale_unit = SaleUnit(form.get("sale_unit", product.sale_unit))
     except ValueError:
         raise CatalogError("Choose a valid product type and status.") from None
+    try:
+        piece_length = units.parse_piece_length(form.get("piece_length_yards"))
+        width = units.parse_width(form.get("width_inches"))
+    except ValueError as exc:
+        raise CatalogError(str(exc)) from None
     before = {
         "name": product.name,
         "status": product.status.value,
         "featured": product.featured,
         "sale_unit": product.sale_unit,
+        "piece_length_yards": str(product.piece_length_yards or ""),
+        "width_inches": product.width_inches,
     }
     product.name = name
     product.summary = summary
@@ -56,6 +64,8 @@ def update_product(admin: AdminUser, product: Product, form: dict[str, str]) -> 
     product.product_type = product_type
     product.featured = form.get("featured") == "1"
     product.sale_unit = sale_unit.value
+    product.piece_length_yards = piece_length
+    product.width_inches = width
     category_ids = _ids(form.get("category_ids", ""))
     categories = db.session.scalars(select(Category).where(Category.id.in_(category_ids))).all()
     if not categories:
@@ -73,6 +83,8 @@ def update_product(admin: AdminUser, product: Product, form: dict[str, str]) -> 
                 "status": status.value,
                 "featured": product.featured,
                 "sale_unit": product.sale_unit,
+                "piece_length_yards": str(piece_length or ""),
+                "width_inches": width,
             },
         },
     )

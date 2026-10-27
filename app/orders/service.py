@@ -174,6 +174,7 @@ def create_order(
     taxable = max(subtotal - discount, 0)
     parcel = [(variants[line.variant.id], line.line.quantity) for line in cart_view.lines]
     shipping_quote = providers.quote_shipping(address, parcel)
+    parcel_weight = providers.parcel_weight_grams(parcel)
     shipping = shipping_quote.cents
     line_amounts = providers.allocate_discount(
         [variant.price_cents * qty for variant, qty in parcel], discount
@@ -218,6 +219,7 @@ def create_order(
         shipping_carrier=shipping_quote.carrier,
         shipping_service=shipping_quote.service,
         shipping_rate_ref=shipping_quote.rate_ref,
+        parcel_weight_grams=parcel_weight,
         tax_cents=tax,
         tax_calculation_ref=tax_quote.calculation_ref,
         total_cents=taxable + shipping + tax,

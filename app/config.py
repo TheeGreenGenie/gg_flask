@@ -144,7 +144,8 @@ class BaseConfig:
         self.SMTP_USERNAME = _env("SMTP_USERNAME")
         self.SMTP_PASSWORD = _env("SMTP_PASSWORD")
         self.SMTP_SECURITY = (_env("SMTP_SECURITY") or self.SMTP_SECURITY).lower()
-        self.ORDER_NOTIFICATION_EMAIL = _env("ORDER_NOTIFICATION_EMAIL")
+        # New orders, Studio approvals and the daily summary (owner, 2026-10-27).
+        self.ORDER_NOTIFICATION_EMAIL = _env("ORDER_NOTIFICATION_EMAIL") or "ggafrikan@gmail.com"
         self.MAILCHIMP_API_KEY = _env("MAILCHIMP_API_KEY")
         self.MAILCHIMP_SERVER_PREFIX = _env("MAILCHIMP_SERVER_PREFIX")
         self.MAILCHIMP_LIST_ID = _env("MAILCHIMP_LIST_ID")
@@ -200,6 +201,7 @@ class TestingConfig(BaseConfig):
         super().__init__()
         self.SECRET_KEY = "test-only-not-secret"  # noqa: S105
         self.MAIL_BACKEND = "memory"  # never send real email from tests, whatever the shell says
+        self.ORDER_NOTIFICATION_EMAIL = _env("ORDER_NOTIFICATION_EMAIL")  # tests opt in
         self.SQLALCHEMY_DATABASE_URI = _env("TEST_DATABASE_URL") or "sqlite:///:memory:"
         self.REDIS_URL = _env("TEST_REDIS_URL")
         self.SUPPORTED_COUNTRIES = ("US",)

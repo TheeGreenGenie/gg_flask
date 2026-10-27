@@ -27,7 +27,7 @@ CATALOG = ROOT / "catalog"
 OUT = ROOT / "instance"
 CUT_TERMS = {"by-the-yard": "By The Yard", "3-yards": "3 Yards", "6-yards": "6 Yards"}
 PER_YARD_TEXT = re.compile(r"sold by (the )?yard", re.I)
-PLACEHOLDER_STOCK = 10  # export_manifest_draft.py sets this for items WordPress did not track
+PLACEHOLDER_STOCK = 1  # owner, 2026-10-27: every item starts at 1 until real counts are entered
 
 
 def old_cuts(db: str) -> dict[int, str]:
@@ -59,14 +59,21 @@ def flags_for(p: dict[str, Any], dup_names: set[str], cut: str) -> list[str]:
     variants = p.get("variants") or []
     out: list[str] = []
     unit = p.get("sale_unit", "fixed_bundle")
-    if unit == "fixed_bundle" and (cut == "By The Yard" or PER_YARD_TEXT.search(text)):
+    has_length = bool(p.get("piece_length_yards"))
+    if (
+        unit == "fixed_bundle"
+        and not has_length
+        and (cut == "By The Yard" or PER_YARD_TEXT.search(text))
+    ):
         why = "old store sold it per yard" if cut == "By The Yard" else "text says sold by the yard"
         out.append(f"PRICE UNIT: {why}, but it is now sold as a bundle at that price")
     if any(v.get("stock") == PLACEHOLDER_STOCK for v in variants):
-        out.append("STOCK: placeholder 10 (old store did not track stock)")
+        out.append(f"STOCK: starting value {PLACEHOLDER_STOCK} (old store did not track stock)")
     if any(str(v.get("sku", "")).startswith("GG-") for v in variants):
         out.append("SKU: placeholder code (old store reused this code)")
-    if not any(v.get("weight_grams") for v in variants):
+    if not any(v.get("weight_grams") for v in variants) and not (
+        p.get("type") == "fabric" and has_length
+    ):
         out.append("WEIGHT: missing (shipping estimates 450 g)")
     if p["name"] in dup_names:
         out.append("NAME: same as another product")

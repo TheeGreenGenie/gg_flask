@@ -94,6 +94,33 @@ PRODUCT_TYPE = {"fabrics": "fabric", "clothing": "clothing", "home-accessories":
 AXIS_NAMES = {"color": "Colorway", "pa_color": "Colorway", "style": "Style", "pa_size": "Size"}
 
 
+INITIAL_STOCK = 1
+# Old cut-length categories -> length of one piece in yards (owner, 2026-10-27: "By The Yard"
+# items are precut 1-yard pieces at that price).
+CUT_LENGTH = {"by-the-yard": 1, "3-yards": 3, "6-yards": 6}
+PER_YARD_TEXT = re.compile(r"sold by (?:the )?yard\.?", re.I)
+LENGTH_TEXT = re.compile(
+    r"(?:comes in|measures|totaling)\s+(\d+(?:\.\d+)?)(?:\s+(\d)/(\d))?\s+yards?", re.I
+)
+SIZE_TEXT = re.compile(r'(\d{2,3})\s*(?:"|”|in)\s*(?:by|x)\s*(\d{2,3})\s*(?:"|”|in)', re.I)
+
+
+def piece_size(terms: set[str], text: str) -> tuple[float | None, int | None]:
+    """(length in yards, width in inches) from the old category or the description."""
+    length: float | None = next((CUT_LENGTH[t] for t in CUT_LENGTH if t in terms), None)
+    if length is None and (m := LENGTH_TEXT.search(text)):
+        length = float(m[1]) + (int(m[2]) / int(m[3]) if m[2] else 0)
+    if length is None and PER_YARD_TEXT.search(text):
+        length = 1  # priced per yard on the old site = a precut 1-yard piece
+    width = None
+    if m := SIZE_TEXT.search(text):
+        a, b = int(m[1]), int(m[2])
+        along = round((length or 0) * 36)
+        candidates = [n for n in (a, b) if n != along and 30 <= n <= 80]
+        width = candidates[0] if candidates else None
+    return (round(length, 2) if length else None), width
+
+
 def q(cur: Any, sql: str, args: Any = None) -> list[dict[str, Any]]:
     cur.execute(sql, args)
     return list(cur.fetchall())
@@ -218,19 +245,21 @@ def main() -> int:
             base_sku = (m.get("_sku") or "").strip()
             if not base_sku:  # most old products only carry their code in the title
                 code = TITLE_CODE.search(row["post_title"])
-                base_sku = code.group(1) if code else ""
+                base_sku = code.group(1).lstrip("-") if code else ""
             if (
                 not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,40}", base_sku)
                 or base_sku in used_skus
             ):
-                base_sku = f"GG-{row['ID']}"
+                # The old store reused some codes across categories (owner, 2026-10-27): keep
+                # the code and add the category's initial, e.g. Ethnic Print 101135 -> 101135-E.
+                suffixed = f"{base_sku}-{row['_cat'][1][0].upper()}" if base_sku else ""
+                base_sku = suffixed if suffixed and suffixed not in used_skus else f"GG-{row['ID']}"
             used_skus.add(base_sku)
 
             def stock_fields(vm: dict[str, str]) -> dict[str, Any]:
-                if vm.get("_manage_stock") == "yes" and (vm.get("_stock") or "").strip():
-                    return {"stock": max(0, int(float(vm["_stock"])))}
-                # Not tracked in WordPress: placeholder stock the owner must set before launch.
-                return {"stock": 0 if vm.get("_stock_status") == "outofstock" else 10}
+                # Owner, 2026-10-27: stock is tracked; every item starts at 1 and real counts
+                # are entered later (hidden products count as unavailable).
+                return {"stock": INITIAL_STOCK}
 
             def money(vm: dict[str, str]) -> dict[str, Any]:
                 price = round(float(vm.get("_price") or vm.get("_regular_price") or 0) * 100)
@@ -290,6 +319,11 @@ def main() -> int:
 
             product_type = PRODUCT_TYPE[parent_slug]
             description = plain_text(row["post_content"]) or plain_text(row["post_excerpt"])
+            length, width = (
+                piece_size(row["_terms"], description) if product_type == "fabric" else (None, None)
+            )
+            if length == 1:
+                description = PER_YARD_TEXT.sub("Precut 1-yard piece.", description)
             summary = (
                 plain_text(row["post_excerpt"]).split("\n")[0][:300]
                 or description.split("\n")[0][:300]
@@ -312,6 +346,8 @@ def main() -> int:
                     "images": images,
                     "options": options,
                     "variants": variants,
+                    **({"piece_length_yards": length} if length else {}),
+                    **({"width_inches": width} if width else {}),
                 }
             )
             print(f"  {slug}: {len(variants)} variant(s), {len(images)} image(s)")

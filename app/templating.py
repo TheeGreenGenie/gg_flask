@@ -8,6 +8,7 @@ from typing import Any
 from flask import Flask
 
 from app import site_content
+from app.catalog import units
 
 
 def money(cents: int, currency: str = "USD") -> str:
@@ -33,6 +34,8 @@ def init_templating(app: Flask) -> None:
     app.add_template_filter(money, "money")
     app.add_template_filter(phone_uri, "phone_uri")
     app.add_template_filter(long_date, "long_date")
+    app.add_template_filter(units.format_weight, "weight")
+    app.add_template_filter(units.usps_weight_step, "usps_step")
 
     @app.context_processor
     def site_globals() -> dict[str, Any]:

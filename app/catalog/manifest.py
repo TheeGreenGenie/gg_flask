@@ -12,6 +12,7 @@ import re
 import shutil
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
+from decimal import Decimal
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -42,7 +43,7 @@ MAX_CATEGORY_DEPTH = 2  # D-003
 PRODUCT_KEYS = {
     "slug", "name", "type", "status", "featured", "published", "legacy_wp_id",
     "summary", "description", "categories", "collections", "images", "options", "variants",
-    "colors", "autoname", "sale_unit",
+    "colors", "autoname", "sale_unit", "piece_length_yards", "width_inches",
 }  # fmt: skip
 VARIANT_KEYS = {
     "sku", "options", "price_cents", "compare_at_cents", "stock", "track_inventory",
@@ -148,6 +149,19 @@ def validate(data: dict[str, Any], assets_dir: Path) -> list[str]:
         _check_enum(p.get("type"), ProductType, f"{loc}.type", err)
         _check_enum(p.get("status", "draft"), ProductStatus, f"{loc}.status", err)
         _check_enum(p.get("sale_unit", "fixed_bundle"), SaleUnit, f"{loc}.sale_unit", err)
+        length = p.get("piece_length_yards")
+        if length is not None and (
+            isinstance(length, bool)
+            or not isinstance(length, int | float)
+            or not 0 < length <= 1000
+            or round(length, 2) != length
+        ):
+            err(f"{loc}.piece_length_yards: a positive number of yards, at most 2 decimals")
+        width = p.get("width_inches")
+        if width is not None and (
+            isinstance(width, bool) or not isinstance(width, int) or not 1 <= width <= 200
+        ):
+            err(f"{loc}.width_inches: a whole number of inches (1-200)")
         colors = p.get("colors") or []
         if not isinstance(colors, list) or any(c not in COLOR_NAMES for c in colors):
             err(f"{loc}.colors: must be a list of {sorted(COLOR_NAMES)}")
@@ -335,6 +349,9 @@ def _load_product(
     product.status = ProductStatus(p.get("status", "draft"))
     product.featured = bool(p.get("featured", False))
     product.sale_unit = SaleUnit(p.get("sale_unit", "fixed_bundle")).value
+    length = p.get("piece_length_yards")
+    product.piece_length_yards = None if length is None else Decimal(str(length))
+    product.width_inches = p.get("width_inches")
     product.colors = ",".join(p.get("colors") or [])
     product.summary = (p.get("summary") or "").strip()
     product.description = (p.get("description") or "").strip()

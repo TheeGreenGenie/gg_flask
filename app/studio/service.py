@@ -21,6 +21,7 @@ from werkzeug.datastructures import FileStorage
 from app import cache, mail, ratelimit
 from app.accounts.service import MAX_PASSWORD, check_password
 from app.catalog import images as image_service
+from app.catalog import units
 from app.catalog.models import (
     Category,
     Collection,
@@ -609,7 +610,10 @@ def update_product_details(
     description_raw: str,
     category_ids_raw: list[str],
     sale_unit_raw: str | None = None,
+    piece_length_raw: str | None = None,
+    width_raw: str | None = None,
 ) -> None:
+    """Length/width left as None keep their current values (forms without those fields)."""
     name = name_raw.strip()
     summary = summary_raw.strip()
     description = description_raw.strip()
@@ -624,6 +628,15 @@ def update_product_details(
     except ValueError:
         raise StudioError("Choose bundle, yard, or metre for the selling unit.") from None
     try:
+        piece_length = (
+            product.piece_length_yards
+            if piece_length_raw is None
+            else units.parse_piece_length(piece_length_raw)
+        )
+        width = product.width_inches if width_raw is None else units.parse_width(width_raw)
+    except ValueError as exc:
+        raise StudioError(str(exc)) from None
+    try:
         category_ids = {int(value) for value in category_ids_raw}
     except ValueError:
         raise StudioError("Choose valid categories.") from None
@@ -636,12 +649,16 @@ def update_product_details(
         "description": product.description,
         "category_ids": sorted(category.id for category in product.categories),
         "sale_unit": product.sale_unit,
+        "piece_length_yards": _yards(product.piece_length_yards),
+        "width_inches": product.width_inches,
     }
     product.name = name
     product.summary = summary
     product.description = description
     product.categories = list(categories)
     product.sale_unit = sale_unit.value
+    product.piece_length_yards = piece_length
+    product.width_inches = width
     audit(
         user,
         "studio.product.updated",
@@ -655,11 +672,17 @@ def update_product_details(
                 "description": description,
                 "category_ids": sorted(category_ids),
                 "sale_unit": sale_unit.value,
+                "piece_length_yards": _yards(piece_length),
+                "width_inches": width,
             },
         },
     )
     db.session.commit()
     cache.bump_catalog_version()
+
+
+def _yards(value: Decimal | None) -> str | None:
+    return None if value is None else format(Decimal(value).normalize(), "f")
 
 
 def upload_product_image(

@@ -58,6 +58,15 @@ collections:
 - slug: floral-designs
   name: Floral Designs
   description: ''
+- slug: grand-super-wax
+  name: Grand Super Wax
+  description: ''
+- slug: super-wax
+  name: Super Wax
+  description: ''
+- slug: regular-wax
+  name: Regular Wax
+  description: ''
 products:
 - slug: adire-print-101219
   name: Adire Print - Orange & Tan - 101219
@@ -86,7 +95,8 @@ products:
   variants:
   - sku: '101219'
     price_cents: 4000
-    stock: 10
+    stock: 1
+  piece_length_yards: 4.5
   colors:
   - Orange
   - Tan
@@ -117,7 +127,8 @@ products:
   variants:
   - sku: '101218'
     price_cents: 4000
-    stock: 10
+    stock: 1
+  piece_length_yards: 4.5
   colors:
   - Pink
   - Cream
@@ -148,7 +159,8 @@ products:
   variants:
   - sku: '101217'
     price_cents: 4000
-    stock: 10
+    stock: 1
+  piece_length_yards: 4.5
   colors:
   - Cream
 - slug: adire-print-101216
@@ -178,7 +190,8 @@ products:
   variants:
   - sku: '101216'
     price_cents: 4000
-    stock: 10
+    stock: 1
+  piece_length_yards: 4.5
   colors:
   - Burgundy
   - Cream
@@ -209,7 +222,8 @@ products:
   variants:
   - sku: '101215'
     price_cents: 4000
-    stock: 10
+    stock: 1
+  piece_length_yards: 4.5
   colors:
   - Gold
   - Brown
@@ -240,7 +254,8 @@ products:
   variants:
   - sku: '101214'
     price_cents: 4000
-    stock: 10
+    stock: 1
+  piece_length_yards: 4.5
   colors:
   - Navy
   - Teal
@@ -271,7 +286,8 @@ products:
   variants:
   - sku: '101213'
     price_cents: 4000
-    stock: 10
+    stock: 1
+  piece_length_yards: 4.5
   colors:
   - Brown
   - Cream
@@ -302,7 +318,8 @@ products:
   variants:
   - sku: '101210'
     price_cents: 4000
-    stock: 10
+    stock: 1
+  piece_length_yards: 4.5
   colors:
   - Cream
   - Brown
@@ -333,7 +350,8 @@ products:
   variants:
   - sku: '101208'
     price_cents: 4000
-    stock: 10
+    stock: 1
+  piece_length_yards: 4.5
   colors:
   - Teal
   - Cream
@@ -364,7 +382,8 @@ products:
   variants:
   - sku: '101207'
     price_cents: 4000
-    stock: 10
+    stock: 1
+  piece_length_yards: 4.5
   colors:
   - Navy
   - Cream
@@ -395,7 +414,8 @@ products:
   variants:
   - sku: '101206'
     price_cents: 4000
-    stock: 10
+    stock: 1
+  piece_length_yards: 4.5
   colors:
   - Navy
   - Teal
@@ -426,7 +446,8 @@ products:
   variants:
   - sku: '101205'
     price_cents: 4000
-    stock: 10
+    stock: 1
+  piece_length_yards: 4.5
   colors:
   - Navy
   - Teal
@@ -458,7 +479,8 @@ products:
   variants:
   - sku: '101204'
     price_cents: 4000
-    stock: 10
+    stock: 1
+  piece_length_yards: 4.5
   colors:
   - Navy
   - Teal
@@ -479,7 +501,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections:
@@ -491,7 +513,9 @@ products:
   variants:
   - sku: '101188'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Brown
   - Orange
@@ -512,7 +536,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections:
@@ -524,7 +548,9 @@ products:
   variants:
   - sku: '101187'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Brown
   - Olive
@@ -545,7 +571,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections:
@@ -557,7 +583,9 @@ products:
   variants:
   - sku: '101186'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Brown
   - Gold
@@ -578,7 +606,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections:
@@ -590,7 +618,9 @@ products:
   variants:
   - sku: '101185'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Multicolor
 - slug: african-ankara-print-101184
@@ -610,7 +640,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections:
@@ -622,7 +652,9 @@ products:
   variants:
   - sku: '101184'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Gold
@@ -643,7 +675,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections:
@@ -655,7 +687,9 @@ products:
   variants:
   - sku: '101183'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Yellow
   - Red
@@ -676,7 +710,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections:
@@ -688,7 +722,9 @@ products:
   variants:
   - sku: '101182'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Brown
   - Olive
@@ -709,7 +745,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections:
@@ -721,7 +757,9 @@ products:
   variants:
   - sku: '101181'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Gold
   - Brown
@@ -742,7 +780,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections:
@@ -754,7 +792,9 @@ products:
   variants:
   - sku: '101180'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Teal
   - Navy
@@ -775,7 +815,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections:
@@ -787,7 +827,9 @@ products:
   variants:
   - sku: '101179'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Gold
   - Teal
@@ -808,7 +850,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections:
@@ -820,7 +862,9 @@ products:
   variants:
   - sku: '101178'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Brown
   - Yellow
@@ -841,7 +885,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -852,7 +896,9 @@ products:
   variants:
   - sku: '101168'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Brown
   - Yellow
@@ -873,7 +919,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -884,7 +930,9 @@ products:
   variants:
   - sku: '101167'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Olive
   - Brown
@@ -905,7 +953,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -916,7 +964,9 @@ products:
   variants:
   - sku: '101169'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
 - slug: african-ankara-print-101166
@@ -936,7 +986,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -947,7 +997,9 @@ products:
   variants:
   - sku: '101166'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
 - slug: african-ankara-print-101170
@@ -967,7 +1019,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -978,7 +1030,9 @@ products:
   variants:
   - sku: '101170'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Teal
   - Yellow
@@ -999,7 +1053,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1010,7 +1064,9 @@ products:
   variants:
   - sku: '101171'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Red
   - Burgundy
@@ -1031,7 +1087,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1042,7 +1098,9 @@ products:
   variants:
   - sku: '101165'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Red
   - Burgundy
@@ -1063,7 +1121,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1074,7 +1132,9 @@ products:
   variants:
   - sku: '101172'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
 - slug: african-ankara-print-101173
@@ -1094,7 +1154,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1105,7 +1165,9 @@ products:
   variants:
   - sku: '101173'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Brown
   - Burgundy
@@ -1126,7 +1188,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1137,7 +1199,9 @@ products:
   variants:
   - sku: '101174'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Brown
   - Cream
@@ -1158,7 +1222,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1169,7 +1233,9 @@ products:
   variants:
   - sku: '101175'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Orange
   - Brown
@@ -1190,7 +1256,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1201,7 +1267,9 @@ products:
   variants:
   - sku: '101176'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Teal
   - Cream
@@ -1222,7 +1290,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1233,7 +1301,9 @@ products:
   variants:
   - sku: '101177'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Burgundy
@@ -1254,7 +1324,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1265,7 +1335,9 @@ products:
   variants:
   - sku: '101164'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Teal
   - Navy
@@ -1286,7 +1358,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1297,7 +1369,9 @@ products:
   variants:
   - sku: '101163'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
 - slug: african-ankara-print-101162
@@ -1317,7 +1391,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1328,7 +1402,9 @@ products:
   variants:
   - sku: '101162'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Cream
   - Navy
@@ -1349,7 +1425,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1360,7 +1436,9 @@ products:
   variants:
   - sku: '101161'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Brown
   - Yellow
@@ -1381,7 +1459,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1392,7 +1470,9 @@ products:
   variants:
   - sku: '101160'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Brown
   - Navy
@@ -1413,7 +1493,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1424,7 +1504,9 @@ products:
   variants:
   - sku: '101159'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Cream
   - Brown
@@ -1445,7 +1527,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1456,7 +1538,9 @@ products:
   variants:
   - sku: '101158'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Cream
@@ -1477,7 +1561,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1488,7 +1572,9 @@ products:
   variants:
   - sku: '101157'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Yellow
@@ -1509,7 +1595,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1520,7 +1606,9 @@ products:
   variants:
   - sku: '101155'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Pink
   - Navy
@@ -1541,7 +1629,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1552,7 +1640,9 @@ products:
   variants:
   - sku: '101156'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Teal
   - Brown
@@ -1573,7 +1663,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1584,7 +1674,9 @@ products:
   variants:
   - sku: '101154'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Blue
@@ -1605,7 +1697,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1616,7 +1708,9 @@ products:
   variants:
   - sku: '101153'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Yellow
   - Brown
@@ -1637,7 +1731,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1648,7 +1742,9 @@ products:
   variants:
   - sku: '101152'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Multicolor
 - slug: african-ankara-print-101151
@@ -1668,7 +1764,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1679,7 +1775,9 @@ products:
   variants:
   - sku: '101151'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Burgundy
@@ -1700,7 +1798,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1711,7 +1809,9 @@ products:
   variants:
   - sku: '101150'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Brown
   - Burgundy
@@ -1732,7 +1832,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1743,7 +1843,9 @@ products:
   variants:
   - sku: '101149'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Burgundy
   - Cream
@@ -1764,7 +1866,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1775,7 +1877,9 @@ products:
   variants:
   - sku: '101148'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Cream
   - Black
@@ -1796,7 +1900,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1807,7 +1911,9 @@ products:
   variants:
   - sku: '101147'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Cream
@@ -1828,7 +1934,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1839,7 +1945,9 @@ products:
   variants:
   - sku: '101146'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Burgundy
   - Brown
@@ -1860,7 +1968,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1871,7 +1979,9 @@ products:
   variants:
   - sku: '101145'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Brown
@@ -1892,7 +2002,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1903,7 +2013,9 @@ products:
   variants:
   - sku: '101144'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Brown
   - Navy
@@ -1924,7 +2036,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1935,7 +2047,9 @@ products:
   variants:
   - sku: '101143'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Teal
@@ -1956,7 +2070,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -1967,7 +2081,9 @@ products:
   variants:
   - sku: '101142'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Red
   - Cream
@@ -1988,7 +2104,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -1999,7 +2115,9 @@ products:
   variants:
   - sku: '101141'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Cream
@@ -2020,7 +2138,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections:
@@ -2032,7 +2150,9 @@ products:
   variants:
   - sku: '101140'
     price_cents: 799
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Teal
   - Navy
@@ -2053,7 +2173,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections:
@@ -2065,7 +2185,9 @@ products:
   variants:
   - sku: '101139'
     price_cents: 799
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Burgundy
   - Red
@@ -2086,7 +2208,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections:
@@ -2098,7 +2220,9 @@ products:
   variants:
   - sku: '101138'
     price_cents: 799
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Cream
@@ -2119,7 +2243,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections:
@@ -2131,7 +2255,9 @@ products:
   variants:
   - sku: '101137'
     price_cents: 799
-    stock: 0
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Burgundy
   - Cream
@@ -2152,7 +2278,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections:
@@ -2164,7 +2290,9 @@ products:
   variants:
   - sku: '101136'
     price_cents: 799
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Red
   - Navy
@@ -2185,7 +2313,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections:
@@ -2197,7 +2325,9 @@ products:
   variants:
   - sku: '101135'
     price_cents: 799
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Multicolor
 - slug: african-ankara-print-101134-3
@@ -2229,7 +2359,9 @@ products:
   - sku: 101134-3
     price_cents: 2100
     compare_at_cents: 2300
-    stock: 10
+    stock: 1
+  piece_length_yards: 3
+  width_inches: 36
   colors:
   - Brown
   - Gold
@@ -2262,7 +2394,9 @@ products:
   - sku: 101133-3
     price_cents: 2100
     compare_at_cents: 2300
-    stock: 10
+    stock: 1
+  piece_length_yards: 3
+  width_inches: 36
   colors:
   - Multicolor
 - slug: african-ankara-print-101132-3
@@ -2294,7 +2428,9 @@ products:
   - sku: 101132-3
     price_cents: 2100
     compare_at_cents: 2300
-    stock: 10
+    stock: 1
+  piece_length_yards: 3
+  width_inches: 36
   colors:
   - Burgundy
   - Cream
@@ -2327,7 +2463,9 @@ products:
   - sku: 101130-3
     price_cents: 2100
     compare_at_cents: 2300
-    stock: 10
+    stock: 1
+  piece_length_yards: 3
+  width_inches: 36
   colors:
   - Brown
   - Cream
@@ -2360,7 +2498,9 @@ products:
   - sku: 101129-3
     price_cents: 2100
     compare_at_cents: 2300
-    stock: 10
+    stock: 1
+  piece_length_yards: 3
+  width_inches: 36
   colors:
   - Multicolor
 - slug: african-ankara-print-101128-3
@@ -2393,7 +2533,9 @@ products:
   - sku: 101128-3
     price_cents: 2100
     compare_at_cents: 2300
-    stock: 10
+    stock: 1
+  piece_length_yards: 3
+  width_inches: 36
   colors:
   - Gold
   - Olive
@@ -2426,7 +2568,9 @@ products:
   - sku: 101127-3
     price_cents: 2100
     compare_at_cents: 2300
-    stock: 10
+    stock: 1
+  piece_length_yards: 3
+  width_inches: 36
   colors:
   - Brown
   - Burgundy
@@ -2459,7 +2603,9 @@ products:
   - sku: 101126-3
     price_cents: 2100
     compare_at_cents: 2300
-    stock: 10
+    stock: 1
+  piece_length_yards: 3
+  width_inches: 36
   colors:
   - Multicolor
 - slug: african-ankara-print-101125-3
@@ -2491,7 +2637,9 @@ products:
   - sku: 101125-3
     price_cents: 2100
     compare_at_cents: 2300
-    stock: 10
+    stock: 1
+  piece_length_yards: 3
+  width_inches: 36
   colors:
   - Navy
   - Red
@@ -2524,7 +2672,9 @@ products:
   - sku: 101124-3
     price_cents: 2100
     compare_at_cents: 2300
-    stock: 10
+    stock: 1
+  piece_length_yards: 3
+  width_inches: 36
   colors:
   - Teal
   - Brown
@@ -2557,7 +2707,9 @@ products:
   - sku: 101123-3
     price_cents: 2100
     compare_at_cents: 2300
-    stock: 10
+    stock: 1
+  piece_length_yards: 3
+  width_inches: 36
   colors:
   - Cream
   - Navy
@@ -2590,7 +2742,9 @@ products:
   - sku: 101122-3
     price_cents: 2100
     compare_at_cents: 2300
-    stock: 10
+    stock: 1
+  piece_length_yards: 3
+  width_inches: 36
   colors:
   - Navy
   - Cream
@@ -2623,7 +2777,9 @@ products:
   - sku: 101121-3
     price_cents: 2100
     compare_at_cents: 2300
-    stock: 10
+    stock: 1
+  piece_length_yards: 3
+  width_inches: 36
   colors:
   - Teal
   - Green
@@ -2658,7 +2814,9 @@ products:
   - sku: 101120-3
     price_cents: 2100
     compare_at_cents: 2300
-    stock: 10
+    stock: 1
+  piece_length_yards: 3
+  width_inches: 36
   colors:
   - Teal
   - Navy
@@ -2679,7 +2837,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -2690,7 +2848,9 @@ products:
   variants:
   - sku: '101119'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Teal
   - Green
@@ -2711,7 +2871,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -2722,7 +2882,9 @@ products:
   variants:
   - sku: '101118'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Multicolor
 - slug: african-ankara-print-101117
@@ -2742,7 +2904,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -2755,7 +2917,9 @@ products:
   variants:
   - sku: '101117'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Orange
   - Brown
@@ -2776,7 +2940,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -2787,7 +2951,9 @@ products:
   variants:
   - sku: '101116'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Orange
@@ -2808,7 +2974,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -2819,7 +2985,9 @@ products:
   variants:
   - sku: '101115'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Cream
 - slug: african-ankara-print-101114
@@ -2839,7 +3007,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -2850,7 +3018,9 @@ products:
   variants:
   - sku: '101114'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Cream
@@ -2871,7 +3041,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -2882,7 +3052,9 @@ products:
   variants:
   - sku: '101113'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Yellow
   - Brown
@@ -2903,7 +3075,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -2914,7 +3086,9 @@ products:
   variants:
   - sku: '101112'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Brown
   - Green
@@ -2935,7 +3109,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -2946,7 +3120,9 @@ products:
   variants:
   - sku: '101111'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Cream
   - Navy
@@ -2967,7 +3143,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -2978,7 +3154,9 @@ products:
   variants:
   - sku: '101110'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Orange
   - Brown
@@ -2999,7 +3177,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3010,7 +3188,9 @@ products:
   variants:
   - sku: '101109'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Brown
   - Yellow
@@ -3031,7 +3211,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3042,7 +3222,9 @@ products:
   variants:
   - sku: '101108'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Olive
@@ -3063,7 +3245,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3074,7 +3256,9 @@ products:
   variants:
   - sku: '101107'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Teal
   - Navy
@@ -3095,7 +3279,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3106,7 +3290,9 @@ products:
   variants:
   - sku: '101106'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Grey
 - slug: african-ankara-print-101105
@@ -3126,7 +3312,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3137,7 +3323,9 @@ products:
   variants:
   - sku: '101105'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Teal
   - Green
@@ -3158,7 +3346,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3169,7 +3357,9 @@ products:
   variants:
   - sku: 101026-2-1
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Gold
   - Orange
@@ -3190,7 +3380,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3201,7 +3391,9 @@ products:
   variants:
   - sku: 101026-2
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Cream
   - Navy
@@ -3236,7 +3428,9 @@ products:
   variants:
   - sku: 101012-6
     price_cents: 6599
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
+  width_inches: 36
   colors:
   - Multicolor
 - slug: african-ankara-print-01068-og
@@ -3256,7 +3450,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -3269,7 +3463,9 @@ products:
   variants:
   - sku: 01068-OG
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Multicolor
 - slug: african-ankara-print-101066-y1
@@ -3289,7 +3485,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3302,7 +3498,9 @@ products:
   variants:
   - sku: 101066-Y1
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Blue
   - Navy
@@ -3323,7 +3521,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3349,20 +3547,22 @@ products:
     options:
       Colorway: Colorway 3
     price_cents: 899
-    stock: 10
+    stock: 1
     image: products/african-ankara-print-101068-og/05.webp
   - sku: 101068-OG-2
     options:
       Colorway: Colorway 1
     price_cents: 899
-    stock: 10
+    stock: 1
     image: products/african-ankara-print-101068-og/01.webp
   - sku: 101068-OG-3
     options:
       Colorway: Colorway 2
     price_cents: 899
-    stock: 10
+    stock: 1
     image: products/african-ankara-print-101068-og/02.webp
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Gold
   - Brown
@@ -3383,7 +3583,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections:
@@ -3397,7 +3597,9 @@ products:
   variants:
   - sku: 101054-Y2
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Gold
   - Brown
@@ -3418,7 +3620,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3431,7 +3633,9 @@ products:
   variants:
   - sku: '101065'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Yellow
@@ -3452,7 +3656,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections:
@@ -3466,7 +3670,9 @@ products:
   variants:
   - sku: 101054-Y1
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Yellow
   - Olive
@@ -3487,7 +3693,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3500,7 +3706,9 @@ products:
   variants:
   - sku: '101064'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Olive
   - Yellow
@@ -3521,7 +3729,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections:
@@ -3535,7 +3743,9 @@ products:
   variants:
   - sku: 101054-R1
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Red
   - Burgundy
@@ -3556,7 +3766,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3569,7 +3779,9 @@ products:
   variants:
   - sku: '101063'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Brown
   - Red
@@ -3590,7 +3802,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3603,7 +3815,9 @@ products:
   variants:
   - sku: '101062'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Brown
   - Yellow
@@ -3624,7 +3838,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3637,7 +3851,9 @@ products:
   variants:
   - sku: '101061'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Multicolor
 - slug: african-ankara-print-101060
@@ -3657,7 +3873,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3670,7 +3886,9 @@ products:
   variants:
   - sku: '101060'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Green
   - Cream
@@ -3691,7 +3909,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3704,7 +3922,9 @@ products:
   variants:
   - sku: '101059'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Red
   - Burgundy
@@ -3725,7 +3945,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3738,7 +3958,9 @@ products:
   variants:
   - sku: '101058'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Gold
   - Brown
@@ -3759,7 +3981,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections:
@@ -3773,7 +3995,9 @@ products:
   variants:
   - sku: 101054-b1
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Blue
   - Navy
@@ -3794,7 +4018,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3807,7 +4031,9 @@ products:
   variants:
   - sku: '101057'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Brown
   - Cream
@@ -3828,7 +4054,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3841,7 +4067,9 @@ products:
   variants:
   - sku: '101056'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Yellow
@@ -3862,7 +4090,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3875,7 +4103,9 @@ products:
   variants:
   - sku: '101055'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Tan
@@ -3896,7 +4126,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3909,7 +4139,9 @@ products:
   variants:
   - sku: '101051'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Brown
   - Tan
@@ -3930,7 +4162,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3943,7 +4175,9 @@ products:
   variants:
   - sku: '101050'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Cream
   - Burgundy
@@ -3964,7 +4198,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -3977,7 +4211,9 @@ products:
   variants:
   - sku: '101049'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Green
   - Teal
@@ -3998,7 +4234,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4011,7 +4247,9 @@ products:
   variants:
   - sku: '101048'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Blue
@@ -4032,7 +4270,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4045,7 +4283,9 @@ products:
   variants:
   - sku: '101046'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Cream
@@ -4066,7 +4306,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4079,7 +4319,9 @@ products:
   variants:
   - sku: '101045'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Brown
   - Olive
@@ -4100,7 +4342,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4113,7 +4355,9 @@ products:
   variants:
   - sku: '101044'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Cream
@@ -4134,7 +4378,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4147,7 +4391,9 @@ products:
   variants:
   - sku: '101043'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Cream
   - Brown
@@ -4168,7 +4414,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4181,7 +4427,9 @@ products:
   variants:
   - sku: '101041'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Cream
@@ -4202,7 +4450,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4215,7 +4463,9 @@ products:
   variants:
   - sku: '101039'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Brown
   - Olive
@@ -4236,7 +4486,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4249,7 +4499,9 @@ products:
   variants:
   - sku: '101038'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Cream
   - Olive
@@ -4270,7 +4522,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4283,7 +4535,9 @@ products:
   variants:
   - sku: '101037'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Multicolor
 - slug: african-ankara-print-101035
@@ -4303,7 +4557,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4316,7 +4570,9 @@ products:
   variants:
   - sku: '101035'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Gold
   - Cream
@@ -4337,7 +4593,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4350,7 +4606,9 @@ products:
   variants:
   - sku: '101036'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Brown
@@ -4371,7 +4629,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4384,7 +4642,9 @@ products:
   variants:
   - sku: '101034'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Yellow
   - Cream
@@ -4405,7 +4665,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4418,7 +4678,9 @@ products:
   variants:
   - sku: '101033'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Grey
   - Tan
@@ -4439,7 +4701,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4452,7 +4714,9 @@ products:
   variants:
   - sku: '101032'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Cream
   - Green
@@ -4473,7 +4737,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45"..'
+    Precut 1-yard piece. 36" by 45"..'
   categories:
   - ankara
   collections: []
@@ -4486,7 +4750,9 @@ products:
   variants:
   - sku: '101042'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Cream
   - Yellow
@@ -4507,7 +4773,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4520,7 +4786,9 @@ products:
   variants:
   - sku: '101040'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Cream
@@ -4541,7 +4809,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4554,7 +4822,9 @@ products:
   variants:
   - sku: '101031'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Green
   - Olive
@@ -4575,7 +4845,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4588,7 +4858,9 @@ products:
   variants:
   - sku: '101030'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Green
   - Teal
@@ -4609,7 +4881,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections:
@@ -4643,26 +4915,28 @@ products:
     options:
       Colorway: Colorway 1
     price_cents: 899
-    stock: 10
+    stock: 1
     image: products/african-ankara-print-101054/01.webp
   - sku: 101054-2
     options:
       Colorway: Colorway 2
     price_cents: 899
-    stock: 10
+    stock: 1
     image: products/african-ankara-print-101054/06.webp
   - sku: 101054-3
     options:
       Colorway: Colorway 3
     price_cents: 899
-    stock: 10
+    stock: 1
     image: products/african-ankara-print-101054/07.webp
   - sku: 101054-4
     options:
       Colorway: Colorway 4
     price_cents: 899
-    stock: 10
+    stock: 1
     image: products/african-ankara-print-101054/08.webp
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Blue
   - Navy
@@ -4683,7 +4957,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4696,7 +4970,9 @@ products:
   variants:
   - sku: '101052'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Cream
@@ -4717,7 +4993,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4730,7 +5006,9 @@ products:
   variants:
   - sku: '101026'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Cream
@@ -4751,7 +5029,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections:
@@ -4765,7 +5043,9 @@ products:
   variants:
   - sku: '101029'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Brown
@@ -4786,7 +5066,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4816,32 +5096,34 @@ products:
     options:
       Colorway: Colorway 5
     price_cents: 899
-    stock: 10
+    stock: 1
     image: products/african-ankara-print-101025-2/02.webp
   - sku: 101024-1-2
     options:
       Colorway: Colorway 1
     price_cents: 899
-    stock: 10
+    stock: 1
     image: products/african-ankara-print-101025-2/04.webp
   - sku: 101024-1-3
     options:
       Colorway: Colorway 2
     price_cents: 899
-    stock: 10
+    stock: 1
     image: products/african-ankara-print-101025-2/03.webp
   - sku: 101024-1-4
     options:
       Colorway: Colorway 3
     price_cents: 899
-    stock: 10
+    stock: 1
     image: products/african-ankara-print-101025-2/05.webp
   - sku: 101024-1-5
     options:
       Colorway: Colorway 4
     price_cents: 899
-    stock: 10
+    stock: 1
     image: products/african-ankara-print-101025-2/06.webp
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Teal
   - Navy
@@ -4862,7 +5144,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -4885,14 +5167,16 @@ products:
     options:
       Colorway: Colorway 1
     price_cents: 899
-    stock: 10
+    stock: 1
     image: products/african-ankara-print-101066-o1/01.webp
   - sku: 101066-O1-2
     options:
       Colorway: Colorway 2
     price_cents: 899
-    stock: 10
+    stock: 1
     image: products/african-ankara-print-101066-o1/04.webp
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Blue
   - Navy
@@ -4927,7 +5211,9 @@ products:
   variants:
   - sku: '101008'
     price_cents: 6599
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
+  width_inches: 36
   colors:
   - Cream
   - Teal
@@ -4962,7 +5248,9 @@ products:
   variants:
   - sku: '101009'
     price_cents: 6599
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
+  width_inches: 36
   colors:
   - Olive
   - Yellow
@@ -4997,7 +5285,9 @@ products:
   variants:
   - sku: '101010'
     price_cents: 6599
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
+  width_inches: 36
   colors:
   - Teal
   - Cream
@@ -5032,7 +5322,9 @@ products:
   variants:
   - sku: 101007-6
     price_cents: 6599
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
+  width_inches: 36
   colors:
   - Burgundy
   - Cream
@@ -5067,7 +5359,9 @@ products:
   variants:
   - sku: 101004-6
     price_cents: 6599
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
+  width_inches: 36
   colors:
   - Yellow
   - Gold
@@ -5101,7 +5395,9 @@ products:
   variants:
   - sku: '101005'
     price_cents: 6599
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
+  width_inches: 36
   colors:
   - Multicolor
 - slug: african-ankara-print-101006-6
@@ -5135,7 +5431,9 @@ products:
   variants:
   - sku: 101006-6
     price_cents: 6599
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
+  width_inches: 36
   colors:
   - Navy
   - Teal
@@ -5170,7 +5468,9 @@ products:
   variants:
   - sku: 101003-6
     price_cents: 6599
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
+  width_inches: 36
   colors:
   - Teal
   - Tan
@@ -5205,7 +5505,9 @@ products:
   variants:
   - sku: 101002-6
     price_cents: 6599
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
+  width_inches: 36
   colors:
   - Navy
   - Olive
@@ -5240,7 +5542,9 @@ products:
   variants:
   - sku: 101001-6
     price_cents: 6599
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
+  width_inches: 36
   colors:
   - Navy
   - Cream
@@ -5274,7 +5578,9 @@ products:
   variants:
   - sku: 101008-1
     price_cents: 6599
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
+  width_inches: 36
   colors:
   - Teal
   - Navy
@@ -5309,7 +5615,9 @@ products:
   variants:
   - sku: 101010-1
     price_cents: 6599
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
+  width_inches: 36
   colors:
   - Multicolor
 - slug: african-ankara-print-101027
@@ -5329,7 +5637,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -5342,7 +5650,9 @@ products:
   variants:
   - sku: 101026-1
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Navy
   - Cream
@@ -5363,7 +5673,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. 36" by 45".'
+    Precut 1-yard piece. 36" by 45".'
   categories:
   - ankara
   collections: []
@@ -5376,7 +5686,9 @@ products:
   variants:
   - sku: 101068-OY1
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
+  width_inches: 45
   colors:
   - Gold
   - Brown
@@ -5417,14 +5729,14 @@ products:
       Style: Style 1
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
     image: products/cushion-cover-g-6/02.webp
   - sku: G-6-2
     options:
       Style: Style 2
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
     image: products/cushion-cover-g-6/03.webp
   colors:
   - Brown
@@ -5472,28 +5784,28 @@ products:
       Style: Style 1
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
     image: products/cushion-cover-g-4/02.webp
   - sku: G-4-2
     options:
       Style: Style 2
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
     image: products/cushion-cover-g-4/03.webp
   - sku: G-4-3
     options:
       Style: Style 3
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
     image: products/cushion-cover-g-4/04.webp
   - sku: G-4-4
     options:
       Style: Style 4
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
     image: products/cushion-cover-g-4/05.webp
   colors:
   - Brown
@@ -5540,27 +5852,27 @@ products:
       Style: Style 1
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
     image: products/cushion-cover-g-5/02.webp
   - sku: G-5-2
     options:
       Style: Style 2
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
   - sku: G-5-3
     options:
       Style: Style 3
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
     image: products/cushion-cover-g-5/04.webp
   - sku: G-5-4
     options:
       Style: Style 4
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
     image: products/cushion-cover-g-5/05.webp
   colors:
   - Multicolor
@@ -5607,28 +5919,28 @@ products:
       Style: Style 1
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
     image: products/cushion-cover-g-3/02.webp
   - sku: G-3-2
     options:
       Style: Style 2
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
     image: products/cushion-cover-g-3/03.webp
   - sku: G-3-3
     options:
       Style: Style 3
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
     image: products/cushion-cover-g-3/04.webp
   - sku: G-3-4
     options:
       Style: Style 4
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
     image: products/cushion-cover-g-3/05.webp
   colors:
   - Multicolor
@@ -5675,28 +5987,28 @@ products:
       Style: Style 1
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
     image: products/cushion-cover-g-2/02.webp
   - sku: G-2-2
     options:
       Style: Style 2
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
     image: products/cushion-cover-g-2/03.webp
   - sku: G-2-3
     options:
       Style: Style 3
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
     image: products/cushion-cover-g-2/04.webp
   - sku: G-2-4
     options:
       Style: Style 4
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
   colors:
   - Brown
   - Cream
@@ -5743,27 +6055,27 @@ products:
       Style: Style 1
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
     image: products/cushion-cover-g-1/04.webp
   - sku: G-1-2
     options:
       Style: Style 2
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
   - sku: G-1-3
     options:
       Style: Style 3
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
     image: products/cushion-cover-g-1/05.webp
   - sku: G-1-4
     options:
       Style: Style 4
     price_cents: 750
     compare_at_cents: 950
-    stock: 10
+    stock: 1
     image: products/cushion-cover-g-1/03.webp
   colors:
   - Cream
@@ -5788,7 +6100,7 @@ products:
     Perfect for creating unique garments and home decor items.
 
 
-    100% Cotton. Width: 45". Sold by Yard.'
+    100% Cotton. Width: 45". Precut 1-yard piece.'
   categories:
   - ethnic-prints
   collections:
@@ -5800,7 +6112,8 @@ products:
   variants:
   - sku: '101203'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Black
   - Burgundy
@@ -5824,7 +6137,7 @@ products:
     Perfect for creating unique garments and home decor items.
 
 
-    100% Cotton. Width: 45". Sold by Yard.'
+    100% Cotton. Width: 45". Precut 1-yard piece.'
   categories:
   - ethnic-prints
   collections:
@@ -5834,9 +6147,10 @@ products:
     alt: Ethnic Print - Yellow & Brown - 101140
   options: []
   variants:
-  - sku: GG-28841
+  - sku: 101140-E
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Yellow
   - Brown
@@ -5860,7 +6174,7 @@ products:
     Perfect for creating unique garments and home decor items.
 
 
-    100% Cotton. Width: 45". Sold by Yard.'
+    100% Cotton. Width: 45". Precut 1-yard piece.'
   categories:
   - ethnic-prints
   collections:
@@ -5870,9 +6184,10 @@ products:
     alt: Ethnic Print - Black & Green - 101141
   options: []
   variants:
-  - sku: GG-28839
+  - sku: 101141-E
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Black
   - Green
@@ -5893,7 +6208,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. Width: 45".'
+    Precut 1-yard piece. Width: 45".'
   categories:
   - ethnic-prints
   collections:
@@ -5905,7 +6220,8 @@ products:
   variants:
   - sku: '101201'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Black
   - Brown
@@ -5926,7 +6242,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. Width: 45".'
+    Precut 1-yard piece. Width: 45".'
   categories:
   - ethnic-prints
   collections:
@@ -5936,9 +6252,10 @@ products:
     alt: Ethnic Print - Black & Navy - 101137
   options: []
   variants:
-  - sku: GG-28834
+  - sku: 101137-E
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Black
   - Navy
@@ -5959,7 +6276,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. Width: 45".'
+    Precut 1-yard piece. Width: 45".'
   categories:
   - ethnic-prints
   collections:
@@ -5971,7 +6288,8 @@ products:
   variants:
   - sku: '101202'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Black
   - Navy
@@ -5992,7 +6310,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. Width: 45".'
+    Precut 1-yard piece. Width: 45".'
   categories:
   - ethnic-prints
   collections:
@@ -6002,9 +6320,10 @@ products:
     alt: Ethnic Print - Navy - 101135
   options: []
   variants:
-  - sku: GG-28823
+  - sku: 101135-E
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Navy
 - slug: ethnic-print-101078
@@ -6024,7 +6343,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. Width: 45".'
+    Precut 1-yard piece. Width: 45".'
   categories:
   - ethnic-prints
   collections:
@@ -6036,7 +6355,8 @@ products:
   variants:
   - sku: '101078'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Cream
 - slug: ethnic-print-101079
@@ -6056,7 +6376,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. Width: 45".'
+    Precut 1-yard piece. Width: 45".'
   categories:
   - ethnic-prints
   collections:
@@ -6068,7 +6388,8 @@ products:
   variants:
   - sku: '101079'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Burgundy
   - Tan
@@ -6089,7 +6410,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. Width: 45".'
+    Precut 1-yard piece. Width: 45".'
   categories:
   - ethnic-prints
   collections:
@@ -6101,7 +6422,8 @@ products:
   variants:
   - sku: '101077'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Brown
 - slug: ethnic-print-101076
@@ -6121,7 +6443,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. Width: 45".'
+    Precut 1-yard piece. Width: 45".'
   categories:
   - ethnic-prints
   collections:
@@ -6133,7 +6455,8 @@ products:
   variants:
   - sku: '101076'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Gold
   - Olive
@@ -6154,7 +6477,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. Width: 45".'
+    Precut 1-yard piece. Width: 45".'
   categories:
   - ethnic-prints
   collections:
@@ -6166,7 +6489,8 @@ products:
   variants:
   - sku: '101075'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Cream
   - Brown
@@ -6187,7 +6511,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. Width: 45".'
+    Precut 1-yard piece. Width: 45".'
   categories:
   - ethnic-prints
   collections:
@@ -6199,7 +6523,8 @@ products:
   variants:
   - sku: '101074'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Gold
   - Brown
@@ -6220,7 +6545,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. Width: 45".'
+    Precut 1-yard piece. Width: 45".'
   categories:
   - ethnic-prints
   collections:
@@ -6232,7 +6557,8 @@ products:
   variants:
   - sku: '101073'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Cream
   - Brown
@@ -6253,7 +6579,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. Width: 45".'
+    Precut 1-yard piece. Width: 45".'
   categories:
   - ethnic-prints
   collections:
@@ -6265,7 +6591,8 @@ products:
   variants:
   - sku: '101072'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Tan
   - Cream
@@ -6286,7 +6613,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. Width: 45".'
+    Precut 1-yard piece. Width: 45".'
   categories:
   - ethnic-prints
   collections:
@@ -6298,7 +6625,8 @@ products:
   variants:
   - sku: '101071'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Multicolor
 - slug: ethnic-print-101070
@@ -6318,7 +6646,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. Width: 45".'
+    Precut 1-yard piece. Width: 45".'
   categories:
   - ethnic-prints
   collections:
@@ -6330,7 +6658,8 @@ products:
   variants:
   - sku: '101070'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Yellow
   - Cream
@@ -6351,7 +6680,7 @@ products:
     100% Cotton.
 
 
-    Sold by the yard. Width: 45".'
+    Precut 1-yard piece. Width: 45".'
   categories:
   - ethnic-prints
   collections:
@@ -6363,7 +6692,8 @@ products:
   variants:
   - sku: '101069'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Cream
   - Green
@@ -6392,7 +6722,7 @@ products:
   variants:
   - sku: '1015'
     price_cents: 4000
-    stock: 10
+    stock: 1
   colors:
   - Grey
 - slug: reversible-jacket-tmb-4-1012
@@ -6420,7 +6750,7 @@ products:
   variants:
   - sku: '1012'
     price_cents: 4000
-    stock: 10
+    stock: 1
   colors:
   - Brown
   - Cream
@@ -6457,7 +6787,7 @@ products:
   variants:
   - sku: '1010'
     price_cents: 4000
-    stock: 10
+    stock: 1
   colors:
   - Grey
   - Brown
@@ -6484,9 +6814,9 @@ products:
     alt: Reversible Jacket TMB-1 - Red & Burgundy - 1016
   options: []
   variants:
-  - sku: GG-29634
+  - sku: '1016'
     price_cents: 4000
-    stock: 10
+    stock: 1
   colors:
   - Red
   - Burgundy
@@ -6515,7 +6845,7 @@ products:
   variants:
   - sku: '1011'
     price_cents: 4000
-    stock: 10
+    stock: 1
   colors:
   - Brown
   - Cream
@@ -6539,7 +6869,7 @@ products:
     Perfect for creating unique garments and home decor items.
 
 
-    100% Cotton. Width: 45". Sold by the Yard.'
+    100% Cotton. Width: 45". Precut 1-yard piece.'
   categories:
   - kente
   collections:
@@ -6553,7 +6883,8 @@ products:
   variants:
   - sku: '101024'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Orange
   - Brown
@@ -6577,7 +6908,7 @@ products:
     Perfect for creating unique garments and home decor items.
 
 
-    100% Cotton. Width: 45". Sold by the Yard.'
+    100% Cotton. Width: 45". Precut 1-yard piece.'
   categories:
   - kente
   collections:
@@ -6591,7 +6922,8 @@ products:
   variants:
   - sku: '101023'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Gold
   - Brown
@@ -6615,7 +6947,7 @@ products:
     Perfect for creating unique garments and home decor items.
 
 
-    100% Cotton. Width: 45". Sold by the Yard.'
+    100% Cotton. Width: 45". Precut 1-yard piece.'
   categories:
   - kente
   collections:
@@ -6629,7 +6961,8 @@ products:
   variants:
   - sku: '101020'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Multicolor
 - slug: kente-print-101021
@@ -6652,7 +6985,7 @@ products:
     Perfect for creating unique garments and home decor items.
 
 
-    100% Cotton. Width: 45". Sold by the Yard.'
+    100% Cotton. Width: 45". Precut 1-yard piece.'
   categories:
   - kente
   collections:
@@ -6666,7 +6999,8 @@ products:
   variants:
   - sku: '101021'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Olive
   - Yellow
@@ -6690,7 +7024,7 @@ products:
     Perfect for creating unique garments and home decor items.
 
 
-    100% Cotton. Width: 45". Sold by the Yard.'
+    100% Cotton. Width: 45". Precut 1-yard piece.'
   categories:
   - kente
   collections:
@@ -6704,7 +7038,8 @@ products:
   variants:
   - sku: '101018'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Multicolor
 - slug: kente-print-101019
@@ -6727,7 +7062,7 @@ products:
     Perfect for creating unique garments and home decor items.
 
 
-    100% Cotton. Width: 45". Sold by the Yard.'
+    100% Cotton. Width: 45". Precut 1-yard piece.'
   categories:
   - kente
   collections:
@@ -6741,7 +7076,8 @@ products:
   variants:
   - sku: '101019'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Gold
   - Olive
@@ -6765,7 +7101,7 @@ products:
     Perfect for creating unique garments and home decor items.
 
 
-    100% Cotton. Width: 45". Sold by the Yard.'
+    100% Cotton. Width: 45". Precut 1-yard piece.'
   categories:
   - kente
   collections:
@@ -6779,7 +7115,8 @@ products:
   variants:
   - sku: '101016'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Orange
   - Gold
@@ -6803,7 +7140,7 @@ products:
     Perfect for creating unique garments and home decor items.
 
 
-    100% Cotton. Width: 45". Sold by the Yard.'
+    100% Cotton. Width: 45". Precut 1-yard piece.'
   categories:
   - kente
   collections:
@@ -6817,7 +7154,8 @@ products:
   variants:
   - sku: '101017'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Tan
   - Brown
@@ -6841,7 +7179,7 @@ products:
     Perfect for creating unique garments and home decor items.
 
 
-    100% Cotton. Width: 45". Sold by the Yard.'
+    100% Cotton. Width: 45". Precut 1-yard piece.'
   categories:
   - kente
   collections:
@@ -6855,7 +7193,8 @@ products:
   variants:
   - sku: '101015'
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Brown
   - Tan
@@ -6879,7 +7218,7 @@ products:
     Perfect for creating unique garments and home decor items.
 
 
-    100% Cotton. Width: 45". Sold by the Yard.'
+    100% Cotton. Width: 45". Precut 1-yard piece.'
   categories:
   - kente
   collections:
@@ -6893,7 +7232,8 @@ products:
   variants:
   - sku: 101009-1
     price_cents: 899
-    stock: 10
+    stock: 1
+  piece_length_yards: 1
   colors:
   - Multicolor
 - slug: bob-marley-sarong-wrap-101200
@@ -6918,7 +7258,7 @@ products:
   variants:
   - sku: '101200'
     price_cents: 1000
-    stock: 10
+    stock: 1
   colors:
   - Green
   - Brown
@@ -6944,7 +7284,7 @@ products:
   variants:
   - sku: '101199'
     price_cents: 1000
-    stock: 10
+    stock: 1
   colors:
   - Green
   - Yellow
@@ -6970,7 +7310,7 @@ products:
   variants:
   - sku: '101198'
     price_cents: 1000
-    stock: 10
+    stock: 1
   colors:
   - Brown
   - Yellow
@@ -6996,7 +7336,7 @@ products:
   variants:
   - sku: '101197'
     price_cents: 1000
-    stock: 10
+    stock: 1
   colors:
   - Multicolor
 - slug: satin-chiffon-101102
@@ -7029,7 +7369,8 @@ products:
   variants:
   - sku: '101102'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
   colors:
   - Black
   - Brown
@@ -7063,7 +7404,8 @@ products:
   variants:
   - sku: '101101'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
   colors:
   - Multicolor
 - slug: satin-chiffon-101100
@@ -7096,7 +7438,8 @@ products:
   variants:
   - sku: '101100'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
   colors:
   - Teal
   - Brown
@@ -7130,7 +7473,8 @@ products:
   variants:
   - sku: '101099'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
   colors:
   - Red
   - Cream
@@ -7164,7 +7508,8 @@ products:
   variants:
   - sku: '101098'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
   colors:
   - Red
 - slug: satin-chiffon-101097
@@ -7197,7 +7542,8 @@ products:
   variants:
   - sku: '101097'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
   colors:
   - Blue
   - Yellow
@@ -7231,7 +7577,8 @@ products:
   variants:
   - sku: '101096'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
   colors:
   - Orange
   - Gold
@@ -7265,7 +7612,8 @@ products:
   variants:
   - sku: '101095'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
   colors:
   - Navy
   - Cream
@@ -7300,7 +7648,8 @@ products:
   variants:
   - sku: '101094'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
   colors:
   - Black
 - slug: satin-chiffon-101093
@@ -7333,7 +7682,8 @@ products:
   variants:
   - sku: '101093'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
   colors:
   - Green
   - Cream
@@ -7367,7 +7717,8 @@ products:
   variants:
   - sku: '101092'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
   colors:
   - Cream
 - slug: satin-chiffon-101091
@@ -7400,7 +7751,8 @@ products:
   variants:
   - sku: '101091'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
   colors:
   - Red
   - Brown
@@ -7434,7 +7786,8 @@ products:
   variants:
   - sku: '101090'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
   colors:
   - Navy
   - Blue
@@ -7468,7 +7821,8 @@ products:
   variants:
   - sku: '101088'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
   colors:
   - Navy
   - Blue
@@ -7502,7 +7856,8 @@ products:
   variants:
   - sku: '101089'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
   colors:
   - Navy
   - Blue
@@ -7536,7 +7891,9 @@ products:
   variants:
   - sku: '101087'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6.0
+  width_inches: 35
   colors:
   - Navy
   - Cream
@@ -7570,7 +7927,8 @@ products:
   variants:
   - sku: '101082'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
   colors:
   - Navy
   - Cream
@@ -7604,7 +7962,8 @@ products:
   variants:
   - sku: '101085'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
   colors:
   - Navy
   - Yellow
@@ -7640,7 +7999,8 @@ products:
   variants:
   - sku: '101083'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
   colors:
   - Yellow
   - Navy
@@ -7674,7 +8034,8 @@ products:
   variants:
   - sku: '101084'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
   colors:
   - Gold
   - Olive
@@ -7708,7 +8069,8 @@ products:
   variants:
   - sku: '101086'
     price_cents: 4199
-    stock: 10
+    stock: 1
+  piece_length_yards: 6
   colors:
   - Pink
   - Navy
@@ -7748,28 +8110,28 @@ products:
     options:
       Colorway: Colorway 1
     price_cents: 2500
-    stock: 10
+    stock: 1
   - sku: 101196-2
     options:
       Colorway: Colorway 2
     price_cents: 2500
-    stock: 10
+    stock: 1
   - sku: 101196-3
     options:
       Colorway: Colorway 3
     price_cents: 2500
-    stock: 10
+    stock: 1
   - sku: 101196-4
     options:
       Colorway: Colorway 4
     price_cents: 2500
-    stock: 10
+    stock: 1
     image: products/wrap-skirt-wr-2002-101196/03.webp
   - sku: 101196-5
     options:
       Colorway: Colorway 5
     price_cents: 2500
-    stock: 10
+    stock: 1
   colors:
   - Brown
   - Cream
@@ -7798,7 +8160,7 @@ products:
   variants:
   - sku: '101195'
     price_cents: 2500
-    stock: 10
+    stock: 1
   colors:
   - Navy
   - Purple
@@ -7827,7 +8189,7 @@ products:
   variants:
   - sku: '101194'
     price_cents: 2500
-    stock: 10
+    stock: 1
   colors:
   - Olive
   - Red
@@ -7856,7 +8218,7 @@ products:
   variants:
   - sku: '101193'
     price_cents: 2500
-    stock: 10
+    stock: 1
   colors:
   - Orange
   - Cream
@@ -7885,7 +8247,7 @@ products:
   variants:
   - sku: '101192'
     price_cents: 2500
-    stock: 10
+    stock: 1
   colors:
   - Olive
   - Yellow
@@ -7912,7 +8274,7 @@ products:
   variants:
   - sku: '101191'
     price_cents: 2500
-    stock: 10
+    stock: 1
   colors:
   - Navy
   - Teal
@@ -7939,7 +8301,7 @@ products:
   variants:
   - sku: '101190'
     price_cents: 2500
-    stock: 10
+    stock: 1
   colors:
   - Brown
   - Olive
@@ -7966,7 +8328,948 @@ products:
   variants:
   - sku: '101189'
     price_cents: 2500
-    stock: 10
+    stock: 1
   colors:
   - Olive
   - Teal
+- slug: grand-super-wax-001
+  name: Grand Super Wax - Yellow & Brown - 001
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - grand-super-wax
+  images:
+  - file: products/grand-super-wax-001/01.webp
+    alt: Grand Super Wax - Yellow & Brown - 001
+  options: []
+  variants:
+  - sku: GSW-001
+    price_cents: 6500
+    stock: 1
+  colors:
+  - Yellow
+  - Brown
+- slug: grand-super-wax-002
+  name: Grand Super Wax - Navy & Cream - 002
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - grand-super-wax
+  images:
+  - file: products/grand-super-wax-002/01.webp
+    alt: Grand Super Wax - Navy & Cream - 002
+  options: []
+  variants:
+  - sku: GSW-002
+    price_cents: 6500
+    stock: 1
+  colors:
+  - Navy
+  - Cream
+- slug: grand-super-wax-003
+  name: Grand Super Wax - Green & Olive - 003
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - grand-super-wax
+  images:
+  - file: products/grand-super-wax-003/01.webp
+    alt: Grand Super Wax - Green & Olive - 003
+  options: []
+  variants:
+  - sku: GSW-003
+    price_cents: 6500
+    stock: 1
+  colors:
+  - Green
+  - Olive
+- slug: grand-super-wax-004
+  name: Grand Super Wax - Cream & Navy - 004
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - grand-super-wax
+  images:
+  - file: products/grand-super-wax-004/01.webp
+    alt: Grand Super Wax - Cream & Navy - 004
+  options: []
+  variants:
+  - sku: GSW-004
+    price_cents: 6500
+    stock: 1
+  colors:
+  - Cream
+  - Navy
+- slug: grand-super-wax-005
+  name: Grand Super Wax - Olive & Navy - 005
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - grand-super-wax
+  images:
+  - file: products/grand-super-wax-005/01.webp
+    alt: Grand Super Wax - Olive & Navy - 005
+  options: []
+  variants:
+  - sku: GSW-005
+    price_cents: 6500
+    stock: 1
+  colors:
+  - Olive
+  - Navy
+- slug: grand-super-wax-006
+  name: Grand Super Wax - Navy & Teal - 006
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - grand-super-wax
+  images:
+  - file: products/grand-super-wax-006/01.webp
+    alt: Grand Super Wax - Navy & Teal - 006
+  options: []
+  variants:
+  - sku: GSW-006
+    price_cents: 6500
+    stock: 1
+  colors:
+  - Navy
+  - Teal
+- slug: grand-super-wax-007
+  name: Grand Super Wax - Teal & Tan - 007
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - grand-super-wax
+  images:
+  - file: products/grand-super-wax-007/01.webp
+    alt: Grand Super Wax - Teal & Tan - 007
+  options: []
+  variants:
+  - sku: GSW-007
+    price_cents: 6500
+    stock: 1
+  colors:
+  - Teal
+  - Tan
+- slug: grand-super-wax-008
+  name: Grand Super Wax - Navy & Cream - 008
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - grand-super-wax
+  images:
+  - file: products/grand-super-wax-008/01.webp
+    alt: Grand Super Wax - Navy & Cream - 008
+  options: []
+  variants:
+  - sku: GSW-008
+    price_cents: 6500
+    stock: 1
+  colors:
+  - Navy
+  - Cream
+- slug: grand-super-wax-009
+  name: Grand Super Wax - Navy & Gold - 009
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - grand-super-wax
+  images:
+  - file: products/grand-super-wax-009/01.webp
+    alt: Grand Super Wax - Navy & Gold - 009
+  options: []
+  variants:
+  - sku: GSW-009
+    price_cents: 6500
+    stock: 1
+  colors:
+  - Navy
+  - Gold
+- slug: regular-wax-fabric-001
+  name: Regular Wax Fabric - Yellow & Olive - 001
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-001/01.webp
+    alt: Regular Wax Fabric - Yellow & Olive - 001
+  options: []
+  variants:
+  - sku: RWF-001
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Yellow
+  - Olive
+- slug: regular-wax-fabric-002
+  name: Regular Wax Fabric - Teal & Cream - 002
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-002/01.webp
+    alt: Regular Wax Fabric - Teal & Cream - 002
+  options: []
+  variants:
+  - sku: RWF-002
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Teal
+  - Cream
+- slug: regular-wax-fabric-003
+  name: Regular Wax Fabric - Black & Brown - 003
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-003/01.webp
+    alt: Regular Wax Fabric - Black & Brown - 003
+  options: []
+  variants:
+  - sku: RWF-003
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Black
+  - Brown
+- slug: regular-wax-fabric-004
+  name: Regular Wax Fabric - Cream & Teal - 004
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-004/01.webp
+    alt: Regular Wax Fabric - Cream & Teal - 004
+  options: []
+  variants:
+  - sku: RWF-004
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Cream
+  - Teal
+- slug: regular-wax-fabric-005
+  name: Regular Wax Fabric - Cream & Olive - 005
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-005/01.webp
+    alt: Regular Wax Fabric - Cream & Olive - 005
+  options: []
+  variants:
+  - sku: RWF-005
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Cream
+  - Olive
+- slug: regular-wax-fabric-006
+  name: Regular Wax Fabric - Navy & Yellow - 006
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-006/01.webp
+    alt: Regular Wax Fabric - Navy & Yellow - 006
+  options: []
+  variants:
+  - sku: RWF-006
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Navy
+  - Yellow
+- slug: regular-wax-fabric-007
+  name: Regular Wax Fabric - Yellow - 007
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-007/01.webp
+    alt: Regular Wax Fabric - Yellow - 007
+  options: []
+  variants:
+  - sku: RWF-007
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Yellow
+- slug: regular-wax-fabric-008
+  name: Regular Wax Fabric - Black & Gold - 008
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-008/01.webp
+    alt: Regular Wax Fabric - Black & Gold - 008
+  options: []
+  variants:
+  - sku: RWF-008
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Black
+  - Gold
+- slug: regular-wax-fabric-009
+  name: Regular Wax Fabric - Brown & Burgundy - 009
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-009/01.webp
+    alt: Regular Wax Fabric - Brown & Burgundy - 009
+  options: []
+  variants:
+  - sku: RWF-009
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Brown
+  - Burgundy
+- slug: regular-wax-fabric-010
+  name: Regular Wax Fabric - Yellow & Gold - 010
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-010/01.webp
+    alt: Regular Wax Fabric - Yellow & Gold - 010
+  options: []
+  variants:
+  - sku: RWF-010
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Yellow
+  - Gold
+- slug: regular-wax-fabric-011
+  name: Regular Wax Fabric - Orange & Brown - 011
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-011/01.webp
+    alt: Regular Wax Fabric - Orange & Brown - 011
+  options: []
+  variants:
+  - sku: RWF-011
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Orange
+  - Brown
+- slug: regular-wax-fabric-012
+  name: Regular Wax Fabric - Cream & Red - 012
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-012/01.webp
+    alt: Regular Wax Fabric - Cream & Red - 012
+  options: []
+  variants:
+  - sku: RWF-012
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Cream
+  - Red
+- slug: regular-wax-fabric-013
+  name: Regular Wax Fabric - Black & Cream - 013
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-013/01.webp
+    alt: Regular Wax Fabric - Black & Cream - 013
+  options: []
+  variants:
+  - sku: RWF-013
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Black
+  - Cream
+- slug: regular-wax-fabric-014
+  name: Regular Wax Fabric - Black & Cream - 014
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-014/01.webp
+    alt: Regular Wax Fabric - Black & Cream - 014
+  options: []
+  variants:
+  - sku: RWF-014
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Black
+  - Cream
+- slug: regular-wax-fabric-015
+  name: Regular Wax Fabric - Gold & Brown - 015
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-015/01.webp
+    alt: Regular Wax Fabric - Gold & Brown - 015
+  options: []
+  variants:
+  - sku: RWF-015
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Gold
+  - Brown
+- slug: regular-wax-fabric-016
+  name: Regular Wax Fabric - Yellow & Gold - 016
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-016/01.webp
+    alt: Regular Wax Fabric - Yellow & Gold - 016
+  options: []
+  variants:
+  - sku: RWF-016
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Yellow
+  - Gold
+- slug: regular-wax-fabric-017
+  name: Regular Wax Fabric - Cream & Brown - 017
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-017/01.webp
+    alt: Regular Wax Fabric - Cream & Brown - 017
+  options: []
+  variants:
+  - sku: RWF-017
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Cream
+  - Brown
+- slug: regular-wax-fabric-018
+  name: Regular Wax Fabric - Red & Brown - 018
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-018/01.webp
+    alt: Regular Wax Fabric - Red & Brown - 018
+  options: []
+  variants:
+  - sku: RWF-018
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Red
+  - Brown
+- slug: regular-wax-fabric-019
+  name: Regular Wax Fabric - Brown & Burgundy - 019
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-019/01.webp
+    alt: Regular Wax Fabric - Brown & Burgundy - 019
+  options: []
+  variants:
+  - sku: RWF-019
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Brown
+  - Burgundy
+- slug: regular-wax-fabric-020
+  name: Regular Wax Fabric - Brown & Cream - 020
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-020/01.webp
+    alt: Regular Wax Fabric - Brown & Cream - 020
+  options: []
+  variants:
+  - sku: RWF-020
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Brown
+  - Cream
+- slug: regular-wax-fabric-021
+  name: Regular Wax Fabric - Orange & Brown - 021
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-021/01.webp
+    alt: Regular Wax Fabric - Orange & Brown - 021
+  options: []
+  variants:
+  - sku: RWF-021
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Orange
+  - Brown
+- slug: regular-wax-fabric-022
+  name: Regular Wax Fabric - Blue & Navy - 022
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-022/01.webp
+    alt: Regular Wax Fabric - Blue & Navy - 022
+  options: []
+  variants:
+  - sku: RWF-022
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Blue
+  - Navy
+- slug: regular-wax-fabric-023
+  name: Regular Wax Fabric - Red & Brown - 023
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-023/01.webp
+    alt: Regular Wax Fabric - Red & Brown - 023
+  options: []
+  variants:
+  - sku: RWF-023
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Red
+  - Brown
+- slug: regular-wax-fabric-024
+  name: Regular Wax Fabric - Brown & Cream - 024
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-024/01.webp
+    alt: Regular Wax Fabric - Brown & Cream - 024
+  options: []
+  variants:
+  - sku: RWF-024
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Brown
+  - Cream
+- slug: regular-wax-fabric-025
+  name: Regular Wax Fabric - Teal & Navy - 025
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-025/01.webp
+    alt: Regular Wax Fabric - Teal & Navy - 025
+  options: []
+  variants:
+  - sku: RWF-025
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Teal
+  - Navy
+- slug: regular-wax-fabric-026
+  name: Regular Wax Fabric - Gold & Brown - 026
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-026/01.webp
+    alt: Regular Wax Fabric - Gold & Brown - 026
+  options: []
+  variants:
+  - sku: RWF-026
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Gold
+  - Brown
+- slug: regular-wax-fabric-027
+  name: Regular Wax Fabric - Purple & Navy - 027
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-027/01.webp
+    alt: Regular Wax Fabric - Purple & Navy - 027
+  options: []
+  variants:
+  - sku: RWF-027
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Purple
+  - Navy
+- slug: regular-wax-fabric-028
+  name: Regular Wax Fabric - Pink & Green - 028
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - regular-wax
+  images:
+  - file: products/regular-wax-fabric-028/01.webp
+    alt: Regular Wax Fabric - Pink & Green - 028
+  options: []
+  variants:
+  - sku: RWF-028
+    price_cents: 4000
+    stock: 1
+  colors:
+  - Pink
+  - Green
+- slug: super-wax-fabric-001
+  name: Super Wax Fabric - Pink & Navy - 001
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - super-wax
+  images:
+  - file: products/super-wax-fabric-001/01.webp
+    alt: Super Wax Fabric - Pink & Navy - 001
+  options: []
+  variants:
+  - sku: SWF-001
+    price_cents: 5000
+    stock: 1
+  colors:
+  - Pink
+  - Navy
+- slug: super-wax-fabric-002
+  name: Super Wax Fabric - Cream - 002
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - super-wax
+  images:
+  - file: products/super-wax-fabric-002/01.webp
+    alt: Super Wax Fabric - Cream - 002
+  options: []
+  variants:
+  - sku: SWF-002
+    price_cents: 5000
+    stock: 1
+  colors:
+  - Cream
+- slug: super-wax-fabric-003
+  name: Super Wax Fabric - Teal & Navy - 003
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - super-wax
+  images:
+  - file: products/super-wax-fabric-003/01.webp
+    alt: Super Wax Fabric - Teal & Navy - 003
+  options: []
+  variants:
+  - sku: SWF-003
+    price_cents: 5000
+    stock: 1
+  colors:
+  - Teal
+  - Navy
+- slug: super-wax-fabric-004
+  name: Super Wax Fabric - Navy & Burgundy - 004
+  type: fabric
+  status: active
+  featured: false
+  published: 2026-08-07
+  summary: ''
+  description: ''
+  categories:
+  - ankara
+  collections:
+  - super-wax
+  images:
+  - file: products/super-wax-fabric-004/01.webp
+    alt: Super Wax Fabric - Navy & Burgundy - 004
+  options: []
+  variants:
+  - sku: SWF-004
+    price_cents: 5000
+    stock: 1
+  colors:
+  - Navy
+  - Burgundy

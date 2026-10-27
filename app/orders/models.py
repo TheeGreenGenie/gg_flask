@@ -111,6 +111,9 @@ class Order(db.Model):  # type: ignore[name-defined]
     shipping_carrier: Mapped[str | None] = mapped_column(String(40))
     shipping_service: Mapped[str | None] = mapped_column(String(80))
     shipping_rate_ref: Mapped[str | None] = mapped_column(String(80))
+    # Estimated parcel weight when the order was placed (fabric at 16 oz/sq yd + packaging),
+    # shown in order admin with its USPS price step.
+    parcel_weight_grams: Mapped[int | None] = mapped_column(Integer)
     tax_cents: Mapped[int] = mapped_column(Integer)
     # Stripe Tax calculation (at checkout) and transaction (after payment) for reporting.
     tax_calculation_ref: Mapped[str | None] = mapped_column(String(80))

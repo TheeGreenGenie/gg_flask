@@ -1025,3 +1025,63 @@ html.gg-home-enhanced {
 	html.gg-home-enhanced { scroll-behavior: auto; }
 	[data-gg-cycle] .gg-home-opening-card__image { transition: none; }
 }
+
+/* ---------- Card flip between slides (owner, 2026-10-27) ----------
+   Scrolling turns the deck: the current card tips back and falls away over the top while the
+   next one swings up flat into place. Scroll-driven (follows the finger; the idle glide in
+   home.js completes the turn). Browsers without scroll timelines and visitors who prefer
+   reduced motion simply scroll the flat cards. */
+@supports (animation-timeline: view()) {
+	@media (prefers-reduced-motion: no-preference) {
+		.gg-home__section {
+			perspective: 1600px;
+			perspective-origin: 50% 50%;
+			view-timeline-name: --gg-card;
+			view-timeline-axis: block;
+			/* Measure against the visible area below the sticky header. */
+			view-timeline-inset: var(--gg-header-offset, 0px) 0px;
+		}
+
+		.gg-slide {
+			/* arrive holds its tilted start before the card comes in; leave holds its end after.
+			   (With "both", leave's flat start would override arrive while it plays.) */
+			animation: gg-card-arrive linear backwards, gg-card-leave linear forwards;
+			animation-timeline: --gg-card, --gg-card;
+			animation-range: entry 0% entry 100%, exit 0% exit 100%;
+			backface-visibility: hidden;
+			will-change: transform, opacity;
+		}
+	}
+}
+
+@keyframes gg-card-arrive {
+	from {
+		opacity: .55;
+		transform: translateY(6%) rotateX(-30deg) scale(.94);
+		transform-origin: 50% 100%;
+		filter: brightness(.8);
+	}
+
+	to {
+		opacity: 1;
+		transform: none;
+		transform-origin: 50% 100%;
+		filter: none;
+	}
+}
+
+@keyframes gg-card-leave {
+	from {
+		opacity: 1;
+		transform: none;
+		transform-origin: 50% 0%;
+		filter: none;
+	}
+
+	to {
+		opacity: .35;
+		transform: translateY(-3%) rotateX(34deg) scale(.94);
+		transform-origin: 50% 0%;
+		filter: brightness(.75);
+	}
+}

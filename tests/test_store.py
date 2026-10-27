@@ -299,6 +299,13 @@ def test_find_fabrics_page_has_stack_and_no_js_grid(shop: FlaskClient) -> None:
     assert 'href="/find-fabrics/"' in html  # in the menu
 
 
+def test_find_fabrics_mobile_grid_cannot_expand_past_viewport() -> None:
+    css = Path("app/static/css/find-fabrics.css").read_text(encoding="utf-8")
+    assert ".gg-ff { grid-template-columns: minmax(0, 1fr); }" in css
+    assert ".gg-ff__stage { overflow: clip; }" in css
+    assert "width: min(100%, max(13rem" in css
+
+
 def test_discovery_feed_is_minimal_bounded_and_fabric_only(shop: FlaskClient) -> None:
     data = shop.get("/api/v1/discovery/fabrics").get_json()
     assert [i["slug"] for i in data["items"]] == ["ankara-blue"]

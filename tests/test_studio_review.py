@@ -54,9 +54,11 @@ def _staff_client(
 def _owner_client(app: Flask) -> FlaskClient:
     client = app.test_client()
     with app.test_request_context("/"):
-        admin, _ = admin_service.create_admin("owner@example.com", OWNER_PASSWORD, AdminRole.OWNER)
+        admin, _ = admin_service.create_admin(
+            "owner", "owner@example.com", OWNER_PASSWORD, AdminRole.OWNER
+        )
         secret = admin.totp_secret
-    client.post("/admin/login", data={"email": "owner@example.com", "password": OWNER_PASSWORD})
+    client.post("/admin/login", data={"username": "owner", "password": OWNER_PASSWORD})
     client.post("/admin/verify", data={"code": admin_service.totp(secret)})
     return client
 
@@ -246,16 +248,18 @@ def test_scoped_roles_see_only_their_area(
 def test_admin_sign_in_returns_to_the_review_page_safely(shop_app: Flask) -> None:
     client = shop_app.test_client()
     with shop_app.test_request_context("/"):
-        admin, _ = admin_service.create_admin("owner@example.com", OWNER_PASSWORD, AdminRole.OWNER)
+        admin, _ = admin_service.create_admin(
+            "owner", "owner@example.com", OWNER_PASSWORD, AdminRole.OWNER
+        )
         secret = admin.totp_secret
     client.get("/admin/login?next=" + PREFIX + "/review/abc")
-    client.post("/admin/login", data={"email": "owner@example.com", "password": OWNER_PASSWORD})
+    client.post("/admin/login", data={"username": "owner", "password": OWNER_PASSWORD})
     done = client.post("/admin/verify", data={"code": admin_service.totp(secret)})
     assert done.headers["Location"].endswith(PREFIX + "/review/abc")
     for unsafe in ("https://evil.example/x", "//evil.example/x", "/\\evil.example"):
         client.post("/admin/logout")
         client.get("/admin/login?next=" + unsafe)
-        client.post("/admin/login", data={"email": "owner@example.com", "password": OWNER_PASSWORD})
+        client.post("/admin/login", data={"username": "owner", "password": OWNER_PASSWORD})
         done = client.post("/admin/verify", data={"code": admin_service.totp(secret)})
         assert done.headers["Location"].endswith("/admin/"), unsafe
 

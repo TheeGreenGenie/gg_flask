@@ -101,7 +101,7 @@ switched off (and says so) until an email provider is connected (`MAIL_BACKEND`)
 Apply migrations, then provision the first administrator from a trusted terminal:
 
 ```bash
-.venv/Scripts/flask --app wsgi admin create --email owner@example.com --role owner
+.venv/Scripts/flask --app wsgi admin create --username owner --email owner@example.com --role owner
 ```
 
 The command prints an authenticator-app secret/URI and ten one-use recovery codes. Store

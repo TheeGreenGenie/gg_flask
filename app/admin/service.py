@@ -6,6 +6,8 @@ import base64
 import hashlib
 import hmac
 import json
+import logging
+import re
 import secrets
 import struct
 import time
@@ -14,7 +16,7 @@ from urllib.parse import quote
 
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError
-from flask import g, has_request_context, request, session
+from flask import current_app, g, has_request_context, request, session
 from sqlalchemy import select
 
 from app import ratelimit
@@ -27,9 +29,11 @@ IDLE_SECONDS = 30 * 60
 ABSOLUTE_SECONDS = 8 * 60 * 60
 PENDING_SECONDS = 5 * 60
 RECOVERY_COUNT = 10
+USERNAME_RE = re.compile(r"^[a-z][a-z0-9._-]{2,63}$")
 
 _hasher = PasswordHasher()
 _dummy_hash = _hasher.hash(secrets.token_urlsafe(16))
+_log = logging.getLogger(__name__)
 
 
 class AdminError(AccountError):
@@ -41,7 +45,7 @@ def generate_totp_secret() -> str:
 
 
 def provisioning_uri(admin: AdminUser) -> str:
-    label = quote(f"GG Afrikan Eleganz:{admin.email}")
+    label = quote(f"GG Afrikan Eleganz:{admin.username}")
     issuer = quote("GG Afrikan Eleganz")
     return f"otpauth://totp/{label}?secret={admin.totp_secret}&issuer={issuer}&digits=6&period=30"
 
@@ -75,12 +79,35 @@ def new_recovery_codes(admin: AdminUser) -> list[str]:
     return codes
 
 
-def create_admin(email_raw: str, password: str, role: AdminRole) -> tuple[AdminUser, list[str]]:
+def normalize_username(raw: str) -> str:
+    username = (raw or "").strip().lower()
+    if not USERNAME_RE.fullmatch(username):
+        raise AdminError(
+            "Username must be 3 to 64 characters: lowercase letters, numbers, dots, "
+            "dashes or underscores."
+        )
+    return username
+
+
+def _check_admin_password(password: str, email: str) -> None:
+    try:
+        check_password(password, email)
+    except AccountError as exc:
+        raise AdminError(str(exc)) from None
+
+
+def create_admin(
+    username_raw: str, email_raw: str, password: str, role: AdminRole
+) -> tuple[AdminUser, list[str]]:
+    username = normalize_username(username_raw)
     email = normalize_email(email_raw)
-    check_password(password, email)
+    _check_admin_password(password, email)
+    if db.session.scalar(select(AdminUser.id).where(AdminUser.username == username)) is not None:
+        raise AdminError("An administrator with that username already exists.")
     if db.session.scalar(select(AdminUser.id).where(AdminUser.email == email)) is not None:
         raise AdminError("An administrator with that email already exists.")
     admin = AdminUser(
+        username=username,
         email=email,
         password_hash=_hasher.hash(password),
         role=role,
@@ -94,17 +121,17 @@ def create_admin(email_raw: str, password: str, role: AdminRole) -> tuple[AdminU
     return admin, codes
 
 
-def begin_login(email_raw: str, password: str) -> None:
-    generic = AdminError("Email or password is incorrect.")
+def begin_login(username_raw: str, password: str) -> None:
+    generic = AdminError("Username or password is incorrect.")
     if not ratelimit.allow("admin-login-ip", ratelimit.client_key(), 20, 900):
         raise AdminError("Too many attempts. Please wait and try again.")
     try:
-        email = normalize_email(email_raw)
-    except AccountError:
+        username = normalize_username(username_raw)
+    except AdminError:
         raise generic from None
-    if not ratelimit.allow("admin-login-email", email, 10, 900):
+    if not ratelimit.allow("admin-login-username", username, 10, 900):
         raise AdminError("Too many attempts. Please wait and try again.")
-    admin = db.session.scalar(select(AdminUser).where(AdminUser.email == email))
+    admin = db.session.scalar(select(AdminUser).where(AdminUser.username == username))
     try:
         _hasher.verify(admin.password_hash if admin else _dummy_hash, password[:MAX_PASSWORD])
     except (VerificationError, InvalidHashError):
@@ -197,6 +224,85 @@ def logout() -> None:
         db.session.commit()
     _clear_admin_session()
     g.pop("admin", None)
+
+
+def change_password(admin: AdminUser, current_password: str, new_password: str) -> None:
+    try:
+        _hasher.verify(admin.password_hash, current_password[:MAX_PASSWORD])
+    except (VerificationError, InvalidHashError):
+        raise AdminError("Your current password is incorrect.") from None
+    _check_admin_password(new_password, admin.email)
+    try:
+        _hasher.verify(admin.password_hash, new_password[:MAX_PASSWORD])
+    except (VerificationError, InvalidHashError):
+        pass
+    else:
+        raise AdminError("Choose a password you have not already been using.")
+    admin.password_hash = _hasher.hash(new_password)
+    admin.session_version += 1
+    audit(admin, "admin.password.changed", "admin", str(admin.id))
+    db.session.commit()
+    # Keep this browser signed in while invalidating every other existing session.
+    session["admin_sv"] = admin.session_version
+    _password_change_notice(admin, reset=False)
+
+
+def reset_password(admin: AdminUser, new_password: str) -> None:
+    """Server-only recovery: replace the hash and revoke every browser session."""
+    _check_admin_password(new_password, admin.email)
+    admin.password_hash = _hasher.hash(new_password)
+    admin.session_version += 1
+    audit(admin, "admin.password.reset", "admin", str(admin.id))
+    db.session.commit()
+    _password_change_notice(admin, reset=True)
+
+
+def _password_change_notice(admin: AdminUser, *, reset: bool) -> None:
+    """Notify without ever copying the password into email, push, logs, or audit data."""
+    from app import mail
+
+    action = "reset by the server owner" if reset else "changed by the signed-in administrator"
+    message = (
+        f"The password for private admin username {admin.username} was {action}. "
+        "The password itself is not stored or sent. If this was unexpected, disable the account "
+        "and reset it from the server immediately."
+    )
+    recipient = str(current_app.config.get("ORDER_NOTIFICATION_EMAIL") or "").strip()
+    if recipient and mail.available():
+        try:
+            mail.send(recipient, "Private admin password changed", message)
+        except Exception:  # pragma: no cover - provider failures vary
+            _log.exception("admin_password_notice_email_failed")
+    if current_app.config.get("STUDIO_APPROVAL_BACKEND") == "ntfy" and current_app.config.get(
+        "STUDIO_NTFY_TOPIC"
+    ):
+        _send_ntfy_security_notice(message)
+
+
+def _send_ntfy_security_notice(message: str) -> None:
+    import urllib.request
+
+    server = str(current_app.config["STUDIO_NTFY_SERVER"]).rstrip("/") + "/"
+    payload = json.dumps(
+        {
+            "topic": current_app.config["STUDIO_NTFY_TOPIC"],
+            "title": "Private admin security notice",
+            "message": message,
+            "priority": "high",
+            "tags": ["warning"],
+        }
+    ).encode()
+    headers = {"Content-Type": "application/json"}
+    if current_app.config.get("STUDIO_NTFY_TOKEN"):
+        headers["Authorization"] = f"Bearer {current_app.config['STUDIO_NTFY_TOKEN']}"
+    request_record = urllib.request.Request(  # noqa: S310 - config requires HTTPS
+        server, data=payload, headers=headers, method="POST"
+    )
+    try:
+        with urllib.request.urlopen(request_record, timeout=3):  # noqa: S310
+            pass
+    except OSError:
+        _log.exception("admin_password_notice_push_failed")
 
 
 def audit(

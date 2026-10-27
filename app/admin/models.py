@@ -22,6 +22,7 @@ class AdminUser(db.Model):  # type: ignore[name-defined]
     __tablename__ = "admin_users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    username: Mapped[str] = mapped_column(String(64), unique=True, index=True)
     email: Mapped[str] = mapped_column(String(254), unique=True)
     password_hash: Mapped[str] = mapped_column(String(255))
     role: Mapped[AdminRole] = mapped_column(

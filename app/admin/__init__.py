@@ -83,12 +83,14 @@ def login() -> str | Response:
     error = ""
     if request.method == "POST":
         try:
-            service.begin_login(request.form.get("email", ""), request.form.get("password", ""))
+            service.begin_login(request.form.get("username", ""), request.form.get("password", ""))
         except service.AdminError as exc:
             error = str(exc)
         else:
             return redirect(url_for("admin.verify"))
-    return render_template("admin/login.html", error=error, email=request.form.get("email", ""))
+    return render_template(
+        "admin/login.html", error=error, username=request.form.get("username", "")
+    )
 
 
 @bp.route("/verify", methods=["GET", "POST"])
@@ -112,6 +114,28 @@ def logout() -> Response:
     service.logout()
     flash("Administrator signed out.", "success")
     return redirect(url_for("admin.login"))
+
+
+@bp.route("/password", methods=["GET", "POST"])
+@login_required
+def password() -> str | Response:
+    error = ""
+    if request.method == "POST":
+        new_password = request.form.get("new_password", "")
+        if new_password != request.form.get("confirm_password", ""):
+            error = "The new passwords do not match."
+        else:
+            try:
+                service.change_password(
+                    _admin(), request.form.get("current_password", ""), new_password
+                )
+            except service.AdminError as exc:
+                db.session.rollback()
+                error = str(exc)
+            else:
+                flash("Password changed. Other administrator sessions were signed out.", "success")
+                return redirect(url_for("admin.dashboard"))
+    return render_template("admin/password.html", admin=_admin(), error=error)
 
 
 @bp.get("/")
@@ -362,13 +386,14 @@ def init_admin(app: Flask) -> None:
         """Administrator setup and recovery tools."""
 
     @admin_cli.command("create")
+    @click.option("--username", prompt=True)
     @click.option("--email", prompt=True)
     @click.option("--role", type=click.Choice([r.value for r in AdminRole]), default="owner")
     @click.password_option(confirmation_prompt=True)
-    def create(email: str, role: str, password: str) -> None:
+    def create(username: str, email: str, role: str, password: str) -> None:
         """Create an administrator and print one-time 2FA setup information."""
         try:
-            user, codes = service.create_admin(email, password, AdminRole(role))
+            user, codes = service.create_admin(username, email, password, AdminRole(role))
         except service.AdminError as exc:
             raise click.ClickException(str(exc)) from None
         click.echo("Administrator created. Add this account to an authenticator app:")
@@ -377,3 +402,21 @@ def init_admin(app: Flask) -> None:
         click.echo("Recovery codes (store securely; each works once):")
         for code in codes:
             click.echo(f"  {code}")
+
+    @admin_cli.command("reset-password")
+    @click.argument("username")
+    @click.password_option(confirmation_prompt=True)
+    def reset_password(username: str, password: str) -> None:
+        """Set a new password and revoke every session for one admin username."""
+        try:
+            normalized = service.normalize_username(username)
+        except service.AdminError as exc:
+            raise click.ClickException(str(exc)) from None
+        user = db.session.scalar(select(AdminUser).where(AdminUser.username == normalized))
+        if user is None:
+            raise click.ClickException("Administrator username not found.")
+        try:
+            service.reset_password(user, password)
+        except service.AdminError as exc:
+            raise click.ClickException(str(exc)) from None
+        click.echo(f"Password reset for {user.username}; all existing sessions were revoked.")

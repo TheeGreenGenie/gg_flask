@@ -109,7 +109,7 @@ def test_product_page_shows_the_piece(catalog_app: Flask, shop: FlaskClient) -> 
 def test_admin_and_studio_edit_piece_size(catalog_app: Flask) -> None:
     with catalog_app.test_request_context("/"):
         admin, _ = admin_service.create_admin(
-            "owner@example.com", "Long unique phrase 482!", AdminRole.OWNER
+            "owner", "owner@example.com", "Long unique phrase 482!", AdminRole.OWNER
         )
         product = db.session.scalar(select(Product).where(Product.slug == "ankara-blue"))
         assert product is not None

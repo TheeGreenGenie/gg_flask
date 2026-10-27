@@ -9,7 +9,7 @@ from PIL import Image
 from sqlalchemy import select
 
 from app.admin import service
-from app.admin.models import AdminAudit, AdminRecoveryCode, AdminRole
+from app.admin.models import AdminAudit, AdminRecoveryCode, AdminRole, AdminUser
 from app.catalog.models import Category, Product, ProductImage, Variant
 from app.extensions import db
 from app.orders.models import Coupon
@@ -18,7 +18,7 @@ from app.orders.models import Coupon
 def make_admin(app: Flask) -> tuple[str, list[str]]:
     with app.test_request_context("/"):
         admin, codes = service.create_admin(
-            "owner@example.com", "Long unique phrase 482!", AdminRole.OWNER
+            "owner", "owner@example.com", "Long unique phrase 482!", AdminRole.OWNER
         )
         return admin.totp_secret, codes
 
@@ -26,7 +26,7 @@ def make_admin(app: Flask) -> tuple[str, list[str]]:
 def password_step(client: FlaskClient) -> None:
     response = client.post(
         "/admin/login",
-        data={"email": "owner@example.com", "password": "Long unique phrase 482!"},
+        data={"username": "owner", "password": "Long unique phrase 482!"},
     )
     assert response.status_code == 302 and response.headers["Location"].endswith("/admin/verify")
 
@@ -38,7 +38,7 @@ def test_admin_requires_password_then_totp(client: FlaskClient, app: Flask) -> N
     response = client.post("/admin/verify", data={"code": service.totp(secret)})
     assert response.status_code == 302 and response.headers["Location"].endswith("/admin/")
     page = client.get("/admin/")
-    assert page.status_code == 200 and b"owner@example.com" in page.data
+    assert page.status_code == 200 and b"Signed in as owner" in page.data
     assert page.headers["Cache-Control"] == "private, no-store"
     assert page.headers["X-Robots-Tag"] == "noindex, nofollow"
     with app.app_context():
@@ -48,8 +48,8 @@ def test_admin_requires_password_then_totp(client: FlaskClient, app: Flask) -> N
 
 def test_bad_password_is_generic(client: FlaskClient, app: Flask) -> None:
     make_admin(app)
-    response = client.post("/admin/login", data={"email": "nope@example.com", "password": "bad"})
-    assert b"Email or password is incorrect" in response.data
+    response = client.post("/admin/login", data={"username": "nope", "password": "bad"})
+    assert b"Username or password is incorrect" in response.data
 
 
 def test_recovery_code_works_once(client: FlaskClient, app: Flask) -> None:
@@ -75,6 +75,89 @@ def test_admin_session_idle_timeout(client: FlaskClient, app: Flask) -> None:
     assert client.get("/admin/").status_code == 302
 
 
+def test_admin_changes_password_with_current_password(client: FlaskClient, app: Flask) -> None:
+    app.config["ORDER_NOTIFICATION_EMAIL"] = "owner@example.com"
+    secret, _ = make_admin(app)
+    password_step(client)
+    client.post("/admin/verify", data={"code": service.totp(secret)})
+
+    wrong = client.post(
+        "/admin/password",
+        data={
+            "current_password": "incorrect password",
+            "new_password": "Different secure phrase 936!",
+            "confirm_password": "Different secure phrase 936!",
+        },
+    )
+    assert b"current password is incorrect" in wrong.data
+
+    changed = client.post(
+        "/admin/password",
+        data={
+            "current_password": "Long unique phrase 482!",
+            "new_password": "Different secure phrase 936!",
+            "confirm_password": "Different secure phrase 936!",
+        },
+        follow_redirects=True,
+    )
+    assert b"Other administrator sessions were signed out" in changed.data
+    with app.app_context():
+        admin = db.session.scalar(select(AdminUser).where(AdminUser.username == "owner"))
+        assert admin is not None
+        assert "Different secure phrase" not in admin.password_hash
+        assert "admin.password.changed" in db.session.scalars(select(AdminAudit.action)).all()
+    notice = app.extensions["outbox"][-1]
+    assert "Different secure phrase" not in notice.body
+    assert "password itself is not stored or sent" in notice.body
+
+    client.post("/admin/logout")
+    old = client.post(
+        "/admin/login",
+        data={"username": "owner", "password": "Long unique phrase 482!"},
+    )
+    assert b"Username or password is incorrect" in old.data
+    new = client.post(
+        "/admin/login",
+        data={"username": "owner", "password": "Different secure phrase 936!"},
+    )
+    assert new.status_code == 302 and new.headers["Location"].endswith("/admin/verify")
+
+
+def test_admin_password_change_reports_password_policy_error(
+    client: FlaskClient, app: Flask
+) -> None:
+    secret, _ = make_admin(app)
+    password_step(client)
+    client.post("/admin/verify", data={"code": service.totp(secret)})
+    response = client.post(
+        "/admin/password",
+        data={
+            "current_password": "Long unique phrase 482!",
+            "new_password": "short",
+            "confirm_password": "short",
+        },
+    )
+    assert response.status_code == 200
+    assert b"Use a password of" in response.data
+
+
+def test_admin_password_reset_cli_uses_username_and_revokes_sessions(app: Flask) -> None:
+    with app.app_context():
+        admin, _ = service.create_admin(
+            "owner", "owner@example.com", "Long unique phrase 482!", AdminRole.OWNER
+        )
+        before_version = admin.session_version
+    result = app.test_cli_runner().invoke(
+        args=["admin", "reset-password", "owner"],
+        input="Replacement secure phrase 741!\nReplacement secure phrase 741!\n",
+    )
+    assert result.exit_code == 0
+    assert "all existing sessions were revoked" in result.output
+    with app.app_context():
+        admin = db.session.scalar(select(AdminUser).where(AdminUser.username == "owner"))
+        assert admin is not None and admin.session_version == before_version + 1
+
+
 def test_totp_accepts_small_clock_drift() -> None:
     secret = service.generate_totp_secret()
     now = 2_000_000_000
@@ -85,7 +168,16 @@ def test_totp_accepts_small_clock_drift() -> None:
 def test_admin_create_cli(app: Flask) -> None:
     runner = app.test_cli_runner()
     result = runner.invoke(
-        args=["admin", "create", "--email", "admin@example.com", "--role", "catalog"],
+        args=[
+            "admin",
+            "create",
+            "--username",
+            "catalog-admin",
+            "--email",
+            "admin@example.com",
+            "--role",
+            "catalog",
+        ],
         input="Another unique phrase 782!\nAnother unique phrase 782!\n",
     )
     assert result.exit_code == 0
@@ -95,13 +187,16 @@ def test_admin_create_cli(app: Flask) -> None:
 def admin_client(catalog_app: Flask, role: AdminRole = AdminRole.OWNER) -> FlaskClient:
     with catalog_app.test_request_context("/"):
         admin, _ = service.create_admin(
-            f"{role.value}@example.com", "Long unique phrase 482!", role
+            role.value,
+            f"{role.value}@example.com",
+            "Long unique phrase 482!",
+            role,
         )
         code = service.totp(admin.totp_secret)
     client = catalog_app.test_client()
     client.post(
         "/admin/login",
-        data={"email": f"{role.value}@example.com", "password": "Long unique phrase 482!"},
+        data={"username": role.value, "password": "Long unique phrase 482!"},
     )
     client.post("/admin/verify", data={"code": code})
     return client

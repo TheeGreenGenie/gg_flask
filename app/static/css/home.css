@@ -21,7 +21,7 @@ html.gg-home-enhanced {
 }
 
 .gg-home {
-	--slide-gap: clamp(.375rem, 1.6vmin, .875rem);
+	--slide-gap: clamp(.75rem, 3.2vmin, 1.75rem); /* space around each card (about double before) */
 	--slide-radius: clamp(1rem, 2.4vmin, 1.5rem);
 	--slide-frame: color-mix(in srgb, var(--gg-accent) 42%, var(--gg-line));
 	--slide-hairline: color-mix(in srgb, var(--gg-accent) 38%, transparent);
@@ -1056,10 +1056,10 @@ html.gg-home-enhanced {
 
 @keyframes gg-card-arrive {
 	from {
-		opacity: .55;
-		transform: translateY(6%) rotateX(-30deg) scale(.94);
+		opacity: .8;
+		transform: translateY(3%) rotateX(-12deg) scale(.97);
 		transform-origin: 50% 100%;
-		filter: brightness(.8);
+		filter: brightness(.94);
 	}
 
 	to {
@@ -1079,9 +1079,9 @@ html.gg-home-enhanced {
 	}
 
 	to {
-		opacity: .35;
-		transform: translateY(-3%) rotateX(34deg) scale(.94);
+		opacity: .7;
+		transform: translateY(-2%) rotateX(14deg) scale(.97);
 		transform-origin: 50% 0%;
-		filter: brightness(.75);
+		filter: brightness(.92);
 	}
 }

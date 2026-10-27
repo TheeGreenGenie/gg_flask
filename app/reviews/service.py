@@ -9,18 +9,21 @@ from datetime import timedelta
 
 from flask import current_app, request
 from sqlalchemy import func, select
+from werkzeug.datastructures import FileStorage
 
 from app import ratelimit
 from app.accounts.models import User
 from app.catalog.models import Product, Variant, utcnow
 from app.extensions import db
 from app.orders.models import Order, OrderLine, PaymentStatus
+from app.reviews import images
 from app.reviews.models import (
     ModerationRemoval,
     ModerationWord,
     PostKind,
     PostStatus,
     ProductPost,
+    ProductPostPhoto,
 )
 
 LINK_RE = re.compile(r"(?:https?://|www\.|\b[\w-]+\.(?:com|net|org|io)\b)", re.I)
@@ -198,7 +201,12 @@ def relevance(tokens: list[str], language: str, product: Product) -> int:
     return min(100, round(100 * matches / max(2, math.sqrt(len(tokens)) * 2)))
 
 
-def create_post(user: User, product: Product, form: dict[str, str]) -> ProductPost:
+def create_post(
+    user: User,
+    product: Product,
+    form: dict[str, str],
+    photos: list[FileStorage] | None = None,
+) -> ProductPost:
     if not ratelimit.allow("product-post-ip", ratelimit.client_key(), 10, 3600):
         raise ReviewError("Too many posts were submitted. Please wait and try again.")
     if not ratelimit.allow("product-post-user", str(user.id), 5, 3600):
@@ -246,9 +254,15 @@ def create_post(user: User, product: Product, form: dict[str, str]) -> ProductPo
     language = detect_language(tokens)
     score = relevance(tokens, language, product)
     obscene = contains_obscenity(tokens, language)
+    try:
+        clean_photos, nude_photo = images.screen(photos or [])
+    except images.PhotoError as exc:
+        raise ReviewError(str(exc)) from None
+    removal_reason = "obscenity" if obscene else ("nude_image" if nude_photo else None)
+    removed = removal_reason is not None
     status = (
         PostStatus.REMOVED
-        if obscene
+        if removed
         else (PostStatus.VISIBLE if score >= 20 else PostStatus.COLLAPSED)
     )
     post = ProductPost(
@@ -256,31 +270,38 @@ def create_post(user: User, product: Product, form: dict[str, str]) -> ProductPo
         user_id=user.id,
         kind=kind,
         status=status,
-        title="" if obscene else title,
-        body="" if obscene else body,
+        title="" if removed else title,
+        body="" if removed else body,
         rating=rating,
         language=language,
         relevance_score=score,
-        moderation_reason="obscenity" if obscene else ("low_relevance" if score < 20 else None),
+        moderation_reason=removal_reason or ("low_relevance" if score < 20 else None),
         verified_buyer=_verified_buyer(user.id, product.id),
         ip_address=(ratelimit.client_key() or "")[:45] or None,
         user_agent=(request.user_agent.string or "")[:300] or None,
     )
     db.session.add(post)
     db.session.flush()
-    if obscene and retention:
+    if not removed:
+        for data in clean_photos:
+            db.session.add(
+                ProductPostPhoto(
+                    post_id=post.id, path=images.save(data), alt=f"Photo: {title}"[:255]
+                )
+            )
+    if removed and retention:  # the text only — a flagged photo is never kept
         db.session.add(
             ModerationRemoval(
                 post_id=post.id,
                 user_id=user.id,
-                reason="obscenity",
+                reason=removal_reason,
                 original_title=title,
                 original_body=body,
                 expires_at=utcnow() + timedelta(days=int(retention)),
             )
         )
     db.session.commit()
-    if obscene:
+    if removed:
         raise ReviewError("Your post was removed because it broke the posting rules.")
     return post
 

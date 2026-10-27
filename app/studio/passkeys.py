@@ -93,7 +93,12 @@ def _approver() -> str | None:
 
 def _tell_owner(subject: str, body: str) -> None:
     recipient = _approver()
-    if not recipient or not mail.send(recipient, subject, body):
+    try:
+        sent = bool(recipient) and mail.send(str(recipient), subject, body)
+    except Exception:  # never fail the sign-in or key step because email failed
+        log.exception("studio_key_notification_failed")
+        sent = False
+    if not sent:
         log.warning("studio_key_notification_not_sent subject=%s", subject)
 
 

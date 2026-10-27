@@ -19,6 +19,8 @@ PHOTO_UPLOAD_ENDPOINTS = frozenset(
     {
         "admin.image_upload",
         "studio.product_image_upload",
+        "studio.blog_edit",
+        "reviews.create",
     }
 )
 

@@ -28,6 +28,7 @@ SCOPED: dict[StudioRole, frozenset[str]] = {
         {
             "studio.blog_posts",
             "studio.blog_edit",
+            "studio.blog_preview",
             "studio.blog_publication",
             "studio.blog_revision_restore",
             "studio.products",

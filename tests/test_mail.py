@@ -154,3 +154,19 @@ def test_production_rejects_unsafe_mail_settings(
 def test_tests_never_send_real_mail(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("MAIL_BACKEND", "smtp")
     assert load_config("testing").MAIL_BACKEND == "memory"
+
+
+def test_console_mail_never_crashes_on_a_non_utf8_console(
+    app: Flask, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import io
+    import sys
+
+    raw = io.BytesIO()
+    console = io.TextIOWrapper(raw, encoding="cp1252")  # a typical Windows console
+    monkeypatch.setattr(sys, "stdout", console)
+    app.config["MAIL_BACKEND"] = "console"
+    with app.app_context():
+        assert mail.send("owner@example.com", "Approve? Price $40.00 → $42.50", "Stock 10 → 12")
+    console.flush()
+    assert b"Price $40.00 ? $42.50" in raw.getvalue()

@@ -3,7 +3,7 @@
 {% block title %}{{ post.title }} · GG Afrikan Eleganz{% endblock %}
 {% block description %}{{ post.excerpt }}{% endblock %}
 {% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/content-legacy.css') }}">{% endblock %}
-{% block content %}
+{% block content %}{% if studio_preview %}<p class="gg-preview-banner" role="status">Preview only — this article is {{ studio_preview.status.value }} and{% if studio_preview.status.value != 'published' %} not{% endif %} visible on the website{% if studio_preview.status.value == 'published' %} (unsaved changes are not shown){% endif %}.</p>{% endif %}
 {#- Layout from the previous site's single-post template (single.php); text is the original article. -#}
 {%- set words = post.body|selectattr(0, 'in', ['p', 'h2'])|map(attribute=1)|join(' ')|wordcount -%}
 {%- set page_url = url_for('content.post', slug=post.slug, _external=True) -%}

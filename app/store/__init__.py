@@ -31,6 +31,7 @@ from app.extensions import csrf, db
 from app.orders import payments, providers
 from app.orders import service as order_service
 from app.orders.models import Order, PaymentProvider
+from app.reviews import images as review_images
 from app.reviews import service as review_service
 from app.store import content
 from app.templating import money
@@ -177,6 +178,7 @@ def product(slug: str) -> str:
         gallery=_gallery(item),
         related=queries.related(item),
         product_posts=review_service.public_posts(item),
+        review_photos=review_images.photos_enabled(),
         rating_average=rating_average,
         rating_count=rating_count,
     )

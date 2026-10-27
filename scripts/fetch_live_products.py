@@ -59,9 +59,7 @@ def parse(path: str, page: str) -> dict[str, Any]:
                 product = item
     offers = product.get("offers") or [{}]
     offer = offers[0] if isinstance(offers, list) else offers
-    short = re.search(
-        r'woocommerce-product-details__short-description">(.*?)</div>', page, re.S
-    )
+    short = re.search(r'woocommerce-product-details__short-description">(.*?)</div>', page, re.S)
     long = re.search(r'id="tab-description"[^>]*>(.*?)</div>', page, re.S)
     gallery = re.findall(r'data-large_image="([^"]+)"', page) or [product.get("image", "")]
     return {

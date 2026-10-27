@@ -19,6 +19,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Private on-server nudity check for review photos (owner, 2026-10-27). ~100 MB; photo posts
+# stay switched off without it.
+moderation = ["nudenet>=3.4,<4"]
 dev = [
     "pytest>=8.3",
     "ruff>=0.8",

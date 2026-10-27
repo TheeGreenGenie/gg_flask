@@ -23,7 +23,9 @@ def create(slug: str) -> Response:
         flash("Sign in before posting a review or question.", "error")
         return redirect(url_for("accounts.login", next=url_for("store.product", slug=slug)))
     try:
-        post = service.create_post(user, product, request.form.to_dict())
+        post = service.create_post(
+            user, product, request.form.to_dict(), request.files.getlist("photos")
+        )
     except service.ReviewError as exc:
         flash(str(exc), "error")
     else:

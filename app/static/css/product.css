@@ -232,3 +232,6 @@
 .gg-product-post--collapsed summary { cursor: pointer; font-weight: 700; }
 .gg-product-post__reply { margin: 1rem 0 0 1rem; padding: 1rem; border-left: 3px solid var(--gg-gold); background: var(--gg-warm); }
 @media (max-width: 38rem) { .gg-product-posts__form { grid-template-columns: 1fr; } .gg-product-posts__form label { grid-column: 1; } }
+
+.gg-product-post__photos { display: flex; flex-wrap: wrap; gap: .5rem; margin: .5rem 0; }
+.gg-product-post__photos img { width: 6rem; height: 6rem; border-radius: .5rem; object-fit: cover; }

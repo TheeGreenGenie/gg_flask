@@ -56,3 +56,14 @@
 .gg-studio__change-status--rejected,
 .gg-studio__change-status--conflict,
 .gg-studio__change-status--failed { background: color-mix(in srgb, #b3261e 16%, var(--gg-paper)); }
+
+/* List pages */
+.gg-studio__pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .5rem 1.25rem; margin: 1.25rem 0 0; font-size: .9rem; }
+.gg-studio__pager a { display: inline-flex; min-height: 2.75rem; align-items: center; padding: 0 1rem; border: 1px solid var(--gg-line); border-radius: 999px; color: var(--gg-ink); font-weight: 700; text-decoration: none; }
+.gg-studio__tip { margin: 0 0 .5rem; color: var(--gg-muted); font-size: .9rem; }
+
+.gg-preview-banner { margin: 0; padding: .75rem 1rem; background: var(--gg-accent); color: var(--gg-accent-ink); font-weight: 700; text-align: center; }
+.gg-studio__changes { display: grid; gap: .75rem; margin: 0; padding: 0; list-style: none; }
+.gg-studio__change { padding: 1rem; border: 1px solid var(--gg-line); border-radius: .75rem; background: var(--gg-paper); }
+.gg-studio__change-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .5rem; }
+.gg-studio__change-head small { color: var(--gg-muted); }

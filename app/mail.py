@@ -17,6 +17,7 @@ from __future__ import annotations
 import logging
 import smtplib
 import ssl
+import sys
 from dataclasses import dataclass
 from email.message import EmailMessage
 from email.utils import formatdate, make_msgid, parseaddr
@@ -49,7 +50,11 @@ def send(to: str, subject: str, body: str) -> bool:
         current_app.extensions.setdefault("outbox", []).append(msg)
         return True
     if backend == "console":
-        print(f"\n--- email to {to}: {subject} ---\n{body}\n--- end email ---\n", flush=True)  # noqa: T201
+        text = f"\n--- email to {to}: {subject} ---\n{body}\n--- end email ---\n"
+        # Windows consoles may not be UTF-8; a character like "→" must never break a request.
+        encoding = getattr(sys.stdout, "encoding", None) or "utf-8"
+        sys.stdout.write(text.encode(encoding, errors="replace").decode(encoding))
+        sys.stdout.flush()
         return True
     if backend == "smtp" and available():
         return _send_smtp(msg)

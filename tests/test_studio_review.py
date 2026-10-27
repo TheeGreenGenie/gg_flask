@@ -173,7 +173,7 @@ def test_held_photo_is_private_until_approved(shop_app: Flask) -> None:
     )
     with shop_app.app_context():
         change = db.session.scalars(select(StudioChange)).one()
-        stored = json.loads(change.upload or "{}")["stored"]
+        stored = json.loads(change.upload or "[]")[0]["stored"]
         held = review.pending_dir() / stored
         assert held.is_file()
         assert not str(held).startswith(shop_app.config["MEDIA_ROOT"])  # never public
@@ -258,3 +258,24 @@ def test_admin_sign_in_returns_to_the_review_page_safely(shop_app: Flask) -> Non
         client.post("/admin/login", data={"email": "owner@example.com", "password": OWNER_PASSWORD})
         done = client.post("/admin/verify", data={"code": admin_service.totp(secret)})
         assert done.headers["Location"].endswith("/admin/"), unsafe
+
+
+def test_summary_lists_only_real_edits(shop_app: Flask) -> None:
+    staff = _staff_client(shop_app, "branding")
+    with shop_app.app_context():
+        product = db.session.scalar(select(Product).where(Product.slug == "ankara-blue"))
+        assert product is not None
+        product.description = "Line one.\n\nLine two."
+        db.session.commit()
+        form = {
+            "name": product.name,
+            "summary": "A brand new summary",
+            "description": "Line one.\r\n\r\nLine two.",  # how browsers send it
+            "category_ids": [str(c.id) for c in product.categories],
+            "sale_unit": product.sale_unit,
+        }
+        product_id = product.id
+    staff.post(PREFIX + f"/products/{product_id}", data=form)
+    with shop_app.app_context():
+        summary = db.session.scalars(select(StudioChange)).one().summary
+    assert "Summary:" in summary and "Description" not in summary

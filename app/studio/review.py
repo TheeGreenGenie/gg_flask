@@ -90,6 +90,10 @@ def _clip(text: str, limit: int = 300) -> str:
     return text if len(text) <= limit else text[: limit - 1] + "…"
 
 
+def _plain(value: Any) -> str:
+    return " ".join(str(value or "").replace("\r\n", "\n").split())
+
+
 def _variant_label(variant: Variant) -> str:
     option = " / ".join(v.label for v in variant.option_values)
     return f"{variant.product.name}{f' ({option})' if option else ''} [{variant.sku}]"
@@ -164,7 +168,8 @@ def _product_edit(args: dict[str, Any], form: MultiDict[str, str]) -> Described:
     lines = [f"Edit product details: {product.name}"]
 
     def compare(label: str, before: Any, after: Any, long: bool = False) -> None:
-        if (before or "") != (after or ""):
+        # Browsers send \r\n; compare text as people read it, not by line-ending bytes.
+        if _plain(before) != _plain(after):
             if long:
                 lines.append(f"{label} rewritten: “{_clip(str(after), 400)}”")
             else:
@@ -392,20 +397,22 @@ def hold(user: StudioUser, endpoint: str, view_args: dict[str, Any], described: 
     from app.studio import service
 
     token = secrets.token_urlsafe(32)
-    upload_info = None
-    upload = request.files.get("image") if endpoint == "studio.product_image_upload" else None
-    if upload is not None and upload.filename:
+    held_files = []
+    for field_name, upload in request.files.items(multi=True):
+        if not upload.filename:
+            continue
         pending_dir().mkdir(parents=True, exist_ok=True)
         stored = f"{secrets.token_hex(16)}.upload"
         upload.save(pending_dir() / stored)
-        upload_info = json.dumps(
+        held_files.append(
             {
-                "field": "image",
+                "field": field_name,
                 "stored": stored,
                 "filename": secure_filename(upload.filename) or "photo",
                 "content_type": upload.mimetype or "application/octet-stream",
             }
         )
+    upload_info = json.dumps(held_files) if held_files else None
     form_pairs = [(k, v) for k, v in request.form.items(multi=True) if k != "csrf_token"]
     change = StudioChange(
         token_hash=_hash(token),
@@ -443,7 +450,12 @@ def _notify_owner(change: StudioChange, token: str) -> None:
         f"Requested: {change.created_at:%Y-%m-%d %H:%M} UTC\n\n"
         f"Review and approve or reject (sign-in required):\n{link}\n"
     )
-    if not recipient or not mail.send(recipient, f"Approve? {first[:120]}", body):
+    try:
+        sent = bool(recipient) and mail.send(str(recipient), f"Approve? {first[:120]}", body)
+    except Exception:  # the change is saved; never fail the staff member's request over email
+        log.exception("studio_change_notification_failed change=%s", change.id)
+        sent = False
+    if not sent:
         log.warning("studio_change_notification_not_sent change=%s link=%s", change.id, link)
 
 
@@ -501,9 +513,16 @@ def pending_count(user: StudioUser | None = None) -> int:
     return int(db.session.scalar(query) or 0)
 
 
+def _held_files(change: StudioChange) -> list[dict[str, str]]:
+    if not change.upload:
+        return []
+    data = json.loads(change.upload)
+    return data if isinstance(data, list) else [data]  # older rows held one file
+
+
 def _discard_upload(change: StudioChange) -> None:
-    if change.upload:
-        stored = json.loads(change.upload).get("stored", "")
+    for info in _held_files(change):
+        stored = info.get("stored", "")
         if stored and "/" not in stored and "\\" not in stored:
             (pending_dir() / stored).unlink(missing_ok=True)
 
@@ -538,13 +557,12 @@ def _replay(change: StudioChange) -> tuple[ChangeStatus, str]:
     app = current_app._get_current_object()  # type: ignore[attr-defined]
     view_args = json.loads(change.view_args)
     data: MultiDict[str, Any] = MultiDict(json.loads(change.form_data))
-    if change.upload:
-        info = json.loads(change.upload)
-        path = pending_dir() / info["stored"]
-        if not path.is_file():
+    for info in _held_files(change):
+        held = pending_dir() / info["stored"]
+        if not held.is_file():
             return ChangeStatus.FAILED, "The uploaded photo is no longer available."
         data.add(
-            info["field"], (io.BytesIO(path.read_bytes()), info["filename"], info["content_type"])
+            info["field"], (io.BytesIO(held.read_bytes()), info["filename"], info["content_type"])
         )
     path = url_for(change.endpoint, **view_args)
     describer, _roles = HELD[change.endpoint]

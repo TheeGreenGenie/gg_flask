@@ -1,0 +1,7 @@
+{#- Expects pager (page, pages, total, first, last), pager_endpoint and pager_args. -#}
+<nav class="gg-studio__pager" aria-label="Pages">
+  <span>{% if pager.total %}Showing {{ pager.first }}–{{ pager.last }} of {{ pager.total }}{% else %}Nothing to show{% endif %}</span>
+  {% if pager.page > 1 %}<a href="{{ url_for(pager_endpoint, page=pager.page - 1, **pager_args) }}" rel="prev">← Previous</a>{% endif %}
+  {% if pager.pages > 1 %}<span>Page {{ pager.page }} of {{ pager.pages }}</span>{% endif %}
+  {% if pager.page < pager.pages %}<a href="{{ url_for(pager_endpoint, page=pager.page + 1, **pager_args) }}" rel="next">Next →</a>{% endif %}
+</nav>

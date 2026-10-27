@@ -45,7 +45,7 @@ from app.content import blog as blog_service
 from app.content.models import BlogPost, BlogRevision
 from app.extensions import db
 from app.reviews.models import ModerationWord, PostStatus, ProductPost
-from app.studio import passkeys, permissions, review, service
+from app.studio import blog_media, passkeys, permissions, review, service
 from app.studio.models import (
     ApprovalStatus,
     InventoryHistory,
@@ -305,6 +305,31 @@ def key_approval(token: str) -> str | Response:
     )
 
 
+PAGE_SIZE = 25  # rows per Studio list page (comfortable on a phone)
+
+
+def _paginate(statement: Any) -> tuple[list[Any], dict[str, int]]:
+    """One page of results plus what the pager partial needs (page, pages, total, first, last)."""
+    total = int(
+        db.session.scalar(select(func.count()).select_from(statement.order_by(None).subquery()))
+        or 0
+    )
+    pages = max(1, -(-total // PAGE_SIZE))
+    try:
+        page = min(max(1, int(request.args.get("page", "1"))), pages)
+    except ValueError:
+        page = 1
+    items = list(db.session.scalars(statement.limit(PAGE_SIZE).offset((page - 1) * PAGE_SIZE)))
+    first = (page - 1) * PAGE_SIZE + 1 if total else 0
+    return items, {
+        "page": page,
+        "pages": pages,
+        "total": total,
+        "first": first,
+        "last": first + len(items) - 1 if items else 0,
+    }
+
+
 def _json_body() -> dict[str, Any]:
     body = request.get_json(silent=True)
     if not isinstance(body, dict):
@@ -418,10 +443,18 @@ def inventory() -> str:
     if query:
         like = f"%{query}%"
         statement = statement.where(or_(Product.name.ilike(like), Variant.sku.ilike(like)))
-    if request.args.get("attention") == "1":
+    attention = request.args.get("attention") == "1"
+    if attention:
         statement = statement.where(Variant.track_inventory.is_(True), Variant.stock_quantity <= 5)
-    variants = db.session.scalars(statement.limit(500)).all()
-    return render_template("studio/inventory.html", staff=_user(), variants=variants, query=query)
+    variants, pager = _paginate(statement)
+    return render_template(
+        "studio/inventory.html",
+        staff=_user(),
+        variants=variants,
+        query=query,
+        pager=pager,
+        attention=attention,
+    )
 
 
 @bp.get("/inventory.csv")
@@ -467,7 +500,14 @@ def inventory_update(variant_id: int) -> Response:
     except service.StudioError as exc:
         db.session.rollback()
         flash(str(exc), "error")
-    return redirect(url_for("studio.inventory", q=request.form.get("return_q", "")))
+    return redirect(
+        url_for(
+            "studio.inventory",
+            q=request.form.get("return_q") or None,
+            page=request.form.get("return_page") or None,
+            attention=request.form.get("return_attention") or None,
+        )
+    )
 
 
 @bp.get("/inventory/history")
@@ -519,8 +559,10 @@ def prices() -> str:
     if query:
         like = f"%{query}%"
         statement = statement.where(or_(Product.name.ilike(like), Variant.sku.ilike(like)))
-    variants = db.session.scalars(statement.limit(500)).all()
-    return render_template("studio/prices.html", staff=_user(), variants=variants, query=query)
+    variants, pager = _paginate(statement)
+    return render_template(
+        "studio/prices.html", staff=_user(), variants=variants, query=query, pager=pager
+    )
 
 
 @bp.post("/prices/<int:variant_id>")
@@ -539,7 +581,13 @@ def price_update(variant_id: int) -> Response:
     except service.StudioError as exc:
         db.session.rollback()
         flash(str(exc), "error")
-    return redirect(url_for("studio.prices", q=request.form.get("return_q", "")))
+    return redirect(
+        url_for(
+            "studio.prices",
+            q=request.form.get("return_q") or None,
+            page=request.form.get("return_page") or None,
+        )
+    )
 
 
 @bp.get("/prices/history")
@@ -593,7 +641,7 @@ def products() -> str:
         statement = statement.where(Product.name.ilike(f"%{query}%"))
     if status in {value.value for value in ProductStatus}:
         statement = statement.where(Product.status == ProductStatus(status))
-    records = db.session.scalars(statement.limit(500)).unique().all()
+    records, pager = _paginate(statement)
     return render_template(
         "studio/products.html",
         staff=_user(),
@@ -601,6 +649,7 @@ def products() -> str:
         query=query,
         selected_status=status,
         statuses=ProductStatus,
+        pager=pager,
     )
 
 
@@ -789,8 +838,8 @@ def blog_edit(post_id: int | None = None) -> str | Response:
     error = ""
     if request.method == "POST":
         try:
-            post = service.save_blog_post(_user(), post, request.form.to_dict())
-        except service.StudioError as exc:
+            post = service.save_blog_post(_user(), post, _blog_form_with_uploads())
+        except (service.StudioError, blog_media.BlogImageError) as exc:
             db.session.rollback()
             error = str(exc)
         else:
@@ -821,6 +870,37 @@ def blog_edit(post_id: int | None = None) -> str | Response:
         error=error,
         body=body,
         revisions=revisions,
+    )
+
+
+def _blog_form_with_uploads() -> dict[str, str]:
+    """The editor form, with any uploaded cover/article photo turned into a media: reference."""
+    form = request.form.to_dict()
+    cover = request.files.get("cover_upload")
+    if cover is not None and cover.filename:
+        form["cover_path"] = blog_media.save_image(cover)
+    if not form.get("cover_path", "").strip():
+        raise blog_media.BlogImageError("Choose a cover photo for the article.")
+    photo = request.files.get("body_image")
+    if photo is not None and photo.filename:
+        reference = blog_media.save_image(photo)
+        alt = (form.get("body_image_alt") or form.get("title") or "Photo").strip()[:200]
+        alt = alt.replace("]", "").replace("[", "") or "Photo"
+        form["body"] = f"{form.get('body', '').rstrip()}\n\n![{alt}]({reference})"
+    return form
+
+
+@bp.get("/blog/<int:post_id>/preview")
+@roles(StudioRole.EDITOR)
+def blog_preview(post_id: int) -> str:
+    """How the article will look on the website, including drafts (never cached or indexed)."""
+    post = db.get_or_404(BlogPost, post_id)
+    return render_template(
+        "content/post.html",
+        post=blog_service.view_for_preview(post),
+        previous_post=None,
+        next_post=None,
+        studio_preview=post,
     )
 
 

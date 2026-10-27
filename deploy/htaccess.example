@@ -36,7 +36,7 @@ Options -Indexes
   RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/inventory/history/[0-9]+/undo/?$ [NC]
   RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/products/(?:[0-9]+/images|images/[0-9]+/remove)/?$ [NC]
   RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/sales/[0-9]+(?:/confirm|/cancel)?/?$ [NC]
-  RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/blog/(?:[0-9]+(?:/publication)?|revisions/[0-9]+/restore)/?$ [NC]
+  RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/blog/(?:[0-9]+(?:/publication|/preview)?|revisions/[0-9]+/restore)/?$ [NC]
   RewriteCond %{REQUEST_URI} !^/REPLACE_WITH_STUDIO_PATH/community(?:/[0-9]+/(?:reply|moderate)|/words(?:/[0-9]+/remove)?)?/?$ [NC]
   RewriteRule ^ - [R=404,L]
 </IfModule>

@@ -184,6 +184,11 @@ def sync_publication(now: datetime | None = None) -> tuple[int, int]:
     return len(published), 0
 
 
+def view_for_preview(post: BlogPost) -> BlogView:
+    """The public rendering of any article, published or not (Studio preview only)."""
+    return _view(post)
+
+
 def _view(post: BlogPost) -> BlogView:
     blocks = json.loads(post.body_json)
     date = (post.published_at or post.publish_at or post.created_at).date().isoformat()

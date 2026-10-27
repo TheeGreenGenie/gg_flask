@@ -106,6 +106,10 @@ class BaseConfig:
     STUDIO_APPROVER_EMAIL: str | None = None
     # WebAuthn relying-party ID for Studio phone keys (default: the request's host name).
     STUDIO_RP_ID: str | None = None
+    # Review photos: "local" = private on-server nudity check (owner, 2026-10-27; needs the
+    # optional nudenet package); anything else keeps photo posting switched off.
+    IMAGE_MODERATION_BACKEND: str | None = None
+    IMAGE_MODERATION_THRESHOLD = 0.5
     STUDIO_COOKIE_NAME = "gg_studio"
     # None means removed text is discarded immediately; owner must explicitly
     # choose a retention period before production moderation begins.
@@ -166,6 +170,10 @@ class BaseConfig:
         self.STUDIO_NTFY_TOKEN = _env("STUDIO_NTFY_TOKEN")
         self.STUDIO_APPROVER_EMAIL = _env("STUDIO_APPROVER_EMAIL")
         self.STUDIO_RP_ID = _env("STUDIO_RP_ID")
+        self.IMAGE_MODERATION_BACKEND = _env("IMAGE_MODERATION_BACKEND")
+        threshold = _env("IMAGE_MODERATION_THRESHOLD")
+        if threshold:
+            self.IMAGE_MODERATION_THRESHOLD = float(threshold)
         self.MODERATION_RETENTION_DAYS = _env_optional_int("MODERATION_RETENTION_DAYS")
         self.STUDIO_USERS_FILE = (
             _env("STUDIO_USERS_FILE", self.STUDIO_USERS_FILE) or self.STUDIO_USERS_FILE
@@ -268,6 +276,10 @@ class ProductionConfig(BaseConfig):
             raise ConfigError("STUDIO_NTFY_TOPIC is required for ntfy approval")
         if not self.STUDIO_NTFY_SERVER.startswith("https://"):
             raise ConfigError("STUDIO_NTFY_SERVER must use HTTPS")
+        if self.IMAGE_MODERATION_BACKEND not in (None, "none", "local"):
+            raise ConfigError("IMAGE_MODERATION_BACKEND must be 'local' or 'none'")
+        if not 0.1 <= self.IMAGE_MODERATION_THRESHOLD <= 0.95:
+            raise ConfigError("IMAGE_MODERATION_THRESHOLD must be between 0.1 and 0.95")
         if self.MODERATION_RETENTION_DAYS not in {None, 0, 15}:
             raise ConfigError("MODERATION_RETENTION_DAYS must be 0 or 15")
 

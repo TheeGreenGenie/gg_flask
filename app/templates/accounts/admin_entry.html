@@ -1,0 +1,12 @@
+{% extends "accounts/_base.html" %}
+{% block title %}Continue as a customer · GG Afrikan Eleganz{% endblock %}
+{% block heading %}Continue as a customer{% endblock %}
+{% block lede %}<p class="gg-page-title__lede">Your administrator identity has been verified.</p>{% endblock %}
+{% block body %}
+<form class="gg-account__card" method="post" action="{{ url_for('accounts.admin_entry') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <p>Continue as <strong>{{ admin.username }}</strong> in the ordinary storefront. This ends the private admin session and gives this browser no administrator permissions.</p>
+  <button class="gg-button gg-button--accent gg-button--block" type="submit">Continue to my customer account</button>
+  <p><a class="gg-link" href="{{ url_for('admin.dashboard') }}">Stay in administration</a></p>
+</form>
+{% endblock %}

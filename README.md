@@ -140,6 +140,12 @@ against analytics and backlink exports before launch.
 | `LOCAL_SHIPPING_CENTS` | Philadelphia ZIPs (191xx, 19019, 19092, 19093, 19099) always get this rate. |
 | `TAX_BACKEND=stripe` (+ `STRIPE_SECRET_KEY`) | Stripe Tax calculates tax at checkout for Stripe and PayPal orders, records a tax transaction after payment and reverses it on refund. If Stripe Tax is unreachable the order is refused rather than charged the wrong tax. |
 | `MAIL_BACKEND=smtp`, `SMTP_HOST/PORT/USERNAME/PASSWORD`, `SMTP_SECURITY`, `MAIL_FROM` | Password-reset, order and Studio-summary emails through any provider's SMTP relay (Postmark, Amazon SES, SendGrid, Google Workspace…). Always encrypted (STARTTLS on 587 or SSL on 465); production refuses `console`/`memory`. A failed send is logged without the message or address. Verify the sending domain with the provider (SPF/DKIM/DMARC DNS records) or mail lands in spam. |
+
+After adding SMTP settings, verify real delivery before launch:
+
+```powershell
+flask --app wsgi mail test you@example.com
+```
 | `GA4_MEASUREMENT_ID=G-…` | Google Analytics 4 with a consent banner. Nothing is sent to Google until a visitor clicks Accept; Global Privacy Control counts as Decline. Reports `view_item`, `add_to_cart`, `begin_checkout`, `purchase`. |
 
 ## Media library

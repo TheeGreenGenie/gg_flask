@@ -49,7 +49,7 @@ SCOPED: dict[StudioRole, frozenset[str]] = {
             "studio.product_visibility",
         }
     ),
-    # Selling: prices, sales, and answering customers' reviews and questions.
+    # Selling: prices, sales, and answering customer reviews, comments, and questions.
     StudioRole.SALES: frozenset(
         {
             "studio.prices",

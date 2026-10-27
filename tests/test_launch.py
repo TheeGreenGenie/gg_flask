@@ -39,7 +39,9 @@ def test_mailchimp_signup_uses_double_opt_in(shop, catalog_app: Flask) -> None:
     }
 
 
-def test_apple_pay_verification_is_fail_closed(shop, catalog_app: Flask, tmp_path: Path) -> None:
+def test_apple_pay_verification_is_fail_closed(
+    shop, catalog_app: Flask, tmp_path: Path
+) -> None:
     path = "/.well-known/apple-developer-merchantid-domain-association"
     assert shop.get(path).status_code == 404
     association = tmp_path / "apple-pay.txt"
@@ -47,3 +49,27 @@ def test_apple_pay_verification_is_fail_closed(shop, catalog_app: Flask, tmp_pat
     catalog_app.config["APPLE_PAY_DOMAIN_ASSOCIATION"] = str(association)
     response = shop.get(path)
     assert response.status_code == 200 and response.data == b"verified"
+
+
+def test_launch_check_reports_blockers(app: Flask) -> None:
+    result = app.test_cli_runner().invoke(args=["launch", "check"])
+
+    assert result.exit_code != 0
+    assert "FAIL" in result.output
+    assert "payments" in result.output
+    assert "MANUAL policies" in result.output
+
+
+def test_launch_check_passes_automated_configuration(app: Flask) -> None:
+    runner = app.test_cli_runner()
+    assert runner.invoke(args=["db", "stamp", "head"]).exit_code == 0
+    app.config.update(
+        STRIPE_SECRET_KEY="sk_test_example",  # noqa: S106 - fake provider test value
+        STRIPE_WEBHOOK_SECRET="whsec_example",  # noqa: S106 - fake provider test value
+    )
+
+    result = runner.invoke(args=["launch", "check"])
+
+    assert result.exit_code == 0, result.output
+    assert "PASS   migrations" in result.output
+    assert "Automated checks passed" in result.output

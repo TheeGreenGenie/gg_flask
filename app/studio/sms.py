@@ -84,6 +84,11 @@ def send_code(record: StudioLoginRequest, force: bool = False) -> None:
     db.session.commit()
     message = f"GG Afrikan Eleganz Studio sign-in code: {code}. It expires in 5 minutes."
     if backend == "console":
+        # Local/testing only; production rejects this backend. The outbox makes automated
+        # verification independent of global console-log handler ordering.
+        current_app.extensions.setdefault("sms_outbox", []).append(
+            {"username": user.username, "code": code}
+        )
         log.warning("studio_sms_code user=%s code=%s (console backend)", user.username, code)
         return
     _send_twilio(user.sms_phone, message)

@@ -17,6 +17,8 @@ from app.accounts.models import (
     StoredPaymentMethod,
     User,
 )
+from app.admin import service as admin_service
+from app.admin.models import AdminRole, AdminUser
 from app.catalog.models import utcnow
 from app.extensions import db
 from app.orders.models import Order, OrderStatus, PaymentProvider, PaymentStatus
@@ -33,6 +35,7 @@ def register(client: FlaskClient, **overrides: str):  # type: ignore[no-untyped-
         "password": PASSWORD,
     }
     data.update(overrides)
+    data.setdefault("username", data["email"].split("@", 1)[0].lower())
     return client.post("/account/register", data=data)
 
 
@@ -115,11 +118,70 @@ def test_login_is_generic_and_rotates_session(shop: FlaskClient, catalog_app: Fl
     )
     unknown = shop.post("/account/login", data={"email": "who@example.com", "password": PASSWORD})
     for resp in (wrong, unknown):
-        assert "Email or password is incorrect." in resp.get_data(as_text=True)
+        assert "Username/email or password is incorrect." in resp.get_data(as_text=True)
     ok = shop.post("/account/login", data={"email": "ADA@example.com", "password": PASSWORD})
     assert ok.status_code == 302
     with shop.session_transaction() as s:
         assert "planted" not in s and s["uid"]
+
+
+def test_customer_can_sign_in_with_username(shop: FlaskClient) -> None:
+    register(shop, username="fabric.friend")
+    shop.post("/account/logout")
+
+    response = shop.post(
+        "/account/login",
+        data={"identity": "FABRIC.FRIEND", "password": PASSWORD},
+        follow_redirects=True,
+    )
+
+    assert response.status_code == 200
+    assert "Signed in as fabric.friend" in response.get_data(as_text=True)
+
+
+def test_username_is_unique_across_customers_and_admins(
+    shop: FlaskClient, catalog_app: Flask
+) -> None:
+    register(shop, username="fabric.friend")
+    shop.post("/account/logout")
+    duplicate = register(shop, username="FABRIC.FRIEND", email="other@example.com")
+    assert "username is already in use" in duplicate.get_data(as_text=True)
+
+    with catalog_app.test_request_context("/"):
+        admin_service.create_admin(
+            "store-owner", "owner@example.com", "Long unique phrase 482!", AdminRole.OWNER
+        )
+    reserved = register(shop, username="store-owner", email="third@example.com")
+    assert "username is already in use" in reserved.get_data(as_text=True)
+
+
+def test_admin_can_enter_storefront_only_after_totp(
+    catalog_app: Flask,
+) -> None:
+    with catalog_app.test_request_context("/"):
+        admin, _ = admin_service.create_admin(
+            "store-owner", "owner@example.com", "Long unique phrase 482!", AdminRole.OWNER
+        )
+        secret = admin.totp_secret
+    client = catalog_app.test_client()
+
+    password = client.post(
+        "/account/login",
+        data={"identity": "store-owner", "password": "Long unique phrase 482!"},
+    )
+    assert password.status_code == 302 and password.headers["Location"].endswith("/admin/verify")
+    verified = client.post("/admin/verify", data={"code": admin_service.totp(secret)})
+    assert verified.status_code == 302
+    assert verified.headers["Location"].endswith("/account/admin-entry")
+    confirmation = client.get(verified.headers["Location"])
+    assert b"gives this browser no administrator permissions" in confirmation.data
+    entered = client.post("/account/admin-entry", follow_redirects=True)
+    assert entered.status_code == 200 and b"Signed in as store-owner" in entered.data
+    with client.session_transaction() as browser_session:
+        assert "uid" in browser_session and "admin_id" not in browser_session
+    with catalog_app.app_context():
+        admin = db.session.scalar(select(AdminUser).where(AdminUser.username == "store-owner"))
+        assert admin is not None and admin.customer_user_id is not None
 
 
 def test_logout_ends_session(shop: FlaskClient) -> None:
@@ -189,7 +251,10 @@ def test_preferences_append_to_consent_log(shop: FlaskClient, catalog_app: Flask
 
 def test_changing_phone_withdraws_sms_consent(shop: FlaskClient, catalog_app: Flask) -> None:
     register(shop, sms_opt_in="1")
-    shop.post("/account/details", data={"first_name": "Ada", "phone": "+44 20 7946 0958"})
+    shop.post(
+        "/account/details",
+        data={"username": "ada", "first_name": "Ada", "phone": "+44 20 7946 0958"},
+    )
     with catalog_app.app_context():
         u = user(catalog_app)
         assert u.phone == "+442079460958"

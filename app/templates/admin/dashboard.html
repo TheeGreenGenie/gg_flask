@@ -6,5 +6,6 @@
   <section><h2>Catalog</h2><p>Edit products, categories, prices, inventory, and safely processed images.</p>{% if admin.role.value in ('owner', 'catalog') %}<a class="gg-link" href="{{ url_for('admin.catalog') }}">Open catalog administration</a>{% endif %}</section>
   <section><h2>Orders</h2><p>Review payments, progress fulfilment, add private notes, and print documents.</p>{% if admin.role.value in ('owner', 'support') %}<a class="gg-link" href="{{ url_for('admin.orders') }}">Open orders</a>{% endif %}</section>
   <section><h2>Security</h2><p>Two-factor authentication is active. Sessions expire after 30 minutes idle or eight hours total.</p></section>
+  <section><h2>Customer view</h2><p>Use your administrator identity as an ordinary customer account. This ends the current admin session and grants no admin permissions.</p><a class="gg-link" href="{{ url_for('accounts.admin_entry') }}">Continue to the storefront</a></section>
 </div>
 {% endblock %}

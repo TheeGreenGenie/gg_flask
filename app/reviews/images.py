@@ -1,4 +1,4 @@
-"""Customer photos on reviews and questions, checked for nudity on our own server.
+"""Customer photos on reviews, comments, and questions, checked on our own server.
 
 Owner, 2026-10-27: the check runs privately (photos never leave the server) and an inappropriate
 photo removes the whole post. The open-source NudeNet detector (bundled ONNX model, CPU only) is

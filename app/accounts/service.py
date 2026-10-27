@@ -55,6 +55,7 @@ _DUMMY_HASH = _hasher.hash(secrets.token_urlsafe(16))
 
 EMAIL_RE = re.compile(r"^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$")
 POSTCODE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 -]{1,22}[A-Za-z0-9]$")
+USERNAME_RE = re.compile(r"^[a-z][a-z0-9._-]{2,63}$")
 
 
 class AccountError(ValueError):
@@ -73,6 +74,16 @@ def normalize_email(raw: str) -> str:
     if len(email) > 254 or not EMAIL_RE.match(email):
         raise AccountError("Please enter a valid email address.")
     return email
+
+
+def normalize_username(raw: str) -> str:
+    username = (raw or "").strip().lower()
+    if not USERNAME_RE.fullmatch(username):
+        raise AccountError(
+            "Username must be 3 to 64 characters: lowercase letters, numbers, dots, "
+            "dashes or underscores, beginning with a letter."
+        )
+    return username
 
 
 def normalize_phone(raw: str) -> str | None:
@@ -140,6 +151,7 @@ def set_consent(user: User, channel: Channel, granted: bool, source: str) -> Non
 
 @dataclass
 class Registration:
+    username: str
     email: str
     password: str
     first_name: str = ""
@@ -150,6 +162,7 @@ class Registration:
 
 def register(data: Registration) -> User:
     _limit("register", ratelimit.client_key(), 10, 3600)
+    username = normalize_username(data.username)
     email = normalize_email(data.email)
     check_password(data.password, email)
     phone = normalize_phone(data.phone)
@@ -159,7 +172,16 @@ def register(data: Registration) -> User:
         raise AccountError(
             "An account with this email already exists. Log in, or reset your password."
         )
+    from app.admin.models import AdminUser
+
+    customer_taken = db.session.scalar(select(User.id).where(User.username == username))
+    admin_taken = db.session.scalar(select(AdminUser.id).where(AdminUser.username == username))
+    if customer_taken is not None or admin_taken is not None:
+        raise AccountError("That username is already in use. Choose another one.")
+    if db.session.scalar(select(AdminUser.id).where(AdminUser.email == email)) is not None:
+        raise AccountError("An administrator already uses this email address.")
     user = User(
+        username=username,
         email=email,
         password_hash=_hasher.hash(data.password),
         first_name=(data.first_name or "").strip()[:80],
@@ -174,15 +196,22 @@ def register(data: Registration) -> User:
     return user
 
 
-def authenticate(email_raw: str, password: str) -> User:
-    generic = AccountError("Email or password is incorrect.")
+def authenticate(identity_raw: str, password: str) -> User:
+    generic = AccountError("Username/email or password is incorrect.")
     _limit("login-ip", ratelimit.client_key(), 20, 900)
     try:
-        email = normalize_email(email_raw)
+        identity = (
+            normalize_email(identity_raw)
+            if "@" in identity_raw
+            else normalize_username(identity_raw)
+        )
     except AccountError:
         raise generic from None
-    _limit("login-email", email, 10, 900)
-    user = db.session.scalar(select(User).where(User.email == email))
+    _limit("login-identity", identity, 10, 900)
+    field = User.email if "@" in identity else User.username
+    user = db.session.scalar(select(User).where(field == identity))
+    if user is not None and _linked_admin(user) is not None:
+        user = None  # linked administrators must complete private-admin 2FA
     try:
         _hasher.verify(user.password_hash if user else _DUMMY_HASH, password[:MAX_PASSWORD])
     except (VerificationError, InvalidHashError):
@@ -231,10 +260,26 @@ def current_user() -> User | None:
 # ---------- profile ----------
 
 
-def update_profile(user: User, first_name: str, phone_raw: str) -> list[str]:
+def update_profile(
+    user: User, username_raw: str, first_name: str, phone_raw: str
+) -> list[str]:
     """Update name/phone. Returns notices (e.g. text consent withdrawn by a number change)."""
     notices: list[str] = []
+    username = normalize_username(username_raw)
     phone = normalize_phone(phone_raw)
+    linked_admin = _linked_admin(user)
+    if linked_admin is not None and username != user.username:
+        raise AccountError("Administrator usernames are managed in the private admin account.")
+    if username != user.username:
+        from app.admin.models import AdminUser
+
+        conflict = db.session.scalar(select(User.id).where(User.username == username))
+        admin_conflict = db.session.scalar(
+            select(AdminUser.id).where(AdminUser.username == username)
+        )
+        if conflict is not None or admin_conflict is not None:
+            raise AccountError("That username is already in use. Choose another one.")
+        user.username = username
     user.first_name = (first_name or "").strip()[:80]
     if phone != user.phone:
         if user.consented(Channel.SMS):
@@ -250,6 +295,8 @@ def update_profile(user: User, first_name: str, phone_raw: str) -> list[str]:
 
 
 def change_password(user: User, current: str, new: str) -> None:
+    if _linked_admin(user) is not None:
+        raise AccountError("Change this password from the private admin area.")
     try:
         _hasher.verify(user.password_hash, current[:MAX_PASSWORD])
     except (VerificationError, InvalidHashError):
@@ -262,6 +309,8 @@ def change_password(user: User, current: str, new: str) -> None:
 
 
 def delete_account(user: User, password: str) -> None:
+    if _linked_admin(user) is not None:
+        raise AccountError("Administrator storefront accounts cannot be deleted here.")
     try:
         _hasher.verify(user.password_hash, password[:MAX_PASSWORD])
     except (VerificationError, InvalidHashError):
@@ -273,6 +322,46 @@ def delete_account(user: User, password: str) -> None:
     db.session.delete(user)  # consents cascade with it
     db.session.commit()
     logout()
+
+
+def _linked_admin(user: User) -> object | None:
+    from app.admin.models import AdminUser
+
+    return db.session.scalar(select(AdminUser).where(AdminUser.customer_user_id == user.id))
+
+
+def is_admin_linked(user: User) -> bool:
+    return _linked_admin(user) is not None
+
+
+def customer_for_admin(admin: object) -> User:
+    """Return/create the non-privileged storefront identity behind a 2FA admin login."""
+    from app.admin.models import AdminUser
+
+    if not isinstance(admin, AdminUser):
+        raise AccountError("Administrator account not found.")
+    if admin.customer_user_id:
+        user = db.session.get(User, admin.customer_user_id)
+        if user is not None:
+            return user
+    username_taken = db.session.scalar(select(User.id).where(User.username == admin.username))
+    email_taken = db.session.scalar(select(User.id).where(User.email == admin.email))
+    if username_taken is not None or email_taken is not None:
+        raise AccountError(
+            "A customer account already uses this administrator username or email. "
+            "Resolve the duplicate before linking accounts."
+        )
+    user = User(
+        username=admin.username,
+        email=admin.email,
+        password_hash=_hasher.hash(secrets.token_urlsafe(32)),
+        first_name=admin.username,
+    )
+    db.session.add(user)
+    db.session.flush()
+    admin.customer_user_id = user.id
+    db.session.commit()
+    return user
 
 
 # ---------- address book ----------
@@ -359,7 +448,7 @@ def start_reset(email_raw: str) -> None:
         return
     _limit("reset-email", email, 3, 3600)
     user = db.session.scalar(select(User).where(User.email == email))
-    if user is None:
+    if user is None or _linked_admin(user) is not None:
         return
     token = secrets.token_urlsafe(32)
     db.session.add(
@@ -400,6 +489,8 @@ def complete_reset(token: str, new_password: str) -> User:
     if reset is None:
         raise AccountError("This reset link has expired or was already used. Request a new one.")
     user = reset.user
+    if _linked_admin(user) is not None:
+        raise AccountError("Administrator passwords are reset from the private admin area.")
     check_password(new_password, user.email)
     user.password_hash = _hasher.hash(new_password)
     user.session_version += 1

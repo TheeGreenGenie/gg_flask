@@ -92,10 +92,22 @@ Then add provider values as you get them (Stripe/PayPal sandbox, Shippo, Stripe 
 ntfy, GA4). Put quotes around values with spaces, e.g.
 `MAIL_FROM="GG Afrikan Eleganz <orders@ggafrikaneleganz.com>"`. Never put this file in git.
 
+After configuring SMTP, send a real delivery test (including a spam-folder check):
+
+```bash
+sudo -u ggflask sh -c 'set -a; . /etc/gg-flask/env; set +a; .venv/bin/flask --app wsgi mail test YOU@EXAMPLE.COM'
+```
+
 Apply migrations (safe to repeat; also brings a restored dump up to date):
 
 ```bash
 cd /srv/gg_flask && sudo -u ggflask sh -c 'set -a; . /etc/gg-flask/env; set +a; .venv/bin/flask --app wsgi db upgrade'
+```
+
+Run the read-only launch preflight. Resolve every `FAIL`, then complete every `MANUAL` item:
+
+```bash
+sudo -u ggflask sh -c 'set -a; . /etc/gg-flask/env; set +a; .venv/bin/flask --app wsgi launch check'
 ```
 
 ## 5. Photos and media

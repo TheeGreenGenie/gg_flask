@@ -10,13 +10,14 @@ from app.accounts.models import User
 from app.catalog.models import Product, utcnow
 from app.extensions import db
 from app.reviews import service as reviews
-from app.reviews.models import ModerationRemoval, PostStatus, ProductPost
+from app.reviews.models import ModerationRemoval, PostKind, PostStatus, ProductPost
 from app.studio import service as studio
 from app.studio.models import StudioAudit
 
 
 def _customer(email: str = "reader@example.com") -> User:
     user = User(
+        username=email.split("@", 1)[0],
         email=email,
         password_hash="not-used-in-service-tests",  # noqa: S106 - no login in service tests
         first_name="Reader",
@@ -155,6 +156,9 @@ def test_support_can_reply_and_override_relevance(catalog_app: Flask) -> None:
         assert post.status == PostStatus.VISIBLE
         assert post.staff_relevance_override is True
         assert reply.body.startswith("Thanks")
+        notice = catalog_app.extensions["outbox"][-1]
+        assert notice.to == "reader@example.com"
+        assert "replied to your review" in notice.subject
         assert db.session.scalar(
             select(StudioAudit).where(StudioAudit.action == "studio.community.replied")
         )
@@ -181,4 +185,55 @@ def test_posting_rules_and_privacy_disclose_moderation(client) -> None:
     assert rules.status_code == 200
     assert b"Positive and negative opinions are treated the same" in rules.data
     assert privacy.status_code == 200
-    assert b"Reviews, questions, and moderation" in privacy.data
+    assert b"Reviews, comments, and moderation" in privacy.data
+    assert b"reviews, comments, and questions" in privacy.data
+
+
+@pytest.mark.parametrize(
+    ("kind", "rating", "success"),
+    [
+        ("review", "5", "Your review was posted."),
+        ("comment", "", "Your comment was posted."),
+        ("question", "", "Your question was posted."),
+    ],
+)
+def test_signed_in_customer_can_post_each_kind_through_storefront(
+    catalog_app: Flask, kind: str, rating: str, success: str
+) -> None:
+    with catalog_app.app_context():
+        customer = _customer(f"{kind}@example.com")
+        product = _product()
+        user_id, session_version, slug = customer.id, customer.session_version, product.slug
+        catalog_app.config["ORDER_NOTIFICATION_EMAIL"] = "owner@example.com"
+    client = catalog_app.test_client()
+    with client.session_transaction() as session:
+        session["uid"] = user_id
+        session["sv"] = session_version
+
+    response = client.post(
+        f"/products/{slug}/posts",
+        data={
+            "kind": kind,
+            "rating": rating,
+            "title": f"Helpful {kind}",
+            "body": "This fabric color and quality information is helpful.",
+        },
+        follow_redirects=True,
+    )
+
+    assert response.status_code == 200
+    assert success in response.get_data(as_text=True)
+    with catalog_app.app_context():
+        post = db.session.scalar(select(ProductPost).where(ProductPost.user_id == user_id))
+        assert post is not None and post.kind == PostKind(kind)
+        assert post.rating == (5 if kind == "review" else None)
+        notice = catalog_app.extensions["outbox"][-1]
+        assert notice.to == "owner@example.com" and f"product {kind}" in notice.subject
+
+
+def test_post_requires_sign_in(catalog_app: Flask) -> None:
+    with catalog_app.app_context():
+        slug = _product().slug
+    response = catalog_app.test_client().post(f"/products/{slug}/posts", data=_form())
+    assert response.status_code == 302
+    assert response.headers["Location"].startswith("/account/login")

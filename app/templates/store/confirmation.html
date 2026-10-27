@@ -6,7 +6,7 @@
   <p>Order <strong>{{ order.public_id }}</strong></p>
   {% if order.payment_status.value == 'paid' %}
     <div hidden data-gg-analytics-event='{{ {"name": "purchase", "once": order.public_id, "params": {"transaction_id": order.public_id, "currency": "USD", "value": order.total_cents / 100, "tax": order.tax_cents / 100, "shipping": order.shipping_cents / 100, "coupon": order.coupon_code or "", "items": order.lines|map(attribute="sku")|map("string")|list}}|tojson|forceescape }}'></div>
-    <p>Your payment of <strong>{{ order.total_cents|money }}</strong> was received. A confirmation was sent to {{ order.email }}.</p>
+    <p>Your payment of <strong>{{ order.total_cents|money }}</strong> was received. We will send order details to {{ order.email }}.</p>
   {% else %}
     <p>Your payment is still being confirmed. Refresh this page in a moment.</p>
   {% endif %}

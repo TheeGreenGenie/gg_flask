@@ -20,6 +20,7 @@ from flask import current_app, g, has_request_context, request, session
 from sqlalchemy import select
 
 from app import ratelimit
+from app.accounts.models import User
 from app.accounts.service import MAX_PASSWORD, AccountError, check_password, normalize_email
 from app.admin.models import AdminAudit, AdminRecoveryCode, AdminRole, AdminUser
 from app.catalog.models import utcnow
@@ -104,8 +105,12 @@ def create_admin(
     _check_admin_password(password, email)
     if db.session.scalar(select(AdminUser.id).where(AdminUser.username == username)) is not None:
         raise AdminError("An administrator with that username already exists.")
+    if db.session.scalar(select(User.id).where(User.username == username)) is not None:
+        raise AdminError("A customer account with that username already exists.")
     if db.session.scalar(select(AdminUser.id).where(AdminUser.email == email)) is not None:
         raise AdminError("An administrator with that email already exists.")
+    if db.session.scalar(select(User.id).where(User.email == email)) is not None:
+        raise AdminError("A customer account with that email already exists.")
     admin = AdminUser(
         username=username,
         email=email,

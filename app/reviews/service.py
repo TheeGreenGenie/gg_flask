@@ -7,11 +7,11 @@ import re
 import unicodedata
 from datetime import timedelta
 
-from flask import current_app, request
+from flask import current_app, request, url_for
 from sqlalchemy import func, select
 from werkzeug.datastructures import FileStorage
 
-from app import ratelimit
+from app import mail, ratelimit
 from app.accounts.models import User
 from app.catalog.models import Product, Variant, utcnow
 from app.extensions import db
@@ -224,7 +224,7 @@ def create_post(
     try:
         kind = PostKind(form.get("kind", ""))
     except ValueError:
-        raise ReviewError("Choose review or question.") from None
+        raise ReviewError("Choose review, comment, or question.") from None
     title = form.get("title", "").strip()
     body = form.get("body", "").strip()
     if not 2 <= len(title) <= 160:
@@ -232,7 +232,7 @@ def create_post(
     if not 10 <= len(body) <= 3000:
         raise ReviewError("Post must be between 10 and 3,000 characters.")
     if LINK_RE.search(title + " " + body):
-        raise ReviewError("Links are not allowed in reviews or questions.")
+        raise ReviewError("Links are not allowed in reviews, comments, or questions.")
     duplicate = db.session.scalar(
         select(ProductPost.id).where(
             ProductPost.user_id == user.id,
@@ -303,7 +303,22 @@ def create_post(
     db.session.commit()
     if removed:
         raise ReviewError("Your post was removed because it broke the posting rules.")
+    _notify_owner(post, product)
     return post
+
+
+def _notify_owner(post: ProductPost, product: Product) -> None:
+    """Best-effort notice; a mail outage must not undo a customer's saved post."""
+    recipient = current_app.config.get("ORDER_NOTIFICATION_EMAIL")
+    if not recipient:
+        return
+    link = url_for("store.product", slug=product.slug, _external=True) + "#reviews"
+    mail.send(
+        recipient,
+        f"New product {post.kind.value}: {product.name}",
+        f"A customer posted a {post.kind.value} on {product.name}.\n\n"
+        f"Title: {post.title}\nStatus: {post.status.value}\n\nView: {link}\n",
+    )
 
 
 def public_posts(product: Product) -> list[ProductPost]:

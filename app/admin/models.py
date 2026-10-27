@@ -4,12 +4,16 @@ from __future__ import annotations
 
 import enum
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.catalog.models import utcnow
 from app.extensions import db
+
+if TYPE_CHECKING:
+    from app.accounts.models import User
 
 
 class AdminRole(enum.StrEnum):
@@ -22,6 +26,9 @@ class AdminUser(db.Model):  # type: ignore[name-defined]
     __tablename__ = "admin_users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    customer_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), unique=True
+    )
     username: Mapped[str] = mapped_column(String(64), unique=True, index=True)
     email: Mapped[str] = mapped_column(String(254), unique=True)
     password_hash: Mapped[str] = mapped_column(String(255))
@@ -37,6 +44,7 @@ class AdminUser(db.Model):  # type: ignore[name-defined]
     recovery_codes: Mapped[list[AdminRecoveryCode]] = relationship(
         back_populates="admin", cascade="all, delete-orphan"
     )
+    customer_user: Mapped[User | None] = relationship("User")
 
 
 class AdminRecoveryCode(db.Model):  # type: ignore[name-defined]

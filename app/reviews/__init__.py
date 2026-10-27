@@ -1,4 +1,4 @@
-"""Storefront review/question routes and maintenance commands."""
+"""Storefront review, comment, and question routes and maintenance commands."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ def create(slug: str) -> Response:
         return redirect(url_for("store.shop"))
     user = account_service.current_user()
     if user is None:
-        flash("Sign in before posting a review or question.", "error")
+        flash("Sign in before posting a review, comment, or question.", "error")
         return redirect(url_for("accounts.login", next=url_for("store.product", slug=slug)))
     try:
         post = service.create_post(
@@ -29,12 +29,7 @@ def create(slug: str) -> Response:
     except service.ReviewError as exc:
         flash(str(exc), "error")
     else:
-        flash(
-            "Your review was posted."
-            if post.kind.value == "review"
-            else "Your question was posted.",
-            "success",
-        )
+        flash(f"Your {post.kind.value} was posted.", "success")
     return redirect(url_for("store.product", slug=slug) + "#reviews")
 
 

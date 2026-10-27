@@ -14,6 +14,7 @@ from app.extensions import db
 
 class PostKind(enum.StrEnum):
     REVIEW = "review"
+    COMMENT = "comment"
     QUESTION = "question"
 
 

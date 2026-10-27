@@ -1,7 +1,7 @@
 {% extends "accounts/_base.html" %}
 {% block title %}My account · GG Afrikan Eleganz{% endblock %}
 {% block heading %}Hello{% if user.first_name %}, {{ user.first_name }}{% endif %}{% endblock %}
-{% block lede %}<p class="gg-page-title__lede">Signed in as {{ user.email }}.</p>{% endblock %}
+{% block lede %}<p class="gg-page-title__lede">Signed in as {{ user.username }} · {{ user.email }}.</p>{% endblock %}
 {% block body %}
 <div class="gg-account__grid">
   <nav class="gg-account__nav" aria-label="Account sections">
@@ -12,7 +12,7 @@
     <a href="{{ url_for('accounts.payment_methods') }}">Payment methods</a>
     <a href="{{ url_for('wishlist.page') }}">Wishlist ({{ wishlist_count }})</a>
     <a href="#password">Password</a>
-    <a href="#delete">Delete account</a>
+    {% if not admin_linked %}<a href="#delete">Delete account</a>{% endif %}
     <form method="post" action="{{ url_for('accounts.logout') }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <button type="submit" class="gg-button gg-button--outline gg-button--block">Sign out</button>
@@ -25,6 +25,11 @@
       <form method="post" action="{{ url_for('accounts.details') }}" novalidate>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="gg-fields">
+          <div class="gg-field">
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" autocomplete="username" required minlength="3" maxlength="64" pattern="[a-z][a-z0-9._-]{2,63}" value="{{ user.username }}"{% if admin_linked %} readonly aria-describedby="admin-username-hint"{% endif %}>
+            {% if admin_linked %}<p class="gg-field__hint" id="admin-username-hint">This username is managed by your private administrator account.</p>{% endif %}
+          </div>
           <div class="gg-field">
             <label for="first_name">First name</label>
             <input id="first_name" name="first_name" type="text" autocomplete="given-name" maxlength="80" value="{{ user.first_name }}">
@@ -56,6 +61,9 @@
 
     <section class="gg-account__card" id="password" aria-labelledby="pw-title">
       <h2 id="pw-title">Password</h2>
+      {% if admin_linked %}
+      <p>Your storefront access uses the private administrator password and authenticator. Change that password from the private admin area.</p>
+      {% else %}
       <form method="post" action="{{ url_for('accounts.password') }}" novalidate>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="gg-fields">
@@ -71,8 +79,10 @@
         <p class="gg-field__hint">Changing your password signs you out on every other device.</p>
         <button class="gg-button gg-button--dark" type="submit">Change password</button>
       </form>
+      {% endif %}
     </section>
 
+    {% if not admin_linked %}
     <section class="gg-account__card gg-account__card--danger" id="delete" aria-labelledby="del-title">
       <h2 id="del-title">Delete account</h2>
       <p>This permanently deletes your account, contact details, message preferences and saved wishlist. It can't be undone.</p>
@@ -91,6 +101,7 @@
         <button class="gg-button gg-button--outline gg-account__delete" type="submit">Delete my account</button>
       </form>
     </section>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

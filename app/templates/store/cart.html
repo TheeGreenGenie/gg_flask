@@ -68,7 +68,7 @@
         <div><dt>Shipping</dt><dd>Calculated at checkout</dd></div>
         <div class="gg-summary__total"><dt>Estimated total</dt><dd>{{ cart.subtotal_cents|money }}</dd></div>
       </dl>
-      <p class="gg-summary__note">Taxes and shipping are calculated at checkout. Coupons can be applied at checkout once they launch.</p>
+      <p class="gg-summary__note">Taxes and shipping are calculated at checkout. Coupons can be applied at checkout.</p>
       {% if cart.has_problems %}
         <p class="gg-summary__warning" role="alert">Please fix the highlighted items before checking out.</p>
       {% endif %}

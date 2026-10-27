@@ -26,6 +26,7 @@ class User(db.Model):  # type: ignore[name-defined]
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    username: Mapped[str] = mapped_column(String(64), unique=True, index=True)
     email: Mapped[str] = mapped_column(String(254), unique=True)  # stored lower-cased
     password_hash: Mapped[str] = mapped_column(String(255))
     first_name: Mapped[str] = mapped_column(String(80), default="")

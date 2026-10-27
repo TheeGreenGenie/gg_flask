@@ -19,6 +19,7 @@ from sqlalchemy import func, or_, select
 from werkzeug.datastructures import FileStorage
 
 from app import cache, mail, ratelimit
+from app.accounts.models import User
 from app.accounts.service import MAX_PASSWORD, check_password
 from app.catalog import images as image_service
 from app.catalog import units
@@ -1163,6 +1164,14 @@ def reply_to_post(user: StudioUser, post: ProductPost, body_raw: str) -> Product
     db.session.add(reply)
     audit(user, "studio.community.replied", "product_post", str(post.id))
     db.session.commit()
+    customer = db.session.get(User, post.user_id) if post.user_id else None
+    if customer:
+        mail.send(
+            customer.email,
+            f"GG Afrikan Eleganz replied to your {post.kind.value}",
+            f"We replied to your {post.kind.value} on {post.product.name}.\n\n"
+            f"Our reply:\n{body}\n",
+        )
     return reply
 
 

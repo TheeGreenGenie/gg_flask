@@ -22,7 +22,8 @@ from dataclasses import dataclass
 from email.message import EmailMessage
 from email.utils import formatdate, make_msgid, parseaddr
 
-from flask import current_app
+import click
+from flask import Flask, current_app
 
 log = logging.getLogger(__name__)
 SMTP_TIMEOUT_SECONDS = 15
@@ -103,3 +104,27 @@ def _send_smtp(msg: Message) -> bool:
         log.warning("mail_send_failed", extra={"to_domain": domain, "error": type(exc).__name__})
         return False
     return True
+
+
+def init_mail(app: Flask) -> None:
+    """Register commands that verify transactional mail without exposing message content."""
+
+    @app.cli.group("mail")
+    def mail_cli() -> None:
+        """Transactional email diagnostics."""
+
+    @mail_cli.command("test")
+    @click.argument("recipient")
+    def test_mail(recipient: str) -> None:
+        """Send one harmless delivery test to RECIPIENT."""
+        if not available():
+            raise click.ClickException(
+                "Email is not configured. Set MAIL_BACKEND=smtp, SMTP_HOST, and MAIL_FROM."
+            )
+        if not send(
+            recipient,
+            "GG Afrikan Eleganz email test",
+            "Transactional email is configured and this test message was delivered.\n",
+        ):
+            raise click.ClickException("The mail provider rejected or could not deliver the test.")
+        click.echo(f"Test message accepted for delivery to {recipient}.")

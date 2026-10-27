@@ -12,6 +12,11 @@
       <input id="first_name" name="first_name" type="text" autocomplete="given-name" maxlength="80" value="{{ form.get('first_name', '') }}">
     </div>
     <div class="gg-field gg-field--wide">
+      <label for="username">Username <span class="gg-required" aria-hidden="true">*</span></label>
+      <input id="username" name="username" type="text" autocomplete="username" required minlength="3" maxlength="64" pattern="[a-z][a-z0-9._-]{2,63}" value="{{ form.get('username', '') }}" aria-describedby="username-hint">
+      <p class="gg-field__hint" id="username-hint">Lowercase letters, numbers, dots, dashes, or underscores; begin with a letter.</p>
+    </div>
+    <div class="gg-field gg-field--wide">
       <label for="email">Email address <span class="gg-required" aria-hidden="true">*</span></label>
       <input id="email" name="email" type="email" autocomplete="email" required maxlength="254" value="{{ form.get('email', '') }}">
     </div>

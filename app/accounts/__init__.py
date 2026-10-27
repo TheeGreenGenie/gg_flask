@@ -19,6 +19,7 @@ from flask import (
     redirect,
     render_template,
     request,
+    session,
     url_for,
 )
 from sqlalchemy import select
@@ -84,6 +85,7 @@ def register() -> Response | str:
         try:
             user = service.register(
                 service.Registration(
+                    username=form.get("username", ""),
                     email=form.get("email", ""),
                     password=form.get("password", ""),
                     first_name=form.get("first_name", ""),
@@ -113,17 +115,50 @@ def login() -> Response | str:
         return redirect(_safe_next(url_for("accounts.dashboard")))
     error = ""
     if request.method == "POST":
+        identity = request.form.get("identity", request.form.get("email", ""))
         try:
-            user = service.authenticate(
-                request.form.get("email", ""), request.form.get("password", "")
-            )
+            user = service.authenticate(identity, request.form.get("password", ""))
         except service.AccountError as exc:
-            error = str(exc)
+            from app.admin import service as admin_service
+
+            try:
+                admin_service.begin_login(identity, request.form.get("password", ""))
+            except admin_service.AdminError:
+                error = str(exc)
+            else:
+                session["owner_return_to"] = url_for("accounts.admin_entry")
+                session["customer_remember_after_admin"] = request.form.get("remember") == "1"
+                return redirect(url_for("admin.verify"))
         else:
             service.login(user, remember=request.form.get("remember") == "1")
             flash("You're signed in.", "success")
             return redirect(_safe_next(url_for("accounts.dashboard")))
-    return render_template("accounts/login.html", error=error, email=request.form.get("email", ""))
+    return render_template(
+        "accounts/login.html",
+        error=error,
+        identity=request.form.get("identity", request.form.get("email", "")),
+    )
+
+
+@bp.route("/admin-entry", methods=["GET", "POST"])
+def admin_entry() -> Response | str:
+    """Turn a fully verified admin session into an ordinary storefront session."""
+    from app.admin import service as admin_service
+
+    admin = admin_service.current_admin()
+    if admin is None:
+        return redirect(url_for("accounts.login"))
+    if request.method == "GET":
+        return render_template("accounts/admin_entry.html", admin=admin)
+    remember = bool(session.get("customer_remember_after_admin"))
+    try:
+        user = service.customer_for_admin(admin)
+    except service.AccountError as exc:
+        flash(str(exc), "error")
+        return redirect(url_for("admin.dashboard"))
+    service.login(user, remember=remember)
+    flash("You are now using the store as a customer.", "success")
+    return redirect(url_for("accounts.dashboard"))
 
 
 @bp.post("/logout")
@@ -143,6 +178,7 @@ def dashboard() -> str:
     return render_template(
         "accounts/dashboard.html",
         user=user,
+        admin_linked=service.is_admin_linked(user),
         email_on=user.consented(Channel.EMAIL),
         sms_on=user.consented(Channel.SMS),
         email_wording=service.EMAIL_WORDING,
@@ -155,7 +191,10 @@ def dashboard() -> str:
 def details() -> Response:
     try:
         for notice in service.update_profile(
-            _user(), request.form.get("first_name", ""), request.form.get("phone", "")
+            _user(),
+            request.form.get("username", ""),
+            request.form.get("first_name", ""),
+            request.form.get("phone", ""),
         ):
             flash(notice, "error")
         flash("Your details are saved.", "success")

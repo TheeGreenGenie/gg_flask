@@ -156,6 +156,22 @@ def test_tests_never_send_real_mail(monkeypatch: pytest.MonkeyPatch) -> None:
     assert load_config("testing").MAIL_BACKEND == "memory"
 
 
+def test_mail_test_command_sends_delivery_probe(app: Flask) -> None:
+    result = app.test_cli_runner().invoke(args=["mail", "test", "owner@example.com"])
+
+    assert result.exit_code == 0
+    assert "accepted for delivery" in result.output
+    assert app.extensions["outbox"][-1].to == "owner@example.com"
+
+
+def test_mail_test_command_fails_when_unconfigured(app: Flask) -> None:
+    app.config["MAIL_BACKEND"] = None
+    result = app.test_cli_runner().invoke(args=["mail", "test", "owner@example.com"])
+
+    assert result.exit_code != 0
+    assert "Email is not configured" in result.output
+
+
 def test_console_mail_never_crashes_on_a_non_utf8_console(
     app: Flask, monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -3,7 +3,6 @@
 # ruff: noqa: S105  (fixture password)
 from __future__ import annotations
 
-import re
 from types import SimpleNamespace
 
 import pytest
@@ -47,13 +46,13 @@ def _key_approved_request(app: Flask, client) -> str:  # type: ignore[no-untyped
         return record.request_id
 
 
-def _logged_code(caplog: pytest.LogCaptureFixture) -> str:
-    codes = re.findall(r"code=(\d{6})", caplog.text)
-    assert codes, caplog.text
-    return codes[-1]
+def _sent_code(app: Flask) -> str:
+    messages = app.extensions.get("sms_outbox", [])
+    assert messages
+    return str(messages[-1]["code"])
 
 
-def test_key_alone_is_not_enough(tgg_app: Flask, caplog: pytest.LogCaptureFixture) -> None:
+def test_key_alone_is_not_enough(tgg_app: Flask) -> None:
     client = tgg_app.test_client()
     request_id = _key_approved_request(tgg_app, client)
     step = client.get(PREFIX + f"/waiting/{request_id}")
@@ -67,13 +66,11 @@ def test_key_alone_is_not_enough(tgg_app: Flask, caplog: pytest.LogCaptureFixtur
             service.consume_approval(record)  # type: ignore[arg-type]
 
 
-def test_right_code_signs_in_wrong_codes_lock_out(
-    tgg_app: Flask, caplog: pytest.LogCaptureFixture
-) -> None:
+def test_right_code_signs_in_wrong_codes_lock_out(tgg_app: Flask) -> None:
     client = tgg_app.test_client()
     request_id = _key_approved_request(tgg_app, client)
     client.get(PREFIX + f"/verify/{request_id}")
-    code = _logged_code(caplog)
+    code = _sent_code(tgg_app)
     wrong = "000000" if code != "000000" else "111111"
     page = client.post(PREFIX + f"/verify/{request_id}", data={"code": wrong})
     assert "not right" in page.get_data(as_text=True)
@@ -86,7 +83,7 @@ def test_right_code_signs_in_wrong_codes_lock_out(
     client2.get(PREFIX + f"/verify/{other}")
     for _ in range(sms.MAX_ATTEMPTS):
         client2.post(PREFIX + f"/verify/{other}", data={"code": wrong})
-    page = client2.post(PREFIX + f"/verify/{other}", data={"code": _logged_code(caplog)})
+    page = client2.post(PREFIX + f"/verify/{other}", data={"code": _sent_code(tgg_app)})
     assert "Too many wrong codes" in page.get_data(as_text=True)
 
 
@@ -105,11 +102,11 @@ def test_no_phone_or_no_sms_service_means_no_sign_in(tgg_app: Flask) -> None:
     assert "not set up" in client.get(PREFIX + f"/verify/{request_id}").get_data(as_text=True)
 
 
-def test_codes_are_stored_hashed(tgg_app: Flask, caplog: pytest.LogCaptureFixture) -> None:
+def test_codes_are_stored_hashed(tgg_app: Flask) -> None:
     client = tgg_app.test_client()
     request_id = _key_approved_request(tgg_app, client)
     client.get(PREFIX + f"/verify/{request_id}")
-    code = _logged_code(caplog)
+    code = _sent_code(tgg_app)
     with tgg_app.app_context():
         record = db.session.scalar(select(StudioLoginRequest))
         assert record is not None and record.sms_code_hash and code not in record.sms_code_hash

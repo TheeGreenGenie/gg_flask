@@ -1,0 +1,14 @@
+{% extends "studio/_base.html" %}
+{% block title %}Enter your code · Staff Studio{% endblock %}
+{% block studio_body %}
+<section class="gg-studio__auth">
+  <p class="gg-eyebrow">Second step</p><h1>Enter the code we texted</h1>
+  <p>We sent a 6-digit code to {{ phone }}. It expires in 5 minutes.</p>
+  {% if error %}<p class="gg-form-error" role="alert">{{ error }}</p>{% endif %}
+  <form method="post" class="gg-studio__form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Code<input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,8}" maxlength="8" required autofocus></label>
+    <button class="gg-button" type="submit">Sign in</button>
+  </form>
+  <form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="gg-button gg-button--outline" name="action" value="resend" type="submit">Text me a new code</button></form>
+</section>
+{% endblock %}

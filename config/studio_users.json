@@ -1,9 +1,41 @@
 {
   "version": 1,
   "users": [
-    {"username": "mrs.adetolu", "roles": ["owner"], "self_approve": true},
-    {"username": "ms.adetolu", "roles": ["branding"], "review": true},
-    {"username": "mr.shasanmi", "roles": ["maintenance"], "review": true},
-    {"username": "mr.adetolu", "roles": ["sales"], "review": true}
+    {
+      "username": "tgg",
+      "roles": [
+        "owner"
+      ],
+      "self_approve": true,
+      "sms": true
+    },
+    {
+      "username": "mrs.adetolu",
+      "roles": [
+        "owner"
+      ],
+      "self_approve": true
+    },
+    {
+      "username": "ms.adetolu",
+      "roles": [
+        "branding"
+      ],
+      "review": true
+    },
+    {
+      "username": "mr.shasanmi",
+      "roles": [
+        "maintenance"
+      ],
+      "review": true
+    },
+    {
+      "username": "mr.adetolu",
+      "roles": [
+        "sales"
+      ],
+      "review": true
+    }
   ]
 }

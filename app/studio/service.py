@@ -117,6 +117,7 @@ def create_user(
     *,
     requires_review: bool = False,
     may_self_approve: bool = False,
+    requires_sms: bool = False,
 ) -> StudioUser:
     username = normalize_username(username_raw)
     _check_studio_password(password, username)
@@ -129,6 +130,7 @@ def create_user(
         roles=",".join(sorted(role.value for role in roles)),
         requires_review=requires_review,
         may_self_approve=may_self_approve,
+        requires_sms=requires_sms,
     )
     db.session.add(user)
     db.session.flush()
@@ -137,7 +139,12 @@ def create_user(
         "studio.user.created",
         "studio_user",
         str(user.id),
-        {"roles": user.roles, "review": requires_review, "self_approve": may_self_approve},
+        {
+            "roles": user.roles,
+            "review": requires_review,
+            "self_approve": may_self_approve,
+            "sms": requires_sms,
+        },
     )
     db.session.commit()
     return user
@@ -170,24 +177,34 @@ def configure_user(
     active: bool,
     requires_review: bool | None = None,
     may_self_approve: bool | None = None,
+    requires_sms: bool | None = None,
 ) -> bool:
     """Apply non-secret manifest fields and revoke sessions when access changes."""
     roles = ",".join(sorted(role.value for role in parse_roles(roles_raw)))
     review = user.requires_review if requires_review is None else requires_review
     self_approve = user.may_self_approve if may_self_approve is None else may_self_approve
+    sms_on = user.requires_sms if requires_sms is None else requires_sms
     before = {
         "roles": user.roles,
         "active": user.active,
         "review": user.requires_review,
         "self_approve": user.may_self_approve,
+        "sms": user.requires_sms,
     }
-    after = {"roles": roles, "active": active, "review": review, "self_approve": self_approve}
+    after = {
+        "roles": roles,
+        "active": active,
+        "review": review,
+        "self_approve": self_approve,
+        "sms": sms_on,
+    }
     if before == after:
         return False
     user.roles = roles
     user.active = active
     user.requires_review = review
     user.may_self_approve = self_approve
+    user.requires_sms = sms_on
     user.session_version += 1
     audit(
         user,
@@ -348,6 +365,8 @@ def decide(record: StudioLoginRequest, approve: bool) -> None:
 def consume_approval(record: StudioLoginRequest) -> tuple[StudioUser, str]:
     if record.status != ApprovalStatus.APPROVED or _aware(record.expires_at) <= utcnow():
         raise StudioError("This sign-in has not been approved.")
+    if record.user.requires_sms and record.sms_verified_at is None:
+        raise StudioError("Enter the code texted to your phone first.")
     record.status = ApprovalStatus.CONSUMED
     token = secrets.token_urlsafe(32)
     now = utcnow()

@@ -110,6 +110,11 @@ class BaseConfig:
     # optional nudenet package); anything else keeps photo posting switched off.
     IMAGE_MODERATION_BACKEND: str | None = None
     IMAGE_MODERATION_THRESHOLD = 0.5
+    # Texted sign-in codes for accounts with requires_sms: "twilio" (production) or "console".
+    STUDIO_SMS_BACKEND: str | None = None
+    TWILIO_ACCOUNT_SID: str | None = None
+    TWILIO_AUTH_TOKEN: str | None = None
+    TWILIO_FROM_NUMBER: str | None = None
     STUDIO_COOKIE_NAME = "gg_studio"
     # None means removed text is discarded immediately; owner must explicitly
     # choose a retention period before production moderation begins.
@@ -171,6 +176,10 @@ class BaseConfig:
         self.STUDIO_APPROVER_EMAIL = _env("STUDIO_APPROVER_EMAIL")
         self.STUDIO_RP_ID = _env("STUDIO_RP_ID")
         self.IMAGE_MODERATION_BACKEND = _env("IMAGE_MODERATION_BACKEND")
+        self.STUDIO_SMS_BACKEND = _env("STUDIO_SMS_BACKEND")
+        self.TWILIO_ACCOUNT_SID = _env("TWILIO_ACCOUNT_SID")
+        self.TWILIO_AUTH_TOKEN = _env("TWILIO_AUTH_TOKEN")
+        self.TWILIO_FROM_NUMBER = _env("TWILIO_FROM_NUMBER")
         threshold = _env("IMAGE_MODERATION_THRESHOLD")
         if threshold:
             self.IMAGE_MODERATION_THRESHOLD = float(threshold)
@@ -202,6 +211,7 @@ class DevelopmentConfig(BaseConfig):
         )
         self.REDIS_URL = self.REDIS_URL or "redis://localhost:6379/0"
         self.STUDIO_PATH = self.STUDIO_PATH or "studio-local-development-only"
+        self.STUDIO_SMS_BACKEND = self.STUDIO_SMS_BACKEND or "console"
 
 
 class TestingConfig(BaseConfig):
@@ -276,6 +286,15 @@ class ProductionConfig(BaseConfig):
             raise ConfigError("STUDIO_NTFY_TOPIC is required for ntfy approval")
         if not self.STUDIO_NTFY_SERVER.startswith("https://"):
             raise ConfigError("STUDIO_NTFY_SERVER must use HTTPS")
+        if self.STUDIO_SMS_BACKEND not in (None, "twilio"):
+            # console would write sign-in codes into the server log.
+            raise ConfigError("STUDIO_SMS_BACKEND must be 'twilio' (or unset) in production")
+        if self.STUDIO_SMS_BACKEND == "twilio" and not (
+            self.TWILIO_ACCOUNT_SID and self.TWILIO_AUTH_TOKEN and self.TWILIO_FROM_NUMBER
+        ):
+            raise ConfigError(
+                "Twilio texts need TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN and TWILIO_FROM_NUMBER"
+            )
         if self.IMAGE_MODERATION_BACKEND not in (None, "none", "local"):
             raise ConfigError("IMAGE_MODERATION_BACKEND must be 'local' or 'none'")
         if not 0.1 <= self.IMAGE_MODERATION_THRESHOLD <= 0.95:

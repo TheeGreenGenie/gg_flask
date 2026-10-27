@@ -90,6 +90,9 @@ class StudioUser(db.Model):  # type: ignore[name-defined]
     requires_review: Mapped[bool] = mapped_column(default=False, server_default=sa_false())
     # May approve their own sign-ins with a phone passkey the owner confirmed (co-owner).
     may_self_approve: Mapped[bool] = mapped_column(default=False, server_default=sa_false())
+    # Every sign-in also needs a 6-digit code texted to this number (owner, 2026-10-27: tgg).
+    requires_sms: Mapped[bool] = mapped_column(default=False, server_default=sa_false())
+    sms_phone: Mapped[str | None] = mapped_column(String(20))  # E.164, set on the server only
 
     approvals: Mapped[list[StudioLoginRequest]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
@@ -122,6 +125,12 @@ class StudioLoginRequest(db.Model):  # type: ignore[name-defined]
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Text-message step (only for users with requires_sms); the code is stored hashed.
+    sms_code_hash: Mapped[str | None] = mapped_column(String(64))
+    sms_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    sms_sends: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    sms_attempts: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    sms_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     user: Mapped[StudioUser] = relationship(back_populates="approvals")
 

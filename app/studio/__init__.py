@@ -45,7 +45,7 @@ from app.content import blog as blog_service
 from app.content.models import BlogPost, BlogRevision
 from app.extensions import db
 from app.reviews.models import ModerationWord, PostStatus, ProductPost
-from app.studio import blog_media, passkeys, permissions, review, service
+from app.studio import blog_media, passkeys, permissions, review, service, sms
 from app.studio.models import (
     ApprovalStatus,
     InventoryHistory,
@@ -54,6 +54,7 @@ from app.studio.models import (
     SaleStatus,
     StudioAudit,
     StudioChange,
+    StudioLoginRequest,
     StudioRole,
     StudioSale,
     StudioUser,
@@ -135,21 +136,9 @@ def waiting(request_id: str) -> str | Response:
     if record is None:
         abort(404)
     if record.status == ApprovalStatus.APPROVED:
-        try:
-            user, token = service.consume_approval(record)
-        except service.StudioError as exc:
-            return render_template("studio/waiting.html", record=record, error=str(exc))
-        target = "studio.password" if user.must_change_password else "studio.dashboard"
-        response = make_response(redirect(url_for(target)))
-        response.set_cookie(
-            current_app.config["STUDIO_COOKIE_NAME"],
-            token,
-            secure=bool(current_app.config["SESSION_COOKIE_SECURE"]),
-            httponly=True,
-            samesite="Strict",
-            path=url_for("studio.login"),
-        )
-        return response
+        if sms.needed(record):
+            return redirect(url_for("studio.sms_verify", request_id=record.request_id))
+        return _finish_sign_in(record)
     own_key = passkeys.can_self_approve(record.user)
     response = make_response(
         render_template("studio/waiting.html", record=record, error="", own_key=own_key)
@@ -157,6 +146,51 @@ def waiting(request_id: str) -> str | Response:
     if record.status == ApprovalStatus.PENDING and not own_key:
         response.headers["Refresh"] = "2"  # (not while a phone key prompt may be open)
     return response
+
+
+def _finish_sign_in(record: StudioLoginRequest) -> str | Response:
+    try:
+        user, token = service.consume_approval(record)
+    except service.StudioError as exc:
+        return render_template("studio/waiting.html", record=record, error=str(exc))
+    target = "studio.password" if user.must_change_password else "studio.dashboard"
+    response = make_response(redirect(url_for(target)))
+    response.set_cookie(
+        current_app.config["STUDIO_COOKIE_NAME"],
+        token,
+        secure=bool(current_app.config["SESSION_COOKIE_SECURE"]),
+        httponly=True,
+        samesite="Strict",
+        path=url_for("studio.login"),
+    )
+    return response
+
+
+@bp.route("/verify/<request_id>", methods=["GET", "POST"])
+def sms_verify(request_id: str) -> str | Response:
+    """Second step for accounts that need a texted code after approval (tgg)."""
+    record = service.find_request(request_id)
+    if record is None or record.status != ApprovalStatus.APPROVED:
+        abort(404)
+    if not sms.needed(record):
+        return _finish_sign_in(record)
+    error = ""
+    try:
+        if request.method == "POST" and request.form.get("action") == "resend":
+            sms.send_code(record, force=True)
+        elif request.method == "POST":
+            sms.verify(record, request.form.get("code", ""))
+            return _finish_sign_in(record)
+        else:
+            sms.send_code(record)
+    except sms.SmsError as exc:
+        error = str(exc)
+    return render_template(
+        "studio/sms_verify.html",
+        record=record,
+        error=error,
+        phone=sms.masked(record.user.sms_phone),
+    )
 
 
 @bp.get("/waiting/<request_id>/key-options")
@@ -1047,12 +1081,24 @@ def init_studio(app: Flask) -> None:
         is_flag=True,
         help="Allow approving their own sign-ins with a phone key the owner confirms.",
     )
+    @click.option(
+        "--sms",
+        is_flag=True,
+        help="Also require a texted code at every sign-in (set the number with set-phone).",
+    )
     @click.password_option(confirmation_prompt=True)
-    def create(username: str, roles: str, review: bool, self_approve: bool, password: str) -> None:
+    def create(
+        username: str, roles: str, review: bool, self_approve: bool, sms: bool, password: str
+    ) -> None:
         """Create a Studio user who must change the temporary password."""
         try:
             user = service.create_user(
-                username, password, roles, requires_review=review, may_self_approve=self_approve
+                username,
+                password,
+                roles,
+                requires_review=review,
+                may_self_approve=self_approve,
+                requires_sms=sms,
             )
         except (service.StudioError, ValueError) as exc:
             raise click.ClickException(str(exc)) from None
@@ -1113,12 +1159,13 @@ def init_studio(app: Flask) -> None:
             user = existing.get(entry.username)
             if user is None:
                 plan.append(("create" if entry.active else "skip-disabled", entry))
-            elif (user.roles, user.active, user.requires_review, user.may_self_approve) != (
-                entry.roles,
-                entry.active,
-                entry.review,
-                entry.self_approve,
-            ):
+            elif (
+                user.roles,
+                user.active,
+                user.requires_review,
+                user.may_self_approve,
+                user.requires_sms,
+            ) != (entry.roles, entry.active, entry.review, entry.self_approve, entry.sms):
                 plan.append(("update", entry))
         for username, user in existing.items():
             if username not in desired_names and user.active:
@@ -1128,8 +1175,10 @@ def init_studio(app: Flask) -> None:
             click.echo("No Studio user changes.")
             return
         for action, entry in plan:
-            flags = (" review" if entry.review else "") + (
-                " self-approve" if entry.self_approve else ""
+            flags = (
+                (" review" if entry.review else "")
+                + (" self-approve" if entry.self_approve else "")
+                + (" sms" if entry.sms else "")
             )
             status = "active" if entry.active else "disabled"
             click.echo(f"{action}: {entry.username} roles={entry.roles} status={status}{flags}")
@@ -1149,6 +1198,7 @@ def init_studio(app: Flask) -> None:
                     entry.roles,
                     requires_review=entry.review,
                     may_self_approve=entry.self_approve,
+                    requires_sms=entry.sms,
                 )
             elif action == "update":
                 service.configure_user(
@@ -1157,10 +1207,29 @@ def init_studio(app: Flask) -> None:
                     entry.active,
                     entry.review,
                     entry.self_approve,
+                    entry.sms,
                 )
             elif action == "disable-missing":
                 service.set_active(existing[entry.username], False)
         click.echo("Studio users synchronized. Removed entries were disabled, never deleted.")
+
+    @studio_cli.command("set-phone")
+    @click.argument("username")
+    @click.argument("phone")
+    def set_phone(username: str, phone: str) -> None:
+        """Set the number that receives sign-in codes (kept only in the database)."""
+        from app.accounts.service import AccountError, normalize_phone
+
+        user = _cli_user(username)
+        try:
+            number = normalize_phone(phone)
+        except AccountError as exc:
+            raise click.ClickException(str(exc)) from None
+        user.sms_phone = number
+        user.session_version += 1
+        service.audit(user, "studio.user.phone_set", "studio_user", str(user.id))
+        db.session.commit()
+        click.echo(f"Sign-in codes for {user.username} go to {sms.masked(number)}.")
 
     @studio_cli.command("remove-keys")
     @click.argument("username")
@@ -1227,6 +1296,7 @@ class UserEntry(NamedTuple):
     active: bool
     review: bool
     self_approve: bool
+    sms: bool = False
 
 
 def _flag_text(user: StudioUser) -> str:
@@ -1235,6 +1305,7 @@ def _flag_text(user: StudioUser) -> str:
         for label, on in (
             ("changes need owner approval", user.requires_review),
             ("may approve own sign-in with a key", user.may_self_approve),
+            ("texted code at every sign-in", user.requires_sms),
         )
         if on
     ]
@@ -1256,7 +1327,7 @@ def _read_user_manifest(path: Path) -> list[UserEntry]:
     entries: list[UserEntry] = []
     seen: set[str] = set()
     for index, item in enumerate(raw_users, start=1):
-        allowed = {"username", "roles", "active", "review", "self_approve"}
+        allowed = {"username", "roles", "active", "review", "self_approve", "sms"}
         if not isinstance(item, dict) or set(item) - allowed:
             raise click.ClickException(f"User {index} has unknown or invalid fields.")
         try:
@@ -1269,11 +1340,12 @@ def _read_user_manifest(path: Path) -> list[UserEntry]:
         active = item.get("active", True)
         review_on = item.get("review", False)
         self_approve = item.get("self_approve", False)
-        if not all(isinstance(flag, bool) for flag in (active, review_on, self_approve)):
+        sms_on = item.get("sms", False)
+        if not all(isinstance(flag, bool) for flag in (active, review_on, self_approve, sms_on)):
             raise click.ClickException(
-                f"User {index}: active, review and self_approve must be true or false."
+                f"User {index}: active, review, self_approve and sms must be true or false."
             )
         seen.add(username)
         role_values = ",".join(sorted(role.value for role in roles))
-        entries.append(UserEntry(username, role_values, active, review_on, self_approve))
+        entries.append(UserEntry(username, role_values, active, review_on, self_approve, sms_on))
     return entries

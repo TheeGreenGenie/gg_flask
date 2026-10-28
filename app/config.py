@@ -227,6 +227,7 @@ class TestingConfig(BaseConfig):
     MAIL_BACKEND = "memory"
     SESSION_COOKIE_SECURE = False
     WTF_CSRF_ENABLED = False
+    HEALTH_CACHE_SECONDS = 0  # tests flip dependencies between requests
 
     def __init__(self) -> None:
         super().__init__()
@@ -285,6 +286,9 @@ class ProductionConfig(BaseConfig):
                 raise ConfigError("STUDIO_PATH must be a 24+ character URL-safe path segment")
         if self.STUDIO_APPROVAL_BACKEND not in {"console", "webhook", "ntfy"}:
             raise ConfigError("STUDIO_APPROVAL_BACKEND must be 'console', 'webhook', or 'ntfy'")
+        if self.STUDIO_PATH and self.STUDIO_APPROVAL_BACKEND == "console":
+            # console writes each sign-in approval link (a key to the Studio) into the server log.
+            raise ConfigError("STUDIO_APPROVAL_BACKEND must be 'ntfy' or 'webhook' in production")
         if self.STUDIO_APPROVAL_BACKEND == "webhook" and not self.STUDIO_APPROVAL_WEBHOOK_URL:
             raise ConfigError("STUDIO_APPROVAL_WEBHOOK_URL is required for webhook approval")
         if self.STUDIO_APPROVAL_WEBHOOK_URL and not self.STUDIO_APPROVAL_WEBHOOK_URL.startswith(

@@ -17,7 +17,7 @@ from zoneinfo import ZoneInfo
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError
 from flask import current_app, g, has_request_context, request
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, or_, select, update
 from werkzeug.datastructures import FileStorage
 
 from app import cache, mail, ratelimit
@@ -48,6 +48,7 @@ from app.studio.models import (
     ApprovalStatus,
     InventoryHistory,
     PriceHistory,
+    ProductHistory,
     SaleDiscountKind,
     SaleStatus,
     StudioAudit,
@@ -175,7 +176,13 @@ def issue_temporary_password(actor: StudioUser, target: StudioUser) -> str:
         raise StudioError("Use Change password to update your own account.")
     if not target.active:
         raise StudioError("That Studio account is disabled.")
-    if not ratelimit.allow("studio-password-swap", f"{actor.id}:{ratelimit.client_key()}", 10, 900):
+    if not ratelimit.allow(
+        "studio-password-swap",
+        f"{actor.id}:{ratelimit.client_key()}",
+        10,
+        900,
+        fail_closed=True,
+    ):
         raise StudioError("Too many password swaps. Please wait and try again.")
     temporary = secrets.token_urlsafe(18)
     _check_studio_password(temporary, target.username)
@@ -254,13 +261,13 @@ def configure_user(
 def begin_login(username_raw: str, password: str) -> tuple[StudioLoginRequest, str]:
     generic = StudioError("Username or password is incorrect.")
     client = ratelimit.client_key()
-    if not ratelimit.allow("studio-login-ip", client, 20, 900):
+    if not ratelimit.allow("studio-login-ip", client, 20, 900, fail_closed=True):
         raise StudioError("Too many attempts. Please wait and try again.")
     try:
         username = normalize_username(username_raw)
     except StudioError:
         username = "invalid"
-    if not ratelimit.allow("studio-login-user", username, 10, 900):
+    if not ratelimit.allow("studio-login-user", username, 10, 900, fail_closed=True):
         raise StudioError("Too many attempts. Please wait and try again.")
     user = db.session.scalar(select(StudioUser).where(StudioUser.username == username))
     if user and user.locked_until and _aware(user.locked_until) > utcnow():
@@ -298,11 +305,51 @@ def begin_login(username_raw: str, password: str) -> tuple[StudioLoginRequest, s
     db.session.add(record)
     audit(user, "studio.login.requested", "login_request", record.request_id)
     db.session.commit()
+    if _signed_in_as_linked_owner(user):
+        decide(record, True)  # the owner is approving their own sign-in by being signed in
+        audit(user, "studio.login.approved_by_admin_session", "login_request", record.request_id)
+        db.session.commit()
+        return record, token
     from app.studio import passkeys
 
     if not passkeys.can_self_approve(user):  # a co-owner approves with her own phone key
         _send_approval(record, token)
     return record, token
+
+
+def _signed_in_as_linked_owner(user: StudioUser) -> bool:
+    """True when this browser holds a fully verified /admin owner session for the account
+    linked to this Studio user (password + authenticator already proved it is that person)."""
+    from app.admin import service as admin_service
+    from app.admin.models import AdminRole
+
+    if user.admin_user_id is None:
+        return False
+    admin = admin_service.current_admin()
+    return bool(admin and admin.id == user.admin_user_id and admin.role == AdminRole.OWNER)
+
+
+def set_admin_link(user: StudioUser, admin_username: str | None) -> None:
+    """Link (or unlink with None) a Studio account to the same person's /admin owner account."""
+    from app.admin.models import AdminRole, AdminUser
+
+    admin = None
+    if admin_username:
+        admin = db.session.scalar(select(AdminUser).where(AdminUser.username == admin_username))
+        if admin is None or admin.role != AdminRole.OWNER:
+            raise StudioError(f"{admin_username} is not an owner account in /admin.")
+    before = user.admin_user_id
+    user.admin_user_id = admin.id if admin else None
+    if before != user.admin_user_id:
+        user.session_version += 1
+        audit(
+            user,
+            "studio.user.admin_link",
+            "studio_user",
+            str(user.id),
+            {"admin": admin.username if admin else None},
+        )
+    db.session.commit()
 
 
 def _send_approval(record: StudioLoginRequest, token: str) -> None:
@@ -382,11 +429,31 @@ def request_by_token(token: str) -> StudioLoginRequest | None:
     return find_request(record.request_id) if record else None
 
 
+def _transition(record: StudioLoginRequest, before: ApprovalStatus, after: ApprovalStatus) -> bool:
+    """Move a login request between states in one UPDATE, so two simultaneous requests can never
+    both win (e.g. one approval turned into two sessions, or approve racing deny)."""
+    now = utcnow()
+    changed = db.session.execute(
+        update(StudioLoginRequest)
+        .where(
+            StudioLoginRequest.id == record.id,
+            StudioLoginRequest.status == before,
+            StudioLoginRequest.expires_at > now,
+        )
+        .values(
+            status=after, decided_at=now if before == ApprovalStatus.PENDING else record.decided_at
+        )
+        .execution_options(synchronize_session=False)
+    ).rowcount  # type: ignore[attr-defined]
+    db.session.refresh(record)
+    return changed == 1
+
+
 def decide(record: StudioLoginRequest, approve: bool) -> None:
-    if record.status != ApprovalStatus.PENDING or _aware(record.expires_at) <= utcnow():
+    target = ApprovalStatus.APPROVED if approve else ApprovalStatus.DENIED
+    if not _transition(record, ApprovalStatus.PENDING, target):
+        db.session.rollback()
         raise StudioError("This sign-in request has expired or was already decided.")
-    record.status = ApprovalStatus.APPROVED if approve else ApprovalStatus.DENIED
-    record.decided_at = utcnow()
     audit(
         record.user,
         "studio.login.approved" if approve else "studio.login.denied",
@@ -401,7 +468,9 @@ def consume_approval(record: StudioLoginRequest) -> tuple[StudioUser, str]:
         raise StudioError("This sign-in has not been approved.")
     if record.user.requires_sms and record.sms_verified_at is None:
         raise StudioError("Enter the code texted to your phone first.")
-    record.status = ApprovalStatus.CONSUMED
+    if not _transition(record, ApprovalStatus.APPROVED, ApprovalStatus.CONSUMED):
+        db.session.rollback()
+        raise StudioError("This sign-in approval has already been used.")
     token = secrets.token_urlsafe(32)
     now = utcnow()
     session_record = StudioSession(
@@ -666,7 +735,7 @@ BULK_PRICE_KINDS = {
     "lower_amount": "Lower by $",
     "set": "Set every price to $",
 }
-BULK_PRICE_LIMIT = 500
+BULK_LIMIT = 500  # options one bulk price/stock change may touch
 
 
 @dataclass
@@ -701,24 +770,8 @@ def _bulk_new_price(before: int, kind: str, amount: Decimal, round_99: bool) -> 
     return cents
 
 
-def plan_bulk_price(form: dict[str, str]) -> BulkPricePlan:
-    """Work out (without saving) what a bulk price change would do to each matching option."""
-    kind = form.get("kind", "")
-    if kind not in BULK_PRICE_KINDS:
-        raise StudioError("Choose how the prices should change.")
-    try:
-        amount = Decimal(form.get("amount", "").strip().replace("$", "").replace(",", ""))
-    except InvalidOperation:
-        raise StudioError("Enter a valid amount.") from None
-    if kind.endswith("percent") and not Decimal("0.01") <= amount <= Decimal("90"):
-        raise StudioError("Percentage must be between 0.01 and 90.")
-    if not kind.endswith("percent") and not Decimal("0.01") <= amount <= Decimal("1000000"):
-        raise StudioError("Dollar amount must be between $0.01 and $1,000,000.")
-    reason = form.get("reason", "").strip()
-    if not 2 <= len(reason) <= 120:
-        raise StudioError("Add a short reason for the price change.")
-    round_99 = form.get("round_99") == "1"
-
+def _bulk_selection(form: dict[str, str]) -> tuple[list[Variant], str]:
+    """Active options picked by category (with subcategories) and/or search, for bulk edits."""
     statement = select(Variant).join(Variant.product).where(Variant.active.is_(True))
     category_id = form.get("category", "")
     query = form.get("q", "").strip()[:100]
@@ -737,12 +790,34 @@ def plan_bulk_price(form: dict[str, str]) -> BulkPricePlan:
     if not label:
         raise StudioError("Choose a category or search words so the change can't hit everything.")
     variants = db.session.scalars(
-        statement.order_by(Product.name, Variant.position, Variant.id).limit(BULK_PRICE_LIMIT + 1)
+        statement.order_by(Product.name, Variant.position, Variant.id).limit(BULK_LIMIT + 1)
     ).all()
     if not variants:
         raise StudioError("No products match. Nothing would change.")
-    if len(variants) > BULK_PRICE_LIMIT:
-        raise StudioError(f"More than {BULK_PRICE_LIMIT} options match. Narrow the selection.")
+    if len(variants) > BULK_LIMIT:
+        raise StudioError(f"More than {BULK_LIMIT} options match. Narrow the selection.")
+    return list(variants), " ".join(label)
+
+
+def plan_bulk_price(form: dict[str, str]) -> BulkPricePlan:
+    """Work out (without saving) what a bulk price change would do to each matching option."""
+    kind = form.get("kind", "")
+    if kind not in BULK_PRICE_KINDS:
+        raise StudioError("Choose how the prices should change.")
+    try:
+        amount = Decimal(form.get("amount", "").strip().replace("$", "").replace(",", ""))
+    except InvalidOperation:
+        raise StudioError("Enter a valid amount.") from None
+    if kind.endswith("percent") and not Decimal("0.01") <= amount <= Decimal("90"):
+        raise StudioError("Percentage must be between 0.01 and 90.")
+    if not kind.endswith("percent") and not Decimal("0.01") <= amount <= Decimal("1000000"):
+        raise StudioError("Dollar amount must be between $0.01 and $1,000,000.")
+    reason = form.get("reason", "").strip()
+    if not 2 <= len(reason) <= 120:
+        raise StudioError("Add a short reason for the price change.")
+    round_99 = form.get("round_99") == "1"
+
+    variants, label = _bulk_selection(form)
 
     in_sale = set(
         db.session.scalars(
@@ -770,7 +845,7 @@ def plan_bulk_price(form: dict[str, str]) -> BulkPricePlan:
         rows.append(BulkPriceRow(variant, before, after if not skip else before, skip))
     shown = format(amount.normalize(), "f")  # 10 -> "10", 2.50 -> "2.5"
     how = BULK_PRICE_KINDS[kind].replace("%", f"{shown}%").replace("$", f"${shown}")
-    summary = f"{how}{' (ending in .99)' if round_99 else ''}, {' '.join(label)}"
+    summary = f"{how}{' (ending in .99)' if round_99 else ''}, {label}"
     fingerprint = hashlib.sha256(
         json.dumps(
             [kind, str(amount), round_99, reason, [(r.variant.id, r.before, r.after) for r in rows]]
@@ -814,6 +889,117 @@ def apply_bulk_price(user: StudioUser, form: dict[str, str]) -> int:
     return len(plan.changes)
 
 
+BULK_STOCK_KINDS = {
+    "set": "Set every option to",
+    "add": "Add to every option",
+    "remove": "Take away from every option",
+}
+
+
+@dataclass
+class BulkStockPlan:
+    rows: list[BulkPriceRow]  # before/after are quantities here
+    reason: str
+    summary: str
+    fingerprint: str
+
+    @property
+    def changes(self) -> list[BulkPriceRow]:
+        return [row for row in self.rows if not row.skip]
+
+
+def plan_bulk_stock(form: dict[str, str]) -> BulkStockPlan:
+    """Work out (without saving) what a bulk stock change would do to each matching option."""
+    kind = form.get("kind", "")
+    if kind not in BULK_STOCK_KINDS:
+        raise StudioError("Choose how the stock should change.")
+    try:
+        amount = int(form.get("amount", "").strip())
+    except ValueError:
+        raise StudioError("Stock must be a whole number.") from None
+    if not (0 if kind == "set" else 1) <= amount <= 1_000_000:
+        raise StudioError("Enter a number between 1 and 1,000,000 (0 is allowed for “set”).")
+    reason = form.get("reason", "").strip()
+    if not 2 <= len(reason) <= 120:
+        raise StudioError("Add a short reason for the stock change.")
+    variants, label = _bulk_selection(form)
+    rows = []
+    for variant in variants:
+        before = variant.stock_quantity
+        after = {"set": amount, "add": before + amount}.get(kind, before - amount)
+        skip = ""
+        if not variant.track_inventory:
+            skip = "Stock isn't counted for this item"
+        elif after < 0:
+            skip = "Would go below zero"
+        elif after > 1_000_000:
+            skip = "Would go above 1,000,000"
+        elif after == before:
+            skip = "No change"
+        rows.append(BulkPriceRow(variant, before, before if skip else after, skip))
+    summary = f"{BULK_STOCK_KINDS[kind]} {amount}, {label}"
+    fingerprint = hashlib.sha256(
+        json.dumps(
+            ["stock", kind, amount, reason, [(r.variant.id, r.before, r.after) for r in rows]]
+        ).encode()
+    ).hexdigest()
+    return BulkStockPlan(rows, reason, summary, fingerprint)
+
+
+def apply_bulk_stock(user: StudioUser, form: dict[str, str]) -> int:
+    """Apply a previewed bulk stock change only if every amount is still what the preview showed."""
+    plan = plan_bulk_stock(form)
+    if not hmac.compare_digest(plan.fingerprint, form.get("fingerprint", "")):
+        raise StudioError("Stock changed since the preview. Review the new preview first.")
+    if not plan.changes:
+        raise StudioError("Nothing would change.")
+    reason = f"Bulk: {plan.reason}"[:160]
+    for row in plan.changes:
+        row.variant.stock_quantity = row.after
+        db.session.add(
+            InventoryHistory(
+                variant_id=row.variant.id,
+                user_id=user.id,
+                before_quantity=row.before,
+                after_quantity=row.after,
+                reason=reason,
+            )
+        )
+    audit(
+        user,
+        "studio.inventory.bulk_updated",
+        "variant_bulk",
+        str(len(plan.changes)),
+        {
+            "summary": plan.summary,
+            "reason": plan.reason,
+            "variant_ids": [row.variant.id for row in plan.changes],
+        },
+    )
+    db.session.commit()
+    cache.bump_catalog_version()
+    return len(plan.changes)
+
+
+STEP_UP_TRIES, STEP_UP_WINDOW = 5, 900
+
+
+def confirm_password(user: StudioUser, password: str) -> None:
+    """Risky actions ask for the signed-in person's password again (owner plan, step-up)."""
+    if not ratelimit.allow(
+        "studio-step-up", str(user.id), STEP_UP_TRIES, STEP_UP_WINDOW, fail_closed=True
+    ):
+        raise StudioError("Too many wrong passwords. Wait 15 minutes, then try again.")
+    try:
+        _hasher.verify(user.password_hash, (password or "")[:MAX_PASSWORD])
+    except (VerificationError, InvalidHashError):
+        audit(user, "studio.step_up.failed", "studio_user", str(user.id))
+        db.session.commit()
+        raise StudioError(
+            "That password is not right. Type the password you use to sign in."
+        ) from None
+
+
 def set_product_visibility(
     user: StudioUser,
     product: Product,
@@ -833,6 +1019,7 @@ def set_product_visibility(
         raise StudioError("The visibility reason is too long.")
     before = product.status
     product.status = target
+    _record_product(user, product, "visibility", {"status": before.value}, reason)
     audit(
         user,
         "studio.product.restored" if live else "studio.product.hidden",
@@ -885,15 +1072,7 @@ def update_product_details(
     categories = db.session.scalars(select(Category).where(Category.id.in_(category_ids))).all()
     if not categories or {category.id for category in categories} != category_ids:
         raise StudioError("Choose at least one valid category.")
-    before = {
-        "name": product.name,
-        "summary": product.summary,
-        "description": product.description,
-        "category_ids": sorted(category.id for category in product.categories),
-        "sale_unit": product.sale_unit,
-        "piece_length_yards": product.piece_length_text or None,
-        "width_inches": product.width_inches,
-    }
+    before = _details_snapshot(product)
     product.name = name
     product.summary = summary
     product.description = description
@@ -902,26 +1081,195 @@ def update_product_details(
     product.piece_length_yards = piece_length
     product.piece_length_max_yards = piece_max
     product.width_inches = width
+    after = _details_snapshot(product)
+    if after != before:
+        _record_product(user, product, "details", before, "")
     audit(
         user,
         "studio.product.updated",
         "product",
         str(product.id),
+        {"before": before, "after": after},
+    )
+    db.session.commit()
+    cache.bump_catalog_version()
+
+
+def _details_snapshot(product: Product) -> dict[str, Any]:
+    """The product fields the Studio details form edits, as plain JSON values."""
+    return {
+        "name": product.name,
+        "summary": product.summary,
+        "description": product.description,
+        "category_ids": sorted(category.id for category in product.categories),
+        "sale_unit": product.sale_unit,
+        "piece_length_yards": product.piece_length_text or None,
+        "width_inches": product.width_inches,
+    }
+
+
+def _snapshot(product: Product, kind: str) -> dict[str, Any]:
+    return {"status": product.status.value} if kind == "visibility" else _details_snapshot(product)
+
+
+def _record_product(
+    user: StudioUser, product: Product, kind: str, before: dict[str, Any], reason: str
+) -> None:
+    db.session.add(
+        ProductHistory(
+            product_id=product.id,
+            user_id=user.id,
+            kind=kind,
+            before=json.dumps(before, sort_keys=True),
+            after=json.dumps(_snapshot(product, kind), sort_keys=True),
+            reason=reason[:160],
+        )
+    )
+
+
+def undo_product_change(user: StudioUser, history: ProductHistory) -> None:
+    """Put a product back as it was before one Studio change, unless it changed again since."""
+    if history.undone_at is not None:
+        raise StudioError("This product change was already undone.")
+    product = db.session.get(Product, history.product_id)
+    if product is None:
+        raise StudioError("The product no longer exists.")
+    if _snapshot(product, history.kind) != json.loads(history.after):
+        raise StudioError(
+            "This product changed again afterward, so it cannot be safely undone automatically."
+        )
+    before = json.loads(history.before)
+    current = _snapshot(product, history.kind)
+    if history.kind == "visibility":
+        product.status = ProductStatus(before["status"])
+    else:
+        categories = db.session.scalars(
+            select(Category).where(Category.id.in_(before["category_ids"]))
+        ).all()
+        if len(categories) != len(before["category_ids"]):
+            raise StudioError("A category this product was in no longer exists.")
+        product.name = before["name"]
+        product.summary = before["summary"]
+        product.description = before["description"]
+        product.categories = list(categories)
+        product.sale_unit = before["sale_unit"]
+        low, high = units.parse_piece_range(before["piece_length_yards"])
+        product.piece_length_yards, product.piece_length_max_yards = low, high
+        product.width_inches = before["width_inches"]
+    history.undone_at = utcnow()
+    _record_product(user, product, history.kind, current, f"Undo change #{history.id}")
+    audit(
+        user,
+        "studio.product.undone",
+        "product_history",
+        str(history.id),
+        {"product_id": product.id, "kind": history.kind},
+    )
+    db.session.commit()
+    cache.bump_catalog_version()
+
+
+BULK_VISIBILITY_KINDS = {"hide": "Hide from the shop", "show": "Put back live"}
+
+
+@dataclass
+class BulkProductRow:
+    product: Product
+    before: str
+    after: str
+    skip: str = ""
+
+
+@dataclass
+class BulkVisibilityPlan:
+    rows: list[BulkProductRow]
+    reason: str
+    summary: str
+    fingerprint: str
+
+    @property
+    def changes(self) -> list[BulkProductRow]:
+        return [row for row in self.rows if not row.skip]
+
+
+def plan_bulk_visibility(form: dict[str, str]) -> BulkVisibilityPlan:
+    """Work out (without saving) which products a bulk hide / put-back-live would change."""
+    kind = form.get("kind", "")
+    if kind not in BULK_VISIBILITY_KINDS:
+        raise StudioError("Choose hide or put back live.")
+    reason = form.get("reason", "").strip()
+    if not 2 <= len(reason) <= 120:
+        raise StudioError("Add a short reason.")
+    statement = select(Product)
+    category_id = form.get("category", "")
+    query = form.get("q", "").strip()[:100]
+    label = []
+    if category_id:
+        category = db.session.get(Category, int(category_id)) if category_id.isdigit() else None
+        if category is None:
+            raise StudioError("That category no longer exists.")
+        ids = [category.id, *(child.id for child in category.children)]
+        statement = statement.where(Product.categories.any(Category.id.in_(ids)))
+        label.append(f"category “{category.name}”")
+    if query:
+        like = f"%{query}%"
+        statement = statement.where(
+            or_(Product.name.ilike(like), Product.variants.any(Variant.sku.ilike(like)))
+        )
+        label.append(f"matching “{query}”")
+    if not label:
+        raise StudioError("Choose a category or search words so the change can't hit everything.")
+    products = db.session.scalars(
+        statement.order_by(Product.name, Product.id).limit(BULK_LIMIT + 1)
+    ).all()
+    if not products:
+        raise StudioError("No products match. Nothing would change.")
+    if len(products) > BULK_LIMIT:
+        raise StudioError(f"More than {BULK_LIMIT} products match. Narrow the selection.")
+    target = ProductStatus.DRAFT if kind == "hide" else ProductStatus.ACTIVE
+    rows = []
+    for product in products:
+        skip = ""
+        if product.status == ProductStatus.ARCHIVED:
+            skip = "Removed from the catalog"
+        elif product.status == target:
+            skip = "Already hidden" if kind == "hide" else "Already live"
+        after = product.status.value if skip else target.value
+        rows.append(BulkProductRow(product, product.status.value, after, skip))
+    summary = f"{BULK_VISIBILITY_KINDS[kind]}: {' '.join(label)}"
+    fingerprint = hashlib.sha256(
+        json.dumps(
+            ["visibility", kind, reason, [(r.product.id, r.before, r.after) for r in rows]]
+        ).encode()
+    ).hexdigest()
+    return BulkVisibilityPlan(rows, reason, summary, fingerprint)
+
+
+def apply_bulk_visibility(user: StudioUser, form: dict[str, str]) -> int:
+    """Apply a previewed bulk hide / put-back-live only if nothing changed since the preview."""
+    plan = plan_bulk_visibility(form)
+    if not hmac.compare_digest(plan.fingerprint, form.get("fingerprint", "")):
+        raise StudioError("Products changed since the preview. Review the new preview first.")
+    if not plan.changes:
+        raise StudioError("Nothing would change.")
+    reason = f"Bulk: {plan.reason}"
+    for row in plan.changes:
+        row.product.status = ProductStatus(row.after)
+        _record_product(user, row.product, "visibility", {"status": row.before}, reason)
+    audit(
+        user,
+        "studio.product.bulk_visibility",
+        "product_bulk",
+        str(len(plan.changes)),
         {
-            "before": before,
-            "after": {
-                "name": name,
-                "summary": summary,
-                "description": description,
-                "category_ids": sorted(category_ids),
-                "sale_unit": sale_unit.value,
-                "piece_length_yards": units.format_piece_length(piece_length, piece_max) or None,
-                "width_inches": width,
-            },
+            "summary": plan.summary,
+            "reason": plan.reason,
+            "product_ids": [row.product.id for row in plan.changes],
         },
     )
     db.session.commit()
     cache.bump_catalog_version()
+    return len(plan.changes)
 
 
 def upload_product_image(
@@ -1453,9 +1801,24 @@ def send_daily_summary(now: datetime | None = None) -> bool:
         f"Low-stock or sold-out options: {low_stock}\n"
         f"Reviews/questions needing attention: {community}\n"
         f"Scheduled or active sales: {sales}\n\n"
+        f"{_job_lines()}"
         "Open the private Staff Studio address to review details."
     )
     return mail.send(recipient, "Daily Staff Studio summary", body)
+
+
+def _job_lines() -> str:
+    """Daily-summary warning for scheduled jobs or the backup that failed or stopped running."""
+    from app import jobs
+
+    trouble = jobs.problems()
+    if not trouble:
+        return "All scheduled jobs and the nightly backup ran normally.\n\n"
+    lines = "".join(f"- {state.name}: {state.problem} ({state.detail})\n" for state in trouble)
+    return (
+        "Scheduled jobs needing attention (run `flask --app wsgi jobs check` on the server):\n"
+        f"{lines}\n"
+    )
 
 
 def audit(

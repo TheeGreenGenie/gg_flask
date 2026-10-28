@@ -49,3 +49,18 @@ def test_ready_503_when_database_unreachable() -> None:
 
 def test_health_rejects_post(client: FlaskClient) -> None:
     assert client.post("/health/live").status_code == 405
+
+
+def test_public_callers_only_learn_ok_or_fail(app: Flask, client: FlaskClient) -> None:
+    app.extensions["redis"] = FakeRedis(healthy=False)
+    resp = client.get("/health/ready", environ_base={"REMOTE_ADDR": "203.0.113.9"})
+    assert resp.status_code == 503 and resp.get_json() == {"status": "fail"}
+
+
+def test_readiness_is_reused_briefly(app: Flask, client: FlaskClient) -> None:
+    app.config["HEALTH_CACHE_SECONDS"] = 60
+    assert client.get("/health/ready").status_code == 200
+    app.extensions["redis"] = FakeRedis(healthy=False)  # not re-checked within the window
+    assert client.get("/health/ready").status_code == 200
+    app.config["HEALTH_CACHE_SECONDS"] = 0
+    assert client.get("/health/ready").status_code == 503

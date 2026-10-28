@@ -35,7 +35,7 @@ from app.catalog.models import (
     Variant,
 )
 from app.extensions import db
-from app.orders.models import Coupon, DiscountType, Order, OrderStatus
+from app.orders.models import TRACKING_CARRIERS, Coupon, DiscountType, Order, OrderStatus
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -265,6 +265,7 @@ def order_view(order_id: int) -> str:
         admin=_admin(),
         order=db.get_or_404(Order, order_id),
         statuses=OrderStatus,
+        carriers=TRACKING_CARRIERS,
     )
 
 
@@ -275,6 +276,31 @@ def order_status(order_id: int) -> Response:
     try:
         order_service.change_status(_admin(), order, request.form.get("status", ""))
         flash("Order status updated.", "success")
+    except order_service.OrderAdminError as exc:
+        db.session.rollback()
+        flash(str(exc), "error")
+    return redirect(url_for("admin.order_view", order_id=order.id))
+
+
+@bp.post("/orders/<int:order_id>/shipped")
+@roles(AdminRole.SUPPORT)
+def order_shipped(order_id: int) -> Response:
+    order = db.get_or_404(Order, order_id)
+    try:
+        emailed = order_service.mark_shipped(
+            _admin(),
+            order,
+            request.form.get("carrier", ""),
+            request.form.get("tracking_number", ""),
+            request.form.get("notify") == "1",
+        )
+        flash(
+            "Marked as shipped and the customer was emailed the tracking link."
+            if emailed
+            else "Marked as shipped. No email was sent"
+            + ("." if request.form.get("notify") != "1" else " (email is not set up yet)."),
+            "success",
+        )
     except order_service.OrderAdminError as exc:
         db.session.rollback()
         flash(str(exc), "error")
@@ -299,8 +325,14 @@ def order_note(order_id: int) -> Response:
 def order_refund(order_id: int) -> Response:
     order = db.get_or_404(Order, order_id)
     try:
-        order_service.refund(_admin(), order)
-        flash("The full payment was refunded.", "success")
+        state = order_service.refund(_admin(), order)
+        flash(
+            "The full payment was refunded."
+            if state == "completed"
+            else "Refund requested. The payment provider is still processing it; the order "
+            "will show Refunded once they confirm (checked every 15 minutes).",
+            "success",
+        )
     except order_service.OrderAdminError as exc:
         db.session.rollback()
         flash(str(exc), "error")

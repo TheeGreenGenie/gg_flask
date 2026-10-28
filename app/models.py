@@ -32,6 +32,7 @@ from app.reviews.models import (
 from app.studio.models import (
     InventoryHistory,
     PriceHistory,
+    ProductHistory,
     StudioAudit,
     StudioChange,
     StudioKeyEnrollment,
@@ -87,6 +88,7 @@ __all__ = [
     "StudioPasskey",
     "InventoryHistory",
     "PriceHistory",
+    "ProductHistory",
     "StudioSale",
     "StudioSaleItem",
     "Wishlist",

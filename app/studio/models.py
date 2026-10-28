@@ -93,6 +93,12 @@ class StudioUser(db.Model):  # type: ignore[name-defined]
     # Every sign-in also needs a 6-digit code texted to this number (owner, 2026-10-27: tgg).
     requires_sms: Mapped[bool] = mapped_column(default=False, server_default=sa_false())
     sms_phone: Mapped[str | None] = mapped_column(String(20))  # E.164, set on the server only
+    # Owner, 2026-10-28 ("connect tgg and owner"): the /admin account that is the same person.
+    # A Studio sign-in from a browser already signed in to /admin as that owner (password +
+    # authenticator) is approved on the spot instead of waiting for the phone.
+    admin_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("admin_users.id", ondelete="SET NULL", name="fk_studio_users_admin_user_id")
+    )
     # Owner, 2026-10-28: an authenticator-app secret replaces the text (no SMS provider needed).
     totp_secret: Mapped[str | None] = mapped_column(String(64))
     totp_last_step: Mapped[int | None] = mapped_column(Integer)  # blocks reusing a code
@@ -195,6 +201,29 @@ class InventoryHistory(db.Model):  # type: ignore[name-defined]
     before_quantity: Mapped[int] = mapped_column(Integer)
     after_quantity: Mapped[int] = mapped_column(Integer)
     reason: Mapped[str] = mapped_column(String(160))
+    undone_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow, index=True
+    )
+
+
+class ProductHistory(db.Model):  # type: ignore[name-defined]
+    """One Studio change to a product's visibility or details, kept so it can be undone.
+
+    `before`/`after` are JSON snapshots of only the fields that kind of change touches.
+    """
+
+    __tablename__ = "studio_product_history"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    product_id: Mapped[int] = mapped_column(
+        ForeignKey("products.id", ondelete="CASCADE"), index=True
+    )
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("studio_users.id", ondelete="SET NULL"))
+    kind: Mapped[str] = mapped_column(String(20))  # "visibility" | "details"
+    before: Mapped[str] = mapped_column(Text)
+    after: Mapped[str] = mapped_column(Text)
+    reason: Mapped[str] = mapped_column(String(160), default="")
     undone_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utcnow, index=True

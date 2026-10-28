@@ -35,6 +35,8 @@ SCOPED: dict[StudioRole, frozenset[str]] = {
             "studio.product_edit",
             "studio.product_image_upload",
             "studio.product_image_remove",
+            "studio.product_history",
+            "studio.product_undo",
         }
     ),
     # Keeping the shop accurate: stock and taking products on or off the site.
@@ -45,8 +47,14 @@ SCOPED: dict[StudioRole, frozenset[str]] = {
             "studio.inventory_update",
             "studio.inventory_history",
             "studio.inventory_undo",
+            "studio.inventory_bulk",
+            "studio.inventory_bulk_apply",
             "studio.products",
             "studio.product_visibility",
+            "studio.product_bulk",
+            "studio.product_bulk_apply",
+            "studio.product_history",
+            "studio.product_undo",
         }
     ),
     # Selling: prices, sales, and answering customer reviews, comments, and questions.

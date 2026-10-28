@@ -49,8 +49,10 @@ from app.reviews.models import ModerationWord, PostStatus, ProductPost
 from app.studio import blog_media, passkeys, permissions, review, service, sms
 from app.studio.models import (
     ApprovalStatus,
+    ChangeStatus,
     InventoryHistory,
     PriceHistory,
+    ProductHistory,
     SaleDiscountKind,
     SaleStatus,
     StudioAudit,
@@ -450,6 +452,18 @@ def changes() -> str:
     )
 
 
+@bp.post("/changes/<int:change_id>/review")
+@roles(StudioRole.OWNER)
+def change_review_link(change_id: int) -> Response:
+    """Owners open a waiting change from the Changes page (no email or log link needed)."""
+    change = db.get_or_404(StudioChange, change_id)
+    if change.status != ChangeStatus.PENDING:
+        flash("That change was already decided.", "error")
+        return redirect(url_for("studio.changes"))
+    service.audit(_user(), "studio.change.review_link", "studio_change", str(change.id))
+    return redirect(url_for("studio.review_change", token=review.fresh_review_token(change)))
+
+
 @bp.post("/logout")
 def logout() -> Response:
     service.revoke_current()
@@ -600,6 +614,49 @@ def inventory_update(variant_id: int) -> Response:
     )
 
 
+@bp.get("/inventory/bulk")
+@roles(StudioRole.EDITOR, StudioRole.INVENTORY)
+def inventory_bulk() -> str:
+    """Bulk stock form; with `preview=1` it shows every before -> after without saving."""
+    form = {key: request.args.get(key, "") for key in ("category", "q", "kind", "amount", "reason")}
+    plan, error = None, ""
+    if request.args.get("preview"):
+        try:
+            plan = service.plan_bulk_stock(form)
+        except service.StudioError as exc:
+            error = str(exc)
+    categories = db.session.scalars(
+        select(Category).where(Category.parent_id.is_(None)).order_by(Category.position)
+    ).all()
+    return render_template(
+        "studio/inventory_bulk.html",
+        staff=_user(),
+        form=form,
+        plan=plan,
+        error=error,
+        categories=categories,
+        kinds=service.BULK_STOCK_KINDS,
+    )
+
+
+@bp.post("/inventory/bulk")
+@roles(StudioRole.EDITOR, StudioRole.INVENTORY)
+def inventory_bulk_apply() -> Response:
+    skip = ("csrf_token", "step_up_password")
+    form = {key: request.form.get(key, "") for key in request.form if key not in skip}
+    try:
+        count = service.apply_bulk_stock(_user(), form)
+    except service.StudioError as exc:
+        db.session.rollback()
+        flash(str(exc), "error")
+        args: dict[str, Any] = {k: v for k, v in form.items() if k != "fingerprint" and v}
+        return redirect(url_for("studio.inventory_bulk", preview=1, **args))
+    flash(
+        f"Stock updated for {count} option(s). Each one can be undone in stock history.", "success"
+    )
+    return redirect(url_for("studio.inventory_history"))
+
+
 @bp.get("/inventory/history")
 @roles(StudioRole.EDITOR, StudioRole.INVENTORY)
 def inventory_history() -> str:
@@ -710,7 +767,8 @@ def price_bulk() -> str:
 @bp.post("/prices/bulk")
 @roles(StudioRole.EDITOR)
 def price_bulk_apply() -> Response:
-    form = {key: request.form.get(key, "") for key in request.form if key != "csrf_token"}
+    skip = ("csrf_token", "step_up_password")
+    form = {key: request.form.get(key, "") for key in request.form if key not in skip}
     try:
         count = service.apply_bulk_price(_user(), form)
     except service.StudioError as exc:
@@ -783,6 +841,118 @@ def products() -> str:
         statuses=ProductStatus,
         pager=pager,
     )
+
+
+@bp.get("/products/bulk")
+@roles(StudioRole.EDITOR)
+def product_bulk() -> str:
+    """Hide or put back live many products; with `preview=1` lists every product first."""
+    form = {key: request.args.get(key, "") for key in ("category", "q", "kind", "reason")}
+    plan, error = None, ""
+    if request.args.get("preview"):
+        try:
+            plan = service.plan_bulk_visibility(form)
+        except service.StudioError as exc:
+            error = str(exc)
+    categories = db.session.scalars(
+        select(Category).where(Category.parent_id.is_(None)).order_by(Category.position)
+    ).all()
+    return render_template(
+        "studio/product_bulk.html",
+        staff=_user(),
+        form=form,
+        plan=plan,
+        error=error,
+        categories=categories,
+        kinds=service.BULK_VISIBILITY_KINDS,
+    )
+
+
+@bp.post("/products/bulk")
+@roles(StudioRole.EDITOR)
+def product_bulk_apply() -> Response:
+    skip = ("csrf_token", "step_up_password")
+    form = {key: request.form.get(key, "") for key in request.form if key not in skip}
+    try:
+        count = service.apply_bulk_visibility(_user(), form)
+    except service.StudioError as exc:
+        db.session.rollback()
+        flash(str(exc), "error")
+        args: dict[str, Any] = {k: v for k, v in form.items() if k != "fingerprint" and v}
+        return redirect(url_for("studio.product_bulk", preview=1, **args))
+    flash(f"{count} product(s) changed. Each one can be undone in product history.", "success")
+    return redirect(url_for("studio.product_history"))
+
+
+@bp.get("/products/history")
+@roles(StudioRole.EDITOR)
+def product_history() -> str:
+    records = db.session.scalars(
+        select(ProductHistory).order_by(ProductHistory.created_at.desc()).limit(500)
+    ).all()
+    products_by_id = {
+        product.id: product
+        for product in db.session.scalars(
+            select(Product).where(Product.id.in_({record.product_id for record in records}))
+        ).all()
+    }
+    users = {
+        user.id: user
+        for user in db.session.scalars(
+            select(StudioUser).where(
+                StudioUser.id.in_({record.user_id for record in records if record.user_id})
+            )
+        ).all()
+    }
+    return render_template(
+        "studio/product_history.html",
+        staff=_user(),
+        records=records,
+        products=products_by_id,
+        users=users,
+        describe=_describe_product_change,
+        may_undo=_may_undo_product,
+    )
+
+
+def _may_undo_product(user: StudioUser, record: ProductHistory) -> bool:
+    """Branding undoes detail edits, maintenance undoes hide/show; editors and owners both."""
+    endpoint = "studio.product_visibility" if record.kind == "visibility" else "studio.product_edit"
+    return permissions.can(user, endpoint, (StudioRole.EDITOR,))
+
+
+def _describe_product_change(record: ProductHistory) -> str:
+    before, after = json.loads(record.before), json.loads(record.after)
+    if record.kind == "visibility":
+        words = {"active": "Live", "draft": "Hidden", "archived": "Removed"}
+        was, now = before["status"], after["status"]
+        return f"{words.get(was, was)} → {words.get(now, now)}"
+    names = {
+        "name": "name",
+        "summary": "summary",
+        "description": "description",
+        "category_ids": "categories",
+        "sale_unit": "selling unit",
+        "piece_length_yards": "piece length",
+        "width_inches": "width",
+    }
+    changed = [label for key, label in names.items() if before.get(key) != after.get(key)]
+    return "Changed " + (", ".join(changed) if changed else "details")
+
+
+@bp.post("/products/history/<int:history_id>/undo")
+@roles(StudioRole.EDITOR)
+def product_undo(history_id: int) -> Response:
+    history = db.get_or_404(ProductHistory, history_id)
+    if not _may_undo_product(_user(), history):
+        abort(403)
+    try:
+        service.undo_product_change(_user(), history)
+        flash("Product change undone.", "success")
+    except service.StudioError as exc:
+        db.session.rollback()
+        flash(str(exc), "error")
+    return redirect(url_for("studio.product_history"))
 
 
 @bp.route("/products/<int:product_id>", methods=["GET", "POST"])
@@ -1263,7 +1433,15 @@ def init_studio(app: Flask) -> None:
                 user.requires_review,
                 user.may_self_approve,
                 user.requires_sms,
-            ) != (entry.roles, entry.active, entry.review, entry.self_approve, entry.sms):
+                _admin_name(user),
+            ) != (
+                entry.roles,
+                entry.active,
+                entry.review,
+                entry.self_approve,
+                entry.sms,
+                entry.admin,
+            ):
                 plan.append(("update", entry))
         for username, user in existing.items():
             if username not in desired_names and user.active:
@@ -1277,6 +1455,7 @@ def init_studio(app: Flask) -> None:
                 (" review" if entry.review else "")
                 + (" self-approve" if entry.self_approve else "")
                 + (" sms" if entry.sms else "")
+                + (f" admin={entry.admin}" if entry.admin else "")
             )
             status = "active" if entry.active else "disabled"
             click.echo(f"{action}: {entry.username} roles={entry.roles} status={status}{flags}")
@@ -1290,7 +1469,7 @@ def init_studio(app: Flask) -> None:
                     hide_input=True,
                     confirmation_prompt=True,
                 )
-                service.create_user(
+                created = service.create_user(
                     entry.username,
                     password,
                     entry.roles,
@@ -1298,6 +1477,7 @@ def init_studio(app: Flask) -> None:
                     may_self_approve=entry.self_approve,
                     requires_sms=entry.sms,
                 )
+                _apply_admin_link(created, entry.admin)
             elif action == "update":
                 service.configure_user(
                     existing[entry.username],
@@ -1307,6 +1487,7 @@ def init_studio(app: Flask) -> None:
                     entry.self_approve,
                     entry.sms,
                 )
+                _apply_admin_link(existing[entry.username], entry.admin)
             elif action == "disable-missing":
                 service.set_active(existing[entry.username], False)
         click.echo("Studio users synchronized. Removed entries were disabled, never deleted.")
@@ -1418,6 +1599,23 @@ class UserEntry(NamedTuple):
     review: bool
     self_approve: bool
     sms: bool = False
+    admin: str | None = None  # /admin owner username of the same person (owner sign-in shortcut)
+
+
+def _admin_name(user: StudioUser) -> str | None:
+    if user.admin_user_id is None:
+        return None
+    from app.admin.models import AdminUser
+
+    admin = db.session.get(AdminUser, user.admin_user_id)
+    return admin.username if admin else None
+
+
+def _apply_admin_link(user: StudioUser, admin_name: str | None) -> None:
+    try:
+        service.set_admin_link(user, admin_name)
+    except service.StudioError as exc:
+        raise click.ClickException(str(exc)) from None
 
 
 def _flag_text(user: StudioUser) -> str:
@@ -1448,7 +1646,7 @@ def _read_user_manifest(path: Path) -> list[UserEntry]:
     entries: list[UserEntry] = []
     seen: set[str] = set()
     for index, item in enumerate(raw_users, start=1):
-        allowed = {"username", "roles", "active", "review", "self_approve", "sms"}
+        allowed = {"username", "roles", "active", "review", "self_approve", "sms", "admin"}
         if not isinstance(item, dict) or set(item) - allowed:
             raise click.ClickException(f"User {index} has unknown or invalid fields.")
         try:
@@ -1466,7 +1664,20 @@ def _read_user_manifest(path: Path) -> list[UserEntry]:
             raise click.ClickException(
                 f"User {index}: active, review, self_approve and sms must be true or false."
             )
+        admin_name = item.get("admin")
+        if admin_name is not None and (not isinstance(admin_name, str) or not admin_name.strip()):
+            raise click.ClickException(f"User {index}: admin must be an admin username.")
         seen.add(username)
         role_values = ",".join(sorted(role.value for role in roles))
-        entries.append(UserEntry(username, role_values, active, review_on, self_approve, sms_on))
+        entries.append(
+            UserEntry(
+                username,
+                role_values,
+                active,
+                review_on,
+                self_approve,
+                sms_on,
+                admin_name.strip().lower() if admin_name else None,
+            )
+        )
     return entries

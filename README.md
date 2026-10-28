@@ -208,17 +208,19 @@ flask --app wsgi studio sync-users --file config/studio_users.json --apply
 ```
 
 `config/studio_users.json` is the editable roster for local and server environments. It contains
-only usernames, roles, and active state—never passwords. The first command previews changes. The
-second applies them and securely prompts for each new user's temporary password. Users removed
-from the file are disabled and signed out rather than deleted, preserving their audit history.
+only usernames, roles, and settings (`review`, `self_approve`, `sms`, and `admin`)—never passwords.
+The first command previews changes. The second applies them and securely prompts for each new
+user's temporary password. Users removed from the file are disabled and signed out rather than
+deleted, preserving their audit history.
 
-`STUDIO_APPROVAL_BACKEND=console` logs the one-time owner approval URL during local development.
-`flask studio approve-local <request-id>` is also available outside production for testing. Neither
-is the production approval mechanism. The owner selected ntfy: production uses
-`STUDIO_APPROVAL_BACKEND=ntfy`, a long private `STUDIO_NTFY_TOPIC`, and optionally a protected-topic
-token. Launch still requires WebAuthn/passkey confirmation after the notification opens the approval
-page. See `deploy/htaccess.example` for edge-protection rules that must be adapted and verified on
-staging.
+Signing in to the Studio is username + password + the owner's approval: the approval link arrives
+by ntfy (`STUDIO_APPROVAL_BACKEND=ntfy` with a long private `STUDIO_NTFY_TOPIC`) and opening it
+requires the owner's `/admin` sign-in (password + authenticator). Production refuses
+`STUDIO_APPROVAL_BACKEND=console`, which only prints the link for local development, as does
+`flask studio approve-local <request-id>`. A roster entry with `"admin": "<owner username>"` links
+that Studio account to the same person's `/admin` owner account (tgg ↔ owner): signing in to the
+Studio from a browser already signed in to `/admin` as that owner is approved immediately. See
+`deploy/htaccess.example` for edge-protection rules that must be adapted and verified on staging.
 
 ## Checks (same as CI)
 
@@ -233,7 +235,7 @@ Tests use SQLite and a fake Redis by default. Set `TEST_DATABASE_URL` / `TEST_RE
 
 ## Configuration
 
-All settings come from environment variables; see [.env.example](.env.example) for names. `APP_ENV=production` (used for staging and live) refuses to start without `SECRET_KEY` (32+ chars), `DATABASE_URL` and `REDIS_URL`.
+All settings come from environment variables; see [.env.example](.env.example) for names. Locally, put them in a `.env` file in the project folder: with the dev extras installed (`python-dotenv`), every `flask` command loads it automatically. The server does not use `.env`; it reads `/etc/gg-flask/env` (DEPLOY.md step 4). `APP_ENV=production` (used for staging and live) refuses to start without `SECRET_KEY` (32+ chars), `DATABASE_URL` and `REDIS_URL`.
 
 Set `TRUSTED_PROXY_HOPS` to the number of reverse proxies in front of the app. With `0`, `X-Forwarded-For` is ignored.
 

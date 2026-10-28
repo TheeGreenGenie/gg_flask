@@ -19,7 +19,7 @@ from datetime import timedelta
 from typing import Any
 
 from flask import current_app, request, session, url_for
-from sqlalchemy import select
+from sqlalchemy import select, update
 from webauthn import (
     base64url_to_bytes,
     generate_authentication_options,
@@ -232,6 +232,21 @@ def register(user: StudioUser, credential: dict[str, Any], label: str = "") -> S
         )
     except InvalidRegistrationResponse:
         raise PasskeyError("The phone's key could not be verified. Please try again.") from None
+    # One owner confirmation registers one key: claim it in a single conditional UPDATE so two
+    # simultaneous registrations can't both succeed.
+    claimed = db.session.execute(
+        update(StudioKeyEnrollment)
+        .where(
+            StudioKeyEnrollment.id == record.id,
+            StudioKeyEnrollment.status == KeyEnrollmentStatus.APPROVED,
+        )
+        .values(status=KeyEnrollmentStatus.REGISTERED)
+        .execution_options(synchronize_session=False)
+    ).rowcount  # type: ignore[attr-defined]
+    if claimed != 1:
+        db.session.rollback()
+        raise PasskeyError("Start the key setup again.")
+    db.session.refresh(record)
     key = StudioPasskey(
         user_id=user.id,
         credential_id=bytes_to_base64url(verified.credential_id),
@@ -240,7 +255,6 @@ def register(user: StudioUser, credential: dict[str, Any], label: str = "") -> S
         label=(label or record.device)[:120],
     )
     db.session.add(key)
-    record.status = KeyEnrollmentStatus.REGISTERED
     service.audit(user, "studio.key.registered", "studio_user", str(user.id))
     db.session.commit()
     _tell_owner(

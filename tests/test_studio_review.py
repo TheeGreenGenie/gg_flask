@@ -6,6 +6,7 @@ from __future__ import annotations
 import io
 import json
 import re
+from typing import Any
 
 import pytest
 from flask import Flask
@@ -294,7 +295,10 @@ def test_reviewed_bulk_price_change_waits_for_the_owner(shop_app: Flask) -> None
         r'name="fingerprint" value="([0-9a-f]{64})"', page.get_data(as_text=True)
     )
     assert fingerprint
-    staff.post(PREFIX + "/prices/bulk", data={**form, "fingerprint": fingerprint[1]})
+    staff.post(
+        PREFIX + "/prices/bulk",
+        data={**form, "fingerprint": fingerprint[1], "step_up_password": PASSWORD},
+    )
     with shop_app.app_context():
         assert db.session.get(Variant, variant.id).price_cents == variant.price_cents
         change = db.session.scalars(select(StudioChange)).one()
@@ -325,3 +329,113 @@ def test_staff_get_the_playful_studio_and_owners_do_not(shop_app: Flask) -> None
     assert "gg-play" not in page and "studio-play.css" not in page
     assert "What needs attention?" in page
     assert "gg-play__steps" not in owner.get(PREFIX + "/prices").get_data(as_text=True)
+
+
+def test_held_bulk_change_never_stores_the_password(shop_app: Flask) -> None:
+    staff = _staff_client(shop_app, "maintenance", name="mr.shasanmi")
+    variant = _variant(shop_app)
+    form = {"q": variant.sku, "kind": "set", "amount": "7", "reason": "Shelf count"}
+    page = staff.get(PREFIX + "/inventory/bulk", query_string={**form, "preview": 1})
+    fingerprint = re.search(
+        r'name="fingerprint" value="([0-9a-f]{64})"', page.get_data(as_text=True)
+    )
+    assert fingerprint
+    wrong = staff.post(
+        PREFIX + "/inventory/bulk",
+        data={**form, "fingerprint": fingerprint[1], "step_up_password": "not it at all"},
+    )
+    assert wrong.status_code == 303
+    with shop_app.app_context():
+        assert db.session.scalars(select(StudioChange)).first() is None  # nothing held
+    staff.post(
+        PREFIX + "/inventory/bulk",
+        data={**form, "fingerprint": fingerprint[1], "step_up_password": PASSWORD},
+    )
+    with shop_app.app_context():
+        change = db.session.scalars(select(StudioChange)).one()
+        assert PASSWORD not in change.form_data and "step_up_password" not in change.form_data
+        assert "→ 7" in change.summary
+    _owner_client(shop_app).post(_review_link(shop_app), data={"decision": "approve"})
+    with shop_app.app_context():
+        assert db.session.get(Variant, variant.id).stock_quantity == 7
+        assert db.session.scalars(select(StudioChange)).one().status == ChangeStatus.APPLIED
+
+
+def test_reviewed_bulk_hide_waits_for_the_owner(shop_app: Flask) -> None:
+    staff = _staff_client(shop_app, "maintenance", name="mr.shasanmi")
+    variant = _variant(shop_app)
+    form = {"q": variant.sku, "kind": "hide", "reason": "Out for the season"}
+    page = staff.get(PREFIX + "/products/bulk", query_string={**form, "preview": 1})
+    fingerprint = re.search(
+        r'name="fingerprint" value="([0-9a-f]{64})"', page.get_data(as_text=True)
+    )
+    assert fingerprint
+    staff.post(
+        PREFIX + "/products/bulk",
+        data={**form, "fingerprint": fingerprint[1], "step_up_password": PASSWORD},
+    )
+    with shop_app.app_context():
+        assert db.session.get(Product, variant.product_id).status.value == "active"
+        assert "Hide from the shop" in db.session.scalars(select(StudioChange)).one().summary
+    _owner_client(shop_app).post(_review_link(shop_app), data={"decision": "approve"})
+    with shop_app.app_context():
+        assert db.session.get(Product, variant.product_id).status.value == "draft"
+
+
+def test_owner_opens_a_waiting_change_from_the_changes_page(shop_app: Flask) -> None:
+    staff = _staff_client(shop_app, "sales")
+    variant = _variant(shop_app)
+    staff.post(PREFIX + f"/prices/{variant.id}", data={"price": "12.00", "reason": "raise"})
+    with shop_app.app_context():
+        change_id = db.session.scalars(select(StudioChange)).one().id
+    assert staff.post(PREFIX + f"/changes/{change_id}/review").status_code == 403
+    owner_studio = _staff_client(shop_app, "owner", review_on=False, name="mrs.adetolu")
+    page = owner_studio.get(PREFIX + "/changes").get_data(as_text=True)
+    assert "Review and decide" in page
+    opened = owner_studio.post(PREFIX + f"/changes/{change_id}/review")
+    assert opened.status_code == 302 and "/review/" in opened.headers["Location"]
+    old_link = _review_link(shop_app)  # the emailed link stops working once replaced
+    owner = _owner_client(shop_app)
+    assert "Approve and publish" not in owner.get(old_link).get_data(as_text=True)
+    new_link = opened.headers["Location"].split("localhost", 1)[-1]
+    assert "Approve and publish" in owner.get(new_link).get_data(as_text=True)
+
+
+def test_a_held_change_is_applied_once_even_if_approved_twice_at_once(shop_app: Flask) -> None:
+    from sqlalchemy.orm.attributes import set_committed_value
+
+    staff = _staff_client(shop_app, "maintenance")
+    variant = _variant(shop_app)
+    staff.post(
+        PREFIX + f"/inventory/{variant.id}",
+        data={"quantity": "2", "reason": "Delivery", "mode": "adjust"},
+    )
+    with shop_app.test_request_context("/"):
+        change = db.session.scalars(select(StudioChange)).one()
+        review.decide(change, True, "owner@example.com")
+        # A second approval racing the first still sees "pending" in its own copy.
+        set_committed_value(change, "status", ChangeStatus.PENDING)
+        set_committed_value(change, "decided_by", None)
+        with pytest.raises(service.StudioError, match="already decided"):
+            review.decide(change, True, "owner@example.com")
+        assert db.session.get(Variant, variant.id).stock_quantity == variant.stock_quantity + 2
+        assert len(db.session.scalars(select(InventoryHistory)).all()) == 1
+
+
+def test_a_failed_replay_releases_the_claim(
+    shop_app: Flask, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    staff = _staff_client(shop_app, "sales")
+    variant = _variant(shop_app)
+    staff.post(PREFIX + f"/prices/{variant.id}", data={"price": "12.00", "reason": "raise"})
+
+    def boom(change: StudioChange) -> Any:
+        raise RuntimeError("replay crashed")
+
+    with shop_app.test_request_context("/"):
+        change = db.session.scalars(select(StudioChange)).one()
+        monkeypatch.setattr(review, "_replay", boom)
+        with pytest.raises(RuntimeError):
+            review.decide(change, True, "owner@example.com")
+        change = db.session.scalars(select(StudioChange)).one()
+        assert change.status == ChangeStatus.PENDING and change.decided_by is None

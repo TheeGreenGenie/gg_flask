@@ -128,13 +128,13 @@ def create_admin(
 
 def begin_login(username_raw: str, password: str) -> None:
     generic = AdminError("Username or password is incorrect.")
-    if not ratelimit.allow("admin-login-ip", ratelimit.client_key(), 20, 900):
+    if not ratelimit.allow("admin-login-ip", ratelimit.client_key(), 20, 900, fail_closed=True):
         raise AdminError("Too many attempts. Please wait and try again.")
     try:
         username = normalize_username(username_raw)
     except AdminError:
         raise generic from None
-    if not ratelimit.allow("admin-login-username", username, 10, 900):
+    if not ratelimit.allow("admin-login-username", username, 10, 900, fail_closed=True):
         raise AdminError("Too many attempts. Please wait and try again.")
     admin = db.session.scalar(select(AdminUser).where(AdminUser.username == username))
     try:
@@ -165,7 +165,9 @@ def complete_login(code_raw: str) -> AdminUser:
     if admin is None or not admin.active:
         _clear_admin_session()
         raise AdminError("Your sign-in attempt expired. Start again.")
-    if not ratelimit.allow("admin-otp", f"{admin.id}:{ratelimit.client_key()}", 10, 900):
+    if not ratelimit.allow(
+        "admin-otp", f"{admin.id}:{ratelimit.client_key()}", 10, 900, fail_closed=True
+    ):
         raise AdminError("Too many attempts. Please wait and try again.")
     code = code_raw.replace(" ", "").strip().upper()
     recovery = db.session.scalar(

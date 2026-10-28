@@ -73,6 +73,7 @@ def create_app(config: BaseConfig | str | None = None) -> Flask:
 
     from app.accounts import init_accounts
     from app.admin import init_admin
+    from app.jobs import init_jobs
     from app.media import init_media
     from app.orders import init_orders
     from app.reviews import init_reviews
@@ -82,6 +83,7 @@ def create_app(config: BaseConfig | str | None = None) -> Flask:
 
     init_accounts(app)
     init_admin(app)
+    init_jobs(app)
     init_media(app)
     init_orders(app)
     init_seo(app)

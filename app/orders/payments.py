@@ -6,11 +6,13 @@ import base64
 import hashlib
 import hmac
 import json
+import logging
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from flask import current_app
@@ -28,6 +30,8 @@ from app.orders.models import (
     PaymentProvider,
     PaymentStatus,
 )
+
+log = logging.getLogger(__name__)
 
 
 class PaymentError(RuntimeError):
@@ -152,19 +156,25 @@ def capture_paypal(order: Order) -> None:
     if result.get("status") != "COMPLETED":
         raise PaymentError("PayPal has not completed this payment.")
     try:
-        capture_id = result["purchase_units"][0]["payments"]["captures"][0]["id"]
+        capture = result["purchase_units"][0]["payments"]["captures"][0]
+        capture_id = capture["id"]
     except (KeyError, IndexError, TypeError):
         raise PaymentError("PayPal returned an incomplete capture response.") from None
+    if capture.get("status") != "COMPLETED":
+        raise PaymentError("PayPal has not completed this payment.")
+    _require_amount(order, *_paypal_amount(capture.get("amount")))
     complete(order, str(capture_id))
 
 
-def refund(order: Order) -> None:
+def refund(order: Order) -> str:
     if order.payment_status != PaymentStatus.PAID or not order.provider_reference:
         raise PaymentError("Only a paid order can be refunded.")
     if not provider_configured(order.payment_provider):
         raise PaymentError(f"{order.payment_provider.value.title()} is not configured.")
+    if order.refund_status == "pending":
+        raise PaymentError("A refund is already in progress for this order.")
     if order.payment_provider == PaymentProvider.STRIPE:
-        _request(
+        result = _request(
             "POST",
             "https://api.stripe.com/v1/refunds",
             {
@@ -175,7 +185,7 @@ def refund(order: Order) -> None:
             urllib.parse.urlencode({"payment_intent": order.provider_reference}).encode(),
         )
     else:
-        _request(
+        result = _request(
             "POST",
             f"{current_app.config['PAYPAL_API_BASE']}/v2/payments/captures/{order.provider_reference}/refund",
             {
@@ -185,11 +195,84 @@ def refund(order: Order) -> None:
             },
             b"{}",
         )
-    order.payment_status = PaymentStatus.REFUNDED
-    order.status = OrderStatus.REFUNDED
-    order.refunded_cents = order.total_cents
-    providers.reverse_tax_transaction(order)
+    reference = str(result.get("id") or "")
+    if not reference:
+        raise PaymentError("The payment provider did not confirm the refund.")
+    order.refund_reference = reference[:80]
+    return _apply_refund_state(order, result)
+
+
+REFUND_STATES = {
+    # Stripe refund statuses
+    "succeeded": "completed",
+    "pending": "pending",
+    "requires_action": "pending",
+    "failed": "failed",
+    "canceled": "failed",
+    # PayPal refund statuses
+    "COMPLETED": "completed",
+    "PENDING": "pending",
+    "FAILED": "failed",
+    "CANCELLED": "failed",
+}
+
+
+def _apply_refund_state(order: Order, result: dict[str, Any]) -> str:
+    """Store the provider's refund state; only a completed refund marks the order refunded."""
+    state = REFUND_STATES.get(str(result.get("status", "")), "pending")
+    if order.payment_provider == PaymentProvider.STRIPE:
+        cents, currency = result.get("amount"), result.get("currency")
+    else:
+        cents, currency = _paypal_amount(result.get("amount"))
+    if (
+        state == "completed"
+        and cents is not None
+        and (
+            int(cents) != order.total_cents or str(currency or "").upper() != order.currency.upper()
+        )
+    ):
+        log.warning("refund_amount_mismatch order=%s", order.public_id)
+        state = "failed"
+    order.refund_status = state
+    if state == "completed":
+        order.payment_status = PaymentStatus.REFUNDED
+        order.status = OrderStatus.REFUNDED
+        order.refunded_cents = order.total_cents
+        providers.reverse_tax_transaction(order)
     db.session.commit()
+    if state == "failed":
+        raise PaymentError("The payment provider did not complete the refund.")
+    return state
+
+
+def sync_refunds() -> dict[str, int]:
+    """Ask the provider about refunds still pending and finish the ones that completed."""
+    counts = {"completed": 0, "pending": 0, "failed": 0, "error": 0}
+    pending = db.session.scalars(
+        select(Order).where(Order.refund_status == "pending", Order.refund_reference.is_not(None))
+    ).all()
+    for order in pending:
+        try:
+            if order.payment_provider == PaymentProvider.STRIPE:
+                result = _request(
+                    "GET",
+                    f"https://api.stripe.com/v1/refunds/{urllib.parse.quote(str(order.refund_reference))}",
+                    {"Authorization": f"Bearer {current_app.config['STRIPE_SECRET_KEY']}"},
+                    b"",
+                )
+            else:
+                result = _request(
+                    "GET",
+                    f"{current_app.config['PAYPAL_API_BASE']}/v2/payments/refunds/"
+                    f"{urllib.parse.quote(str(order.refund_reference))}",
+                    {"Authorization": f"Bearer {_paypal_token()}"},
+                    b"",
+                )
+            counts[_apply_refund_state(order, result)] += 1
+        except PaymentError:
+            db.session.rollback()
+            counts["failed" if order.refund_status == "failed" else "error"] += 1
+    return counts
 
 
 def handle_stripe(body: bytes, signature: str) -> bool:
@@ -289,9 +372,10 @@ def _record_and_process(
     if paid_type:
         if order is None:
             raise PaymentError("Webhook references an unknown order.")
-        amount = obj.get("amount_total") if provider == PaymentProvider.STRIPE else None
-        if amount is not None and int(amount) != order.total_cents:
-            raise PaymentError("Webhook payment amount does not match the order.")
+        if provider == PaymentProvider.STRIPE:
+            _require_amount(order, obj.get("amount_total"), obj.get("currency"))
+        else:
+            _require_amount(order, *_paypal_amount(obj.get("amount")))
         reference = (
             obj.get("payment_intent") if provider == PaymentProvider.STRIPE else obj.get("id")
         )
@@ -307,6 +391,35 @@ def _record_and_process(
     )
     db.session.commit()
     return paid_type
+
+
+def _paypal_amount(amount: Any) -> tuple[int | None, str | None]:
+    """PayPal sends {"currency_code": "USD", "value": "17.99"}; returns (cents, currency)."""
+    if not isinstance(amount, dict):
+        return None, None
+    try:
+        cents = Decimal(str(amount["value"])) * 100
+    except (KeyError, InvalidOperation):
+        return None, None
+    if cents != cents.to_integral_value():
+        return None, None
+    return int(cents), str(amount.get("currency_code") or "") or None
+
+
+def _require_amount(order: Order, cents: Any, currency: Any) -> None:
+    """A payment only counts when the provider confirms exactly this order's amount and currency."""
+    try:
+        matches = (
+            cents is not None
+            and currency is not None
+            and int(cents) == order.total_cents
+            and str(currency).upper() == order.currency.upper()
+        )
+    except (TypeError, ValueError):
+        matches = False
+    if not matches:
+        log.warning("payment_amount_mismatch order=%s", order.public_id)
+        raise PaymentError("The payment amount or currency does not match the order.")
 
 
 def _valid_stripe_signature(body: bytes, header: str, secret: str) -> bool:

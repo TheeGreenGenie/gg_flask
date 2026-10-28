@@ -70,3 +70,8 @@
 .gg-studio__change { padding: 1rem; border: 1px solid var(--gg-line); border-radius: .75rem; background: var(--gg-paper); }
 .gg-studio__change-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .5rem; }
 .gg-studio__change-head small { color: var(--gg-muted); }
+
+/* Password step-up on risky actions (bulk changes, unpublishing) */
+.gg-studio__confirm { display: grid; gap: .4rem; max-width: 26rem; margin: 1.25rem 0 1rem; font-weight: 700; }
+.gg-studio__confirm input { min-height: 2.75rem; }
+.gg-studio form + section[aria-labelledby="bulk-preview"] { margin-top: 2.25rem; }

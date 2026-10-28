@@ -17,8 +17,10 @@ WorkingDirectory=/srv/gg_flask
 EnvironmentFile=/etc/gg-flask/env
 # Listen on localhost only; Apache is the public front door. 3 workers suits a small VPS
 # (rule of thumb: 2 x CPU cores + 1).
+# No gunicorn access log: Apache already logs each request with secrets removed
+# (deploy/apache-site.example.conf); a second raw log would record one-time links.
 ExecStart=/srv/gg_flask/.venv/bin/gunicorn --bind 127.0.0.1:8000 --workers 3 \
-    --timeout 30 --access-logfile - --error-logfile - wsgi:app
+    --timeout 30 --error-logfile - wsgi:app
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=on-failure
 RestartSec=3

@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo
 import pytest
 from flask import Flask
 from PIL import Image
+from sqlalchemy.orm.attributes import set_committed_value
 
 from app.catalog.models import Category, Product, ProductImage, ProductStatus, Variant, utcnow
 from app.content import blog as blog_service
@@ -21,6 +22,7 @@ from app.studio.models import (
     ApprovalStatus,
     InventoryHistory,
     PriceHistory,
+    ProductHistory,
     SaleStatus,
     StudioAudit,
     StudioLoginRequest,
@@ -798,7 +800,12 @@ def test_bulk_price_preview_saves_nothing_then_applies_with_history(catalog_app:
         assert db.session.query(PriceHistory).count() == 0
 
     response = client.post(
-        PREFIX + "/prices/bulk", data={**_bulk_form(category_id), "fingerprint": fingerprint[1]}
+        PREFIX + "/prices/bulk",
+        data={
+            **_bulk_form(category_id),
+            "fingerprint": fingerprint[1],
+            "step_up_password": NEW_PASSWORD,
+        },
     )
     assert response.status_code == 302 and response.headers["Location"].endswith("/prices/history")
     with catalog_app.app_context():
@@ -825,7 +832,11 @@ def test_bulk_price_refuses_a_stale_preview(catalog_app: Flask) -> None:
         db.session.commit()
     response = client.post(
         PREFIX + "/prices/bulk",
-        data={**_bulk_form(category_id), "fingerprint": fingerprint[1]},
+        data={
+            **_bulk_form(category_id),
+            "fingerprint": fingerprint[1],
+            "step_up_password": NEW_PASSWORD,
+        },
         follow_redirects=True,
     )
     assert b"changed since the preview" in response.data
@@ -856,3 +867,217 @@ def test_bulk_price_rounding_to_99() -> None:
     assert service._bulk_new_price(4599, "set", Decimal("45.99"), True) == 4599
     assert service._bulk_new_price(4500, "lower_amount", Decimal("5"), True) == 3999
     assert service._bulk_new_price(4000, "raise_amount", Decimal("2.50"), False) == 4250
+
+
+def _preview_fingerprint(client, path: str, form: dict[str, str]) -> str:  # type: ignore[no-untyped-def]
+    text = client.get(PREFIX + path, query_string={**form, "preview": 1}).get_data(as_text=True)
+    found = re.search(r'name="fingerprint" value="([0-9a-f]{64})"', text)
+    assert found, text[-2000:]
+    return found[1]
+
+
+def test_bulk_stock_previews_then_applies_with_history(catalog_app: Flask) -> None:
+    client = catalog_app.test_client()
+    _approved_cookie(catalog_app, client, roles="editor", change=True)
+    category_id, before = _first_category(catalog_app)
+    with catalog_app.app_context():
+        stock = {v: db.session.get(Variant, v).stock_quantity for v, _ in before}
+    form = {"category": str(category_id), "kind": "add", "amount": "3", "reason": "Delivery"}
+    fingerprint = _preview_fingerprint(client, "/inventory/bulk", form)
+    with catalog_app.app_context():
+        assert db.session.query(InventoryHistory).count() == 0  # preview saves nothing
+    response = client.post(
+        PREFIX + "/inventory/bulk",
+        data={**form, "fingerprint": fingerprint, "step_up_password": NEW_PASSWORD},
+    )
+    assert response.headers["Location"].endswith("/inventory/history")
+    with catalog_app.app_context():
+        for variant_id, quantity in stock.items():
+            variant = db.session.get(Variant, variant_id)
+            expected = quantity + 3 if variant.track_inventory else quantity
+            assert variant.stock_quantity == expected
+        assert all(h.reason == "Bulk: Delivery" for h in db.session.query(InventoryHistory))
+
+
+def test_bulk_stock_skips_going_below_zero(catalog_app: Flask) -> None:
+    category_id, before = _first_category(catalog_app)
+    with catalog_app.app_context():
+        db.session.get(Variant, before[0][0]).stock_quantity = 1
+        db.session.commit()
+        form = {"category": str(category_id), "kind": "remove", "amount": "2", "reason": "Damaged"}
+        row = next(r for r in service.plan_bulk_stock(form).rows if r.variant.id == before[0][0])
+        assert row.skip == "Would go below zero" and row.after == 1
+
+
+def test_risky_actions_need_the_password_again(catalog_app: Flask) -> None:
+    client = catalog_app.test_client()
+    _approved_cookie(catalog_app, client, roles="editor", change=True)
+    category_id, before = _first_category(catalog_app)
+    form = {"category": str(category_id), "kind": "set", "amount": "50", "reason": "Recount"}
+    fingerprint = _preview_fingerprint(client, "/inventory/bulk", form)
+    for password in ("", "wrong password here"):
+        page = client.post(
+            PREFIX + "/inventory/bulk",
+            data={**form, "fingerprint": fingerprint, "step_up_password": password},
+            follow_redirects=True,
+        )
+        assert b"password is not right" in page.data
+    with catalog_app.app_context():
+        assert db.session.query(InventoryHistory).count() == 0
+        failures = db.session.query(StudioAudit).filter_by(action="studio.step_up.failed").count()
+        assert failures == 2
+    for _ in range(service.STEP_UP_TRIES):
+        client.post(
+            PREFIX + "/inventory/bulk",
+            data={**form, "fingerprint": fingerprint, "step_up_password": "nope nope nope"},
+        )
+    locked = client.post(
+        PREFIX + "/inventory/bulk",
+        data={**form, "fingerprint": fingerprint, "step_up_password": NEW_PASSWORD},
+        follow_redirects=True,
+    )
+    assert b"Too many wrong passwords" in locked.data
+
+
+def test_unpublishing_asks_for_the_password_but_publishing_does_not(app: Flask) -> None:
+    client = app.test_client()
+    _approved_cookie(app, client, roles="editor", change=True)
+    client.post(PREFIX + "/blog/new", data=_blog_form())
+    with app.app_context():
+        post_id = db.session.query(BlogPost.id).scalar()
+    client.post(PREFIX + f"/blog/{post_id}/publication", data={"action": "publish"})
+    assert client.get("/blog/studio-journal-story/").status_code == 200
+    page = client.post(
+        PREFIX + f"/blog/{post_id}/publication", data={"action": "unpublish"}, follow_redirects=True
+    )
+    assert b"password is not right" in page.data
+    assert client.get("/blog/studio-journal-story/").status_code == 200
+    client.post(
+        PREFIX + f"/blog/{post_id}/publication",
+        data={"action": "unpublish", "step_up_password": NEW_PASSWORD},
+    )
+    assert client.get("/blog/studio-journal-story/").status_code == 404
+
+
+def _active_product(app: Flask) -> tuple[int, str, list[str]]:
+    with app.app_context():
+        product = db.session.query(Product).filter_by(status=ProductStatus.ACTIVE).first()
+        assert product is not None
+        return product.id, product.name, [str(c.id) for c in product.categories]
+
+
+def test_hiding_a_product_is_recorded_and_can_be_undone(catalog_app: Flask) -> None:
+    client = catalog_app.test_client()
+    _approved_cookie(catalog_app, client, roles="editor", change=True)
+    product_id, _, _ = _active_product(catalog_app)
+    client.post(
+        PREFIX + f"/products/{product_id}/visibility",
+        data={"live": "0", "reason": "Sold out", "expected": "active"},
+    )
+    with catalog_app.app_context():
+        assert db.session.get(Product, product_id).status == ProductStatus.DRAFT
+        history_id = db.session.query(ProductHistory).one().id
+    page = client.get(PREFIX + "/products/history").get_data(as_text=True)
+    assert "Live → Hidden" in page and "Sold out" in page
+    done = client.post(PREFIX + f"/products/history/{history_id}/undo", follow_redirects=True)
+    assert b"Product change undone" in done.data
+    with catalog_app.app_context():
+        assert db.session.get(Product, product_id).status == ProductStatus.ACTIVE
+        assert db.session.get(ProductHistory, history_id).undone_at is not None
+
+
+def test_details_edit_can_be_undone_but_not_after_a_later_change(catalog_app: Flask) -> None:
+    client = catalog_app.test_client()
+    _approved_cookie(catalog_app, client, roles="editor", change=True)
+    product_id, name, category_ids = _active_product(catalog_app)
+
+    def save(new_name: str) -> None:
+        client.post(
+            PREFIX + f"/products/{product_id}",
+            data={"name": new_name, "summary": "", "description": "", "category_ids": category_ids},
+        )
+
+    save("First New Name")
+    save("Second New Name")
+    with catalog_app.app_context():
+        first, second = db.session.query(ProductHistory).order_by(ProductHistory.id).all()
+        first_id, second_id = first.id, second.id
+    refused = client.post(PREFIX + f"/products/history/{first_id}/undo", follow_redirects=True)
+    assert b"cannot be safely undone" in refused.data
+    client.post(PREFIX + f"/products/history/{second_id}/undo")
+    with catalog_app.app_context():
+        assert db.session.get(Product, product_id).name == "First New Name"
+    client.post(PREFIX + f"/products/history/{first_id}/undo")
+    with catalog_app.app_context():
+        assert db.session.get(Product, product_id).name == name
+
+
+def test_bulk_hide_previews_needs_password_and_applies(catalog_app: Flask) -> None:
+    client = catalog_app.test_client()
+    _approved_cookie(catalog_app, client, roles="editor", change=True)
+    category_id, _ = _first_category(catalog_app)
+    form = {"category": str(category_id), "kind": "hide", "reason": "End of season"}
+    fingerprint = _preview_fingerprint(client, "/products/bulk", form)
+    with catalog_app.app_context():
+        live = [
+            p.id
+            for p in db.session.query(Product).filter_by(status=ProductStatus.ACTIVE)
+            if any(c.id == category_id or c.parent_id == category_id for c in p.categories)
+        ]
+        assert live
+    refused = client.post(
+        PREFIX + "/products/bulk", data={**form, "fingerprint": fingerprint}, follow_redirects=True
+    )
+    assert b"password is not right" in refused.data
+    client.post(
+        PREFIX + "/products/bulk",
+        data={**form, "fingerprint": fingerprint, "step_up_password": NEW_PASSWORD},
+    )
+    with catalog_app.app_context():
+        assert all(db.session.get(Product, i).status == ProductStatus.DRAFT for i in live)
+        reasons = {h.reason for h in db.session.query(ProductHistory)}
+        assert reasons == {"Bulk: End of season"}
+
+
+def test_each_role_undoes_only_its_own_kind_of_product_change(catalog_app: Flask) -> None:
+    with catalog_app.app_context():
+        product = db.session.query(Product).filter_by(status=ProductStatus.ACTIVE).first()
+        details = ProductHistory(
+            product_id=product.id, kind="details", before="{}", after="{}", reason=""
+        )
+        hidden = ProductHistory(
+            product_id=product.id, kind="visibility", before="{}", after="{}", reason=""
+        )
+        db.session.add_all([details, hidden])
+        db.session.commit()
+        details_id, hidden_id = details.id, hidden.id
+    client = catalog_app.test_client()
+    _approved_cookie(catalog_app, client, roles="maintenance", change=True)
+    assert client.post(PREFIX + f"/products/history/{details_id}/undo").status_code == 403
+    assert client.post(PREFIX + f"/products/history/{hidden_id}/undo").status_code == 302
+
+
+def test_one_approval_can_never_become_two_sessions(app: Flask, client) -> None:
+    _user(app)
+    client.post(PREFIX + "/", data={"username": "ada", "password": PASSWORD})
+    with app.test_request_context(PREFIX + "/"):
+        record = db.session.query(StudioLoginRequest).one()
+        service.decide(record, True)
+        service.consume_approval(record)
+        # A second request racing the first still sees "approved" in its own (stale) copy.
+        set_committed_value(record, "status", ApprovalStatus.APPROVED)
+        with pytest.raises(service.StudioError, match="already been used"):
+            service.consume_approval(record)
+        assert db.session.query(StudioSession).count() == 1
+
+
+def test_approve_cannot_override_a_denial(app: Flask, client) -> None:
+    _user(app)
+    client.post(PREFIX + "/", data={"username": "ada", "password": PASSWORD})
+    with app.test_request_context(PREFIX + "/"):
+        record = db.session.query(StudioLoginRequest).one()
+        service.decide(record, False)
+        set_committed_value(record, "status", ApprovalStatus.PENDING)  # a racing request's view
+        with pytest.raises(service.StudioError, match="already decided"):
+            service.decide(record, True)
+        assert db.session.get(StudioLoginRequest, record.id).status == ApprovalStatus.DENIED

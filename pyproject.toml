@@ -27,6 +27,9 @@ dev = [
     "ruff>=0.8",
     "mypy>=1.13",
     "pip-audit>=2.7",
+    # Lets the `flask` command read the local .env (Flask loads it automatically when present).
+    # Production never relies on it: the server passes settings through /etc/gg-flask/env.
+    "python-dotenv>=1.0,<2",
 ]
 # Design/QA helpers (scripts/): prototype image prep and responsive screenshots.
 tools = [

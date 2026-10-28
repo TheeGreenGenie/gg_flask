@@ -7,7 +7,7 @@
         "owner"
       ],
       "self_approve": true,
-      "sms": true
+      "admin": "owner"
     },
     {
       "username": "mrs.adetolu",

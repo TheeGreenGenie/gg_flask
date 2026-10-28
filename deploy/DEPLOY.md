@@ -133,7 +133,7 @@ curl -s http://127.0.0.1:8000/health/ready     # {"status": "ok", ...}
 
 ```bash
 sudo cp /srv/gg_flask/deploy/apache-site.example.conf /etc/apache2/sites-available/gg-flask.conf
-sudo nano /etc/apache2/sites-available/gg-flask.conf   # set REPLACE_DOMAIN, REPLACE_OWNER_IP
+sudo nano /etc/apache2/sites-available/gg-flask.conf   # set REPLACE_DOMAIN, REPLACE_OWNER_IP, REPLACE_WITH_STUDIO_PATH (= STUDIO_PATH)
 sudo certbot certonly --apache -d REPLACE_DOMAIN
 sudo a2ensite gg-flask && sudo apachectl configtest && sudo systemctl reload apache2
 ```
@@ -161,6 +161,16 @@ sudo /srv/gg_flask/deploy/backup.sh && ls -l /var/backups/gg-flask/db   # first 
 
 Copy `/var/backups/gg-flask` off the server regularly (another machine or cloud storage).
 
+Every job (and the backup) leaves a heartbeat in `/srv/gg_flask/instance/jobs/`. A few minutes after
+setup, and whenever something looks off, check them all at once:
+
+```bash
+sudo -u ggflask bash -c 'set -a; . /etc/gg-flask/env; set +a; cd /srv/gg_flask && .venv/bin/flask --app wsgi jobs check'
+```
+
+Each line says `ok` or `PROBLEM` (failed, overdue, or never ran). The daily summary email repeats any
+problem, so you hear about a stopped job or a missed backup without logging in.
+
 ## 10. Smoke test (staging2)
 
 - `https://DOMAIN/` loads; `curl -sI https://DOMAIN/ | grep -i strict-transport` shows HSTS.
@@ -169,6 +179,14 @@ Copy `/var/backups/gg-flask` off the server regularly (another machine or cloud 
 - `https://DOMAIN/admin/` works from your IP and is refused from a phone on mobile data.
 - An unknown address under the Studio path shows the normal 404; Studio sign-in sends the ntfy
   notification to your phone.
+- **Studio approvals end to end:** sign in as a staff account on the computer; on your phone, tap
+  the ntfy notification's "Review sign-in", sign in to `/admin` as owner on the phone, check the
+  match code matches the computer, approve; the computer continues into the Studio.
+- **tgg shortcut:** in a browser already signed in to `/admin` as owner, sign in to the Studio as
+  tgg; it goes straight in with no notification. In a private window (no admin sign-in) it waits
+  for approval instead.
+- `sudo -u ggflask ... flask --app wsgi jobs check` (see step 9) lists every job as ok after the
+  first night.
 - With sandbox keys: place a Stripe and a PayPal test order; the confirmation email arrives.
 - `journalctl -t gg-flask-job --since "10 min ago"` shows the minute jobs running.
 

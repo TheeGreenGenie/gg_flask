@@ -125,8 +125,8 @@ def check_password(password: str, email: str) -> None:
         raise AccountError("That password is too easy to guess. Try a longer phrase.")
 
 
-def _limit(bucket: str, key: str, limit: int, window: int) -> None:
-    if not ratelimit.allow(bucket, key, limit, window):
+def _limit(bucket: str, key: str, limit: int, window: int, *, fail_closed: bool = False) -> None:
+    if not ratelimit.allow(bucket, key, limit, window, fail_closed=fail_closed):
         raise RateLimited("Too many attempts. Please wait a few minutes and try again.")
 
 
@@ -239,12 +239,12 @@ def _issue_email_verification(user: User, email_opt_in: bool, sms_opt_in: bool) 
 
 def resend_verification(email_raw: str) -> bool:
     """Best-effort resend with a generic browser response to prevent account discovery."""
-    _limit("verify-resend-ip", ratelimit.client_key(), 10, 3600)
+    _limit("verify-resend-ip", ratelimit.client_key(), 10, 3600, fail_closed=True)
     try:
         email = normalize_email(email_raw)
     except AccountError:
         return False
-    _limit("verify-resend-email", email, 3, 3600)
+    _limit("verify-resend-email", email, 3, 3600, fail_closed=True)
     user = db.session.scalar(select(User).where(User.email == email))
     if user is None or user.email_verified_at is not None:
         return False
@@ -558,12 +558,12 @@ def reset_available() -> bool:
 
 def start_reset(email_raw: str) -> None:
     """Email a single-use link if the account exists. Same outcome either way."""
-    _limit("reset-ip", ratelimit.client_key(), 10, 3600)
+    _limit("reset-ip", ratelimit.client_key(), 10, 3600, fail_closed=True)
     try:
         email = normalize_email(email_raw)
     except AccountError:
         return
-    _limit("reset-email", email, 3, 3600)
+    _limit("reset-email", email, 3, 3600, fail_closed=True)
     user = db.session.scalar(select(User).where(User.email == email))
     if user is None or user.email_verified_at is None or _linked_admin(user) is not None:
         return

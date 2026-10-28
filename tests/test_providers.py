@@ -233,8 +233,14 @@ def test_order_stores_rate_and_tax_and_records_transaction(
         assert fake.form()["reference"] == order.public_id
 
         catalog_app.config["STRIPE_WEBHOOK_SECRET"] = "whsec_test"
-        monkeypatch.setattr(payments, "_request", lambda *a, **k: {})
-        payments.refund(order)
+        refund_reply = {
+            "id": "re_1",
+            "status": "succeeded",
+            "amount": order.total_cents,
+            "currency": "usd",
+        }
+        monkeypatch.setattr(payments, "_request", lambda *a, **k: refund_reply)
+        assert payments.refund(order) == "completed"
         assert any("/create_reversal" in call[0] for call in fake.calls)
         db.session.rollback()
 

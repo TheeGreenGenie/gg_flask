@@ -41,7 +41,7 @@ from flask import (
     request,
     url_for,
 )
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from werkzeug.datastructures import MultiDict
 from werkzeug.exceptions import HTTPException
 from werkzeug.utils import secure_filename
@@ -57,6 +57,7 @@ from app.studio.models import (
     ChangeStatus,
     InventoryHistory,
     PriceHistory,
+    ProductHistory,
     StudioChange,
     StudioRole,
     StudioSale,
@@ -180,6 +181,46 @@ def _price_bulk(args: dict[str, Any], form: MultiDict[str, str]) -> Described:
     if len(changes) > 60:
         lines.append(f"…and {len(changes) - 60} more")
     return Described(lines, plan.fingerprint)
+
+
+def _inventory_bulk(args: dict[str, Any], form: MultiDict[str, str]) -> Described:
+    from app.studio import service
+
+    try:
+        plan = service.plan_bulk_stock(form.to_dict())
+    except service.StudioError:
+        return Described([], needs_review=False)  # the view refuses it with the reason
+    changes = plan.changes
+    lines = [f"Change stock of {len(changes)} option(s): {plan.summary}", f"Reason: {plan.reason}"]
+    lines += [f"{_variant_label(row.variant)}: {row.before} → {row.after}" for row in changes[:60]]
+    if len(changes) > 60:
+        lines.append(f"…and {len(changes) - 60} more")
+    return Described(lines, plan.fingerprint)
+
+
+def _product_bulk(args: dict[str, Any], form: MultiDict[str, str]) -> Described:
+    from app.studio import service
+
+    try:
+        plan = service.plan_bulk_visibility(form.to_dict())
+    except service.StudioError:
+        return Described([], needs_review=False)  # the view refuses it with the reason
+    changes = plan.changes
+    lines = [f"{plan.summary} ({len(changes)} product(s))", f"Reason: {plan.reason}"]
+    lines += [row.product.name for row in changes[:60]]
+    if len(changes) > 60:
+        lines.append(f"…and {len(changes) - 60} more")
+    return Described(lines, plan.fingerprint)
+
+
+def _product_undo(args: dict[str, Any], form: MultiDict[str, str]) -> Described:
+    history = _get(ProductHistory, args["history_id"])
+    product = _get(Product, history.product_id)
+    what = "hide/put back live" if history.kind == "visibility" else "details edit"
+    return Described(
+        [f"Undo a {what} on {product.name} (change #{history.id})"],
+        _fp("product-undo", history.id, history.undone_at, product.status, product.name),
+    )
 
 
 def _product_edit(args: dict[str, Any], form: MultiDict[str, str]) -> Described:
@@ -374,15 +415,28 @@ def _word_remove(args: dict[str, Any], form: MultiDict[str, str]) -> Described:
     return Described([f"Remove moderation word “{word.word}” ({word.language})"], _fp(word.id))
 
 
+# Risky actions ask for the password again before they run or are held (owner plan: bulk price
+# changes, removing a blog post; bulk stock added alongside). The password is never stored.
+PASSWORD_FIELD = "step_up_password"  # noqa: S105 - a form field name, not a secret
+STEP_UP: dict[str, Callable[[MultiDict[str, str]], bool]] = {
+    "studio.price_bulk_apply": lambda form: True,
+    "studio.inventory_bulk_apply": lambda form: True,
+    "studio.product_bulk_apply": lambda form: True,
+    "studio.blog_publication": lambda form: form.get("action") == "unpublish",
+}
+
 # endpoint -> (describer, the page's original roles for the permission pre-check)
 HELD: dict[str, tuple[Describer, tuple[StudioRole, ...]]] = {
     "studio.inventory_update": (_inventory_update, (StudioRole.EDITOR, StudioRole.INVENTORY)),
     "studio.inventory_undo": (_inventory_undo, (StudioRole.EDITOR, StudioRole.INVENTORY)),
+    "studio.inventory_bulk_apply": (_inventory_bulk, (StudioRole.EDITOR, StudioRole.INVENTORY)),
     "studio.price_update": (_price_update, (StudioRole.EDITOR,)),
     "studio.price_undo": (_price_undo, (StudioRole.EDITOR,)),
     "studio.price_bulk_apply": (_price_bulk, (StudioRole.EDITOR,)),
     "studio.product_edit": (_product_edit, (StudioRole.EDITOR,)),
     "studio.product_visibility": (_product_visibility, (StudioRole.EDITOR,)),
+    "studio.product_bulk_apply": (_product_bulk, (StudioRole.EDITOR,)),
+    "studio.product_undo": (_product_undo, (StudioRole.EDITOR,)),
     "studio.product_image_upload": (_image_upload, (StudioRole.EDITOR,)),
     "studio.product_image_remove": (_image_remove, (StudioRole.EDITOR,)),
     "studio.sale_confirm": (_sale_confirm, (StudioRole.EDITOR,)),
@@ -433,7 +487,9 @@ def hold(user: StudioUser, endpoint: str, view_args: dict[str, Any], described: 
             }
         )
     upload_info = json.dumps(held_files) if held_files else None
-    form_pairs = [(k, v) for k, v in request.form.items(multi=True) if k != "csrf_token"]
+    form_pairs = [
+        (k, v) for k, v in request.form.items(multi=True) if k not in ("csrf_token", PASSWORD_FIELD)
+    ]
     change = StudioChange(
         token_hash=_hash(token),
         user_id=user.id,
@@ -476,7 +532,9 @@ def _notify_owner(change: StudioChange, token: str) -> None:
         log.exception("studio_change_notification_failed change=%s", change.id)
         sent = False
     if not sent:
-        log.warning("studio_change_notification_not_sent change=%s link=%s", change.id, link)
+        # Never log the link: it opens the approval page. The owner finds held changes on
+        # their Studio "Changes" page instead.
+        log.warning("studio_change_notification_not_sent change=%s", change.id)
 
 
 def gate(endpoint: str, view: Callable[..., Any]) -> Callable[..., Any]:
@@ -488,6 +546,18 @@ def gate(endpoint: str, view: Callable[..., Any]) -> Callable[..., Any]:
         if request.method != "POST" or g.get("studio_replay"):
             return view(*args, **kwargs)
         user = service.current_user()
+        back = request.referrer or ""
+        if not back.startswith(request.host_url):
+            back = url_for("studio.dashboard")
+        risky = endpoint in STEP_UP and STEP_UP[endpoint](request.form)
+        if user is not None and not user.must_change_password and risky:
+            if not permissions.can(user, endpoint, legacy_roles):
+                abort(403)
+            try:
+                service.confirm_password(user, request.form.get(PASSWORD_FIELD, ""))
+            except service.StudioError as exc:
+                flash(str(exc), "error")
+                return redirect(back, code=303)
         if user is None or user.must_change_password or not user.requires_review:
             return view(*args, **kwargs)  # the view's own sign-in/role checks apply
         if not permissions.can(user, endpoint, legacy_roles):
@@ -501,8 +571,7 @@ def gate(endpoint: str, view: Callable[..., Any]) -> Callable[..., Any]:
             " see “My changes”.",
             "success",
         )
-        back = request.referrer or ""
-        if not back.startswith(request.host_url):
+        if back == url_for("studio.dashboard"):
             back = url_for("studio.changes")
         return redirect(back, code=303)
 
@@ -518,6 +587,14 @@ def install(app: Flask) -> None:
 
 
 # ---------- deciding ----------
+
+
+def fresh_review_token(change: StudioChange) -> str:
+    """A new one-use review link for a waiting change (replaces the emailed one)."""
+    token = secrets.token_urlsafe(32)
+    change.token_hash = _hash(token)
+    db.session.commit()
+    return token
 
 
 def change_by_token(token: str) -> StudioChange | None:
@@ -565,12 +642,32 @@ def _discard_upload(change: StudioChange) -> None:
 def decide(change: StudioChange, approve: bool, decided_by: str) -> StudioChange:
     from app.studio import service
 
-    if change.status != ChangeStatus.PENDING:
+    # Claim the change in one conditional UPDATE so two simultaneous approvals (double click, two
+    # tabs) can never replay it twice; only the request that claims it goes on.
+    claimed = db.session.execute(
+        update(StudioChange)
+        .where(
+            StudioChange.id == change.id,
+            StudioChange.status == ChangeStatus.PENDING,
+            StudioChange.decided_by.is_(None),
+        )
+        .values(decided_by=decided_by[:254])
+        .execution_options(synchronize_session=False)
+    ).rowcount  # type: ignore[attr-defined]
+    db.session.commit()
+    db.session.refresh(change)
+    if claimed != 1:
         raise service.StudioError("This change was already decided.")
-    if approve:
-        status, message = _replay(change)
-    else:
-        status, message = ChangeStatus.REJECTED, "Rejected by the owner."
+    try:
+        if approve:
+            status, message = _replay(change)
+        else:
+            status, message = ChangeStatus.REJECTED, "Rejected by the owner."
+    except Exception:
+        db.session.rollback()
+        change.decided_by = None  # release the claim so the owner can try again
+        db.session.commit()
+        raise
     change.status = status
     change.result = message[:2000]
     change.decided_by = decided_by[:254]

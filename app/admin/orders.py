@@ -6,11 +6,14 @@ from datetime import UTC, datetime
 
 from sqlalchemy import select
 
+from app import mail
 from app.admin import service
 from app.admin.models import AdminUser
+from app.catalog.models import utcnow
 from app.extensions import db
 from app.orders import payments
 from app.orders.models import (
+    TRACKING_CARRIERS,
     Coupon,
     DiscountType,
     Order,
@@ -55,6 +58,53 @@ def change_status(admin: AdminUser, order: Order, raw_status: str) -> None:
     db.session.commit()
 
 
+def mark_shipped(
+    admin: AdminUser, order: Order, carrier_raw: str, number_raw: str, notify: bool
+) -> bool:
+    """Record the tracking number and move the order to Shipped; returns whether it was emailed.
+
+    Labels are bought outside the app (Pirate Ship / Click-N-Ship), so the owner pastes the
+    number here. A shipped order can have its number corrected (and the email sent again).
+    """
+    if order.status not in (OrderStatus.PAID, OrderStatus.PROCESSING, OrderStatus.SHIPPED):
+        raise OrderAdminError("Only paid orders can be marked as shipped.")
+    carrier = carrier_raw.strip().lower()
+    if carrier not in TRACKING_CARRIERS:
+        raise OrderAdminError("Choose the carrier.")
+    number = "".join(number_raw.split()).upper()
+    if not 8 <= len(number) <= 40 or not number.isalnum():
+        raise OrderAdminError("Paste the tracking number (8 to 40 letters and numbers).")
+    before = {
+        "status": order.status.value,
+        "carrier": order.tracking_carrier,
+        "number": order.tracking_number,
+    }
+    order.tracking_carrier, order.tracking_number = carrier, number
+    if order.status != OrderStatus.SHIPPED:
+        order.status = OrderStatus.SHIPPED
+        order.shipped_at = utcnow()
+    service.audit(
+        admin,
+        "order.shipped",
+        "order",
+        str(order.id),
+        {"before": before, "carrier": carrier, "number": number, "emailed": notify},
+    )
+    db.session.commit()
+    if not notify:
+        return False
+    name = TRACKING_CARRIERS[carrier][0]
+    body = (
+        f"Good news: your order {order.public_id} is on its way!\n\n"
+        f"Carrier: {name}\nTracking number: {number}\nTrack it here: {order.tracking_url}\n\n"
+        "Thank you for shopping with GG Afrikan Eleganz."
+    )
+    try:
+        return mail.send(order.email, f"Your order {order.public_id} has shipped", body)
+    except Exception:  # noqa: BLE001 - the order is saved; never fail the owner's request
+        return False
+
+
 def cancel_unpaid(admin: AdminUser, order: Order) -> None:
     if order.status != OrderStatus.PENDING_PAYMENT:
         raise OrderAdminError("Paid orders must be refunded through their payment provider.")
@@ -75,19 +125,29 @@ def cancel_unpaid(admin: AdminUser, order: Order) -> None:
     db.session.commit()
 
 
-def refund(admin: AdminUser, order: Order) -> None:
+def refund(admin: AdminUser, order: Order) -> str:
+    """Ask the provider for a full refund; returns "completed", or "pending" while it works."""
     try:
-        payments.refund(order)
+        state = payments.refund(order)
     except payments.PaymentError as exc:
+        service.audit(
+            admin,
+            "order.refund_failed",
+            "order",
+            str(order.id),
+            {"refund_status": order.refund_status, "refund_reference": order.refund_reference},
+        )
+        db.session.commit()
         raise OrderAdminError(str(exc)) from None
     service.audit(
         admin,
-        "order.refunded",
+        "order.refunded" if state == "completed" else "order.refund_requested",
         "order",
         str(order.id),
-        {"amount_cents": order.refunded_cents},
+        {"amount_cents": order.total_cents, "refund_reference": order.refund_reference},
     )
     db.session.commit()
+    return state
 
 
 def add_note(admin: AdminUser, order: Order, raw_body: str) -> None:

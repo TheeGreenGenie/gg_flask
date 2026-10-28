@@ -1,0 +1,20 @@
+{% extends "studio/_base.html" %}
+{% block title %}Hide or show many products · Staff Studio{% endblock %}
+{% block studio_body %}{% from "studio/_play.html" import steps with context %}
+<header class="gg-studio__header"><div><p class="gg-eyebrow">Products</p><h1>Hide or show many products</h1><p>Hidden products leave the shop, search and Find Fabrics but keep their photos, orders and history. Nothing is deleted, and each change can be undone.</p><a href="{{ url_for('studio.products') }}">Back to products</a></div></header>{{ steps([["👆", "Choose which products: pick a category or type words"], ["🙈", "Choose hide, or put back live"], ["👀", "Press Preview and check the list"], ["🔒", "Type your password and press Save"]]) }}
+{% if error %}<p class="gg-form-error" role="alert">{{ error }}</p>{% endif %}
+<form method="get" class="gg-studio__form gg-studio__form--wide"><input type="hidden" name="preview" value="1">
+  <div class="gg-studio__two"><label>Category (includes its subcategories)<select name="category"><option value="">Any category</option>{% for item in categories %}<option value="{{ item.id }}"{% if form.category == item.id|string %} selected{% endif %}>{{ item.name }}</option>{% for child in item.children %}<option value="{{ child.id }}"{% if form.category == child.id|string %} selected{% endif %}>— {{ child.name }}</option>{% endfor %}{% endfor %}</select></label><label>And/or product name or SKU<input type="search" name="q" maxlength="100" value="{{ form.q }}"></label></div>
+  <label>Change<select name="kind">{% for value, label in kinds.items() %}<option value="{{ value }}"{% if form.kind == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+  <label>Reason<input name="reason" maxlength="120" required placeholder="Sold out for the season, back in stock…" value="{{ form.reason }}"></label>
+  <button class="gg-button" type="submit">Preview the list</button>
+</form>
+{% if plan %}
+<section aria-labelledby="bulk-preview"><h2 id="bulk-preview">Preview: {{ plan.summary }}</h2>
+<p><strong>{{ plan.changes|length }}</strong> product(s) will change{% if plan.rows|length > plan.changes|length %}, {{ plan.rows|length - plan.changes|length }} left as they are (reason shown){% endif %}. Nothing is saved until you press the button below.</p>
+{% set words = {'active': 'Live', 'draft': 'Hidden', 'archived': 'Removed'} %}
+<div class="gg-studio__table-wrap"><table><thead><tr><th>Product</th><th>Now</th><th>After</th><th>Note</th></tr></thead><tbody>{% for row in plan.rows %}<tr><td><strong>{{ row.product.name }}</strong></td><td data-label="Now">{{ words[row.before] }}</td><td data-label="After">{% if row.skip %}—{% else %}<strong>{{ words[row.after] }}</strong>{% endif %}</td><td>{{ row.skip }}</td></tr>{% endfor %}</tbody></table></div>
+{% if plan.changes %}<form method="post" action="{{ url_for('studio.product_bulk_apply') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% for key, value in form.items() %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}<input type="hidden" name="fingerprint" value="{{ plan.fingerprint }}"><label class="gg-studio__confirm">Type your password to confirm this big change<input type="password" name="step_up_password" autocomplete="current-password" required maxlength="128"></label><button class="gg-button" type="submit">Save: change these {{ plan.changes|length }} product(s)</button></form>{% endif %}
+</section>
+{% endif %}
+{% endblock %}

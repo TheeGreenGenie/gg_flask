@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import enum
 from datetime import datetime
+from urllib.parse import quote
 
 from sqlalchemy import (
     CheckConstraint,
@@ -71,6 +72,15 @@ class Coupon(db.Model):  # type: ignore[name-defined]
     )
 
 
+# Carriers the owner can choose when marking an order shipped: code -> (name, tracking URL prefix).
+TRACKING_CARRIERS: dict[str, tuple[str, str]] = {
+    "usps": ("USPS", "https://tools.usps.com/go/TrackConfirmAction?tLabels="),
+    "ups": ("UPS", "https://www.ups.com/track?tracknum="),
+    "fedex": ("FedEx", "https://www.fedex.com/fedextrack/?trknbr="),
+    "dhl": ("DHL", "https://www.dhl.com/us-en/home/tracking.html?tracking-id="),
+}
+
+
 class Order(db.Model):  # type: ignore[name-defined]
     __tablename__ = "orders"
 
@@ -111,6 +121,10 @@ class Order(db.Model):  # type: ignore[name-defined]
     shipping_carrier: Mapped[str | None] = mapped_column(String(40))
     shipping_service: Mapped[str | None] = mapped_column(String(80))
     shipping_rate_ref: Mapped[str | None] = mapped_column(String(80))
+    # Filled when the owner marks the order shipped (labels bought outside the app).
+    tracking_carrier: Mapped[str | None] = mapped_column(String(20))
+    tracking_number: Mapped[str | None] = mapped_column(String(40))
+    shipped_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # Estimated parcel weight when the order was placed (fabric at 16 oz/sq yd + packaging),
     # shown in order admin with its USPS price step.
     parcel_weight_grams: Mapped[int | None] = mapped_column(Integer)
@@ -120,6 +134,10 @@ class Order(db.Model):  # type: ignore[name-defined]
     tax_transaction_ref: Mapped[str | None] = mapped_column(String(80))
     total_cents: Mapped[int] = mapped_column(Integer)
     refunded_cents: Mapped[int] = mapped_column(Integer, default=0)
+    # Provider refund id and state (pending/completed/failed); the order only becomes Refunded
+    # once the provider confirms it (`flask orders sync-refunds` follows up on pending ones).
+    refund_reference: Mapped[str | None] = mapped_column(String(80))
+    refund_status: Mapped[str | None] = mapped_column(String(20), index=True)
     currency: Mapped[str] = mapped_column(String(3), default="USD")
     coupon_code: Mapped[str | None] = mapped_column(String(40))
     hold_expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
@@ -140,6 +158,13 @@ class Order(db.Model):  # type: ignore[name-defined]
     notes: Mapped[list[OrderNote]] = relationship(
         back_populates="order", order_by="OrderNote.created_at", cascade="all, delete-orphan"
     )
+
+    @property
+    def tracking_url(self) -> str | None:
+        carrier = TRACKING_CARRIERS.get(self.tracking_carrier or "")
+        if not carrier or not self.tracking_number:
+            return None
+        return carrier[1] + quote(self.tracking_number)
 
 
 class OrderLine(db.Model):  # type: ignore[name-defined]

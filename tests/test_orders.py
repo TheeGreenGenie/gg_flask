@@ -170,6 +170,7 @@ def test_stripe_webhook_is_signed_duplicate_safe_and_consumes_stock(
                     "object": {
                         "id": "cs_1",
                         "amount_total": order.total_cents,
+                        "currency": "usd",
                         "payment_status": "paid",
                         "metadata": {"order_id": public_id},
                     }

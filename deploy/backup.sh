@@ -29,3 +29,11 @@ find "$BACKUP_DIR/db" -name '*.dump' -mtime +"$KEEP_DAYS" -delete
 find "$BACKUP_DIR/media" -mindepth 1 -maxdepth 1 -type d -mtime +"$KEEP_DAYS" -exec rm -rf {} +
 
 logger -t gg-flask-backup "backup $STAMP done"
+
+# Heartbeat for `flask jobs check` / the daily summary (a failed run never reaches this line,
+# so a missing or old heartbeat means the backup is not happening).
+HEARTBEAT_DIR=${HEARTBEAT_DIR:-/srv/gg_flask/instance/jobs}
+if [ -d "$HEARTBEAT_DIR" ]; then
+    (umask 022; printf '{"job": "backup", "result": "ok", "exit": 0, "finished": %s, "seconds": 0}\n' \
+        "$(date +%s)" > "$HEARTBEAT_DIR/backup.json")
+fi

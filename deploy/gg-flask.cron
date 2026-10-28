@@ -11,6 +11,8 @@ PATH=/usr/local/bin:/usr/bin:/bin
 * * * * *    ggflask  /srv/gg_flask/deploy/run-job.sh studio sync-blog
 # Every 15 minutes: release stock held by abandoned checkouts.
 */15 * * * * ggflask  /srv/gg_flask/deploy/run-job.sh orders release-expired-holds
+# Every 15 minutes: finish refunds the payment provider was still processing.
+7-59/15 * * * * ggflask  /srv/gg_flask/deploy/run-job.sh orders sync-refunds
 # Daily 03:10: delete wishlists nobody has touched for 90 days.
 10 3 * * *   ggflask  /srv/gg_flask/deploy/run-job.sh wishlist-prune
 # Daily 03:15: release usernames/emails from accounts that stayed unverified for 7 days.

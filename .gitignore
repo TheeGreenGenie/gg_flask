@@ -20,3 +20,6 @@ PROJECT_STATUS.md
 
 # Developer hand-off notes between AI sessions (planning, local only)
 architecture_walk_through.md
+
+# Scratch folders left by other local tools
+.codex-*/

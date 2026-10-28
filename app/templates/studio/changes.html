@@ -12,6 +12,7 @@
     </div>
     <ul class="gg-studio__change-lines">{% for line in change.summary.splitlines() %}<li>{{ line }}</li>{% endfor %}</ul>
     {% if change.result %}<p class="gg-studio__change-result">{{ change.result }}</p>{% endif %}
+    {% if 'owner' in staff.roles and change.status.value == 'pending' %}<form method="post" action="{{ url_for('studio.change_review_link', change_id=change.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="gg-button" type="submit">Review and decide</button></form>{% endif %}
   </li>
 {% else %}
   <li class="gg-studio__change">No changes yet.</li>

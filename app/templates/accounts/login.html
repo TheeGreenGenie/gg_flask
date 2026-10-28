@@ -21,6 +21,7 @@
     <a class="gg-link" href="{{ url_for('accounts.forgot_password') }}">Forgot password?</a>
   </div>
   <button class="gg-button gg-button--accent gg-button--block gg-button--lg" type="submit">Sign in</button>
+  <p class="gg-account__switch"><a class="gg-link" href="{{ url_for('accounts.verification_pending') }}">Need another verification email?</a></p>
   <p class="gg-account__switch">New here? <a class="gg-link" href="{{ url_for('accounts.register', next=request.args.get('next')) }}">Create an account</a></p>
 </form>
 {% endblock %}

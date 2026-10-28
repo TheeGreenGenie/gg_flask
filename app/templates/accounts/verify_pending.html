@@ -1,0 +1,16 @@
+{% extends "accounts/_base.html" %}
+{% block title %}Verify your email · GG Afrikan Eleganz{% endblock %}
+{% block heading %}Verify your email{% endblock %}
+{% block lede %}<p class="gg-page-title__lede">Your account remains locked until you open the verification link sent to your email.</p>{% endblock %}
+{% block body %}
+<form class="gg-account__card" method="post" action="{{ url_for('accounts.resend_verification') }}" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <p>The link expires after 24 hours. Check your spam folder, or request a new link below.</p>
+  <div class="gg-field">
+    <label for="verification-email">Email address</label>
+    <input id="verification-email" name="email" type="email" autocomplete="email" required maxlength="254" value="{{ email }}">
+  </div>
+  <button class="gg-button gg-button--accent gg-button--block" type="submit">Resend verification email</button>
+  <p class="gg-account__switch"><a class="gg-link" href="{{ url_for('accounts.login') }}">Return to sign in</a></p>
+</form>
+{% endblock %}

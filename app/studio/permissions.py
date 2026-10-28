@@ -56,6 +56,8 @@ SCOPED: dict[StudioRole, frozenset[str]] = {
             "studio.price_update",
             "studio.price_history",
             "studio.price_undo",
+            "studio.price_bulk",
+            "studio.price_bulk_apply",
             "studio.sales",
             "studio.sale_new",
             "studio.sale_preview",

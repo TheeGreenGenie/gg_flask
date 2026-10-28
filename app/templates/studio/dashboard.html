@@ -1,6 +1,27 @@
 {% extends "studio/_base.html" %}
 {% block title %}Staff Studio · GG Afrikan Eleganz{% endblock %}
 {% block studio_body %}
+{% if staff.playful %}
+<header class="gg-play__hello"><span class="gg-play__wave" aria-hidden="true">👋</span><div><h1>Hi {{ staff.display_name }}!</h1><p>What shall we do today? Tap a big button to start.</p></div></header>
+{% if staff.requires_review %}
+<section class="gg-play__stars" aria-label="Your stars this week">
+  <h2><span aria-hidden="true">⭐</span> Your stars this week</h2>
+  <p class="gg-play__star-row" aria-hidden="true">{% for _ in range([stars, 10]|min) %}<span class="gg-play__star">⭐</span>{% endfor %}{% for _ in range(10 - [stars, 10]|min) %}<span class="gg-play__star gg-play__star--empty">☆</span>{% endfor %}</p>
+  <p>{% if stars == 0 %}Every change the owner approves earns you a star. Let's get your first one!{% elif stars < 5 %}{{ stars }} star{{ 's' if stars != 1 }}! Great start, keep going!{% elif stars < 10 %}{{ stars }} stars! You're doing brilliantly!{% else %}{{ stars }} stars! Superstar week! 🏆{% endif %}</p>
+  {% if my_pending %}<p class="gg-play__waiting"><span aria-hidden="true">⏳</span> {{ my_pending }} change{{ 's' if my_pending != 1 }} waiting for the owner to say yes. <a href="{{ url_for('studio.changes') }}">See them</a></p>{% endif %}
+</section>
+{% endif %}
+<div class="gg-play__tiles">
+{% if studio_can('studio.inventory', 'editor', 'inventory') %}<a class="gg-play__tile gg-play__tile--teal" href="{{ url_for('studio.inventory', attention=1) }}"><span class="gg-play__tile-icon" aria-hidden="true">📦</span><strong>Stock</strong><span>Count what's on the shelf and fix the numbers.</span>{% if low_stock %}<em class="gg-play__badge">{{ low_stock }} running low</em>{% endif %}</a>{% endif %}
+{% if studio_can('studio.prices', 'editor') %}<a class="gg-play__tile gg-play__tile--gold" href="{{ url_for('studio.prices') }}"><span class="gg-play__tile-icon" aria-hidden="true">🏷️</span><strong>Prices</strong><span>Change how much something costs.</span></a>{% endif %}
+{% if studio_can('studio.sales', 'editor') %}<a class="gg-play__tile gg-play__tile--pink" href="{{ url_for('studio.sales') }}"><span class="gg-play__tile-icon" aria-hidden="true">🎉</span><strong>Sales</strong><span>Plan money-off days for customers.</span>{% if upcoming_sales %}<em class="gg-play__badge">{{ upcoming_sales }} on now or coming</em>{% endif %}</a>{% endif %}
+{% if studio_can('studio.products', 'editor') %}<a class="gg-play__tile gg-play__tile--purple" href="{{ url_for('studio.products') }}"><span class="gg-play__tile-icon" aria-hidden="true">🧵</span><strong>Products</strong><span>Names, pictures and words about each fabric.</span>{% if hidden %}<em class="gg-play__badge">{{ hidden }} hidden</em>{% endif %}</a>{% endif %}
+{% if studio_can('studio.blog_posts', 'editor') %}<a class="gg-play__tile gg-play__tile--green" href="{{ url_for('studio.blog_posts') }}"><span class="gg-play__tile-icon" aria-hidden="true">✍️</span><strong>Blog</strong><span>Write a story for the website.</span></a>{% endif %}
+{% if studio_can('studio.community', 'support') %}<a class="gg-play__tile gg-play__tile--blue" href="{{ url_for('studio.community') }}"><span class="gg-play__tile-icon" aria-hidden="true">💬</span><strong>Customer questions</strong><span>Answer reviews and questions.</span>{% if community_attention %}<em class="gg-play__badge">{{ community_attention }} to look at</em>{% endif %}</a>{% endif %}
+<a class="gg-play__tile gg-play__tile--orange" href="{{ url_for('studio.changes') }}"><span class="gg-play__tile-icon" aria-hidden="true">✅</span><strong>My changes</strong><span>See what the owner said yes or no to.</span>{% if my_pending %}<em class="gg-play__badge">{{ my_pending }} waiting</em>{% endif %}</a>
+</div>
+{% if staff.requires_review %}<p class="gg-play__help"><span aria-hidden="true">💡</span> Stuck? Nothing you do goes on the website until the owner says yes, so it's safe to try.</p>{% endif %}
+{% else %}
 <header class="gg-studio__header"><div><p class="gg-eyebrow">Staff Studio</p><h1>What needs attention?</h1><p>Signed in as {{ staff.username }}</p></div></header>
 <div class="gg-studio__tiles">
 {% if staff.requires_review %}<a href="{{ url_for('studio.changes') }}"><strong>{{ my_pending }}</strong><span>Your changes waiting for the owner's approval</span></a>{% endif %}
@@ -10,4 +31,5 @@
 {% if studio_can('studio.community', 'support') %}<a href="{{ url_for('studio.community') }}"><strong>{{ community_attention }}</strong><span>Reviews or questions that may need attention</span></a>{% endif %}
 </div>
 {% if 'owner' in staff.roles %}<section class="gg-studio__section"><h2>Recent activity</h2><div class="gg-studio__table-wrap"><table><thead><tr><th>When</th><th>Person</th><th>Action</th><th>Item</th></tr></thead><tbody>{% for item in recent %}<tr><td>{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</td><td>{{ item.actor_username }}</td><td>{{ item.action }}</td><td>{{ item.entity_type or '' }} {{ item.entity_id or '' }}</td></tr>{% else %}<tr><td colspan="4">No activity yet.</td></tr>{% endfor %}</tbody></table></div></section>{% endif %}
+{% endif %}
 {% endblock %}

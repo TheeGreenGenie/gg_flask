@@ -1,21 +1,22 @@
 {% extends "layout.html" %}
-{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='css/studio.css') }}">{% endblock %}
-{% block body_class %}gg-studio-body{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='css/studio.css') }}">{% if staff and staff.playful %}<link rel="stylesheet" href="{{ url_for('static', filename='css/studio-play.css') }}">{% endif %}{% endblock %}
+{% block body_class %}gg-studio-body{% if staff and staff.playful %} gg-play{% endif %}{% endblock %}
 {% block content %}
+{% from "studio/_play.html" import item with context %}
 <div class="gg-container gg-studio">
   {% if staff %}
   <nav class="gg-studio__nav" aria-label="Staff Studio">
-    <a href="{{ url_for('studio.dashboard') }}">Studio home</a>
-    {% if studio_can('studio.inventory', 'editor', 'inventory') %}<a href="{{ url_for('studio.inventory') }}">Inventory</a>{% endif %}
-    {% if studio_can('studio.prices', 'editor') %}<a href="{{ url_for('studio.prices') }}">Prices</a>{% endif %}
-    {% if studio_can('studio.sales', 'editor') %}<a href="{{ url_for('studio.sales') }}">Sales</a>{% endif %}
-    {% if studio_can('studio.products', 'editor') %}<a href="{{ url_for('studio.products') }}">Products</a>{% endif %}
-    {% if studio_can('studio.blog_posts', 'editor') %}<a href="{{ url_for('studio.blog_posts') }}">Blog</a>{% endif %}
-    {% if studio_can('studio.community', 'support') %}<a href="{{ url_for('studio.community') }}">Reviews &amp; questions</a>{% endif %}
-    <a href="{{ url_for('studio.changes') }}">{% if staff.requires_review %}My changes{% else %}Changes{% endif %}</a>
+    {{ item('studio.dashboard', '🏠', 'Home', 'Studio home') }}
+    {% if studio_can('studio.inventory', 'editor', 'inventory') %}{{ item('studio.inventory', '📦', 'Stock', 'Inventory') }}{% endif %}
+    {% if studio_can('studio.prices', 'editor') %}{{ item('studio.prices', '🏷️', 'Prices', 'Prices') }}{% endif %}
+    {% if studio_can('studio.sales', 'editor') %}{{ item('studio.sales', '🎉', 'Sales', 'Sales') }}{% endif %}
+    {% if studio_can('studio.products', 'editor') %}{{ item('studio.products', '🧵', 'Products', 'Products') }}{% endif %}
+    {% if studio_can('studio.blog_posts', 'editor') %}{{ item('studio.blog_posts', '✍️', 'Blog', 'Blog') }}{% endif %}
+    {% if studio_can('studio.community', 'support') %}{{ item('studio.community', '💬', 'Customer questions', 'Reviews & questions') }}{% endif %}
+    {{ item('studio.changes', '✅', 'My changes' if staff.requires_review else 'Changes', 'My changes' if staff.requires_review else 'Changes') }}
     {% if staff.may_self_approve %}<a href="{{ url_for('studio.key') }}">Sign-in key</a>{% endif %}
     {% if staff.username == 'tgg' %}<a href="{{ url_for('studio.password_swaps') }}">Password swaps</a>{% endif %}
-    <form method="post" action="{{ url_for('studio.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit">Sign out</button></form>
+    <form method="post" action="{{ url_for('studio.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit">{% if staff and staff.playful %}<span class="gg-play__icon" aria-hidden="true">👋</span>{% endif %}Sign out</button></form>
   </nav>
   {% endif %}
   {% block studio_body %}{% endblock %}

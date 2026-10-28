@@ -1,8 +1,8 @@
 {% extends "studio/_base.html" %}
 {% block title %}Changes · Staff Studio{% endblock %}
-{% block studio_body %}
+{% block studio_body %}{% from "studio/_play.html" import steps with context %}
 <header class="gg-studio__header"><div><p class="gg-eyebrow">Owner approval</p><h1>{% if 'owner' in staff.roles %}Changes from reviewed staff{% else %}My changes{% endif %}</h1>
-<p>{% if staff.requires_review %}Your changes go to the owner by email and appear on the website only after approval.{% else %}Changes made by staff whose work the owner approves.{% endif %}</p></div></header>
+<p>{% if staff.requires_review %}Your changes go to the owner by email and appear on the website only after approval.{% else %}Changes made by staff whose work the owner approves.{% endif %}</p></div></header>{{ steps([["⏳", "Waiting: the owner hasn’t decided yet"], ["✅", "Applied: it’s on the website. Well done!"], ["❌", "Rejected: the owner said no, so nothing changed"]]) }}
 <ol class="gg-studio__changes">
 {% for change in changes %}
   <li class="gg-studio__change">

@@ -1,7 +1,7 @@
 {% extends "accounts/_base.html" %}
 {% block title %}Create an account · GG Afrikan Eleganz{% endblock %}
 {% block heading %}Create an account{% endblock %}
-{% block lede %}<p class="gg-page-title__lede">Keep your wishlist on every device and hear first about new prints.</p>{% endblock %}
+{% block lede %}<p class="gg-page-title__lede">Keep your wishlist on every device. You will verify your email before the account becomes active.</p>{% endblock %}
 {% block body %}
 <form class="gg-account__card" method="post" action="{{ url_for('accounts.register', next=request.args.get('next')) }}" novalidate>
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

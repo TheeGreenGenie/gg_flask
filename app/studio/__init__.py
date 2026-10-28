@@ -6,6 +6,7 @@ import csv
 import functools
 import io
 import json
+import urllib.parse
 from collections.abc import Callable
 from datetime import timedelta
 from pathlib import Path
@@ -190,6 +191,7 @@ def sms_verify(request_id: str) -> str | Response:
         record=record,
         error=error,
         phone=sms.masked(record.user.sms_phone),
+        app_code=sms.uses_app(record.user),
     )
 
 
@@ -519,6 +521,7 @@ def dashboard() -> str:
         community_attention=int(community_attention or 0),
         recent=recent,
         my_pending=review.pending_count(user),
+        stars=review.applied_this_week(user) if user.playful else 0,
     )
 
 
@@ -675,6 +678,48 @@ def price_update(variant_id: int) -> Response:
             page=request.form.get("return_page") or None,
         )
     )
+
+
+@bp.get("/prices/bulk")
+@roles(StudioRole.EDITOR)
+def price_bulk() -> str:
+    """Bulk change form; with `preview=1` it shows every before -> after without saving."""
+    form = {key: request.args.get(key, "") for key in ("category", "q", "kind", "amount")}
+    form["reason"] = request.args.get("reason", "")
+    form["round_99"] = request.args.get("round_99", "")
+    plan, error = None, ""
+    if request.args.get("preview"):
+        try:
+            plan = service.plan_bulk_price(form)
+        except service.StudioError as exc:
+            error = str(exc)
+    categories = db.session.scalars(
+        select(Category).where(Category.parent_id.is_(None)).order_by(Category.position)
+    ).all()
+    return render_template(
+        "studio/price_bulk.html",
+        staff=_user(),
+        form=form,
+        plan=plan,
+        error=error,
+        categories=categories,
+        kinds=service.BULK_PRICE_KINDS,
+    )
+
+
+@bp.post("/prices/bulk")
+@roles(StudioRole.EDITOR)
+def price_bulk_apply() -> Response:
+    form = {key: request.form.get(key, "") for key in request.form if key != "csrf_token"}
+    try:
+        count = service.apply_bulk_price(_user(), form)
+    except service.StudioError as exc:
+        db.session.rollback()
+        flash(str(exc), "error")
+        args: dict[str, Any] = {k: v for k, v in form.items() if k != "fingerprint" and v}
+        return redirect(url_for("studio.price_bulk", preview=1, **args))
+    flash(f"{count} price(s) updated. Each one can be undone in price history.", "success")
+    return redirect(url_for("studio.price_history"))
 
 
 @bp.get("/prices/history")
@@ -1283,6 +1328,29 @@ def init_studio(app: Flask) -> None:
         service.audit(user, "studio.user.phone_set", "studio_user", str(user.id))
         db.session.commit()
         click.echo(f"Sign-in codes for {user.username} go to {sms.masked(number)}.")
+
+    @studio_cli.command("set-authenticator")
+    @click.argument("username")
+    def set_authenticator(username: str) -> None:
+        """Use an authenticator app for the sign-in code instead of texts (no SMS provider)."""
+        user = _cli_user(username)
+        user.totp_secret = admin_service.generate_totp_secret()
+        user.totp_last_step = None
+        user.requires_sms = True
+        user.session_version += 1
+        service.audit(user, "studio.user.authenticator_set", "studio_user", str(user.id))
+        db.session.commit()
+        label = urllib.parse.quote(f"GG Studio:{user.username}")
+        click.echo("In Google Authenticator (or any authenticator app) choose 'Enter a setup key':")
+        click.echo(f"  Account: GG Studio {user.username}")
+        click.echo(f"  Key: {user.totp_secret}")
+        click.echo(
+            f"Or open this link on the phone: otpauth://totp/{label}?secret={user.totp_secret}"
+            "&issuer=GG%20Studio&digits=6&period=30"
+        )
+        click.echo(
+            "Every sign-in now asks for the app's 6-digit code. Running this again replaces it."
+        )
 
     @studio_cli.command("remove-keys")
     @click.argument("username")

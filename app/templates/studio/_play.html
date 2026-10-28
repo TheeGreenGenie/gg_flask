@@ -1,0 +1,7 @@
+{# Game-style helpers for staff (not owners): owner, 2026-10-28. Import "with context". #}
+
+{# A menu link: picture + simple words for staff, the usual label for owners. #}
+{% macro item(endpoint, emoji, words, label) %}<a href="{{ url_for(endpoint) }}">{% if staff and staff.playful %}<span class="gg-play__icon" aria-hidden="true">{{ emoji }}</span>{{ words }}{% else %}{{ label }}{% endif %}</a>{% endmacro %}
+
+{# Numbered "how to do it" strip shown under a page title, staff only. #}
+{% macro steps(items) %}{% if staff and staff.playful %}<ol class="gg-play__steps" aria-label="How to do it">{% for emoji, text in items %}<li><span class="gg-play__step-icon" aria-hidden="true">{{ emoji }}</span><span>{{ text }}</span></li>{% endfor %}</ol>{% endif %}{% endmacro %}

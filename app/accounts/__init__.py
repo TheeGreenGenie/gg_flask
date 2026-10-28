@@ -83,7 +83,7 @@ def register() -> Response | str:
     error = ""
     if request.method == "POST":
         try:
-            user = service.register(
+            user, sent = service.register(
                 service.Registration(
                     username=form.get("username", ""),
                     email=form.get("email", ""),
@@ -97,9 +97,17 @@ def register() -> Response | str:
         except service.AccountError as exc:
             error = str(exc)
         else:
-            service.login(user, remember=form.get("remember") == "1")
-            flash("Welcome! Your account is ready.", "success")
-            return redirect(_safe_next(url_for("accounts.dashboard")))
+            session["pending_verification_email"] = user.email
+            session["account_after_verify"] = _safe_next(url_for("accounts.dashboard"))
+            session["account_verify_remember"] = form.get("remember") == "1"
+            flash(
+                "Check your email for the verification link."
+                if sent
+                else "Your account is pending, but the verification email could not be sent. "
+                "Try resending it below.",
+                "success" if sent else "error",
+            )
+            return redirect(url_for("accounts.verification_pending"))
     return render_template(
         "accounts/register.html",
         error=error,
@@ -118,6 +126,10 @@ def login() -> Response | str:
         identity = request.form.get("identity", request.form.get("email", ""))
         try:
             user = service.authenticate(identity, request.form.get("password", ""))
+        except service.EmailNotVerified as exc:
+            session["pending_verification_email"] = exc.email
+            flash("Verify your email address before signing in.", "error")
+            return redirect(url_for("accounts.verification_pending"))
         except service.AccountError as exc:
             from app.admin import service as admin_service
 
@@ -138,6 +150,52 @@ def login() -> Response | str:
         error=error,
         identity=request.form.get("identity", request.form.get("email", "")),
     )
+
+
+@bp.get("/verify-email")
+def verification_pending() -> str:
+    return render_template(
+        "accounts/verify_pending.html",
+        email=session.get("pending_verification_email", ""),
+    )
+
+
+@bp.route("/verify-email/<token>", methods=["GET", "POST"])
+def verify_email(token: str) -> Response | str:
+    if request.method == "GET":
+        if not service.verification_token_ok(token):
+            flash("That verification link is invalid or expired.", "error")
+            return redirect(url_for("accounts.verification_pending"))
+        return render_template("accounts/verify_confirm.html", token=token, error="")
+    try:
+        user = service.verify_email(token, request.form.get("password", ""))
+    except service.AccountError as exc:
+        if not service.verification_token_ok(token):
+            flash(str(exc), "error")
+            return redirect(url_for("accounts.verification_pending"))
+        return render_template("accounts/verify_confirm.html", token=token, error=str(exc))
+    remember = bool(session.pop("account_verify_remember", False))
+    target = session.pop("account_after_verify", url_for("accounts.dashboard"))
+    session.pop("pending_verification_email", None)
+    service.login(user, remember=remember)
+    flash("Your email is verified and your account is ready.", "success")
+    return redirect(target)
+
+
+@bp.post("/verify-email/resend")
+def resend_verification() -> Response:
+    email = request.form.get("email", "")
+    session["pending_verification_email"] = email.strip().lower()[:254]
+    try:
+        service.resend_verification(email)
+    except service.RateLimited as exc:
+        flash(str(exc), "error")
+    else:
+        flash(
+            "If that address belongs to a pending account, a new verification email was sent.",
+            "success",
+        )
+    return redirect(url_for("accounts.verification_pending"))
 
 
 @bp.route("/admin-entry", methods=["GET", "POST"])
@@ -420,3 +478,9 @@ def init_accounts(app: Flask) -> None:
                     latest.created_at.isoformat(),
                 ]
             )
+
+    @accounts_cli.command("purge-unverified")
+    @click.option("--days", default=7, show_default=True, type=click.IntRange(min=1))
+    def purge_unverified(days: int) -> None:
+        """Delete pending accounts that never verified their email."""
+        click.echo(f"Purged {service.purge_unverified(days)} unverified account(s).")

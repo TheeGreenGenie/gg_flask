@@ -13,6 +13,8 @@ PATH=/usr/local/bin:/usr/bin:/bin
 */15 * * * * ggflask  /srv/gg_flask/deploy/run-job.sh orders release-expired-holds
 # Daily 03:10: delete wishlists nobody has touched for 90 days.
 10 3 * * *   ggflask  /srv/gg_flask/deploy/run-job.sh wishlist-prune
+# Daily 03:15: release usernames/emails from accounts that stayed unverified for 7 days.
+15 3 * * *   ggflask  /srv/gg_flask/deploy/run-job.sh accounts purge-unverified
 # Daily 03:20: permanently delete expired private copies of auto-removed review text.
 20 3 * * *   ggflask  /srv/gg_flask/deploy/run-job.sh reviews purge-removed
 # Daily 07:30: email the owner the Studio summary (needs MAIL_BACKEND=smtp).

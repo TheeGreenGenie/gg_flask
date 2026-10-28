@@ -149,6 +149,7 @@ POLICIES: Final = {
                 "Information we collect",
                 (
                     "We collect information you provide when you create an account, contact us, join a list, save products, or place an order. This may include contact, delivery, order, preference, and message information.",
+                    "New customer accounts remain locked until the email address is confirmed through a single-use, expiring verification link. Abandoned unverified accounts are deleted after 7 days.",
                     "We also receive limited technical information needed for security, sessions, fraud prevention, and reliable operation.",
                 ),
             ),

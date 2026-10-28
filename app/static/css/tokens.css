@@ -184,7 +184,8 @@ main:focus { outline: none; }
 	padding-inline: var(--gg-gutter);
 }
 
-.gg-visually-hidden {
+.gg-visually-hidden,
+.gg-sr-only {
 	position: absolute !important;
 	width: 1px;
 	height: 1px;

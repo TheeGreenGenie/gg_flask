@@ -26,6 +26,7 @@ import logging
 import secrets
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from datetime import timedelta
 from pathlib import Path
 from typing import Any, cast
 
@@ -47,7 +48,7 @@ from werkzeug.utils import secure_filename
 
 from app import mail
 from app.catalog.models import Category, Product, ProductImage, Variant, utcnow
-from app.catalog.units import parse_piece_length, parse_width
+from app.catalog.units import format_piece_length, parse_piece_range, parse_width
 from app.content.models import BlogPost, BlogRevision, BlogStatus
 from app.extensions import db
 from app.reviews.models import ModerationWord, ProductPost
@@ -163,6 +164,24 @@ def _price_undo(args: dict[str, Any], form: MultiDict[str, str]) -> Described:
     )
 
 
+def _price_bulk(args: dict[str, Any], form: MultiDict[str, str]) -> Described:
+    from app.studio import service
+
+    try:
+        plan = service.plan_bulk_price(form.to_dict())
+    except service.StudioError:
+        return Described([], needs_review=False)  # the view refuses it with the reason
+    changes = plan.changes
+    lines = [f"Change {len(changes)} price(s): {plan.summary}", f"Reason: {plan.reason}"]
+    lines += [
+        f"{_variant_label(row.variant)}: {_money(row.before)} → {_money(row.after)}"
+        for row in changes[:60]
+    ]
+    if len(changes) > 60:
+        lines.append(f"…and {len(changes) - 60} more")
+    return Described(lines, plan.fingerprint)
+
+
 def _product_edit(args: dict[str, Any], form: MultiDict[str, str]) -> Described:
     product = _get(Product, args["product_id"])
     lines = [f"Edit product details: {product.name}"]
@@ -184,8 +203,8 @@ def _product_edit(args: dict[str, Any], form: MultiDict[str, str]) -> Described:
         if form.get("piece_length_yards") is not None:
             compare(
                 "Piece length (yards)",
-                str(product.piece_length_yards or ""),
-                str(parse_piece_length(form.get("piece_length_yards")) or ""),
+                product.piece_length_text,
+                format_piece_length(*parse_piece_range(form.get("piece_length_yards"))),
             )
         if form.get("width_inches") is not None:
             compare(
@@ -361,6 +380,7 @@ HELD: dict[str, tuple[Describer, tuple[StudioRole, ...]]] = {
     "studio.inventory_undo": (_inventory_undo, (StudioRole.EDITOR, StudioRole.INVENTORY)),
     "studio.price_update": (_price_update, (StudioRole.EDITOR,)),
     "studio.price_undo": (_price_undo, (StudioRole.EDITOR,)),
+    "studio.price_bulk_apply": (_price_bulk, (StudioRole.EDITOR,)),
     "studio.product_edit": (_product_edit, (StudioRole.EDITOR,)),
     "studio.product_visibility": (_product_visibility, (StudioRole.EDITOR,)),
     "studio.product_image_upload": (_image_upload, (StudioRole.EDITOR,)),
@@ -511,6 +531,21 @@ def pending_count(user: StudioUser | None = None) -> int:
     if user is not None:
         query = query.where(StudioChange.user_id == user.id)
     return int(db.session.scalar(query) or 0)
+
+
+def applied_this_week(user: StudioUser) -> int:
+    """Changes by this person the owner approved in the last 7 days (the Studio star chart)."""
+    since = utcnow() - timedelta(days=7)
+    return int(
+        db.session.scalar(
+            select(func.count(StudioChange.id)).where(
+                StudioChange.user_id == user.id,
+                StudioChange.status == ChangeStatus.APPLIED,
+                StudioChange.decided_at >= since,
+            )
+        )
+        or 0
+    )
 
 
 def _held_files(change: StudioChange) -> list[dict[str, str]]:

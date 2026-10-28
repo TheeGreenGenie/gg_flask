@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from datetime import timedelta
+from urllib.parse import urlsplit
 
 import pytest
 from flask import Flask
@@ -12,6 +13,7 @@ from app.accounts import service
 from app.accounts.models import (
     Address,
     Channel,
+    EmailVerification,
     MarketingConsent,
     PasswordReset,
     StoredPaymentMethod,
@@ -27,7 +29,7 @@ from app.wishlist.models import Wishlist
 PASSWORD = "kente-sunrise-2026"  # noqa: S105 (test fixture)
 
 
-def register(client: FlaskClient, **overrides: str):  # type: ignore[no-untyped-def]
+def register(client: FlaskClient, verify: bool = True, **overrides: str):  # type: ignore[no-untyped-def]
     data = {
         "first_name": "Ada",
         "email": "Ada@Example.com",
@@ -36,7 +38,18 @@ def register(client: FlaskClient, **overrides: str):  # type: ignore[no-untyped-
     }
     data.update(overrides)
     data.setdefault("username", data["email"].split("@", 1)[0].lower())
-    return client.post("/account/register", data=data)
+    app = client.application
+    before = len(app.extensions.get("outbox", []))
+    response = client.post("/account/register", data=data)
+    outbox = app.extensions.get("outbox", [])
+    if verify and len(outbox) > before and "Verify your GG" in outbox[-1].subject:
+        match = re.search(r"https?://\S+", outbox[-1].body)
+        assert match
+        response = client.post(
+            urlsplit(match.group(0)).path,
+            data={"password": data["password"]},
+        )
+    return response
 
 
 def user(app: Flask, email: str = "ada@example.com") -> User:
@@ -52,10 +65,103 @@ def test_register_normalises_and_hashes(shop: FlaskClient, catalog_app: Flask) -
     with catalog_app.app_context():
         u = user(catalog_app)
         assert u.phone == "+12155550123"
+        assert u.email_verified_at is not None
         assert u.password_hash.startswith("$argon2id$") and PASSWORD not in u.password_hash
         assert u.consents == []  # nothing ticked -> no consent recorded
     page = shop.get("/account/").get_data(as_text=True)
     assert "Hello, Ada" in page and "ada@example.com" in page
+
+
+def test_unverified_email_cannot_sign_in_or_activate_marketing(
+    shop: FlaskClient, catalog_app: Flask
+) -> None:
+    response = register(shop, verify=False, email_opt_in="1", sms_opt_in="1")
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/account/verify-email")
+    with catalog_app.app_context():
+        pending = user(catalog_app)
+        assert pending.email_verified_at is None and pending.consents == []
+        verification = db.session.scalar(select(EmailVerification))
+        assert verification is not None
+        assert verification.email_opt_in and verification.sms_opt_in
+
+    assert shop.get("/account/").headers["Location"].startswith("/account/login")
+    blocked = shop.post("/account/login", data={"identity": "ada", "password": PASSWORD})
+    assert blocked.status_code == 302
+    assert blocked.headers["Location"].endswith("/account/verify-email")
+
+    message = catalog_app.extensions["outbox"][-1]
+    link = re.search(r"https?://\S+", message.body)
+    assert link
+    confirm_path = urlsplit(link.group(0)).path
+    assert shop.get(confirm_path).status_code == 200
+    wrong = shop.post(confirm_path, data={"password": "wrong-password"})
+    assert b"password is not correct" in wrong.data
+    with catalog_app.app_context():
+        assert user(catalog_app).email_verified_at is None
+    verified = shop.post(confirm_path, data={"password": PASSWORD})
+    assert verified.status_code == 302 and verified.headers["Location"] == "/account/"
+    with catalog_app.app_context():
+        active = user(catalog_app)
+        assert active.email_verified_at is not None
+        assert active.consented(Channel.EMAIL) and active.consented(Channel.SMS)
+
+
+def test_verification_link_is_single_use_and_resend_is_generic(
+    shop: FlaskClient, catalog_app: Flask
+) -> None:
+    register(shop, verify=False)
+    first_message = catalog_app.extensions["outbox"][-1]
+    first_link = re.search(r"https?://\S+", first_message.body)
+    assert first_link
+
+    unknown = shop.post("/account/verify-email/resend", data={"email": "unknown@example.com"})
+    assert unknown.status_code == 302
+    assert len(catalog_app.extensions["outbox"]) == 1
+    resent = shop.post("/account/verify-email/resend", data={"email": "ada@example.com"})
+    assert resent.status_code == 302
+    assert len(catalog_app.extensions["outbox"]) == 2
+
+    first_path = urlsplit(first_link.group(0)).path
+    assert shop.post(first_path, data={"password": PASSWORD}).status_code == 302
+    replay = shop.get(first_path, follow_redirects=True)
+    assert b"invalid or expired" in replay.data
+
+
+def test_registering_again_replaces_a_pending_account(
+    shop: FlaskClient, catalog_app: Flask
+) -> None:
+    register(shop, verify=False, username="squatter", password="someone-elses-pass-1")  # noqa: S106
+    stale = re.search(r"https?://\S+", catalog_app.extensions["outbox"][-1].body)
+    assert stale
+
+    response = register(shop, username="ada")
+    assert response.status_code == 302 and response.headers["Location"] == "/account/"
+    with catalog_app.app_context():
+        assert db.session.scalar(select(func.count(User.id))) == 1
+        assert user(catalog_app).username == "ada"
+    assert (
+        b"invalid or expired" in shop.get(urlsplit(stale.group(0)).path, follow_redirects=True).data
+    )
+
+    # A verified account still cannot be taken over by registering its email.
+    shop.post("/account/logout")
+    again = register(shop, username="other", verify=False)
+    assert b"already exists" in again.data
+
+
+def test_abandoned_unverified_accounts_are_purged(shop: FlaskClient, catalog_app: Flask) -> None:
+    register(shop, verify=False)
+    with catalog_app.app_context():
+        pending = user(catalog_app)
+        pending.created_at = utcnow() - timedelta(days=8)
+        db.session.commit()
+
+    result = catalog_app.test_cli_runner().invoke(args=["accounts", "purge-unverified"])
+
+    assert result.exit_code == 0 and "Purged 1" in result.output
+    with catalog_app.app_context():
+        assert user(catalog_app) is None
 
 
 def test_consent_is_opt_in_and_recorded_with_wording(shop: FlaskClient, catalog_app: Flask) -> None:

@@ -21,6 +21,7 @@ def _customer(email: str = "reader@example.com") -> User:
         email=email,
         password_hash="not-used-in-service-tests",  # noqa: S106 - no login in service tests
         first_name="Reader",
+        email_verified_at=utcnow(),
     )
     db.session.add(user)
     db.session.commit()

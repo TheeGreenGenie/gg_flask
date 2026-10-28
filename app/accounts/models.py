@@ -28,6 +28,7 @@ class User(db.Model):  # type: ignore[name-defined]
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(String(64), unique=True, index=True)
     email: Mapped[str] = mapped_column(String(254), unique=True)  # stored lower-cased
+    email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     password_hash: Mapped[str] = mapped_column(String(255))
     first_name: Mapped[str] = mapped_column(String(80), default="")
     phone: Mapped[str | None] = mapped_column(String(20))  # E.164, e.g. +12155550123
@@ -46,6 +47,9 @@ class User(db.Model):  # type: ignore[name-defined]
     )
     payment_methods: Mapped[list[StoredPaymentMethod]] = relationship(
         back_populates="user", cascade="all, delete-orphan", order_by="StoredPaymentMethod.id"
+    )
+    email_verifications: Mapped[list[EmailVerification]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
     )
 
     def consented(self, channel: Channel) -> bool:
@@ -86,6 +90,23 @@ class PasswordReset(db.Model):  # type: ignore[name-defined]
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     user: Mapped[User] = relationship()
+
+
+class EmailVerification(db.Model):  # type: ignore[name-defined]
+    """Single-use email ownership link; only its SHA-256 digest is stored."""
+
+    __tablename__ = "email_verifications"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    email_opt_in: Mapped[bool] = mapped_column(Boolean, default=False)
+    sms_opt_in: Mapped[bool] = mapped_column(Boolean, default=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    user: Mapped[User] = relationship(back_populates="email_verifications")
 
 
 class Address(db.Model):  # type: ignore[name-defined]

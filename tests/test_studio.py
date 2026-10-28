@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timedelta
+from decimal import ROUND_HALF_UP, Decimal
 from io import BytesIO
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -116,6 +118,36 @@ def test_password_login_needs_single_use_owner_approval(app: Flask, client) -> N
     replay = client.get(PREFIX + f"/waiting/{request_id}")
     assert replay.status_code == 200
     assert b"already been used" in replay.data
+
+
+def test_ntfy_approval_payload_is_valid_for_ntfy(
+    app: Flask, client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import urllib.request
+
+    sent: list[urllib.request.Request] = []
+
+    class _Ok:
+        def __enter__(self) -> _Ok:
+            return self
+
+        def __exit__(self, *_: object) -> None:
+            return None
+
+    monkeypatch.setattr(urllib.request, "urlopen", lambda req, timeout: sent.append(req) or _Ok())
+    app.config.update(
+        STUDIO_APPROVAL_BACKEND="ntfy",
+        STUDIO_NTFY_SERVER="https://ntfy.example",
+        STUDIO_NTFY_TOPIC="private-topic",
+    )
+    _user(app)
+    client.post(PREFIX + "/", data={"username": "ada", "password": PASSWORD})
+    assert len(sent) == 1 and sent[0].full_url == "https://ntfy.example/"
+    payload = json.loads(sent[0].data)  # type: ignore[arg-type]
+    assert payload["topic"] == "private-topic"
+    # ntfy's JSON API rejects the whole message (HTTP 400) unless priority is a number 1-5.
+    assert isinstance(payload["priority"], int) and 1 <= payload["priority"] <= 5
+    assert payload["click"].startswith("http") and payload["actions"][0]["url"] == payload["click"]
 
 
 def test_expired_request_cannot_be_consumed(app: Flask, client) -> None:
@@ -722,3 +754,105 @@ def test_studio_user_removed_from_manifest_is_disabled(app: Flask, tmp_path: Pat
     with app.app_context():
         user = db.session.query(StudioUser).one()
         assert user.active is False
+
+
+def _bulk_form(category_id: int, **extra: str) -> dict[str, str]:
+    form = {"category": str(category_id), "kind": "raise_percent", "amount": "10"}
+    form.update(reason="Supplier increase", **extra)
+    return form
+
+
+def _first_category(app: Flask) -> tuple[int, list[tuple[int, int]]]:
+    """A category with priced options, and its (variant id, price) pairs after clearing sales."""
+    with app.app_context():
+        variant = db.session.query(Variant).filter(Variant.active.is_(True)).first()
+        assert variant is not None
+        category = variant.product.categories[0]
+        ids = [category.id, *(child.id for child in category.children)]
+        variants = (
+            db.session.query(Variant)
+            .join(Variant.product)
+            .filter(Variant.active.is_(True), Product.categories.any(Category.id.in_(ids)))
+            .all()
+        )
+        for item in variants:
+            item.compare_at_cents = None
+        db.session.commit()
+        return category.id, [(item.id, item.price_cents) for item in variants]
+
+
+def test_bulk_price_preview_saves_nothing_then_applies_with_history(catalog_app: Flask) -> None:
+    client = catalog_app.test_client()
+    _approved_cookie(catalog_app, client, roles="editor", change=True)
+    category_id, before = _first_category(catalog_app)
+    page = client.get(
+        PREFIX + "/prices/bulk", query_string={**_bulk_form(category_id), "preview": 1}
+    )
+    text = page.get_data(as_text=True)
+    assert page.status_code == 200
+    assert "Raise by 10%" in text and "Save these" in text
+    fingerprint = re.search(r'name="fingerprint" value="([0-9a-f]{64})"', text)
+    assert fingerprint
+    with catalog_app.app_context():
+        assert [(v, db.session.get(Variant, v).price_cents) for v, _ in before] == before
+        assert db.session.query(PriceHistory).count() == 0
+
+    response = client.post(
+        PREFIX + "/prices/bulk", data={**_bulk_form(category_id), "fingerprint": fingerprint[1]}
+    )
+    assert response.status_code == 302 and response.headers["Location"].endswith("/prices/history")
+    with catalog_app.app_context():
+        for variant_id, cents in before:
+            expected = int((Decimal(cents) * Decimal("1.1")).quantize(Decimal("1"), ROUND_HALF_UP))
+            assert db.session.get(Variant, variant_id).price_cents == expected
+        history = db.session.query(PriceHistory).all()
+        assert len(history) == len(before)
+        assert all(item.reason == "Bulk: Supplier increase" for item in history)
+        assert db.session.query(StudioAudit).filter_by(action="studio.price.bulk_updated").count()
+
+
+def test_bulk_price_refuses_a_stale_preview(catalog_app: Flask) -> None:
+    client = catalog_app.test_client()
+    _approved_cookie(catalog_app, client, roles="editor", change=True)
+    category_id, before = _first_category(catalog_app)
+    text = client.get(
+        PREFIX + "/prices/bulk", query_string={**_bulk_form(category_id), "preview": 1}
+    ).get_data(as_text=True)
+    fingerprint = re.search(r'name="fingerprint" value="([0-9a-f]{64})"', text)
+    assert fingerprint
+    with catalog_app.app_context():
+        db.session.get(Variant, before[0][0]).price_cents += 100  # someone changed one price
+        db.session.commit()
+    response = client.post(
+        PREFIX + "/prices/bulk",
+        data={**_bulk_form(category_id), "fingerprint": fingerprint[1]},
+        follow_redirects=True,
+    )
+    assert b"changed since the preview" in response.data
+    with catalog_app.app_context():
+        assert db.session.query(PriceHistory).count() == 0
+
+
+def test_bulk_price_needs_a_selection_and_skips_sale_conflicts(catalog_app: Flask) -> None:
+    client = catalog_app.test_client()
+    _approved_cookie(catalog_app, client, roles="editor", change=True)
+    category_id, before = _first_category(catalog_app)
+    everything = client.get(
+        PREFIX + "/prices/bulk",
+        query_string={"kind": "lower_percent", "amount": "5", "reason": "x y", "preview": 1},
+    )
+    assert b"can&#39;t hit everything" in everything.data
+    with catalog_app.app_context():
+        variant = db.session.get(Variant, before[0][0])
+        variant.compare_at_cents = variant.price_cents + 50
+        db.session.commit()
+        plan = service.plan_bulk_price(_bulk_form(category_id))
+        row = next(r for r in plan.rows if r.variant.id == before[0][0])
+        assert row.skip == "Would reach its compare-at (was) price" and row.after == row.before
+
+
+def test_bulk_price_rounding_to_99() -> None:
+    assert service._bulk_new_price(4000, "raise_percent", Decimal("10"), True) == 4399
+    assert service._bulk_new_price(4599, "set", Decimal("45.99"), True) == 4599
+    assert service._bulk_new_price(4500, "lower_amount", Decimal("5"), True) == 3999
+    assert service._bulk_new_price(4000, "raise_amount", Decimal("2.50"), False) == 4250

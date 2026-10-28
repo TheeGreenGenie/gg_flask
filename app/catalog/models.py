@@ -28,7 +28,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.catalog.units import GRAMS_PER_OUNCE
+from app.catalog.units import GRAMS_PER_OUNCE, format_piece_length
 from app.extensions import db
 
 
@@ -145,6 +145,10 @@ class Product(db.Model):  # type: ignore[name-defined]
             "piece_length_yards IS NULL OR piece_length_yards > 0", name="piece_length_positive"
         ),
         CheckConstraint("width_inches IS NULL OR width_inches > 0", name="width_inches_positive"),
+        CheckConstraint(
+            "piece_length_max_yards IS NULL OR piece_length_max_yards > piece_length_yards",
+            name="piece_length_range_valid",
+        ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -167,6 +171,8 @@ class Product(db.Model):  # type: ignore[name-defined]
     # Length of one fixed bundle/precut piece in yards (e.g. 1 for the precut 1-yard prints,
     # 6 for 6-yard bundles) and the fabric width; editable in admin and the Studio.
     piece_length_yards: Mapped[Decimal | None] = mapped_column(Numeric(6, 2))
+    # Set when pieces vary (owner, 2026-10-28: "4-5 yards"); piece_length_yards is then the low end.
+    piece_length_max_yards: Mapped[Decimal | None] = mapped_column(Numeric(6, 2))
     width_inches: Mapped[int | None] = mapped_column(Integer)
     # Comma-separated names from naming.PALETTE (controlled vocabulary, future color filter).
     colors: Mapped[str] = mapped_column(String(200), default="", server_default="")
@@ -231,10 +237,18 @@ class Product(db.Model):  # type: ignore[name-defined]
         """'1-yard precut piece' / '6-yard bundle' for fixed bundles with a known length."""
         if self.sale_unit != SaleUnit.FIXED_BUNDLE.value or not self.piece_length_yards:
             return None
+        if self.piece_length_max_yards:
+            low = format_yards(Decimal(self.piece_length_yards))
+            return f"{low}–{format_yards(Decimal(self.piece_length_max_yards))}-yard bundle"
         length = format_yards(Decimal(self.piece_length_yards))
         if Decimal(self.piece_length_yards) == 1:
             return "1-yard precut piece"
         return f"{length}-yard bundle"
+
+    @property
+    def piece_length_text(self) -> str:
+        """What the editors show in the length box: '4.5', '4-5' or ''."""
+        return format_piece_length(self.piece_length_yards, self.piece_length_max_yards)
 
     @property
     def price_unit_label(self) -> str:
@@ -246,7 +260,8 @@ class Product(db.Model):  # type: ignore[name-defined]
         if self.product_type != ProductType.FABRIC or not self.piece_length_yards:
             return None
         width_yards = Decimal(self.width_inches or DEFAULT_FABRIC_WIDTH_INCHES) / 36
-        square_yards = Decimal(self.piece_length_yards) * width_yards
+        longest = self.piece_length_max_yards or self.piece_length_yards  # ceiling, like weight
+        square_yards = Decimal(longest) * width_yards
         return math.ceil(square_yards * FABRIC_MAX_OZ_PER_SQ_YD * GRAMS_PER_OUNCE)
 
     @property

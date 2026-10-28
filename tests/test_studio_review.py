@@ -283,3 +283,45 @@ def test_summary_lists_only_real_edits(shop_app: Flask) -> None:
     with shop_app.app_context():
         summary = db.session.scalars(select(StudioChange)).one().summary
     assert "Summary:" in summary and "Description" not in summary
+
+
+def test_reviewed_bulk_price_change_waits_for_the_owner(shop_app: Flask) -> None:
+    staff = _staff_client(shop_app, "sales")
+    variant = _variant(shop_app)
+    form = {"q": variant.sku, "kind": "set", "amount": "12.00", "reason": "New season"}
+    page = staff.get(PREFIX + "/prices/bulk", query_string={**form, "preview": 1})
+    fingerprint = re.search(
+        r'name="fingerprint" value="([0-9a-f]{64})"', page.get_data(as_text=True)
+    )
+    assert fingerprint
+    staff.post(PREFIX + "/prices/bulk", data={**form, "fingerprint": fingerprint[1]})
+    with shop_app.app_context():
+        assert db.session.get(Variant, variant.id).price_cents == variant.price_cents
+        change = db.session.scalars(select(StudioChange)).one()
+        assert change.status == ChangeStatus.PENDING and "→ $12.00" in change.summary
+    _owner_client(shop_app).post(_review_link(shop_app), data={"decision": "approve"})
+    with shop_app.app_context():
+        assert db.session.get(Variant, variant.id).price_cents == 1200
+        assert db.session.scalars(select(StudioChange)).one().status == ChangeStatus.APPLIED
+
+
+def test_staff_get_the_playful_studio_and_owners_do_not(shop_app: Flask) -> None:
+    staff = _staff_client(shop_app, "sales", name="mr.adetolu")
+    home = staff.get(PREFIX + "/home").get_data(as_text=True)
+    assert "gg-play" in home and "studio-play.css" in home
+    assert "Hi Mr. Adetolu!" in home and "Your stars this week" in home
+    assert "Every change the owner approves earns you a star" in home
+    prices = staff.get(PREFIX + "/prices").get_data(as_text=True)
+    assert 'class="gg-play__steps"' in prices and "Press Save" in prices
+
+    # One approved change = one star.
+    variant = _variant(shop_app)
+    staff.post(PREFIX + f"/prices/{variant.id}", data={"price": "12.00", "reason": "raise"})
+    _owner_client(shop_app).post(_review_link(shop_app), data={"decision": "approve"})
+    assert "1 star! Great start" in staff.get(PREFIX + "/home").get_data(as_text=True)
+
+    owner = _staff_client(shop_app, "owner", review_on=False, name="mrs.adetolu")
+    page = owner.get(PREFIX + "/home").get_data(as_text=True)
+    assert "gg-play" not in page and "studio-play.css" not in page
+    assert "What needs attention?" in page
+    assert "gg-play__steps" not in owner.get(PREFIX + "/prices").get_data(as_text=True)

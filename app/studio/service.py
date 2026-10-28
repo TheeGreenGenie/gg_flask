@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 import logging
 import re
 import secrets
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
@@ -173,9 +175,7 @@ def issue_temporary_password(actor: StudioUser, target: StudioUser) -> str:
         raise StudioError("Use Change password to update your own account.")
     if not target.active:
         raise StudioError("That Studio account is disabled.")
-    if not ratelimit.allow(
-        "studio-password-swap", f"{actor.id}:{ratelimit.client_key()}", 10, 900
-    ):
+    if not ratelimit.allow("studio-password-swap", f"{actor.id}:{ratelimit.client_key()}", 10, 900):
         raise StudioError("Too many password swaps. Please wait and try again.")
     temporary = secrets.token_urlsafe(18)
     _check_studio_password(temporary, target.username)
@@ -329,7 +329,7 @@ def _send_approval(record: StudioLoginRequest, token: str) -> None:
             "topic": current_app.config["STUDIO_NTFY_TOPIC"],
             "title": "Staff Studio sign-in request",
             "message": message,
-            "priority": "high",
+            "priority": 4,  # ntfy's JSON API takes 1-5 only; "high" is rejected with a 400
             "tags": ["key"],
             "click": link,
             "actions": [{"action": "view", "label": "Review sign-in", "url": link, "clear": True}],
@@ -659,6 +659,161 @@ def undo_price(user: StudioUser, history: PriceHistory) -> None:
     cache.bump_catalog_version()
 
 
+BULK_PRICE_KINDS = {
+    "raise_percent": "Raise by %",
+    "lower_percent": "Lower by %",
+    "raise_amount": "Raise by $",
+    "lower_amount": "Lower by $",
+    "set": "Set every price to $",
+}
+BULK_PRICE_LIMIT = 500
+
+
+@dataclass
+class BulkPriceRow:
+    variant: Variant
+    before: int
+    after: int
+    skip: str = ""  # why this option is left unchanged (shown in the preview)
+
+
+@dataclass
+class BulkPricePlan:
+    rows: list[BulkPriceRow]
+    reason: str
+    summary: str
+    fingerprint: str
+
+    @property
+    def changes(self) -> list[BulkPriceRow]:
+        return [row for row in self.rows if not row.skip]
+
+
+def _bulk_new_price(before: int, kind: str, amount: Decimal, round_99: bool) -> int:
+    if kind in ("raise_percent", "lower_percent"):
+        factor = (100 + amount if kind == "raise_percent" else 100 - amount) / 100
+        cents = int((Decimal(before) * factor).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+    else:
+        step = int((amount * 100).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+        cents = {"raise_amount": before + step, "lower_amount": before - step}.get(kind, step)
+    if round_99 and cents > 99:
+        cents = (cents // 100) * 100 + 99 if cents % 100 == 99 else (cents // 100) * 100 - 1
+    return cents
+
+
+def plan_bulk_price(form: dict[str, str]) -> BulkPricePlan:
+    """Work out (without saving) what a bulk price change would do to each matching option."""
+    kind = form.get("kind", "")
+    if kind not in BULK_PRICE_KINDS:
+        raise StudioError("Choose how the prices should change.")
+    try:
+        amount = Decimal(form.get("amount", "").strip().replace("$", "").replace(",", ""))
+    except InvalidOperation:
+        raise StudioError("Enter a valid amount.") from None
+    if kind.endswith("percent") and not Decimal("0.01") <= amount <= Decimal("90"):
+        raise StudioError("Percentage must be between 0.01 and 90.")
+    if not kind.endswith("percent") and not Decimal("0.01") <= amount <= Decimal("1000000"):
+        raise StudioError("Dollar amount must be between $0.01 and $1,000,000.")
+    reason = form.get("reason", "").strip()
+    if not 2 <= len(reason) <= 120:
+        raise StudioError("Add a short reason for the price change.")
+    round_99 = form.get("round_99") == "1"
+
+    statement = select(Variant).join(Variant.product).where(Variant.active.is_(True))
+    category_id = form.get("category", "")
+    query = form.get("q", "").strip()[:100]
+    label = []
+    if category_id:
+        category = db.session.get(Category, int(category_id)) if category_id.isdigit() else None
+        if category is None:
+            raise StudioError("That category no longer exists.")
+        ids = [category.id, *(child.id for child in category.children)]
+        statement = statement.where(Product.categories.any(Category.id.in_(ids)))
+        label.append(f"category “{category.name}”")
+    if query:
+        like = f"%{query}%"
+        statement = statement.where(or_(Product.name.ilike(like), Variant.sku.ilike(like)))
+        label.append(f"matching “{query}”")
+    if not label:
+        raise StudioError("Choose a category or search words so the change can't hit everything.")
+    variants = db.session.scalars(
+        statement.order_by(Product.name, Variant.position, Variant.id).limit(BULK_PRICE_LIMIT + 1)
+    ).all()
+    if not variants:
+        raise StudioError("No products match. Nothing would change.")
+    if len(variants) > BULK_PRICE_LIMIT:
+        raise StudioError(f"More than {BULK_PRICE_LIMIT} options match. Narrow the selection.")
+
+    in_sale = set(
+        db.session.scalars(
+            select(StudioSaleItem.variant_id)
+            .join(StudioSaleItem.sale)
+            .where(
+                StudioSaleItem.variant_id.in_([v.id for v in variants]),
+                StudioSale.status.in_([SaleStatus.SCHEDULED, SaleStatus.ACTIVE]),
+            )
+        ).all()
+    )
+    rows = []
+    for variant in variants:
+        before = variant.price_cents
+        after = _bulk_new_price(before, kind, amount, round_99)
+        skip = ""
+        if variant.id in in_sale:
+            skip = "In a scheduled or active sale"
+        elif not 1 <= after <= 100_000_000:
+            skip = "New price would be outside the allowed range"
+        elif variant.compare_at_cents is not None and after >= variant.compare_at_cents:
+            skip = "Would reach its compare-at (was) price"
+        elif after == before:
+            skip = "No change"
+        rows.append(BulkPriceRow(variant, before, after if not skip else before, skip))
+    shown = format(amount.normalize(), "f")  # 10 -> "10", 2.50 -> "2.5"
+    how = BULK_PRICE_KINDS[kind].replace("%", f"{shown}%").replace("$", f"${shown}")
+    summary = f"{how}{' (ending in .99)' if round_99 else ''}, {' '.join(label)}"
+    fingerprint = hashlib.sha256(
+        json.dumps(
+            [kind, str(amount), round_99, reason, [(r.variant.id, r.before, r.after) for r in rows]]
+        ).encode()
+    ).hexdigest()
+    return BulkPricePlan(rows, reason, summary, fingerprint)
+
+
+def apply_bulk_price(user: StudioUser, form: dict[str, str]) -> int:
+    """Apply a previewed bulk change only if every price is still what the preview showed."""
+    plan = plan_bulk_price(form)
+    if not hmac.compare_digest(plan.fingerprint, form.get("fingerprint", "")):
+        raise StudioError("Prices changed since the preview. Review the new preview first.")
+    if not plan.changes:
+        raise StudioError("Nothing would change.")
+    reason = f"Bulk: {plan.reason}"[:160]
+    for row in plan.changes:
+        row.variant.price_cents = row.after
+        db.session.add(
+            PriceHistory(
+                variant_id=row.variant.id,
+                user_id=user.id,
+                before_cents=row.before,
+                after_cents=row.after,
+                reason=reason,
+            )
+        )
+    audit(
+        user,
+        "studio.price.bulk_updated",
+        "variant_bulk",
+        str(len(plan.changes)),
+        {
+            "summary": plan.summary,
+            "reason": plan.reason,
+            "variant_ids": [row.variant.id for row in plan.changes],
+        },
+    )
+    db.session.commit()
+    cache.bump_catalog_version()
+    return len(plan.changes)
+
+
 def set_product_visibility(
     user: StudioUser,
     product: Product,
@@ -715,10 +870,10 @@ def update_product_details(
     except ValueError:
         raise StudioError("Choose bundle, yard, or metre for the selling unit.") from None
     try:
-        piece_length = (
-            product.piece_length_yards
+        piece_length, piece_max = (
+            (product.piece_length_yards, product.piece_length_max_yards)
             if piece_length_raw is None
-            else units.parse_piece_length(piece_length_raw)
+            else units.parse_piece_range(piece_length_raw)
         )
         width = product.width_inches if width_raw is None else units.parse_width(width_raw)
     except ValueError as exc:
@@ -736,7 +891,7 @@ def update_product_details(
         "description": product.description,
         "category_ids": sorted(category.id for category in product.categories),
         "sale_unit": product.sale_unit,
-        "piece_length_yards": _yards(product.piece_length_yards),
+        "piece_length_yards": product.piece_length_text or None,
         "width_inches": product.width_inches,
     }
     product.name = name
@@ -745,6 +900,7 @@ def update_product_details(
     product.categories = list(categories)
     product.sale_unit = sale_unit.value
     product.piece_length_yards = piece_length
+    product.piece_length_max_yards = piece_max
     product.width_inches = width
     audit(
         user,
@@ -759,17 +915,13 @@ def update_product_details(
                 "description": description,
                 "category_ids": sorted(category_ids),
                 "sale_unit": sale_unit.value,
-                "piece_length_yards": _yards(piece_length),
+                "piece_length_yards": units.format_piece_length(piece_length, piece_max) or None,
                 "width_inches": width,
             },
         },
     )
     db.session.commit()
     cache.bump_catalog_version()
-
-
-def _yards(value: Decimal | None) -> str | None:
-    return None if value is None else format(Decimal(value).normalize(), "f")
 
 
 def upload_product_image(
@@ -1169,8 +1321,7 @@ def reply_to_post(user: StudioUser, post: ProductPost, body_raw: str) -> Product
         mail.send(
             customer.email,
             f"GG Afrikan Eleganz replied to your {post.kind.value}",
-            f"We replied to your {post.kind.value} on {post.product.name}.\n\n"
-            f"Our reply:\n{body}\n",
+            f"We replied to your {post.kind.value} on {post.product.name}.\n\nOur reply:\n{body}\n",
         )
     return reply
 

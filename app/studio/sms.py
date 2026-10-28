@@ -5,6 +5,10 @@ not enough: a 6-digit code is texted to their number and must be typed in before
 starts. The code is stored only as a hash, expires after 5 minutes, allows 5 guesses and at most
 3 sends per sign-in.
 
+With an authenticator-app secret on the account (`flask studio set-authenticator`), the code
+comes from the app on their phone instead and nothing is texted: no SMS provider is needed
+(owner, 2026-10-28). Each app code works once.
+
 Backends (STUDIO_SMS_BACKEND): "twilio" (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN,
 TWILIO_FROM_NUMBER) for real texts; "console" for local testing only (the code is written to the
 server log). With no backend, or no phone number on the account, the sign-in is refused — the
@@ -18,6 +22,7 @@ import hashlib
 import hmac
 import logging
 import secrets
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -27,7 +32,7 @@ from flask import current_app
 
 from app.catalog.models import utcnow
 from app.extensions import db
-from app.studio.models import StudioLoginRequest
+from app.studio.models import StudioLoginRequest, StudioUser
 
 log = logging.getLogger(__name__)
 CODE_TTL = timedelta(minutes=5)
@@ -54,6 +59,24 @@ def needed(record: StudioLoginRequest) -> bool:
     return bool(record.user.requires_sms) and record.sms_verified_at is None
 
 
+def uses_app(user: StudioUser) -> bool:
+    return bool(user.totp_secret)
+
+
+def _app_code_step(user: StudioUser, code: str) -> int | None:
+    """The 30-second step a correct, unused authenticator code belongs to."""
+    from app.admin.service import totp
+
+    now = int(time.time())
+    for drift in (-30, 0, 30):
+        step = (now + drift) // 30
+        if (user.totp_last_step is None or step > user.totp_last_step) and hmac.compare_digest(
+            totp(str(user.totp_secret), step * 30), code
+        ):
+            return step
+    return None
+
+
 def masked(phone: str | None) -> str:
     return f"•••• {phone[-4:]}" if phone and len(phone) >= 4 else "your phone"
 
@@ -63,6 +86,13 @@ def send_code(record: StudioLoginRequest, force: bool = False) -> None:
     from app.studio import service
 
     user = record.user
+    if uses_app(user):
+        if record.sms_sent_at is None:  # start the 5-minute window to type the app's code
+            now = utcnow()
+            record.sms_sent_at = now
+            record.expires_at = max(_aware(record.expires_at), now + CODE_TTL)
+            db.session.commit()
+        return
     backend = current_app.config.get("STUDIO_SMS_BACKEND")
     if not user.sms_phone or backend not in {"twilio", "console"}:
         raise SmsError(
@@ -98,14 +128,23 @@ def verify(record: StudioLoginRequest, code_raw: str) -> None:
     from app.studio import service
 
     code = "".join(ch for ch in (code_raw or "") if ch.isdigit())
-    if record.sms_code_hash is None or record.sms_sent_at is None:
+    app_code = uses_app(record.user)
+    if record.sms_sent_at is None or (record.sms_code_hash is None and not app_code):
         raise SmsError("Ask for a code first.")
     if utcnow() - _aware(record.sms_sent_at) > CODE_TTL:
         raise SmsError("That code expired. Send a new one.")
     if record.sms_attempts >= MAX_ATTEMPTS:
         raise SmsError("Too many wrong codes. Start the sign-in again.")
     record.sms_attempts += 1
-    if len(code) != 6 or not hmac.compare_digest(_digest(record, code), record.sms_code_hash):
+    if app_code:
+        step = _app_code_step(record.user, code) if len(code) == 6 else None
+        if step is None:
+            db.session.commit()
+            raise SmsError("That code is not right. Use the newest code in your authenticator app.")
+        record.user.totp_last_step = step
+    elif len(code) != 6 or not hmac.compare_digest(
+        _digest(record, code), str(record.sms_code_hash)
+    ):
         db.session.commit()
         raise SmsError("That code is not right. Check the text and try again.")
     record.sms_verified_at = utcnow()

@@ -204,9 +204,7 @@ def test_tgg_phone_key_issues_one_display_temporary_password(
 
 def test_mrs_adetolu_cannot_open_or_call_password_swaps(app: Flask) -> None:
     with app.test_request_context(PREFIX + "/"):
-        user = service.create_user(
-            "mrs.adetolu", PASSWORD, "owner", may_self_approve=True
-        )
+        user = service.create_user("mrs.adetolu", PASSWORD, "owner", may_self_approve=True)
         user.must_change_password = False
         _with_key(user)
     client = app.test_client()

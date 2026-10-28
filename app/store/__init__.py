@@ -20,7 +20,7 @@ from flask import (
 from sqlalchemy import select
 from werkzeug.wrappers import Response
 
-from app import cache, marketing, ratelimit, site_content
+from app import address_lookup, cache, marketing, ratelimit, site_content
 from app.accounts import service as account_service
 from app.assets import media_version
 from app.cart import service as cart_service
@@ -214,6 +214,24 @@ def find_fabrics() -> str:
     return render_template(
         "store/find_fabrics.html", products=items, categories=categories, selected=selected
     )
+
+
+@bp.get("/api/v1/address-suggestions")
+def address_suggestions() -> tuple[Response, int]:
+    """Address autocomplete for our own checkout/address forms only (see app/address_lookup)."""
+    if request.headers.get("Sec-Fetch-Site", "same-origin") not in ("same-origin", "none"):
+        return jsonify(items=[]), 403  # other websites may not spend our lookups
+    try:
+        items = address_lookup.suggest(
+            request.args.get("q", ""), request.args.get("country", "")[:2]
+        )
+    except address_lookup.Limited:
+        return jsonify(items=[], retry_after=address_lookup.IP_WINDOW), 429
+    except address_lookup.Unavailable:
+        return jsonify(items=[]), 503
+    response = jsonify(items=items)
+    response.headers["Cache-Control"] = "private, no-store"  # addresses are personal data
+    return response, 200
 
 
 @bp.get("/api/v1/discovery/fabrics")

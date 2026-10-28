@@ -69,9 +69,7 @@ def checks() -> list[Check]:
             "configured" if mail.available() else "configure SMTP and run `flask mail test`",
         )
     )
-    payments = [
-        provider.value for provider in PaymentProvider if provider_configured(provider)
-    ]
+    payments = [provider.value for provider in PaymentProvider if provider_configured(provider)]
     results.append(
         Check(
             "PASS" if payments else "FAIL",

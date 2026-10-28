@@ -24,7 +24,14 @@ from flask import current_app, g, request, session, url_for
 from sqlalchemy import delete, func, select
 
 from app import mail, ratelimit
-from app.accounts.models import Address, Channel, MarketingConsent, PasswordReset, User
+from app.accounts.models import (
+    Address,
+    Channel,
+    EmailVerification,
+    MarketingConsent,
+    PasswordReset,
+    User,
+)
 from app.catalog.models import utcnow
 from app.extensions import db
 
@@ -40,6 +47,7 @@ SMS_WORDING = (
 WORDING = {Channel.EMAIL: EMAIL_WORDING, Channel.SMS: SMS_WORDING}
 
 RESET_TTL = timedelta(hours=1)
+VERIFY_TTL = timedelta(hours=24)
 MIN_PASSWORD = 10
 MAX_PASSWORD = 128
 COMMON_PASSWORDS = frozenset(
@@ -64,6 +72,12 @@ class AccountError(ValueError):
 
 class RateLimited(AccountError):
     pass
+
+
+class EmailNotVerified(AccountError):
+    def __init__(self, email: str):
+        super().__init__("Verify your email address before signing in.")
+        self.email = email
 
 
 # ---------- normalisation & validation ----------
@@ -160,7 +174,7 @@ class Registration:
     sms_opt_in: bool = False
 
 
-def register(data: Registration) -> User:
+def register(data: Registration) -> tuple[User, bool]:
     _limit("register", ratelimit.client_key(), 10, 3600)
     username = normalize_username(data.username)
     email = normalize_email(data.email)
@@ -168,7 +182,8 @@ def register(data: Registration) -> User:
     phone = normalize_phone(data.phone)
     if data.sms_opt_in and not phone:
         raise AccountError("Add a mobile number to receive texts, or untick the text option.")
-    if db.session.scalar(select(User.id).where(User.email == email)) is not None:
+    existing = db.session.scalar(select(User).where(User.email == email))
+    if existing is not None and existing.email_verified_at is not None:
         raise AccountError(
             "An account with this email already exists. Log in, or reset your password."
         )
@@ -176,10 +191,17 @@ def register(data: Registration) -> User:
 
     customer_taken = db.session.scalar(select(User.id).where(User.username == username))
     admin_taken = db.session.scalar(select(AdminUser.id).where(AdminUser.username == username))
-    if customer_taken is not None or admin_taken is not None:
+    if (customer_taken is not None and (existing is None or customer_taken != existing.id)) or (
+        admin_taken is not None
+    ):
         raise AccountError("That username is already in use. Choose another one.")
     if db.session.scalar(select(AdminUser.id).where(AdminUser.email == email)) is not None:
         raise AccountError("An administrator already uses this email address.")
+    if existing is not None:
+        # A pending account proved nothing; whoever registers this address again replaces it,
+        # so a stranger cannot lock the real owner out until the 7-day purge.
+        db.session.delete(existing)
+        db.session.flush()
     user = User(
         username=username,
         email=email,
@@ -188,9 +210,97 @@ def register(data: Registration) -> User:
         phone=phone,
     )
     db.session.add(user)
-    if data.email_opt_in:
+    db.session.commit()
+    sent = _issue_email_verification(user, data.email_opt_in, data.sms_opt_in)
+    return user, sent
+
+
+def _issue_email_verification(user: User, email_opt_in: bool, sms_opt_in: bool) -> bool:
+    token = secrets.token_urlsafe(32)
+    db.session.add(
+        EmailVerification(
+            user=user,
+            token_hash=_hash_token(token),
+            email_opt_in=email_opt_in,
+            sms_opt_in=sms_opt_in,
+            expires_at=utcnow() + VERIFY_TTL,
+        )
+    )
+    db.session.commit()
+    link = url_for("accounts.verify_email", token=token, _external=True)
+    return mail.send(
+        user.email,
+        "Verify your GG Afrikan Eleganz email",
+        f"Hi {user.first_name or user.username},\n\nConfirm that this email belongs to you by "
+        f"opening this link within 24 hours, then enter the password you chose:\n{link}\n\n"
+        "If you did not create this account, you can ignore this message.",
+    )
+
+
+def resend_verification(email_raw: str) -> bool:
+    """Best-effort resend with a generic browser response to prevent account discovery."""
+    _limit("verify-resend-ip", ratelimit.client_key(), 10, 3600)
+    try:
+        email = normalize_email(email_raw)
+    except AccountError:
+        return False
+    _limit("verify-resend-email", email, 3, 3600)
+    user = db.session.scalar(select(User).where(User.email == email))
+    if user is None or user.email_verified_at is not None:
+        return False
+    latest = db.session.scalar(
+        select(EmailVerification)
+        .where(EmailVerification.user_id == user.id)
+        .order_by(EmailVerification.id.desc())
+    )
+    return _issue_email_verification(
+        user,
+        bool(latest and latest.email_opt_in),
+        bool(latest and latest.sms_opt_in),
+    )
+
+
+def _valid_email_verification(token: str) -> EmailVerification | None:
+    if not token or len(token) > 100:
+        return None
+    verification = db.session.scalar(
+        select(EmailVerification).where(EmailVerification.token_hash == _hash_token(token))
+    )
+    if verification is None or verification.used_at is not None:
+        return None
+    expires = verification.expires_at
+    if expires.tzinfo is None:
+        from datetime import UTC
+
+        expires = expires.replace(tzinfo=UTC)
+    user = verification.user
+    if expires <= utcnow() or user.email_verified_at is not None:
+        return None
+    return verification
+
+
+def verification_token_ok(token: str) -> bool:
+    return _valid_email_verification(token) is not None
+
+
+def verify_email(token: str, password: str) -> User:
+    verification = _valid_email_verification(token)
+    if verification is None:
+        raise AccountError("That verification link is invalid or expired.")
+    _limit("verify-email", f"{verification.id}:{ratelimit.client_key()}", 10, 900)
+    user = verification.user
+    try:
+        _hasher.verify(user.password_hash, password[:MAX_PASSWORD])
+    except (VerificationError, InvalidHashError):
+        raise AccountError("That password is not correct.") from None
+    now = utcnow()
+    user.email_verified_at = now
+    for record in user.email_verifications:
+        if record.used_at is None:
+            record.used_at = now
+    if verification.email_opt_in:
         _record_consent(user, Channel.EMAIL, True, "register")
-    if data.sms_opt_in:
+    if verification.sms_opt_in:
         _record_consent(user, Channel.SMS, True, "register")
     db.session.commit()
     return user
@@ -218,6 +328,8 @@ def authenticate(identity_raw: str, password: str) -> User:
         raise generic from None
     if user is None:
         raise generic
+    if user.email_verified_at is None:
+        raise EmailNotVerified(user.email)
     if _hasher.check_needs_rehash(user.password_hash):
         user.password_hash = _hasher.hash(password)
     return user
@@ -226,6 +338,8 @@ def authenticate(identity_raw: str, password: str) -> User:
 def login(user: User, remember: bool) -> None:
     from app.wishlist import service as wishlist_service
 
+    if user.email_verified_at is None:
+        raise EmailNotVerified(user.email)
     anonymous_wishlist = wishlist_service.current()  # before the session is reset
     session.clear()  # new session on login: prevents fixation
     session["uid"] = user.id
@@ -249,7 +363,11 @@ def current_user() -> User | None:
         uid = session.get("uid")
         if isinstance(uid, int):
             candidate = db.session.get(User, uid)
-            if candidate is not None and session.get("sv") == candidate.session_version:
+            if (
+                candidate is not None
+                and candidate.email_verified_at is not None
+                and session.get("sv") == candidate.session_version
+            ):
                 user = candidate
             else:
                 session.clear()  # password changed elsewhere or account deleted
@@ -260,9 +378,7 @@ def current_user() -> User | None:
 # ---------- profile ----------
 
 
-def update_profile(
-    user: User, username_raw: str, first_name: str, phone_raw: str
-) -> list[str]:
+def update_profile(user: User, username_raw: str, first_name: str, phone_raw: str) -> list[str]:
     """Update name/phone. Returns notices (e.g. text consent withdrawn by a number change)."""
     notices: list[str] = []
     username = normalize_username(username_raw)
@@ -356,6 +472,7 @@ def customer_for_admin(admin: object) -> User:
         email=admin.email,
         password_hash=_hasher.hash(secrets.token_urlsafe(32)),
         first_name=admin.username,
+        email_verified_at=utcnow(),
     )
     db.session.add(user)
     db.session.flush()
@@ -448,7 +565,7 @@ def start_reset(email_raw: str) -> None:
         return
     _limit("reset-email", email, 3, 3600)
     user = db.session.scalar(select(User).where(User.email == email))
-    if user is None or _linked_admin(user) is not None:
+    if user is None or user.email_verified_at is None or _linked_admin(user) is not None:
         return
     token = secrets.token_urlsafe(32)
     db.session.add(
@@ -500,6 +617,18 @@ def complete_reset(token: str, new_password: str) -> User:
     )
     db.session.commit()
     return user
+
+
+def purge_unverified(days: int = 7) -> int:
+    """Delete abandoned pending accounts so random addresses cannot reserve names forever."""
+    cutoff = utcnow() - timedelta(days=days)
+    users = db.session.scalars(
+        select(User).where(User.email_verified_at.is_(None), User.created_at <= cutoff)
+    ).all()
+    for user in users:
+        db.session.delete(user)
+    db.session.commit()
+    return len(users)
 
 
 # ---------- marketing export (owner tool) ----------

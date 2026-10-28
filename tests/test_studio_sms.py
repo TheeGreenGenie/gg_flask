@@ -142,3 +142,35 @@ def test_cli_sets_phone_and_flag(app: Flask) -> None:
     assert "texted code at every sign-in" in out, out
     out = runner.invoke(args=["studio", "set-phone", "tgg", "215-555-0123"]).output
     assert "•••• 0123" in out
+
+
+def test_authenticator_app_replaces_texts(tgg_app: Flask) -> None:
+    from app.admin.service import totp
+
+    tgg_app.config["STUDIO_SMS_BACKEND"] = None  # no SMS provider at all
+    out = tgg_app.test_cli_runner().invoke(args=["studio", "set-authenticator", "tgg"]).output
+    assert "Key: " in out and "otpauth://totp/" in out, out
+    with tgg_app.app_context():
+        user = db.session.scalar(select(StudioUser).where(StudioUser.username == "tgg"))
+        assert user is not None and user.totp_secret and user.requires_sms
+        secret = user.totp_secret
+
+    client = tgg_app.test_client()
+    request_id = _key_approved_request(tgg_app, client)
+    page = client.get(PREFIX + f"/verify/{request_id}").get_data(as_text=True)
+    assert "authenticator app" in page and "Text me" not in page
+    assert not tgg_app.extensions.get("sms_outbox")
+    code = totp(secret)
+    wrong = "000000" if code != "000000" else "111111"
+    assert "not right" in client.post(
+        PREFIX + f"/verify/{request_id}", data={"code": wrong}
+    ).get_data(as_text=True)
+    done = client.post(PREFIX + f"/verify/{request_id}", data={"code": code})
+    assert done.status_code == 302 and "gg_studio=" in done.headers["Set-Cookie"]
+
+    # The same app code cannot be replayed for another sign-in.
+    client2 = tgg_app.test_client()
+    other = _key_approved_request(tgg_app, client2)
+    client2.get(PREFIX + f"/verify/{other}")
+    again = client2.post(PREFIX + f"/verify/{other}", data={"code": code})
+    assert "not right" in again.get_data(as_text=True)

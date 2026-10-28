@@ -43,7 +43,8 @@ MAX_CATEGORY_DEPTH = 2  # D-003
 PRODUCT_KEYS = {
     "slug", "name", "type", "status", "featured", "published", "legacy_wp_id",
     "summary", "description", "categories", "collections", "images", "options", "variants",
-    "colors", "autoname", "sale_unit", "piece_length_yards", "width_inches",
+    "colors", "autoname", "sale_unit", "piece_length_yards", "piece_length_max_yards",
+    "width_inches",
 }  # fmt: skip
 VARIANT_KEYS = {
     "sku", "options", "price_cents", "compare_at_cents", "stock", "track_inventory",
@@ -157,6 +158,17 @@ def validate(data: dict[str, Any], assets_dir: Path) -> list[str]:
             or round(length, 2) != length
         ):
             err(f"{loc}.piece_length_yards: a positive number of yards, at most 2 decimals")
+        longest = p.get("piece_length_max_yards")
+        if longest is not None and (
+            isinstance(longest, bool)
+            or not isinstance(longest, int | float)
+            or not isinstance(length, int | float)
+            or not length < longest <= 1000
+            or round(longest, 2) != longest
+        ):
+            err(
+                f"{loc}.piece_length_max_yards: needs piece_length_yards and must be longer than it"
+            )
         width = p.get("width_inches")
         if width is not None and (
             isinstance(width, bool) or not isinstance(width, int) or not 1 <= width <= 200
@@ -351,6 +363,8 @@ def _load_product(
     product.sale_unit = SaleUnit(p.get("sale_unit", "fixed_bundle")).value
     length = p.get("piece_length_yards")
     product.piece_length_yards = None if length is None else Decimal(str(length))
+    longest = p.get("piece_length_max_yards")
+    product.piece_length_max_yards = None if longest is None else Decimal(str(longest))
     product.width_inches = p.get("width_inches")
     product.colors = ",".join(p.get("colors") or [])
     product.summary = (p.get("summary") or "").strip()

@@ -1,6 +1,13 @@
 """Import every model module so SQLAlchemy metadata (and Alembic) sees all tables."""
 
-from app.accounts.models import Address, MarketingConsent, PasswordReset, StoredPaymentMethod, User
+from app.accounts.models import (
+    Address,
+    EmailVerification,
+    MarketingConsent,
+    PasswordReset,
+    StoredPaymentMethod,
+    User,
+)
 from app.admin.models import AdminAudit, AdminRecoveryCode, AdminRole, AdminUser
 from app.cart.models import Cart, CartLine
 from app.catalog.models import (
@@ -43,6 +50,7 @@ __all__ = [
     "AdminRole",
     "AdminUser",
     "Address",
+    "EmailVerification",
     "MarketingConsent",
     "PasswordReset",
     "StoredPaymentMethod",

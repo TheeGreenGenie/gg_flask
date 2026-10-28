@@ -93,8 +93,11 @@ The files contain personal data: import them into the provider, then delete them
 people whose latest choice is "yes" are included; every opt-in/opt-out is kept in
 `marketing_consents` with the exact wording shown, the date and the source.
 
-Password-reset emails print to the terminal in development. On the live site reset is
-switched off (and says so) until an email provider is connected (`MAIL_BACKEND`).
+New customer accounts stay locked until the customer opens a single-use email verification link
+and confirms the registration password;
+marketing choices do not activate before verification. Pending accounts are deleted after seven
+days by `accounts purge-unverified`. Verification and password-reset emails print to the terminal
+in development. On the live site these flows require a connected email provider (`MAIL_BACKEND`).
 
 ## Administration
 
@@ -247,7 +250,7 @@ Set `TRUSTED_PROXY_HOPS` to the number of reverse proxies in front of the app. W
 | `/cart/`, `/checkout/` | Server-side cart and duplicate-proof hosted checkout |
 | `/find-fabrics/` | Swipe-to-save fabric discovery (feed: `/api/v1/discovery/fabrics`) |
 | `/wishlist/` | Anonymous wishlist (JSON: `/api/v1/wishlist`) |
-| `/account/` | Customer accounts: register, sign in, details, message preferences, password, delete |
+| `/account/` | Verified customer accounts: register, verify email, sign in, details, preferences, password, delete |
 | `/admin/` | Private two-factor administration for catalog, orders, refunds, and coupons |
 | `/<STUDIO_PATH>/` | Hidden owner-approved Staff Studio (path comes only from the environment) |
 | `/sitemap.xml`, `/robots.txt` | Search-engine discovery rules |

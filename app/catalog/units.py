@@ -7,6 +7,7 @@ non-technical staff.
 from __future__ import annotations
 
 import math
+import re
 from decimal import Decimal, InvalidOperation
 
 MAX_PIECE_YARDS = Decimal(1000)
@@ -33,6 +34,29 @@ def parse_piece_length(raw: str | None) -> Decimal | None:
     if value != value.quantize(Decimal("0.01")):
         raise ValueError("Use at most two decimals for the piece length, for example 4.5.")
     return value.quantize(Decimal("0.01"))
+
+
+_RANGE_SPLIT = re.compile(r"\s*(?:-|–|—|\bto\b)\s*")
+
+
+def parse_piece_range(raw: str | None) -> tuple[Decimal | None, Decimal | None]:
+    """'4.5' -> (4.5, None); '4-5' or '4 to 5' -> (4, 5): pieces cut anywhere in that range."""
+    text = (raw or "").strip().lower().removesuffix("yards").removesuffix("yard").strip()
+    parts = _RANGE_SPLIT.split(text, maxsplit=1) if text else [""]
+    if len(parts) == 1:
+        return parse_piece_length(text), None
+    low, high = parse_piece_length(parts[0]), parse_piece_length(parts[1])
+    if low is None or high is None or high <= low:
+        raise ValueError("For a range, put the smaller length first, for example 4-5.")
+    return low, high
+
+
+def format_piece_length(low: Decimal | None, high: Decimal | None = None) -> str:
+    """(4.50, None) -> '4.5'; (4, 5) -> '4-5'; no length -> ''."""
+    if low is None:
+        return ""
+    text = format(Decimal(low).normalize(), "f")
+    return f"{text}-{format(Decimal(high).normalize(), 'f')}" if high is not None else text
 
 
 def parse_width(raw: str | None) -> int | None:

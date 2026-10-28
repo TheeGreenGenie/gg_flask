@@ -1,0 +1,15 @@
+{% extends "accounts/_base.html" %}
+{% block title %}Confirm your email · GG Afrikan Eleganz{% endblock %}
+{% block heading %}Confirm your email{% endblock %}
+{% block lede %}<p class="gg-page-title__lede">The link proves you can receive email at this address. Enter the password chosen during registration to finish securely.</p>{% endblock %}
+{% block body %}
+<form class="gg-account__card" method="post" action="{{ url_for('accounts.verify_email', token=token) }}" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  {% include "accounts/_error.html" %}
+  <div class="gg-field">
+    <label for="verification-password">Account password</label>
+    <input id="verification-password" name="password" type="password" autocomplete="current-password" required maxlength="128">
+  </div>
+  <button class="gg-button gg-button--accent gg-button--block" type="submit">Verify email and activate account</button>
+</form>
+{% endblock %}

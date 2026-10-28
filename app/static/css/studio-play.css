@@ -1,0 +1,146 @@
+/* Game-style Staff Studio for staff (owner, 2026-10-28): big picture buttons, simple steps,
+   chunky "press-down" buttons and cheerful feedback. Loaded only for non-owner accounts;
+   owners keep studio.css as it is. Every rule is scoped to body.gg-play. */
+
+.gg-play {
+	--play-teal: #d6f3ef; --play-teal-ink: #0d5c53;
+	--play-gold: #fff0c2; --play-gold-ink: #6b4a00;
+	--play-pink: #ffe0ec; --play-pink-ink: #8a1d4b;
+	--play-purple: #ece3ff; --play-purple-ink: #4b2a8f;
+	--play-green: #def5dc; --play-green-ink: #205c1d;
+	--play-blue: #dcecff; --play-blue-ink: #1b4a85;
+	--play-orange: #ffe6d1; --play-orange-ink: #8a3c00;
+	--play-button: #2f7de1; --play-button-edge: #1c56a3; --play-button-ink: #fff;
+	--play-star: #f5b301;
+}
+:root[data-theme="dark"] .gg-play {
+	--play-teal: #10302c; --play-teal-ink: #8fe3d7;
+	--play-gold: #33290c; --play-gold-ink: #ffd76a;
+	--play-pink: #3a1626; --play-pink-ink: #ffa6c9;
+	--play-purple: #261c3d; --play-purple-ink: #c9b3ff;
+	--play-green: #15301a; --play-green-ink: #9ee29a;
+	--play-blue: #132a45; --play-blue-ink: #9cc8ff;
+	--play-orange: #3a2210; --play-orange-ink: #ffbf8a;
+	--play-button: #4d95f0; --play-button-edge: #2a64b3; --play-button-ink: #0a1526;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) .gg-play {
+		--play-teal: #10302c; --play-teal-ink: #8fe3d7;
+		--play-gold: #33290c; --play-gold-ink: #ffd76a;
+		--play-pink: #3a1626; --play-pink-ink: #ffa6c9;
+		--play-purple: #261c3d; --play-purple-ink: #c9b3ff;
+		--play-green: #15301a; --play-green-ink: #9ee29a;
+		--play-blue: #132a45; --play-blue-ink: #9cc8ff;
+		--play-orange: #3a2210; --play-orange-ink: #ffbf8a;
+		--play-button: #4d95f0; --play-button-edge: #2a64b3; --play-button-ink: #0a1526;
+	}
+}
+
+/* Bigger, friendlier text everywhere */
+.gg-play .gg-studio { font-size: 1.1rem; }
+.gg-play .gg-studio h1 { font-family: var(--gg-font-heading); font-size: clamp(1.8rem, 6vw, 2.6rem); }
+.gg-play .gg-studio h2 { font-family: var(--gg-font-heading); }
+.gg-play .gg-eyebrow { display: none; }
+
+/* Menu: rounded picture chips */
+.gg-play .gg-studio__nav { gap: .5rem; border-bottom: 0; }
+.gg-play .gg-studio__nav a, .gg-play .gg-studio__nav button { gap: .4rem; padding: .55rem 1rem; border-radius: 999px; background: var(--gg-subtle-bg); }
+.gg-play .gg-studio__nav a:hover, .gg-play .gg-studio__nav button:hover { background: var(--play-gold); color: var(--play-gold-ink); }
+.gg-play__icon { font-size: 1.25em; line-height: 1; }
+
+/* Home: greeting */
+.gg-play__hello { display: flex; align-items: center; gap: 1rem; padding: 1.25rem 1.5rem; border-radius: var(--gg-radius-lg); background: var(--play-gold); color: var(--play-gold-ink); }
+.gg-play__hello h1 { margin: 0; color: inherit; }
+.gg-play__hello p { margin: .25rem 0 0; font-size: 1.15rem; }
+.gg-play__wave { font-size: clamp(2.5rem, 10vw, 3.5rem); line-height: 1; transform-origin: 70% 70%; animation: gg-play-wave 1.6s ease-in-out 2; }
+
+/* Home: star chart */
+.gg-play__stars { margin-top: 1.25rem; padding: 1.25rem 1.5rem; border: 3px dashed var(--play-star); border-radius: var(--gg-radius-lg); }
+.gg-play__stars h2 { margin: 0 0 .5rem; font-size: 1.3rem; }
+.gg-play__stars p { margin: .35rem 0; }
+.gg-play__star-row { display: flex; flex-wrap: wrap; gap: .2rem; font-size: clamp(1.6rem, 7vw, 2.2rem); line-height: 1; }
+.gg-play__star { animation: gg-play-pop .5s ease-out both; }
+.gg-play__star:nth-child(2) { animation-delay: .08s; } .gg-play__star:nth-child(3) { animation-delay: .16s; }
+.gg-play__star:nth-child(4) { animation-delay: .24s; } .gg-play__star:nth-child(5) { animation-delay: .32s; }
+.gg-play__star--empty { color: var(--gg-muted); animation: none; }
+.gg-play__waiting { font-weight: 700; }
+
+/* Home: big picture tiles */
+.gg-play__tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 1rem; margin-top: 1.5rem; }
+.gg-play__tile { position: relative; display: grid; gap: .3rem; align-content: start; min-height: 11rem; padding: 1.4rem; border-radius: var(--gg-radius-lg); text-decoration: none; box-shadow: 0 6px 0 rgba(0, 0, 0, .12); transition: transform .12s ease, box-shadow .12s ease; }
+.gg-play__tile:hover { transform: translateY(-3px); box-shadow: 0 9px 0 rgba(0, 0, 0, .12); }
+.gg-play__tile:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0, 0, 0, .12); }
+.gg-play__tile:focus-visible { outline: 4px solid var(--gg-focus); outline-offset: 3px; }
+.gg-play__tile strong { font-family: var(--gg-font-heading); font-size: 1.5rem; }
+.gg-play__tile span:not(.gg-play__tile-icon) { font-size: 1.05rem; line-height: 1.4; }
+.gg-play__tile-icon { font-size: 3rem; line-height: 1; }
+.gg-play__badge { justify-self: start; margin-top: .4rem; padding: .25rem .7rem; border-radius: 999px; background: var(--gg-paper); color: var(--gg-ink); font-size: .95rem; font-style: normal; font-weight: 700; }
+.gg-play__tile--teal { background: var(--play-teal); color: var(--play-teal-ink); }
+.gg-play__tile--gold { background: var(--play-gold); color: var(--play-gold-ink); }
+.gg-play__tile--pink { background: var(--play-pink); color: var(--play-pink-ink); }
+.gg-play__tile--purple { background: var(--play-purple); color: var(--play-purple-ink); }
+.gg-play__tile--green { background: var(--play-green); color: var(--play-green-ink); }
+.gg-play__tile--blue { background: var(--play-blue); color: var(--play-blue-ink); }
+.gg-play__tile--orange { background: var(--play-orange); color: var(--play-orange-ink); }
+.gg-play__help { margin-top: 1.5rem; padding: 1rem 1.25rem; border-radius: var(--gg-radius-md); background: var(--play-blue); color: var(--play-blue-ink); font-weight: 700; }
+
+/* "How to do it" strip under each page title */
+.gg-play__steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: .75rem; margin: 1.25rem 0; padding: 0; list-style: none; counter-reset: gg-step; }
+.gg-play__steps li { position: relative; display: flex; align-items: center; gap: .6rem; padding: .9rem 1rem .9rem 3.1rem; border-radius: var(--gg-radius-md); background: var(--play-green); color: var(--play-green-ink); font-weight: 700; line-height: 1.35; counter-increment: gg-step; }
+.gg-play__steps li::before { content: counter(gg-step); position: absolute; left: .8rem; display: grid; place-items: center; width: 1.8rem; height: 1.8rem; border-radius: 50%; background: var(--play-green-ink); color: var(--play-green); font-weight: 800; }
+.gg-play__step-icon { font-size: 1.5rem; line-height: 1; }
+
+/* Chunky game buttons that press down */
+.gg-play .gg-studio button, .gg-play .gg-studio .gg-button { min-height: 3.2rem; padding: .75rem 1.4rem; border: 0; border-radius: 999px; background: var(--play-button); color: var(--play-button-ink); font-size: 1.05rem; font-weight: 800; box-shadow: 0 5px 0 var(--play-button-edge); cursor: pointer; transition: transform .08s ease, box-shadow .08s ease; }
+.gg-play .gg-studio button:hover, .gg-play .gg-studio .gg-button:hover { filter: brightness(1.06); }
+.gg-play .gg-studio button:active, .gg-play .gg-studio .gg-button:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--play-button-edge); }
+.gg-play .gg-studio .gg-button--outline { background: var(--gg-paper); color: var(--play-button); box-shadow: 0 5px 0 var(--gg-line), inset 0 0 0 2px var(--play-button); }
+.gg-play .gg-studio__row-form button { padding-inline: 1.6rem; border-radius: var(--gg-radius-md); }
+.gg-play .gg-studio__nav button { min-height: 2.75rem; padding: .55rem 1rem; background: var(--gg-subtle-bg); color: var(--gg-ink); box-shadow: none; font-weight: 700; }
+
+/* Big, easy boxes */
+.gg-play .gg-studio input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+.gg-play .gg-studio select,
+.gg-play .gg-studio textarea { min-height: 3.2rem; padding: .7rem .9rem; border: 2px solid var(--gg-input-border); border-radius: var(--gg-radius-md); font-size: 1.1rem; }
+.gg-play .gg-studio input:focus, .gg-play .gg-studio select:focus, .gg-play .gg-studio textarea:focus { border-color: var(--play-button); outline: 3px solid color-mix(in srgb, var(--play-button) 35%, transparent); }
+.gg-play .gg-studio input[type="checkbox"] { width: 1.5rem; height: 1.5rem; accent-color: var(--play-button); vertical-align: middle; }
+.gg-play .gg-studio label { font-size: 1.05rem; }
+
+/* Tables: roomy rows and soft stripes */
+.gg-play .gg-studio th { font-size: .9rem; }
+.gg-play .gg-studio td { padding-block: 1rem; }
+.gg-play .gg-studio tbody tr:nth-child(even) { background: var(--gg-subtle-bg); }
+
+/* Cheerful messages: success celebrates, mistakes are gentle */
+.gg-play .gg-notice { position: relative; display: block; overflow: hidden; padding: 1.1rem 5rem 1.1rem 1.25rem; border-left: 0; border-radius: var(--gg-radius-md); font-size: 1.1rem; }
+.gg-play .gg-notice svg { display: none; }
+.gg-play .gg-notice--success { background: var(--play-green); color: var(--play-green-ink); animation: gg-play-pop .45s ease-out; }
+.gg-play .gg-notice--success::before { content: "🎉 Well done!"; content: "🎉 Well done!" / "Well done!"; margin-right: .35rem; font-weight: 800; }
+.gg-play .gg-notice--success::after { content: "⭐ ✨ ⭐"; content: "⭐ ✨ ⭐" / ""; position: absolute; right: 1rem; top: .2rem; font-size: 1.2rem; animation: gg-play-confetti 1.2s ease-out forwards; }
+.gg-play .gg-notice--error { background: var(--play-orange); color: var(--play-orange-ink); }
+.gg-play .gg-notice--error::before { content: "🙈 Oops!"; content: "🙈 Oops!" / "Oops!"; margin-right: .35rem; font-weight: 800; }
+.gg-play .gg-form-error { padding: 1rem 1.25rem; border-radius: var(--gg-radius-md); background: var(--play-orange); color: var(--play-orange-ink); font-weight: 700; }
+.gg-play .gg-form-error::before { content: "🙈 "; content: "🙈 " / ""; }
+
+@keyframes gg-play-pop { 0% { transform: scale(.6); opacity: 0; } 70% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); } }
+@keyframes gg-play-wave { 0%, 60%, 100% { transform: rotate(0); } 15%, 45% { transform: rotate(16deg); } 30% { transform: rotate(-8deg); } }
+@keyframes gg-play-confetti { 0% { transform: translateY(.6rem) scale(.5); opacity: 0; } 40% { opacity: 1; } 100% { transform: translateY(-.4rem) scale(1.15); opacity: .9; } }
+
+@media (prefers-reduced-motion: reduce) {
+	.gg-play *, .gg-play *::before, .gg-play *::after { animation: none !important; transition: none !important; }
+}
+@media (max-width: 42rem) {
+	/* Phones: every table row becomes a card, so nothing hides off the right edge */
+	.gg-play .gg-studio__table-wrap { overflow: visible; }
+	.gg-play .gg-studio table, .gg-play .gg-studio tbody, .gg-play .gg-studio tr, .gg-play .gg-studio td { display: block; width: 100%; }
+	.gg-play .gg-studio thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+	.gg-play .gg-studio tr { margin-bottom: 1rem; padding: .75rem 1rem; border: 2px solid var(--gg-line); border-radius: var(--gg-radius-lg); }
+	.gg-play .gg-studio tbody tr:nth-child(even) { background: transparent; }
+	.gg-play .gg-studio td { padding: .35rem 0; border: 0; }
+	.gg-play .gg-studio td[data-label]::before { content: attr(data-label) ": "; color: var(--gg-muted); font-weight: 700; }
+	.gg-play .gg-studio__row-form { min-width: 0; }
+	.gg-play .gg-studio__row-form button { width: 100%; }
+	.gg-play__hello { padding: 1rem; }
+	.gg-play__tile { min-height: 8.5rem; }
+	.gg-play__tile-icon { font-size: 2.4rem; }
+}

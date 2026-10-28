@@ -40,6 +40,38 @@ def test_piece_length_rejects_nonsense(raw: str) -> None:
         units.parse_piece_length(raw)
 
 
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [("4-5", ("4.00", "5.00")), ("4 – 5 yards", ("4.00", "5.00")), ("4.5 to 6", ("4.50", "6.00")),
+     ("4.5", ("4.50", None)), ("", (None, None))],
+)  # fmt: skip
+def test_piece_length_range_parsing(raw: str, expected: tuple[str | None, str | None]) -> None:
+    low, high = units.parse_piece_range(raw)
+    assert (str(low) if low else None, str(high) if high else None) == expected
+    assert units.format_piece_length(low, high) == {"4.5": "4.5", "": ""}.get(
+        raw, f"{low.normalize():f}-{high.normalize():f}" if low and high else ""
+    )
+
+
+@pytest.mark.parametrize("raw", ["5-4", "4-4", "4-", "-5", "4-abc"])
+def test_piece_length_range_rejects_backwards_or_broken(raw: str) -> None:
+    with pytest.raises(ValueError):
+        units.parse_piece_range(raw)
+
+
+def test_range_label_and_weight_use_the_longest_piece() -> None:
+    bundle = Product(
+        product_type=ProductType.FABRIC,
+        piece_length_yards=Decimal(4),
+        piece_length_max_yards=Decimal(5),
+        width_inches=36,
+        sale_unit="fixed_bundle",
+    )
+    assert bundle.piece_label == "4–5-yard bundle"
+    assert bundle.piece_length_text == "4-5"
+    assert bundle.estimated_weight_grams == 2268  # 5 sq yd x 16 oz, never under-estimated
+
+
 def test_width_parsing() -> None:
     assert units.parse_width('45"') == 45 and units.parse_width("") is None
     for bad in ("0", "4.5", "wide", "300"):
@@ -94,6 +126,11 @@ def test_manifest_accepts_and_validates_piece_size(app: Flask, assets: Path) -> 
     errors = mf.validate(bad, assets)
     assert any("piece_length_yards" in e for e in errors)
     assert any("width_inches" in e for e in errors)
+    ranged = manifest()
+    ranged["products"][0].update(piece_length_yards=4, piece_length_max_yards=5)
+    assert mf.validate(ranged, assets) == []
+    ranged["products"][0].update(piece_length_max_yards=3)
+    assert any("piece_length_max_yards" in e for e in mf.validate(ranged, assets))
 
 
 def test_product_page_shows_the_piece(catalog_app: Flask, shop: FlaskClient) -> None:
@@ -124,8 +161,14 @@ def test_admin_and_studio_edit_piece_size(catalog_app: Flask) -> None:
         }
         update_product(admin, product, form)
         assert (product.piece_length_yards, product.width_inches) == (Decimal("6.00"), 46)
+        update_product(admin, product, {**form, "piece_length_yards": "4-5"})
+        assert (product.piece_length_yards, product.piece_length_max_yards) == (4, 5)
+        update_product(admin, product, {**form, "piece_length_yards": "6"})
+        assert product.piece_length_max_yards is None  # back to a single length
         with pytest.raises(CatalogError, match="piece length"):
             update_product(admin, product, {**form, "piece_length_yards": "0"})
+        with pytest.raises(CatalogError, match="smaller length first"):
+            update_product(admin, product, {**form, "piece_length_yards": "5-4"})
         db.session.rollback()
 
     with catalog_app.test_request_context("/studio-testing-private-path/"):

@@ -39,9 +39,7 @@ def test_mailchimp_signup_uses_double_opt_in(shop, catalog_app: Flask) -> None:
     }
 
 
-def test_apple_pay_verification_is_fail_closed(
-    shop, catalog_app: Flask, tmp_path: Path
-) -> None:
+def test_apple_pay_verification_is_fail_closed(shop, catalog_app: Flask, tmp_path: Path) -> None:
     path = "/.well-known/apple-developer-merchantid-domain-association"
     assert shop.get(path).status_code == 404
     association = tmp_path / "apple-pay.txt"

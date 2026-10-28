@@ -71,6 +71,9 @@ class BaseConfig:
     # Shipping: "flat" or "shippo" (live USPS rates; flat rate is the fallback).
     SHIPPING_BACKEND = "flat"
     SHIPPO_API_TOKEN: str | None = None
+    # Address autocomplete (HERE, server-side only). The cap bounds paid lookups per day.
+    HERE_API_KEY: str | None = None
+    ADDRESS_LOOKUP_DAILY_CAP = 1000
     SHIPPO_CARRIERS: tuple[str, ...] = ("USPS",)
     SHIPPO_PARCEL_INCHES: tuple[int, int, int] = (12, 10, 4)
     SHIPPING_HANDLING_CENTS = 0
@@ -137,6 +140,10 @@ class BaseConfig:
         self.TAX_BACKEND = _env("TAX_BACKEND")
         self.SHIPPING_BACKEND = _env("SHIPPING_BACKEND", self.SHIPPING_BACKEND) or "flat"
         self.SHIPPO_API_TOKEN = _env("SHIPPO_API_TOKEN")
+        self.HERE_API_KEY = _env("HERE_API_KEY")
+        self.ADDRESS_LOOKUP_DAILY_CAP = _env_int(
+            "ADDRESS_LOOKUP_DAILY_CAP", self.ADDRESS_LOOKUP_DAILY_CAP
+        )
         self.SHIPPO_CARRIERS = _env_csv("SHIPPO_CARRIERS") or self.SHIPPO_CARRIERS
         self.SHIPPING_HANDLING_CENTS = _env_optional_int("SHIPPING_HANDLING_CENTS") or 0
         for name in ("STREET", "CITY", "STATE", "ZIP", "PHONE", "EMAIL"):
@@ -260,6 +267,8 @@ class ProductionConfig(BaseConfig):
             raise ConfigError("TAX_BACKEND must be 'stripe' or 'none'")
         if self.SHIPPING_BACKEND not in ("flat", "shippo"):
             raise ConfigError("SHIPPING_BACKEND must be 'flat' or 'shippo'")
+        if not 0 <= self.ADDRESS_LOOKUP_DAILY_CAP <= 1_000_000:
+            raise ConfigError("ADDRESS_LOOKUP_DAILY_CAP must be between 0 and 1000000")
         if self.MAIL_BACKEND not in (None, "smtp"):
             # console/memory would print reset links and order details into server logs.
             raise ConfigError("MAIL_BACKEND must be 'smtp' (or unset) in production")

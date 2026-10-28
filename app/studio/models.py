@@ -93,6 +93,9 @@ class StudioUser(db.Model):  # type: ignore[name-defined]
     # Every sign-in also needs a 6-digit code texted to this number (owner, 2026-10-27: tgg).
     requires_sms: Mapped[bool] = mapped_column(default=False, server_default=sa_false())
     sms_phone: Mapped[str | None] = mapped_column(String(20))  # E.164, set on the server only
+    # Owner, 2026-10-28: an authenticator-app secret replaces the text (no SMS provider needed).
+    totp_secret: Mapped[str | None] = mapped_column(String(64))
+    totp_last_step: Mapped[int | None] = mapped_column(Integer)  # blocks reusing a code
 
     approvals: Mapped[list[StudioLoginRequest]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
@@ -101,6 +104,16 @@ class StudioUser(db.Model):  # type: ignore[name-defined]
     @property
     def role_set(self) -> set[StudioRole]:
         return {StudioRole(value) for value in self.roles.split(",") if value}
+
+    @property
+    def playful(self) -> bool:
+        """Owner, 2026-10-28: staff get the game-style Studio; owners (tgg, mrs.adetolu) don't."""
+        return StudioRole.OWNER not in self.role_set
+
+    @property
+    def display_name(self) -> str:
+        """'ms.adetolu' -> 'Ms. Adetolu'."""
+        return ". ".join(part.capitalize() for part in self.username.split(".") if part)
 
 
 class StudioLoginRequest(db.Model):  # type: ignore[name-defined]

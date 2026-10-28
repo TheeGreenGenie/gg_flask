@@ -36,12 +36,8 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("token_hash"),
     )
-    op.create_index(
-        "ix_email_verifications_user_id", "email_verifications", ["user_id"]
-    )
-    op.create_index(
-        "ix_email_verifications_expires_at", "email_verifications", ["expires_at"]
-    )
+    op.create_index("ix_email_verifications_user_id", "email_verifications", ["user_id"])
+    op.create_index("ix_email_verifications_expires_at", "email_verifications", ["expires_at"])
 
 
 def downgrade() -> None:

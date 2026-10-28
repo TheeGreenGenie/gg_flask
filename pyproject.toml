@@ -51,6 +51,8 @@ addopts = "-ra --strict-markers"
 [tool.ruff]
 line-length = 100
 target-version = "py313"
+# `pip install .` leaves a copy of the app in build/ (CI does this); lint only the real files.
+extend-exclude = ["build"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "S", "SIM"]

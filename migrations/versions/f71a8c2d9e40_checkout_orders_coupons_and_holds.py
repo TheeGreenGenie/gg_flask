@@ -27,9 +27,15 @@ def upgrade() -> None:
         "completed",
         "cancelled",
         "refunded",
-        name="order_status", create_type=False)
-    payment_provider = postgresql.ENUM("stripe", "paypal", name="payment_provider", create_type=False)
-    payment_status = postgresql.ENUM("pending", "paid", "failed", "refunded", name="payment_status", create_type=False)
+        name="order_status",
+        create_type=False,
+    )
+    payment_provider = postgresql.ENUM(
+        "stripe", "paypal", name="payment_provider", create_type=False
+    )
+    payment_status = postgresql.ENUM(
+        "pending", "paid", "failed", "refunded", name="payment_status", create_type=False
+    )
     for enum in (discount_type, order_status, payment_provider, payment_status):
         enum.create(op.get_bind(), checkfirst=True)
     op.create_table(

@@ -32,8 +32,7 @@ def upgrade() -> None:
     op.add_column("users", sa.Column("username", sa.String(length=64), nullable=True))
     bind = op.get_bind()
     reserved = {
-        row.username
-        for row in bind.execute(sa.text("SELECT username FROM admin_users")).mappings()
+        row.username for row in bind.execute(sa.text("SELECT username FROM admin_users")).mappings()
     }
     used = set(reserved)
     users = bind.execute(sa.text("SELECT id, email FROM users ORDER BY id")).mappings()
@@ -63,9 +62,7 @@ def upgrade() -> None:
             ["id"],
             ondelete="SET NULL",
         )
-        batch.create_unique_constraint(
-            "uq_admin_users_customer_user_id", ["customer_user_id"]
-        )
+        batch.create_unique_constraint("uq_admin_users_customer_user_id", ["customer_user_id"])
 
 
 def downgrade() -> None:

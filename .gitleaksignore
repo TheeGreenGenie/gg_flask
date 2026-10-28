@@ -1,0 +1,4 @@
+# Reviewed false positives only: each line silences one exact finding (commit:file:rule:line).
+# Made-up test password "kente-moonrise-2027" in the password-reset test, not a real credential.
+5e0d724df65ba9c2e11876bd218a7611e4b64df7:tests/test_accounts.py:generic-api-key:208
+5e0d724df65ba9c2e11876bd218a7611e4b64df7:tests/test_accounts.py:generic-api-key:211

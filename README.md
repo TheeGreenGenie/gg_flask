@@ -231,11 +231,11 @@ Studio from a browser already signed in to `/admin` as that owner is approved im
 .venv/Scripts/pytest
 ```
 
-Tests use SQLite and a fake Redis by default. Set `TEST_DATABASE_URL` / `TEST_REDIS_URL` to run them against real services (CI does).
+Tests run on PostgreSQL only (never SQLite), by default the `gg_test` database of the docker-compose PostgreSQL (`docker compose up -d`; create it once with `docker exec gg_flask-db-1 createdb -U gg gg_test`). The schema is built once per run and every table is emptied before each test. Redis is faked unless `TEST_REDIS_URL` is set; `TEST_KV_BACKEND=database` runs the whole suite on the PostgreSQL stand-in for Redis used on SiteGround.
 
 ## Configuration
 
-All settings come from environment variables; see [.env.example](.env.example) for names. Locally, put them in a `.env` file in the project folder: with the dev extras installed (`python-dotenv`), every `flask` command loads it automatically. The server does not use `.env`; it reads `/etc/gg-flask/env` (DEPLOY.md step 4). `APP_ENV=production` (used for staging and live) refuses to start without `SECRET_KEY` (32+ chars), `DATABASE_URL` and `REDIS_URL`.
+All settings come from environment variables; see [.env.example](.env.example) for names. Locally, put them in a `.env` file in the project folder: with the dev extras installed (`python-dotenv`), every `flask` command loads it automatically. The server does not use `.env`; it reads `/etc/gg-flask/env` (DEPLOY.md step 4). `APP_ENV=production` (used for staging and live) refuses to start without `SECRET_KEY` (32+ chars), `DATABASE_URL` and either `REDIS_URL` or `KV_BACKEND=database` (rate limits and caches in PostgreSQL, for hosts without Redis such as SiteGround).
 
 Set `TRUSTED_PROXY_HOPS` to the number of reverse proxies in front of the app. With `0`, `X-Forwarded-For` is ignored.
 

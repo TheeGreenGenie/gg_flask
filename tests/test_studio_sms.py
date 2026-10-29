@@ -114,7 +114,7 @@ def test_codes_are_stored_hashed(tgg_app: Flask) -> None:
 
 def test_production_never_logs_codes(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("SECRET_KEY", "x" * 40)
-    monkeypatch.setenv("DATABASE_URL", "sqlite:///:memory:")
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://gg@localhost/unused")
     monkeypatch.setenv("REDIS_URL", "redis://localhost:6379/0")
     monkeypatch.setenv("STUDIO_SMS_BACKEND", "console")
     with pytest.raises(ConfigError, match="twilio"):

@@ -1,6 +1,11 @@
 <form class="gg-newsletter-form" action="{{ url_for('store.newsletter') }}" method="post">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <label class="gg-visually-hidden" for="nl-email-{{ form_id }}">Email address</label>
+  {#- Honeypot: hidden from people and screen readers; bots that fill every field reveal themselves. -#}
+  <div class="gg-visually-hidden" aria-hidden="true">
+    <label for="nl-hp-{{ form_id }}">Leave this empty</label>
+    <input id="nl-hp-{{ form_id }}" name="gg_hp" type="text" tabindex="-1" autocomplete="off">
+  </div>
   <input id="nl-email-{{ form_id }}" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="Your email address">
   <button class="gg-button gg-button--accent" type="submit">Sign up</button>
 </form>

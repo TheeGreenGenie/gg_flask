@@ -387,7 +387,7 @@ def combination_key(options: dict[str, str]) -> str:
 
 
 def _aware(value: datetime | None) -> datetime | None:
-    # SQLite returns naive datetimes; treat them as UTC.
+    # Defensive: treat a timezone-less value as UTC.
     if value is not None and value.tzinfo is None:
         return value.replace(tzinfo=UTC)
     return value

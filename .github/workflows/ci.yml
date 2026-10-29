@@ -11,6 +11,14 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - python: "3.13"  # local development
+            kv: ""
+          - python: "3.14"  # SiteGround: Python 3.14, rate limits/caches in PostgreSQL (no Redis)
+            kv: database
     services:
       postgres:
         image: postgres:17
@@ -28,12 +36,13 @@ jobs:
           --health-cmd "redis-cli ping" --health-interval 5s --health-retries 10
     env:
       TEST_DATABASE_URL: postgresql+psycopg://gg:gg@localhost:5432/gg_test
-      TEST_REDIS_URL: redis://localhost:6379/0
+      TEST_REDIS_URL: ${{ matrix.kv == 'database' && '' || 'redis://localhost:6379/0' }}
+      TEST_KV_BACKEND: ${{ matrix.kv }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: ${{ matrix.python }}
           cache: pip
       - run: pip install -r requirements.lock && pip install --no-deps -e . && pip install -e ".[dev]"
       - name: Lint
@@ -52,6 +61,17 @@ jobs:
         run: flask db upgrade
       - name: Dependency vulnerabilities
         run: pip-audit -r requirements.lock
+
+
+  wrapper:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: SiteGround Node wrapper tests (no npm packages)
+        run: node --check deploy/siteground/server.js && npm test
 
   secrets:
     runs-on: ubuntu-latest

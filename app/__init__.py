@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 
 from flask import Flask
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -10,7 +11,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from app.assets import init_assets
 from app.catalog import init_catalog
 from app.config import BaseConfig, load_config
-from app.extensions import csrf, db, init_redis, migrate
+from app.extensions import csrf, db, init_redis
 from app.legacy import init_legacy_redirects
 from app.log_config import configure_logging
 from app.security import init_security_headers
@@ -42,7 +43,12 @@ def create_app(config: BaseConfig | str | None = None) -> Flask:
     from app import models  # noqa: F401  (register all tables)
 
     db.init_app(app)
-    migrate.init_app(app, db)
+    if os.environ.get("GG_WEB_ONLY") != "1":
+        # `flask db ...` and `launch check` need Flask-Migrate. The web server never does, and
+        # importing it (Alembic) costs ~0.2 s of every wake-up on hosts that idle the app.
+        from flask_migrate import Migrate
+
+        Migrate(app, db)
     csrf.init_app(app)
     init_redis(app)
     init_security_headers(app)

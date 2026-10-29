@@ -36,6 +36,22 @@ CONTENT_SECURITY_POLICY = build_csp()
 PERMISSIONS_POLICY = "camera=(), microphone=(), geolocation=(), interest-cohort=()"
 
 
+PRIVATE = "private, no-store"
+
+
+def apply_shared_cache_policy(response: Response) -> Response:
+    """Keep shared caches (the host's page cache, CDNs) away from anything personal.
+
+    The host caches any response that does not forbid it, and pages carry per-visitor content
+    (cart count, CSRF token, flashed messages). So a response may be shared-cached only when its
+    route explicitly marked it public, and never when it sets a cookie. Everything else is
+    private and never stored.
+    """
+    if not response.cache_control.public or response.headers.getlist("Set-Cookie"):
+        response.headers["Cache-Control"] = PRIVATE
+    return response
+
+
 def init_security_headers(app: Flask) -> None:
     hsts = app.config.get("ENABLE_HSTS", False)
     csp = build_csp(analytics=bool(app.config.get("GA4_MEASUREMENT_ID")))
@@ -52,3 +68,9 @@ def init_security_headers(app: Flask) -> None:
         if hsts:
             headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
         return response
+
+    # Registered before the blueprints and asset hooks, so it runs after them and sees their
+    # final Cache-Control.
+    @app.after_request
+    def shared_cache_policy(response: Response) -> Response:
+        return apply_shared_cache_policy(response)

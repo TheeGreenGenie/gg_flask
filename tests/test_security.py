@@ -30,7 +30,7 @@ def test_production_refuses_to_start_without_secrets(monkeypatch: pytest.MonkeyP
 
 def test_production_rejects_short_secret_key(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("SECRET_KEY", "short")
-    monkeypatch.setenv("DATABASE_URL", "sqlite:///:memory:")
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://gg@localhost/unused")
     monkeypatch.setenv("REDIS_URL", "redis://localhost:6379/0")
     with pytest.raises(ConfigError, match="at least 32"):
         load_config("production")
@@ -38,7 +38,7 @@ def test_production_rejects_short_secret_key(monkeypatch: pytest.MonkeyPatch) ->
 
 def test_production_sets_hsts_and_secure_cookies(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("SECRET_KEY", "x" * 40)
-    monkeypatch.setenv("DATABASE_URL", "sqlite:///:memory:")
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://gg@localhost/unused")
     monkeypatch.setenv("REDIS_URL", "redis://localhost:6379/0")
     app = create_app(ProductionConfig())
     assert app.config["SESSION_COOKIE_SECURE"] is True
@@ -90,3 +90,17 @@ def test_forwarded_headers_used_with_one_trusted_proxy() -> None:
     )
     # Only the hop added by our own proxy (the last one) is trusted.
     assert resp.text == "203.0.113.9"
+
+
+def test_fixed_dummy_hash_matches_current_password_settings() -> None:
+    import pytest
+    from argon2 import PasswordHasher
+    from argon2.exceptions import VerifyMismatchError
+
+    from app.passwords import DUMMY_HASH
+
+    hasher = PasswordHasher()
+    # Same cost as a real hash, so an unknown username takes as long as a wrong password.
+    assert not hasher.check_needs_rehash(DUMMY_HASH), "regenerate DUMMY_HASH with PasswordHasher()"
+    with pytest.raises(VerifyMismatchError):
+        hasher.verify(DUMMY_HASH, "")

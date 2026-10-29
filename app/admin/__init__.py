@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import functools
+import ipaddress
 from collections.abc import Callable
 from typing import Any
 
@@ -11,6 +12,7 @@ from flask import (
     Blueprint,
     Flask,
     abort,
+    current_app,
     flash,
     redirect,
     render_template,
@@ -63,6 +65,20 @@ def roles(*allowed: AdminRole) -> Callable[[Callable[..., Any]], Callable[..., A
         return wrapped
 
     return decorate
+
+
+@bp.before_request
+def _admin_network_allowlist() -> None:
+    """Replaces Apache's `Require ip` now that the app may run without Apache in front."""
+    allowed = current_app.config.get("ADMIN_ALLOWED_IPS") or ()
+    if not allowed:
+        return
+    try:
+        client = ipaddress.ip_address(request.remote_addr or "")
+    except ValueError:
+        abort(404)
+    if not any(client in ipaddress.ip_network(net, strict=False) for net in allowed):
+        abort(404)  # same as any unknown page: do not reveal that /admin exists
 
 
 @bp.after_request

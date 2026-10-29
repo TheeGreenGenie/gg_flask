@@ -16,12 +16,10 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # Plain ADD COLUMN: a SQLite batch rebuild would drop the unique flag on existing indexes.
     op.add_column("studio_users", sa.Column("totp_secret", sa.String(length=64), nullable=True))
     op.add_column("studio_users", sa.Column("totp_last_step", sa.Integer(), nullable=True))
 
 
 def downgrade() -> None:
-    with op.batch_alter_table("studio_users") as batch_op:
-        batch_op.drop_column("totp_last_step")
-        batch_op.drop_column("totp_secret")
+    op.drop_column("studio_users", "totp_last_step")
+    op.drop_column("studio_users", "totp_secret")

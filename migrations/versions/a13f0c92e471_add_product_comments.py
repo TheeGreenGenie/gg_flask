@@ -17,9 +17,6 @@ depends_on = None
 
 def _replace_post_kind(values: tuple[str, ...], downgrade: bool = False) -> None:
     bind = op.get_bind()
-    if bind.dialect.name != "postgresql":
-        # SQLite stores this SQLAlchemy enum as text without a database constraint.
-        return
     if downgrade:
         op.execute("UPDATE product_posts SET kind = 'question' WHERE kind = 'comment'")
     temporary = sa.Enum(*values, name="product_post_kind_replacement")

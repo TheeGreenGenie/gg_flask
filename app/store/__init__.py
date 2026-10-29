@@ -30,7 +30,7 @@ from app.content import blog
 from app.extensions import csrf, db
 from app.orders import payments, providers
 from app.orders import service as order_service
-from app.orders.models import Order, PaymentProvider
+from app.orders.models import Order, PaymentProvider, PaymentStatus
 from app.reviews import images as review_images
 from app.reviews import service as review_service
 from app.store import content
@@ -489,19 +489,60 @@ def paypal_webhook() -> tuple[dict[str, bool] | dict[str, str], int]:
     return {"processed": processed}, 200
 
 
+NEWSLETTER_CHECK_EMAIL = "Check your email to confirm your subscription."
+NEWSLETTER_BUSY = "Too many signup attempts. Please try again later."
+
+
 @bp.post("/newsletter")
 def newsletter() -> Response:
-    if not ratelimit.allow("newsletter", ratelimit.client_key(), 5, 3600):
-        flash("Too many signup attempts. Please try again later.", "error")
-        return redirect(_safe_back(url_for("store.home")))
+    back = _safe_back(url_for("store.home"))
+    if request.form.get("gg_hp"):
+        # Honeypot: the field is hidden from people, so only form-filling bots send it. They get
+        # the normal reply and nothing is sent to Mailchimp.
+        flash(NEWSLETTER_CHECK_EMAIL, "success")
+        return redirect(back)
+    # Fail closed: each signup can make Mailchimp email a stranger, so no limiter means no signup.
+    if not ratelimit.allow("newsletter", ratelimit.client_key(), 5, 3600, fail_closed=True):
+        flash(NEWSLETTER_BUSY, "error")
+        return redirect(back)
     try:
         email = account_service.normalize_email(request.form.get("email", ""))
-        marketing.subscribe(email)
+        confirmed = _proven_customer_email(email)
+        if not confirmed and not ratelimit.allow(
+            "newsletter-site",
+            "all",
+            current_app.config["NEWSLETTER_HOURLY_CAP"],
+            3600,
+            fail_closed=True,
+        ):
+            flash(NEWSLETTER_BUSY, "error")
+            return redirect(back)
+        state = marketing.subscribe(email, confirmed=confirmed)
     except (account_service.AccountError, marketing.MarketingError) as exc:
         flash(str(exc), "error")
     else:
-        flash("Check your email to confirm your subscription.", "success")
-    return redirect(_safe_back(url_for("store.home")))
+        if state == marketing.SUBSCRIBED:
+            flash("You're subscribed. Thank you for staying connected!", "success")
+        else:
+            flash(NEWSLETTER_CHECK_EMAIL, "success")
+    return redirect(back)
+
+
+def _proven_customer_email(email: str) -> bool:
+    """True only for a signed-in customer (verified email) subscribing their own account email
+    who has paid for an order. Anyone else, or any other address, gets the confirmation email."""
+    user = account_service.current_user()
+    if user is None or user.email != email:
+        return False
+    paid = db.session.scalar(
+        select(Order.id)
+        .where(
+            Order.user_id == user.id,
+            Order.payment_status.in_((PaymentStatus.PAID, PaymentStatus.REFUNDED)),
+        )
+        .limit(1)
+    )
+    return paid is not None
 
 
 def _safe_back(default: str) -> str:

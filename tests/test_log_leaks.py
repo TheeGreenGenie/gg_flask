@@ -68,7 +68,7 @@ def test_held_change_link_is_not_logged_when_email_fails(
 
 def test_production_refuses_console_sign_in_approvals(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("SECRET_KEY", "x" * 40)
-    monkeypatch.setenv("DATABASE_URL", "sqlite:///:memory:")
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://gg@localhost/unused")
     monkeypatch.setenv("REDIS_URL", "redis://localhost:6379/0")
     monkeypatch.setenv("STUDIO_PATH", "a" * 30)
     monkeypatch.delenv("STUDIO_APPROVAL_BACKEND", raising=False)

@@ -29,15 +29,27 @@ def test_discovery_feed_supports_etag(shop: FlaskClient) -> None:
     assert again.status_code == 304
 
 
+def _cache_keys(app: Flask) -> list[str]:
+    store = app.extensions["redis"]
+    if hasattr(store, "values"):  # tests' FakeRedis
+        return list(store.values)
+    from sqlalchemy import select
+
+    from app.extensions import db
+    from app.kvstore import KVEntry
+
+    with app.app_context():  # the database stand-in (TEST_KV_BACKEND=database)
+        return list(db.session.scalars(select(KVEntry.key)))
+
+
 def test_catalog_cache_is_used_and_invalidated(shop: FlaskClient, catalog_app: Flask) -> None:
-    redis = catalog_app.extensions["redis"]
     shop.get("/api/v1/discovery/fabrics")
-    assert any(k.startswith("cache:catalog:v0:discovery:") for k in redis.values)
+    assert any(k.startswith("cache:catalog:v0:discovery:") for k in _cache_keys(catalog_app))
     with catalog_app.test_request_context():
         cache.bump_catalog_version()
         assert cache.catalog_version() == "1"
     shop.get("/api/v1/discovery/fabrics")
-    assert any(k.startswith("cache:catalog:v1:discovery:") for k in redis.values)
+    assert any(k.startswith("cache:catalog:v1:discovery:") for k in _cache_keys(catalog_app))
 
 
 def test_cache_fails_open_when_redis_is_down(shop: FlaskClient, catalog_app: Flask) -> None:

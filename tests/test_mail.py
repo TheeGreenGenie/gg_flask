@@ -115,7 +115,7 @@ def test_unconfigured_smtp_is_unavailable(smtp_app: Flask) -> None:
 
 def _production_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("SECRET_KEY", "x" * 40)
-    monkeypatch.setenv("DATABASE_URL", "sqlite:///:memory:")
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://gg@localhost/unused")
     monkeypatch.setenv("REDIS_URL", "redis://localhost:6379/0")
 
 

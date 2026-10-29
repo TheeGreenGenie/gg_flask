@@ -16,18 +16,14 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # Plain ADD COLUMN: a SQLite batch rebuild would drop the unique flag on existing indexes.
     op.add_column("products", sa.Column("piece_length_max_yards", sa.Numeric(6, 2), nullable=True))
-    if op.get_bind().dialect.name != "sqlite":  # SQLite cannot add a CHECK to an existing table
-        op.create_check_constraint(
-            "piece_length_range_valid",
-            "products",
-            "piece_length_max_yards IS NULL OR piece_length_max_yards > piece_length_yards",
-        )
+    op.create_check_constraint(
+        "piece_length_range_valid",
+        "products",
+        "piece_length_max_yards IS NULL OR piece_length_max_yards > piece_length_yards",
+    )
 
 
 def downgrade() -> None:
-    if op.get_bind().dialect.name != "sqlite":
-        op.drop_constraint("piece_length_range_valid", "products", type_="check")
-    with op.batch_alter_table("products") as batch_op:
-        batch_op.drop_column("piece_length_max_yards")
+    op.drop_constraint("piece_length_range_valid", "products", type_="check")
+    op.drop_column("products", "piece_length_max_yards")

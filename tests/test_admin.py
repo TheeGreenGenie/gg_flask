@@ -3,6 +3,7 @@ from __future__ import annotations
 import time
 from io import BytesIO
 
+import pytest
 from flask import Flask
 from flask.testing import FlaskClient
 from PIL import Image
@@ -321,3 +322,24 @@ def test_coupon_manager_validates_saves_and_audits(catalog_app: Flask) -> None:
         coupon = db.session.scalar(select(Coupon).where(Coupon.code == "WELCOME-10"))
         assert coupon and coupon.amount == 10 and coupon.minimum_subtotal_cents == 2500
         assert "coupon.saved" in db.session.scalars(select(AdminAudit.action)).all()
+
+
+def test_optional_network_allowlist_hides_admin_from_other_ips(
+    catalog_app: Flask, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    client = admin_client(catalog_app)
+    assert client.get("/admin/").status_code == 200  # no allowlist: password + code only
+    catalog_app.config["ADMIN_ALLOWED_IPS"] = ("203.0.113.7", "198.51.100.0/24")
+    assert client.get("/admin/").status_code == 404  # test client is 127.0.0.1
+    assert client.get("/admin/login").status_code == 404
+    for ip, status in (("203.0.113.7", 200), ("198.51.100.42", 200), ("192.0.2.1", 404)):
+        response = client.get("/admin/", environ_base={"REMOTE_ADDR": ip})
+        assert response.status_code == status, ip
+
+
+def test_allowlist_entries_are_validated(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.config import ConfigError, DevelopmentConfig
+
+    monkeypatch.setenv("ADMIN_ALLOWED_IPS", "203.0.113.7,not-an-ip")
+    with pytest.raises(ConfigError, match="not an IP"):
+        DevelopmentConfig()

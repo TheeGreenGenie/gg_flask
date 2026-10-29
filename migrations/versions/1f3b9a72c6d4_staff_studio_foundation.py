@@ -129,6 +129,5 @@ def downgrade():
         "studio_users",
     ):
         op.drop_table(table)
-    # PostgreSQL enum types outlive their table; SQLite ignores this branch.
-    if op.get_bind().dialect.name == "postgresql":
-        sa.Enum(name="studio_approval_status").drop(op.get_bind(), checkfirst=True)
+    # PostgreSQL enum types outlive their table.
+    sa.Enum(name="studio_approval_status").drop(op.get_bind(), checkfirst=True)

@@ -20,6 +20,7 @@ from app.catalog.models import (
     Variant,
 )
 from app.content.models import BlogPost, BlogRevision
+from app.kvstore import KVEntry
 from app.media.models import MediaAsset
 from app.orders.models import Coupon, Order, OrderLine, OrderNote, PaymentEvent, StockHold
 from app.reviews.models import (
@@ -93,4 +94,5 @@ __all__ = [
     "StudioSaleItem",
     "Wishlist",
     "WishlistItem",
+    "KVEntry",
 ]

@@ -25,6 +25,7 @@ from app.accounts.service import MAX_PASSWORD, AccountError, check_password, nor
 from app.admin.models import AdminAudit, AdminRecoveryCode, AdminRole, AdminUser
 from app.catalog.models import utcnow
 from app.extensions import db
+from app.passwords import DUMMY_HASH
 
 IDLE_SECONDS = 30 * 60
 ABSOLUTE_SECONDS = 8 * 60 * 60
@@ -33,7 +34,7 @@ RECOVERY_COUNT = 10
 USERNAME_RE = re.compile(r"^[a-z][a-z0-9._-]{2,63}$")
 
 _hasher = PasswordHasher()
-_dummy_hash = _hasher.hash(secrets.token_urlsafe(16))
+_dummy_hash = DUMMY_HASH
 _log = logging.getLogger(__name__)
 
 

@@ -1,5 +1,8 @@
 # Deploying to your own server (staging2 first, then live)
 
+> **The shop is hosted on SiteGround: follow [SITEGROUND.md](SITEGROUND.md).** This guide is for a
+> Linux server you control (root access), kept as the fallback if SiteGround stops being suitable.
+
 Written for a Linux server (Ubuntu 24.04 / Debian 13) with Apache in front. Every command is
 copy-paste; replace values in `ALL_CAPS`. Do staging2 completely, test it, then repeat for the
 live domain. Nothing here touches the WordPress site until you switch the domain over.

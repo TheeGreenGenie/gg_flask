@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import os
 from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient
+from sqlalchemy import text
 
 from app import create_app
 from app.catalog import manifest as mf
@@ -62,18 +64,43 @@ class FakePipeline:
         return [*out, True]
 
 
-@pytest.fixture
-def app(tmp_path: Path) -> Iterator[Flask]:
+@pytest.fixture(scope="session")
+def _schema() -> Iterator[None]:
+    """Build the PostgreSQL test schema once per run (rebuilding it per test took ~25 min)."""
     app = create_app("testing")
-    app.config["MEDIA_ROOT"] = str(tmp_path / "media")
-    if app.extensions.get("redis") is None:
-        app.extensions["redis"] = FakeRedis()
     with app.app_context():
+        db.drop_all()
         db.create_all()
-    yield app
+    yield
     with app.app_context():
         db.session.remove()
         db.drop_all()
+
+
+def _empty_all_tables() -> None:
+    names = ", ".join(f'"{t.name}"' for t in db.metadata.sorted_tables)
+    db.session.execute(text(f"TRUNCATE {names} RESTART IDENTITY CASCADE"))
+    db.session.commit()
+
+
+@pytest.fixture
+def app(tmp_path: Path, _schema: None) -> Iterator[Flask]:
+    app = create_app("testing")
+    app.config["MEDIA_ROOT"] = str(tmp_path / "media")
+    if app.extensions.get("redis") is None:
+        # TEST_KV_BACKEND=database runs every test on the PostgreSQL stand-in for Redis.
+        if os.environ.get("TEST_KV_BACKEND") == "database":
+            from app.kvstore import DatabaseKV
+
+            app.extensions["redis"] = DatabaseKV()
+        else:
+            app.extensions["redis"] = FakeRedis()
+    with app.app_context():
+        _empty_all_tables()
+    yield app
+    with app.app_context():
+        db.session.remove()
+        db.engine.dispose()  # no connection outlives its test app
 
 
 @pytest.fixture

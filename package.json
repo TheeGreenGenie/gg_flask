@@ -1,0 +1,13 @@
+{
+  "name": "gg-afrikan-eleganz",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SiteGround Node.js entry point that runs the Flask shop behind a private socket",
+  "scripts": {
+    "start": "node deploy/siteground/server.js",
+    "test": "node --test deploy/siteground/server.test.js"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

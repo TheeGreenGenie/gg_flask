@@ -27,8 +27,6 @@ PAIRS = (  # table, column, unique-constraint name, index name
 
 
 def upgrade():
-    if op.get_bind().dialect.name != "postgresql":
-        return  # SQLite databases are created from the models directly
     for table, column, constraint, index in PAIRS:
         op.drop_index(index, table_name=table)
         op.create_index(index, table, [column], unique=True)
@@ -41,8 +39,6 @@ def upgrade():
 
 
 def downgrade():
-    if op.get_bind().dialect.name != "postgresql":
-        return
     op.create_unique_constraint("studio_users_username_key", "studio_users", ["username"])
     op.create_unique_constraint("blog_posts_slug_key", "blog_posts", ["slug"])
     for table, column, constraint, index in PAIRS:

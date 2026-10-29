@@ -7,6 +7,7 @@ insecure default.
 
 from __future__ import annotations
 
+import ipaddress
 import os
 from datetime import timedelta
 
@@ -43,10 +44,17 @@ class BaseConfig:
     SQLALCHEMY_DATABASE_URI: str | None = None
     SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True}
     REDIS_URL: str | None = None
+    # Rate limits and caches live in Redis when REDIS_URL is set. On hosts without Redis
+    # (SiteGround) set KV_BACKEND=database to keep them in a PostgreSQL table instead.
+    KV_BACKEND: str | None = None
 
     # Number of reverse proxies in front of the app that we trust to set
     # X-Forwarded-* headers. 0 means trust none (direct exposure / local dev).
     TRUSTED_PROXY_HOPS = 0
+    # Optional: only these IPs/networks may reach /admin (others get a plain 404). Empty = no
+    # IP restriction. Phone approvals of Studio sign-ins need /admin from the phone, so set this
+    # only if those come from a listed network (home Wi-Fi, VPN).
+    ADMIN_ALLOWED_IPS: tuple[str, ...] = ()
 
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
@@ -74,6 +82,9 @@ class BaseConfig:
     # Address autocomplete (HERE, server-side only). The cap bounds paid lookups per day.
     HERE_API_KEY: str | None = None
     ADDRESS_LOOKUP_DAILY_CAP = 1000
+    # Newsletter: most confirmation emails per hour for the whole site, so a bot spreading
+    # signups across many IPs cannot use the form to mail strangers in bulk.
+    NEWSLETTER_HOURLY_CAP = 30
     SHIPPO_CARRIERS: tuple[str, ...] = ("USPS",)
     SHIPPO_PARCEL_INCHES: tuple[int, int, int] = (12, 10, 4)
     SHIPPING_HANDLING_CENTS = 0
@@ -133,6 +144,17 @@ class BaseConfig:
         self.SECRET_KEY = _env("SECRET_KEY")
         self.SQLALCHEMY_DATABASE_URI = _env("DATABASE_URL")
         self.REDIS_URL = _env("REDIS_URL")
+        self.KV_BACKEND = _env("KV_BACKEND")
+        # Where scheduled jobs leave heartbeats (default: instance/jobs).
+        self.JOBS_HEARTBEAT_DIR = _env("JOBS_HEARTBEAT_DIR")
+        self.ADMIN_ALLOWED_IPS = _env_csv("ADMIN_ALLOWED_IPS")
+        for network in self.ADMIN_ALLOWED_IPS:
+            try:
+                ipaddress.ip_network(network, strict=False)
+            except ValueError:
+                raise ConfigError(
+                    f"ADMIN_ALLOWED_IPS: {network!r} is not an IP or network"
+                ) from None
         self.TRUSTED_PROXY_HOPS = _env_int("TRUSTED_PROXY_HOPS", self.TRUSTED_PROXY_HOPS)
         self.SUPPORTED_COUNTRIES = _env_csv("SUPPORTED_COUNTRIES")
         self.FLAT_SHIPPING_CENTS = _env_optional_int("FLAT_SHIPPING_CENTS")
@@ -144,6 +166,7 @@ class BaseConfig:
         self.ADDRESS_LOOKUP_DAILY_CAP = _env_int(
             "ADDRESS_LOOKUP_DAILY_CAP", self.ADDRESS_LOOKUP_DAILY_CAP
         )
+        self.NEWSLETTER_HOURLY_CAP = _env_int("NEWSLETTER_HOURLY_CAP", self.NEWSLETTER_HOURLY_CAP)
         self.SHIPPO_CARRIERS = _env_csv("SHIPPO_CARRIERS") or self.SHIPPO_CARRIERS
         self.SHIPPING_HANDLING_CENTS = _env_optional_int("SHIPPING_HANDLING_CENTS") or 0
         for name in ("STREET", "CITY", "STATE", "ZIP", "PHONE", "EMAIL"):
@@ -234,7 +257,12 @@ class TestingConfig(BaseConfig):
         self.SECRET_KEY = "test-only-not-secret"  # noqa: S105
         self.MAIL_BACKEND = "memory"  # never send real email from tests, whatever the shell says
         self.ORDER_NOTIFICATION_EMAIL = _env("ORDER_NOTIFICATION_EMAIL")  # tests opt in
-        self.SQLALCHEMY_DATABASE_URI = _env("TEST_DATABASE_URL") or "sqlite:///:memory:"
+        # PostgreSQL only, like production. Default: the docker-compose database on this PC.
+        self.SQLALCHEMY_DATABASE_URI = (
+            _env("TEST_DATABASE_URL") or "postgresql+psycopg://gg:gg@localhost:55432/gg_test"
+        )
+        if not self.SQLALCHEMY_DATABASE_URI.startswith("postgresql"):
+            raise ConfigError("TEST_DATABASE_URL must be a PostgreSQL database (no SQLite)")
         self.REDIS_URL = _env("TEST_REDIS_URL")
         self.SUPPORTED_COUNTRIES = ("US",)
         self.FLAT_SHIPPING_CENTS = 799
@@ -256,7 +284,7 @@ class ProductionConfig(BaseConfig):
             for name, value in (
                 ("SECRET_KEY", self.SECRET_KEY),
                 ("DATABASE_URL", self.SQLALCHEMY_DATABASE_URI),
-                ("REDIS_URL", self.REDIS_URL),
+                ("REDIS_URL or KV_BACKEND=database", self.REDIS_URL or self.KV_BACKEND),
             )
             if value is None
         ]
@@ -270,6 +298,10 @@ class ProductionConfig(BaseConfig):
             raise ConfigError("SHIPPING_BACKEND must be 'flat' or 'shippo'")
         if not 0 <= self.ADDRESS_LOOKUP_DAILY_CAP <= 1_000_000:
             raise ConfigError("ADDRESS_LOOKUP_DAILY_CAP must be between 0 and 1000000")
+        if self.KV_BACKEND not in (None, "database"):
+            raise ConfigError("KV_BACKEND must be 'database' (or unset to use REDIS_URL)")
+        if not 0 <= self.NEWSLETTER_HOURLY_CAP <= 10_000:
+            raise ConfigError("NEWSLETTER_HOURLY_CAP must be between 0 and 10000")
         if self.MAIL_BACKEND not in (None, "smtp"):
             # console/memory would print reset links and order details into server logs.
             raise ConfigError("MAIL_BACKEND must be 'smtp' (or unset) in production")

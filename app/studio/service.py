@@ -38,6 +38,7 @@ from app.catalog.models import (
 from app.content import blog as blog_service
 from app.content.models import BlogPost, BlogRevision, BlogStatus
 from app.extensions import db
+from app.passwords import DUMMY_HASH
 from app.reviews.models import (
     ModerationWord,
     PostStatus,
@@ -69,7 +70,7 @@ COOKIE_MAX = 200
 PASSWORD_SWAP_USERNAME = "tgg"  # noqa: S105 - account name, not a secret
 
 _hasher = PasswordHasher()
-_dummy_hash = _hasher.hash(secrets.token_urlsafe(18))
+_dummy_hash = DUMMY_HASH
 _log = logging.getLogger(__name__)
 
 

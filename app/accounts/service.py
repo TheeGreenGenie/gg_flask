@@ -34,6 +34,7 @@ from app.accounts.models import (
 )
 from app.catalog.models import utcnow
 from app.extensions import db
+from app.passwords import DUMMY_HASH
 
 EMAIL_WORDING = (
     "Email me about new prints, offers and opportunities from GG Afrikan Eleganz. "
@@ -59,7 +60,7 @@ COMMON_PASSWORDS = frozenset(
 )  # fmt: skip
 
 _hasher = PasswordHasher()  # Argon2id with the library's current recommended parameters
-_DUMMY_HASH = _hasher.hash(secrets.token_urlsafe(16))
+_DUMMY_HASH = DUMMY_HASH
 
 EMAIL_RE = re.compile(r"^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$")
 POSTCODE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 -]{1,22}[A-Za-z0-9]$")
@@ -590,7 +591,7 @@ def _valid_reset(token: str) -> PasswordReset | None:
     if reset is None or reset.used_at is not None:
         return None
     expires = reset.expires_at
-    if expires.tzinfo is None:  # SQLite returns naive datetimes
+    if expires.tzinfo is None:  # defensive: a timezone-less value is UTC
         from datetime import UTC
 
         expires = expires.replace(tzinfo=UTC)

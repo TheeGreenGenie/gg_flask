@@ -222,6 +222,13 @@ def test_checkout_creates_order_and_private_payment_page(
     ready = shop.get(response.location).get_data(as_text=True)
     assert re.search(r"Pay \$[\d.,]+ securely", ready)
     assert "We never see or store your card details" in ready
+    # Browsers apply form-action to the redirect after "Pay": only this page may continue to
+    # the providers' checkout pages; everywhere else forms stay on this site.
+    pay_csp = shop.get(response.location).headers["Content-Security-Policy"]
+    form_action = next(d for d in pay_csp.split("; ") if d.startswith("form-action"))
+    assert "https://checkout.stripe.com" in form_action and "https://www.paypal.com" in form_action
+    home_csp = shop.get("/").headers["Content-Security-Policy"]
+    assert "form-action 'self';" in home_csp and "checkout.stripe.com" not in home_csp
     assert catalog_app.test_client().get(response.location).status_code == 404
 
 

@@ -13,7 +13,16 @@ GA_CONNECT = (
 )
 
 
-def build_csp(analytics: bool = False) -> str:
+# The only places a form may continue to besides this site: the providers' hosted checkout
+# pages. Allowed on the "Pay" page alone; browsers apply form-action to the redirect too.
+PAYMENT_FORM_TARGETS = (
+    "https://checkout.stripe.com",
+    "https://www.paypal.com",
+    "https://www.sandbox.paypal.com",
+)
+
+
+def build_csp(analytics: bool = False, form_targets: tuple[str, ...] = ()) -> str:
     return "; ".join(
         [
             "default-src 'self'",
@@ -25,7 +34,7 @@ def build_csp(analytics: bool = False) -> str:
             "frame-src https://www.youtube-nocookie.com",  # homepage brand-story video
             "frame-ancestors 'none'",
             "base-uri 'self'",
-            "form-action 'self'",
+            "form-action 'self'" + "".join(f" {target}" for target in form_targets),
             "object-src 'none'",
         ]
     )

@@ -11,6 +11,7 @@ from flask import (
     current_app,
     flash,
     jsonify,
+    make_response,
     redirect,
     render_template,
     request,
@@ -33,6 +34,7 @@ from app.orders import service as order_service
 from app.orders.models import Order, PaymentProvider, PaymentStatus
 from app.reviews import images as review_images
 from app.reviews import service as review_service
+from app.security import PAYMENT_FORM_TARGETS, build_csp
 from app.store import content
 from app.templating import money
 
@@ -415,18 +417,27 @@ def checkout() -> Response | str:
 
 
 @bp.get("/checkout/order/<public_id>/payment")
-def order_payment(public_id: str) -> str:
+def order_payment(public_id: str) -> Response:
     order = db.session.scalar(select(Order).where(Order.public_id == public_id))
     if order is None or public_id not in set(session.get("checkout_orders", [])):
         abort(404)
     seconds_left = (order.hold_expires_at - utcnow()).total_seconds()
-    return render_template(
-        "store/payment.html",
-        order=order,
-        provider_configured=payments.provider_configured(order.payment_provider),
-        minutes_left=max(0, int(seconds_left // 60)),
-        hide_newsletter=True,
+    response = make_response(
+        render_template(
+            "store/payment.html",
+            order=order,
+            provider_configured=payments.provider_configured(order.payment_provider),
+            minutes_left=max(0, int(seconds_left // 60)),
+            hide_newsletter=True,
+        )
     )
+    # "Pay" redirects to Stripe's or PayPal's checkout; the site-wide form-action 'self' would
+    # make the browser silently block that redirect, so this page alone also allows them.
+    response.headers["Content-Security-Policy"] = build_csp(
+        analytics=bool(current_app.config.get("GA4_MEASUREMENT_ID")),
+        form_targets=PAYMENT_FORM_TARGETS,
+    )
+    return response
 
 
 @bp.post("/checkout/order/<public_id>/payment")

@@ -47,6 +47,8 @@ def check(now: float | None = None) -> list[JobState]:
     now = time.time() if now is None else now
     states = []
     for name, max_age in EXPECTED.items():
+        if name == "backup" and current_app.config.get("GG_PLATFORM") == "siteground":
+            continue  # SiteGround takes its own daily backups; deploy/backup.sh is not used there
         path = heartbeat_dir() / f"{name}.json"
         try:
             beat = json.loads(path.read_text(encoding="utf-8"))

@@ -128,6 +128,15 @@ If `/home/customer` is not your home path, use the output of `echo $HOME`. Check
 
 ## 8. Staging checks (paste results to Claude; no secrets)
 
+First run the automated security and hosting check; it prints PASS / FAIL / WARN per item and
+never prints a secret value:
+
+```bash
+sh ~/.ggflask/current/deploy/siteground/launch-check.sh
+```
+
+Then the manual checks:
+
 1. **Visitor IP:** open the site from your phone, then
    `grep forwarding ~/.ggflask/logs/wrapper.log | tail -3`. The `ip=` value must be your phone's
    public IP. If it is empty or SiteGround's, tell Claude before going further (rate limits and the

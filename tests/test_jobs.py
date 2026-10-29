@@ -67,3 +67,12 @@ def test_daily_summary_warns_about_job_problems(catalog_app: Flask, tmp_path: Pa
         _all_healthy(tmp_path)
         service.send_daily_summary()
         assert "ran normally" in catalog_app.extensions["outbox"][-1].body
+
+
+def test_siteground_does_not_expect_the_server_backup_job(app: Flask, tmp_path: Path) -> None:
+    app.config.update(JOBS_HEARTBEAT_DIR=str(tmp_path), GG_PLATFORM="siteground")
+    _all_healthy(tmp_path)
+    (tmp_path / "backup.json").unlink()
+    with app.app_context():
+        assert jobs.problems() == []  # SiteGround's own daily backups replace deploy/backup.sh
+        assert "backup" not in {state.name for state in jobs.check()}

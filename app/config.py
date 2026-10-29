@@ -149,6 +149,8 @@ class BaseConfig:
         self.KV_BACKEND = _env("KV_BACKEND")
         # Where scheduled jobs leave heartbeats (default: instance/jobs).
         self.JOBS_HEARTBEAT_DIR = _env("JOBS_HEARTBEAT_DIR")
+        # Set to "siteground" by deploy/siteground/* so host-specific checks adapt.
+        self.GG_PLATFORM = _env("GG_PLATFORM")
         self.ADMIN_ALLOWED_IPS = _env_csv("ADMIN_ALLOWED_IPS")
         self.PREVIEW_PASSWORD = _env("PREVIEW_PASSWORD")
         for network in self.ADMIN_ALLOWED_IPS:

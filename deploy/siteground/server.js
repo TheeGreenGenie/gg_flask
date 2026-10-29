@@ -225,6 +225,7 @@ function createWrapper(options = {}) {
     PYTHONUNBUFFERED: "1",
     MEDIA_ROOT: P.media,
     JOBS_HEARTBEAT_DIR: P.jobs,
+    GG_PLATFORM: "siteground",
     ...fileEnv,
     GG_SOCKET: P.socket,
   };

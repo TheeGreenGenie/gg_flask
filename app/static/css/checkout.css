@@ -196,7 +196,77 @@
 .gg-summary__warning { color: var(--gg-sale); font-weight: 700; }
 .gg-cart__empty { grid-column: 1 / -1; }
 
-.gg-payment-summary { max-width: 26rem; margin: 1rem 0 1.5rem; padding: 1.25rem; border-radius: var(--gg-radius-md); background: var(--gg-warm); }
+/* ---------- Secure payment (review and pay) ---------- */
+.gg-pay {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 22rem;
+	grid-template-areas: "steps steps" "review box";
+	gap: clamp(1.25rem, 3vw, 2.5rem);
+	align-items: start;
+	padding-block: clamp(1.5rem, 4vw, 3rem) clamp(3rem, 6vw, 5rem);
+}
+
+.gg-pay__steps { grid-area: steps; display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin: 0; padding: 0; list-style: none; font-size: .85rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.gg-pay__steps li { display: inline-flex; align-items: center; gap: .35rem; color: var(--gg-muted); }
+.gg-pay__steps li + li::before { content: "›"; margin-right: .6rem; color: var(--gg-crumb-sep); }
+.gg-pay__steps .is-done { color: var(--gg-success); }
+.gg-pay__steps .is-current { color: var(--gg-ink); }
+
+.gg-pay__review { grid-area: review; }
+.gg-pay__review h1 { margin: 0 0 .25rem; font-size: clamp(1.6rem, 3vw, 2.1rem); }
+.gg-pay__order { margin: 0 0 1.75rem; color: var(--gg-muted); }
+.gg-pay__heading { margin: 0 0 .75rem; color: var(--gg-muted); font-size: .8rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+
+.gg-pay__items { display: grid; gap: .75rem; margin: 0 0 1.75rem; padding: 0; list-style: none; }
+.gg-pay__item {
+	display: grid;
+	grid-template-columns: 6rem minmax(0, 1fr) auto;
+	gap: 1rem;
+	align-items: center;
+	padding: .75rem;
+	border: 1px solid var(--gg-line);
+	border-radius: var(--gg-radius-md);
+	background: var(--gg-paper);
+}
+.gg-pay__item img { width: 6rem; height: 6rem; border-radius: var(--gg-radius-sm); object-fit: cover; background: var(--gg-warm); }
+.gg-pay__item-text p { margin: 0; }
+.gg-pay__item-name { font-weight: 700; line-height: 1.35; }
+.gg-pay__item-meta { margin-top: .2rem; color: var(--gg-muted); font-size: .88rem; }
+.gg-pay__item-total { margin: 0; font-weight: 700; white-space: nowrap; }
+
+.gg-pay__ship { display: flex; gap: .9rem; padding: 1rem 1.1rem; border-radius: var(--gg-radius-md); background: var(--gg-warm); box-shadow: inset 0 0 0 1px var(--gg-raised-edge); }
+.gg-pay__ship p { margin: 0; line-height: 1.55; }
+.gg-pay__ship-icon { display: inline-grid; flex: none; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; color: var(--gg-link); background: var(--gg-paper); }
+.gg-pay__back { margin: 1.25rem 0 0; }
+.gg-pay__back a { display: inline-flex; align-items: center; gap: .3rem; color: var(--gg-link); }
+
+.gg-pay__box {
+	grid-area: box;
+	position: sticky;
+	top: 1.5rem;
+	padding: clamp(1.25rem, 3vw, 1.75rem);
+	border-radius: var(--gg-radius-md);
+	background: var(--gg-warm);
+	box-shadow: inset 0 0 0 1px var(--gg-raised-edge);
+}
+.gg-pay__box h2 { margin: 0 0 1rem; font-size: 1.25rem; }
+.gg-pay__button { display: flex; align-items: center; justify-content: center; gap: .5rem; width: 100%; min-height: 3.25rem; font-size: 1.05rem; }
+.gg-pay__method { margin: .75rem 0 0; color: var(--gg-muted); font-size: .85rem; line-height: 1.5; text-align: center; }
+.gg-pay__notice { padding: .9rem 1rem; border-radius: var(--gg-radius-sm); color: var(--gg-ink); background: var(--gg-err-bg); }
+.gg-pay__hold { display: flex; gap: .45rem; align-items: flex-start; margin: 1.25rem 0 0; padding-top: 1rem; border-top: 1px solid var(--gg-warm-deep); color: var(--gg-muted); font-size: .85rem; line-height: 1.45; }
+.gg-pay__hold svg { flex: none; margin-top: .1rem; }
+
+/* Phones and tablets: pay box first, items underneath. */
+@media (max-width: 63.9375rem) {
+	.gg-pay { grid-template-columns: 1fr; grid-template-areas: "steps" "box" "review"; }
+	.gg-pay__box { position: static; }
+}
+
+@media (max-width: 30rem) {
+	.gg-pay__item { grid-template-columns: 4.5rem minmax(0, 1fr); }
+	.gg-pay__item img { width: 4.5rem; height: 4.5rem; }
+	.gg-pay__item-total { grid-column: 2; }
+}
 
 /* Address autocomplete suggestions (address-autocomplete.js) */
 .gg-address-anchor { position: relative; }

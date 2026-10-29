@@ -25,7 +25,7 @@ from app.accounts import service as account_service
 from app.assets import media_version
 from app.cart import service as cart_service
 from app.catalog import queries
-from app.catalog.models import Product
+from app.catalog.models import Product, utcnow
 from app.content import blog
 from app.extensions import csrf, db
 from app.orders import payments, providers
@@ -419,10 +419,12 @@ def order_payment(public_id: str) -> str:
     order = db.session.scalar(select(Order).where(Order.public_id == public_id))
     if order is None or public_id not in set(session.get("checkout_orders", [])):
         abort(404)
+    seconds_left = (order.hold_expires_at - utcnow()).total_seconds()
     return render_template(
         "store/payment.html",
         order=order,
         provider_configured=payments.provider_configured(order.payment_provider),
+        minutes_left=max(0, int(seconds_left // 60)),
         hide_newsletter=True,
     )
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import time
 from typing import Any
 
 import pytest
@@ -171,3 +172,102 @@ def test_paypal_amount_parsing_is_exact() -> None:
     assert payments._paypal_amount({"currency_code": "USD", "value": "17.999"}) == (None, None)
     assert payments._paypal_amount({"value": "abc"}) == (None, None)
     assert payments._paypal_amount(json.loads("null")) == (None, None)
+
+
+# ---------- Stripe retries (a shopper returning to "Pay" must never hit an error) ----------
+
+
+def _stripe_ready(app: Flask) -> list[tuple[str, str, dict[str, str]]]:
+    app.config.update(STRIPE_SECRET_KEY="sk_test_x", STRIPE_WEBHOOK_SECRET="whsec_x")  # noqa: S106
+    return []
+
+
+def test_returning_to_pay_reuses_the_open_stripe_session(catalog_app: Flask) -> None:
+    order = _order(catalog_app)
+    calls = _stripe_ready(catalog_app)
+    order.provider_reference = "cs_existing"
+
+    def fake(method: str, url: str, headers: dict[str, str], body: bytes | None) -> dict[str, Any]:
+        calls.append((method, url, headers))
+        return {
+            "id": "cs_existing",
+            "status": "open",
+            "url": "https://checkout.stripe.com/x",
+            "expires_at": int(time.time()) + 20 * 60,
+        }
+
+    catalog_app.extensions["payment_http"] = fake
+    hosted = payments.begin(order, "https://shop/ok", "https://shop/cancel")
+    assert hosted.url == "https://checkout.stripe.com/x"
+    assert [(m, u.rsplit("/", 1)[-1]) for m, u, _ in calls] == [("GET", "cs_existing")]
+
+
+def test_a_lapsing_session_is_closed_and_a_fresh_one_made_with_a_new_key(
+    catalog_app: Flask,
+) -> None:
+    order = _order(catalog_app)
+    calls = _stripe_ready(catalog_app)
+    order.provider_reference = "cs_old"
+    made = iter(["cs_new1", "cs_new2"])
+
+    def fake(method: str, url: str, headers: dict[str, str], body: bytes | None) -> dict[str, Any]:
+        calls.append((method, url, headers))
+        if method == "GET":  # about to lapse: not worth sending the shopper to
+            return {
+                "status": "open",
+                "url": "https://checkout.stripe.com/old",
+                "expires_at": int(time.time()) + 60,
+            }
+        if url.endswith("/expire"):
+            return {"status": "expired"}
+        return {"id": next(made), "url": "https://checkout.stripe.com/new"}
+
+    catalog_app.extensions["payment_http"] = fake
+    payments.begin(order, "https://shop/ok", "https://shop/cancel")
+    assert [m + " " + u.split("/v1/")[1] for m, u, _ in calls] == [
+        "GET checkout/sessions/cs_old",
+        "POST checkout/sessions/cs_old/expire",
+        "POST checkout/sessions",
+    ]
+    assert order.provider_reference == "cs_new1"
+    first_key = calls[-1][2]["Idempotency-Key"]
+    assert first_key.startswith(f"checkout-{order.public_id}-")
+
+    time.sleep(1.1)  # a later retry (after this session lapses too) gets a different key
+    calls.clear()
+    payments.begin(order, "https://shop/ok", "https://shop/cancel")
+    assert calls[-1][2]["Idempotency-Key"] != first_key
+
+
+def test_paying_again_for_a_paid_session_says_so(catalog_app: Flask) -> None:
+    order = _order(catalog_app)
+    _stripe_ready(catalog_app)
+    order.provider_reference = "cs_done"
+    catalog_app.extensions["payment_http"] = lambda *a: {"status": "complete"}
+    with pytest.raises(payments.PaymentError, match="already been paid"):
+        payments.begin(order, "https://shop/ok", "https://shop/cancel")
+
+
+def test_provider_refusals_are_logged_with_their_reason_but_no_personal_data() -> None:
+    import io
+    import urllib.error
+
+    body = (
+        b'{"error": {"type": "invalid_request_error", "code": "email_invalid",'
+        b' "param": "customer_email", "message": "Invalid email: ada@example.com"}}'
+    )
+    exc = urllib.error.HTTPError("https://api.stripe.com/v1/x", 400, "Bad", {}, io.BytesIO(body))  # type: ignore[arg-type]
+    reason = payments._provider_reason(exc)
+    assert "invalid_request_error" in reason and "email_invalid" in reason
+    assert "param=customer_email" in reason
+    assert "ada@example.com" not in reason and "<email>" in reason
+    paypal = urllib.error.HTTPError(
+        "https://api-m.paypal.com/v2/x",
+        422,
+        "Unprocessable",
+        {},  # type: ignore[arg-type]
+        io.BytesIO(
+            b'{"name": "UNPROCESSABLE_ENTITY", "details": [{"issue": "ORDER_ALREADY_CAPTURED"}]}'
+        ),
+    )
+    assert payments._provider_reason(paypal) == "UNPROCESSABLE_ENTITY | ORDER_ALREADY_CAPTURED"

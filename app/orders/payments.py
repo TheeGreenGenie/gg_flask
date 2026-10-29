@@ -7,6 +7,7 @@ import hashlib
 import hmac
 import json
 import logging
+import re
 import time
 import urllib.error
 import urllib.parse
@@ -63,12 +64,19 @@ def begin(order: Order, success_url: str, cancel_url: str) -> HostedPayment:
     if order.status != OrderStatus.PENDING_PAYMENT or _expired(order):
         raise PaymentError("This payment session has expired.")
     if order.payment_provider == PaymentProvider.STRIPE:
+        reused = _open_stripe_session(order)
+        if reused is not None:
+            return reused
+        # Stripe's minimum is 30 minutes; a minute's margin covers clock and network delay.
+        expires_at = int(time.time()) + 31 * 60
         result = _request(
             "POST",
             "https://api.stripe.com/v1/checkout/sessions",
             {
                 "Authorization": f"Bearer {current_app.config['STRIPE_SECRET_KEY']}",
-                "Idempotency-Key": f"checkout-{order.public_id}",
+                # One key per attempt: Stripe refuses a key reused with different details (the
+                # expiry changes every time), which used to make every retry fail.
+                "Idempotency-Key": f"checkout-{order.public_id}-{expires_at}",
                 "Content-Type": "application/x-www-form-urlencoded",
             },
             urllib.parse.urlencode(
@@ -84,7 +92,7 @@ def begin(order: Order, success_url: str, cancel_url: str) -> HostedPayment:
                     "line_items[0][quantity]": 1,
                     "success_url": success_url,
                     "cancel_url": cancel_url,
-                    "expires_at": int(time.time()) + 30 * 60,
+                    "expires_at": expires_at,
                 }
             ).encode(),
         )
@@ -138,6 +146,34 @@ def begin(order: Order, success_url: str, cancel_url: str) -> HostedPayment:
     order.provider_reference = reference
     db.session.commit()
     return HostedPayment(url, reference)
+
+
+STRIPE_REUSE_MIN_SECONDS = 5 * 60  # don't send a shopper to a session about to lapse
+
+
+def _open_stripe_session(order: Order) -> HostedPayment | None:
+    """Send a returning shopper back to the Stripe page already made for this order.
+
+    An order never has two open ways to pay: a session that is still open is reused, and one
+    about to lapse is closed on Stripe's side before a new one is made.
+    """
+    reference = order.provider_reference or ""
+    if not reference.startswith("cs_"):
+        return None
+    headers = {"Authorization": f"Bearer {current_app.config['STRIPE_SECRET_KEY']}"}
+    url = f"https://api.stripe.com/v1/checkout/sessions/{reference}"
+    session = _request("GET", url, headers, None)
+    status = session.get("status")
+    if status == "complete":
+        raise PaymentError(
+            "This order has already been paid. Your confirmation email is on its way."
+        )
+    if status == "open":
+        expires = int(session.get("expires_at") or 0)
+        if expires > time.time() + STRIPE_REUSE_MIN_SECONDS and session.get("url"):
+            return HostedPayment(str(session["url"]), reference)
+        _request("POST", f"{url}/expire", headers, b"")
+    return None
 
 
 def capture_paypal(order: Order) -> None:
@@ -482,7 +518,7 @@ def _paypal_token() -> str:
     return token
 
 
-def _request(method: str, url: str, headers: dict[str, str], body: bytes) -> dict[str, Any]:
+def _request(method: str, url: str, headers: dict[str, str], body: bytes | None) -> dict[str, Any]:
     injected = current_app.extensions.get("payment_http")
     if injected:
         return injected(method, url, headers, body)
@@ -490,8 +526,41 @@ def _request(method: str, url: str, headers: dict[str, str], body: bytes) -> dic
     try:
         with urllib.request.urlopen(request, timeout=10) as response:  # noqa: S310
             return _json(response.read())
-    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
+    except urllib.error.HTTPError as exc:
+        # Keep the provider's reason (error type/code/message; never our keys) for diagnosis.
+        log.warning(
+            "payment_provider_refused",
+            extra={
+                "status": exc.code,
+                "endpoint": urllib.parse.urlsplit(url).path,
+                "reason": _provider_reason(exc),
+            },
+        )
         raise PaymentError("The payment provider is temporarily unavailable.") from exc
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
+        log.warning("payment_provider_unreachable", extra={"error": type(exc).__name__})
+        raise PaymentError("The payment provider is temporarily unavailable.") from exc
+
+
+def _provider_reason(exc: urllib.error.HTTPError) -> str:
+    """Stripe's or PayPal's short explanation of a refusal, for the server log."""
+    try:
+        data = json.loads(exc.read() or b"{}")
+    except (OSError, ValueError):
+        return "unreadable error body"
+    err = data.get("error", data) if isinstance(data, dict) else {}
+    if not isinstance(err, dict):
+        return str(err)[:200]
+    details = err.get("details") if isinstance(err.get("details"), list) else []
+    parts = [
+        err.get("type") or err.get("name"),
+        err.get("code")
+        or (details[0].get("issue") if details and isinstance(details[0], dict) else None),
+        f"param={err['param']}" if err.get("param") else None,
+        err.get("message"),
+    ]
+    reason = " | ".join(str(p) for p in parts if p)[:300]
+    return re.sub(r"[^\s@|]+@[^\s@|]+", "<email>", reason)  # logs never hold personal data
 
 
 def _json(body: bytes) -> dict[str, Any]:

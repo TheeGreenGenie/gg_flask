@@ -211,7 +211,17 @@ def test_checkout_creates_order_and_private_payment_page(
         },
     )
     assert response.status_code == 302 and "/payment" in response.location
-    assert "not configured" in shop.get(response.location).get_data(as_text=True)
+    page = shop.get(response.location).get_data(as_text=True)
+    assert "Stripe payments are not available right now" in page  # no keys in tests
+    assert "Nothing has been charged" in page
+    # Review-and-pay page: item photo and details, delivery address, reservation time.
+    assert 'class="gg-pay__item"' in page and "/media/products/ankara-blue/" in page
+    assert "123 Market Street" in page and "Philadelphia, PA 19103" in page
+    assert re.search(r"reserved for \d+ more minutes", page)
+    catalog_app.config.update(STRIPE_SECRET_KEY="sk_test_x", STRIPE_WEBHOOK_SECRET="whsec_x")  # noqa: S106
+    ready = shop.get(response.location).get_data(as_text=True)
+    assert re.search(r"Pay \$[\d.,]+ securely", ready)
+    assert "We never see or store your card details" in ready
     assert catalog_app.test_client().get(response.location).status_code == 404
 
 

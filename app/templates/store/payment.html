@@ -1,27 +1,76 @@
 {% extends "layout.html" %}
+{%- from "partials/icons.html" import icon -%}
 {% block title %}Secure payment · GG Afrikan Eleganz{% endblock %}
 {% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}">{% endblock %}
 {% block content %}
-<div class="gg-page-title"><div class="gg-container"><h1>Secure payment</h1></div></div>
-<main class="gg-container gg-content-page">
-  <p>Order <strong>{{ order.public_id }}</strong></p>
-  <dl class="gg-summary__rows gg-payment-summary">
-    <div><dt>Items</dt><dd>{{ order.subtotal_cents|money }}</dd></div>
-    {% if order.discount_cents %}<div><dt>Discount{% if order.coupon_code %} ({{ order.coupon_code }}){% endif %}</dt><dd>−{{ order.discount_cents|money }}</dd></div>{% endif %}
-    <div><dt>Shipping{% if order.shipping_service %} · {{ order.shipping_service }}{% endif %}</dt><dd>{{ order.shipping_cents|money }}</dd></div>
-    <div><dt>Sales tax</dt><dd>{{ order.tax_cents|money }}</dd></div>
-    <div class="gg-summary__total"><dt>Total</dt><dd>{{ order.total_cents|money }}</dd></div>
-  </dl>
-  <p>Your items are reserved until {{ order.hold_expires_at.strftime('%I:%M %p UTC') }}.</p>
-  {% if provider_configured %}
-    <p>You’ll continue to {{ order.payment_provider.value|title }} to enter payment details securely.</p>
-    <form method="post" action="{{ url_for('store.begin_order_payment', public_id=order.public_id) }}">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <button class="gg-button gg-button--accent" type="submit">Pay securely with {{ order.payment_provider.value|title }}</button>
-    </form>
-  {% else %}
-    <p role="status">The {{ order.payment_provider.value|title }} connection is not configured yet. Your card or account has not been charged.</p>
-  {% endif %}
-  <p><a href="{{ url_for('store.checkout') }}">Return to checkout</a></p>
-</main>
+{%- set is_stripe = order.payment_provider.value == 'stripe' -%}
+{%- set provider_name = 'Stripe' if is_stripe else 'PayPal' -%}
+<div class="gg-container gg-pay">
+  <ol class="gg-pay__steps" aria-label="Checkout progress">
+    <li class="is-done">{{ icon('check', 14) }} Cart</li>
+    <li class="is-done">{{ icon('check', 14) }} Details</li>
+    <li class="is-current" aria-current="step">Payment</li>
+  </ol>
+
+  <section class="gg-pay__review" aria-labelledby="pay-title">
+    <h1 id="pay-title">Review and pay</h1>
+    <p class="gg-pay__order">Order <strong>{{ order.public_id }}</strong></p>
+
+    <h2 class="gg-pay__heading">Your items</h2>
+    <ul class="gg-pay__items">
+      {% for line in order.lines %}
+        {%- set v = line.variant -%}
+        {%- set img = v.image.path if v and v.image else (v.product.cover.path if v and v.product.cover else None) -%}
+        <li class="gg-pay__item">
+          <img src="{{ media_url(img) }}" width="96" height="96" alt="{{ line.product_name }}" loading="{{ 'eager' if loop.first else 'lazy' }}">
+          <div class="gg-pay__item-text">
+            <p class="gg-pay__item-name">{{ line.product_name }}</p>
+            {% if line.variant_label and line.variant_label != line.product_name %}<p class="gg-pay__item-meta">{{ line.variant_label }}</p>{% endif %}
+            <p class="gg-pay__item-meta">Qty {{ line.quantity }} · {{ line.unit_price_cents|money }} each</p>
+          </div>
+          <p class="gg-pay__item-total">{{ line.line_total_cents|money }}</p>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <div class="gg-pay__ship">
+      <span class="gg-pay__ship-icon">{{ icon('truck', 20) }}</span>
+      <div>
+        <h2 class="gg-pay__heading">Delivering to</h2>
+        <p>{{ order.first_name }} {{ order.last_name }}<br>
+          {{ order.address1 }}{% if order.address2 %}, {{ order.address2 }}{% endif %}<br>
+          {{ order.city }}, {{ order.region }} {{ order.postcode }} · {{ order.country }}</p>
+        {% if order.shipping_service %}<p class="gg-pay__item-meta">{{ order.shipping_service }}</p>{% endif %}
+      </div>
+    </div>
+    <p class="gg-pay__back"><a href="{{ url_for('store.checkout') }}">{{ icon('chevron-left', 14) }} Change details</a></p>
+  </section>
+
+  <aside class="gg-pay__box" aria-labelledby="pay-summary-title">
+    <h2 id="pay-summary-title">Order total</h2>
+    <dl class="gg-summary__rows">
+      <div><dt>Items</dt><dd>{{ order.subtotal_cents|money }}</dd></div>
+      {% if order.discount_cents %}<div><dt>Discount{% if order.coupon_code %} ({{ order.coupon_code }}){% endif %}</dt><dd>−{{ order.discount_cents|money }}</dd></div>{% endif %}
+      <div><dt>Shipping</dt><dd>{{ order.shipping_cents|money }}</dd></div>
+      <div><dt>Sales tax</dt><dd>{{ order.tax_cents|money }}</dd></div>
+      <div class="gg-summary__total"><dt>Total</dt><dd>{{ order.total_cents|money }}</dd></div>
+    </dl>
+
+    {% if provider_configured %}
+      <form method="post" action="{{ url_for('store.begin_order_payment', public_id=order.public_id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="gg-button gg-button--accent gg-pay__button" type="submit">{{ icon('lock', 18) }} Pay {{ order.total_cents|money }} securely</button>
+      </form>
+      <p class="gg-pay__method">
+        {% if is_stripe %}Card, Apple Pay or Google Pay{% else %}PayPal or Venmo{% endif %}, on {{ provider_name }}’s secure page. We never see or store your card details.
+      </p>
+    {% else %}
+      <p class="gg-pay__notice" role="status">{{ provider_name }} payments are not available right now. Nothing has been charged.</p>
+    {% endif %}
+
+    <p class="gg-pay__hold">{{ icon('clock', 16) }}
+      {% if minutes_left > 0 %}Your items are reserved for {{ minutes_left }} more minute{{ '' if minutes_left == 1 else 's' }}.{% else %}Your reservation has ended. Return to checkout to try again.{% endif %}
+    </p>
+  </aside>
+</div>
 {% endblock %}

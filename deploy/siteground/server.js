@@ -11,7 +11,7 @@
 //   env           the app's settings (KEY=VALUE, same format as .env; never in git)
 //   venv/         Python packages, rebuilt when requirements.lock or Python changes
 //   run/app.sock  the Gunicorn socket (this account only)
-//   logs/         wrapper.log and app.log, rotated at 5 MB
+//   logs/         wrapper.log, app.log (setup: packages, database), python.log (the app)
 //   media/        uploaded and imported photos (MEDIA_ROOT)
 //   jobs/         scheduled-job heartbeats (JOBS_HEARTBEAT_DIR)
 //   current       link to the deployed code, used by cron jobs (deploy/siteground/run-job.sh)
@@ -186,6 +186,8 @@ function createWrapper(options = {}) {
     venv: path.join(home, "venv"),
     run: path.join(home, "run"),
     socket: path.join(home, "run", "app.sock"),
+    pidfile: path.join(home, "run", "gunicorn.pid"),
+    release: path.join(home, "run", "gunicorn.release"), // which deploy that Gunicorn serves
     logs: path.join(home, "logs"),
     media: path.join(home, "media"),
     jobs: path.join(home, "jobs"),
@@ -228,11 +230,23 @@ function createWrapper(options = {}) {
     GG_PLATFORM: "siteground",
     ...fileEnv,
     GG_SOCKET: P.socket,
+    GG_PIDFILE: P.pidfile,
   };
 
   let phase = "starting"; // starting | ready | failed | stopping
   let child = null;
+  let adopted = null; // pid of a Gunicorn left running by the previous (idled) wrapper
   let crashes = [];
+  const pylogPath = path.join(P.logs, "python.log");
+
+  const alive = (pid) => {
+    try {
+      process.kill(pid, 0);
+      return true;
+    } catch {
+      return false;
+    }
+  };
   let waiters = [];
 
   function setPhase(next) {
@@ -355,23 +369,99 @@ function createWrapper(options = {}) {
     });
   }
 
+  // SiteGround stops an idle app by killing the Node process outright, so stop() never runs and
+  // the Gunicorn it started keeps running. Left alone, every wake-up adds three more processes
+  // until the account hits its process limit ("fork: Resource temporarily unavailable").
+  // Before starting a new one, stop any Gunicorn of this app that is still running.
+  async function stopLeftovers() {
+    const conf = path.join("deploy", "siteground", "gunicorn.conf.py");
+    const pids = new Set();
+    try {
+      const recorded = Number(fs.readFileSync(P.pidfile, "utf8").trim());
+      if (recorded > 1) pids.add(recorded);
+    } catch {}
+    try {
+      for (const entry of fs.readdirSync("/proc")) {
+        if (!/^\d+$/.test(entry) || Number(entry) === process.pid) continue;
+        let cmd = "";
+        try {
+          cmd = fs.readFileSync(`/proc/${entry}/cmdline`, "utf8").replace(/\0/g, " ");
+        } catch {
+          continue; // another account's process, or already gone
+        }
+        if (cmd.includes("gunicorn") && cmd.includes(conf)) pids.add(Number(entry));
+      }
+    } catch {} // no /proc: the recorded pid is all we have
+    const targets = [...pids].filter(alive);
+    if (!targets.length) return;
+    log(`stopping ${targets.length} leftover gunicorn process(es)`);
+    for (const pid of targets) {
+      try {
+        process.kill(pid, "SIGTERM");
+      } catch {}
+    }
+    for (let i = 0; i < 50 && targets.some(alive); i += 1) await new Promise((r) => setTimeout(r, 100));
+    for (const pid of targets.filter(alive)) {
+      try {
+        process.kill(pid, "SIGKILL");
+      } catch {}
+    }
+  }
+
+  // If the Gunicorn left by the previous wrapper serves this same deploy and answers, keep it:
+  // waking up is then only Node starting (well under a second) instead of Python too.
+  async function adoptRunning() {
+    let pid = 0;
+    let release = "";
+    try {
+      pid = Number(fs.readFileSync(P.pidfile, "utf8").trim());
+      release = fs.readFileSync(P.release, "utf8");
+    } catch {
+      return false;
+    }
+    if (!(pid > 1) || release !== APP_DIR || !alive(pid) || !(await socketAccepts())) return false;
+    adopted = pid;
+    log(`ready (reusing running gunicorn pid ${pid})`);
+    setPhase("ready");
+    const watch = setInterval(() => {
+      if (adopted === pid && !alive(pid) && phase !== "stopping") {
+        clearInterval(watch);
+        adopted = null;
+        log("reused gunicorn stopped; starting a new one");
+        phase = "starting";
+        startPython().catch((e) => log(`restart failed: ${e.message}`));
+      }
+    }, 5_000);
+    return true;
+  }
+
   async function startPython() {
+    if (await adoptRunning()) return;
+    await stopLeftovers();
     fs.rmSync(P.socket, { force: true });
+    fs.rmSync(P.release, { force: true });
+    // Gunicorn writes its own log file (not a pipe to this process), so it keeps logging when
+    // SiteGround kills the wrapper and a later wrapper reuses it.
+    try {
+      if (fs.statSync(pylogPath).size > LIMITS.logBytes) fs.renameSync(pylogPath, `${pylogPath}.1`);
+    } catch {}
+    const out = fs.openSync(pylogPath, "a", 0o600);
     const gunicorn = path.join(P.venv, "bin", "gunicorn");
     const conf = path.join(APP_DIR, "deploy", "siteground", "gunicorn.conf.py");
     child = spawn(gunicorn, ["--config", conf, "wsgi:app"], {
       cwd: APP_DIR,
       env: { ...pythonEnv, GG_WEB_ONLY: "1" }, // skip CLI-only imports: faster wake-up
-      stdio: ["ignore", "pipe", "pipe"],
+      stdio: ["ignore", out, out],
+      detached: true, // its own process group: not taken down by signals aimed at Node's
     });
+    fs.closeSync(out);
     const started = child;
-    child.stdout.on("data", (d) => alog.write(d.toString().trimEnd()));
-    child.stderr.on("data", (d) => alog.write(d.toString().trimEnd()));
     child.on("error", (e) => log(`gunicorn could not start (${e.code})`));
     child.on("exit", (code, signal) => onExit(started, code, signal));
     const deadline = Date.now() + LIMITS.startupWaitMs + 30_000;
     while (Date.now() < deadline && child === started && started.exitCode === null) {
       if (await socketAccepts()) {
+        fs.writeFileSync(P.release, APP_DIR, { mode: 0o600 });
         log(`ready (gunicorn pid ${started.pid})`);
         setPhase("ready");
         return;
@@ -503,6 +593,7 @@ function createWrapper(options = {}) {
     log("stopping");
     server.close();
     if (child && child.exitCode === null) child.kill("SIGTERM");
+    if (adopted && alive(adopted)) process.kill(adopted, "SIGTERM");
     setTimeout(() => process.exit(0), 10_000).unref();
     if (child && child.exitCode === null) child.once("exit", () => process.exit(0));
     else process.exit(0);

@@ -1,0 +1,105 @@
+{% extends "email/_base.html" %}
+{% import "email/_parts.html" as part %}
+{% block title %}Order {{ order.public_id }}{% endblock %}
+{% block preheader %}{% if for_owner %}New order from {{ order.first_name }} {{ order.last_name }}: {{ order.total_cents|money }}.{% else %}Thank you, {{ order.first_name }}. Your order {{ order.public_id }} is confirmed: {{ order.total_cents|money }}.{% endif %}{% endblock %}
+{% block body %}
+{% if not for_owner %}
+<tr><td style="padding:22px 24px 0;">
+  <img src="{{ banner }}" width="552" alt="African wax print fabrics" style="display:block;width:100%;max-width:552px;height:auto;border:0;">
+</td></tr>
+{% endif %}
+<tr><td class="gg-pad" align="center" style="padding:30px 40px 8px;">
+  {% if for_owner %}
+    <p style="margin:0 0 8px;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#2e6b2f;">New paid order</p>
+    <h1 style="margin:0 0 10px;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:34px;font-weight:normal;color:#1f1a14;">{{ order.first_name }} {{ order.last_name }} · {{ order.total_cents|money }}</h1>
+  {% else %}
+    <p style="margin:0 0 8px;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#2e6b2f;">✓ Order confirmed</p>
+    <h1 style="margin:0 0 10px;font-family:Georgia,'Times New Roman',serif;font-size:30px;line-height:36px;font-weight:normal;color:#1f1a14;">Thank you, {{ order.first_name }}</h1>
+    <p style="margin:0 auto;max-width:440px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:23px;color:#6b6157;">Your payment was received and we’re getting your order ready. We’ll email you a tracking link as soon as it ships.</p>
+  {% endif %}
+  <p style="margin:16px 0 0;font-family:Helvetica,Arial,sans-serif;font-size:13px;color:#6b6157;">Order <strong style="color:#1f1a14;">{{ order.public_id }}</strong>{% if placed_on %} · {{ placed_on }}{% endif %}</p>
+</td></tr>
+
+{% if for_owner %}
+<tr><td class="gg-pad" style="padding:20px 40px 0;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#fbf3df;border:1px solid #e8c77d;">
+    <tr><td style="padding:16px 18px;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#3d352c;">
+      <strong>To pack and ship:</strong> {{ delivery_method }}{% if parcel_weight %} · estimated parcel {{ parcel_weight }}{% endif %}<br>
+      Customer: {{ order.email }}{% if order.phone %} · {{ order.phone }}{% endif %}<br>
+      <a href="{{ admin_url }}" style="color:#8a6100;font-weight:bold;">Open this order in admin</a> to mark it shipped with a tracking number.
+    </td></tr>
+  </table>
+</td></tr>
+{% endif %}
+
+<tr><td class="gg-pad" style="padding:28px 40px 4px;">
+  {{ part.heading("Your order" if not for_owner else "Items") }}
+  {{ part.items(lines) }}
+  {{ part.totals(order) }}
+</td></tr>
+
+<tr><td class="gg-pad" style="padding:26px 40px 6px;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+    <tr>
+      <td class="gg-col" width="50%" valign="top" style="padding:0 12px 20px 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#3d352c;">
+        {{ part.heading("Delivering to") }}
+        {{ part.address(order) }}
+      </td>
+      <td class="gg-col" width="50%" valign="top" style="padding:0 0 20px 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#3d352c;">
+        {{ part.heading("Contact") }}
+        {{ order.email }}{% if order.phone %}<br>{{ order.phone }}{% endif %}
+      </td>
+    </tr>
+    <tr>
+      <td class="gg-col" width="50%" valign="top" style="padding:0 12px 20px 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#3d352c;">
+        {{ part.heading("Delivery") }}
+        {{ delivery_method }}<br>
+        {% if carrier_name and tracking_url %}{{ carrier_name }} · <a href="{{ tracking_url }}" style="color:#8a6100;">track your package</a>{% else %}<span style="color:#6b6157;">Tracking link emailed when it ships</span>{% endif %}
+      </td>
+      <td class="gg-col" width="50%" valign="top" style="padding:0 0 20px 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#3d352c;">
+        {{ part.heading("Payment") }}
+        {{ payment_method }}<br><span style="color:#6b6157;">Paid {{ order.total_cents|money }}</span>
+      </td>
+    </tr>
+  </table>
+</td></tr>
+
+{% if not for_owner %}
+<tr><td class="gg-pad" style="padding:6px 40px 28px;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f6f1e9;">
+    <tr><td style="padding:20px 22px;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#3d352c;">
+      {{ part.heading("What happens next") }}
+      <strong style="color:#2e6b2f;">✓ Order confirmed</strong> — we’ve received your order and payment.<br>
+      <strong>Prepared with care</strong> — your fabric is cut, checked and packed.<br>
+      <strong>On its way</strong> — you’ll get an email with the carrier and a tracking link.
+    </td></tr>
+  </table>
+</td></tr>
+{% if account_url %}
+<tr><td align="center" style="padding:0 40px 30px;">{{ part.button(account_url, "View your order") }}</td></tr>
+{% endif %}
+
+<tr><td style="padding:0 24px;"><div style="height:1px;background:#d9b46a;line-height:1px;font-size:1px;">&nbsp;</div></td></tr>
+<tr><td class="gg-pad" align="center" style="padding:28px 40px 6px;">
+  <p style="margin:0 0 4px;font-family:Georgia,'Times New Roman',serif;font-size:22px;color:#1f1a14;">Keep exploring</p>
+  <p style="margin:0;font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#6b6157;">More from the shop, picked for you.</p>
+</td></tr>
+<tr><td class="gg-pad" style="padding:18px 34px 30px;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+    {% for pair in promos|batch(2) %}
+    <tr>
+      {% for promo in pair %}
+      <td class="gg-promo" width="50%" valign="top" style="padding:0 6px 18px;">
+        <a href="{{ promo.url }}" style="text-decoration:none;">
+          <img src="{{ promo.image }}" width="254" alt="{{ promo.title }}" style="display:block;width:100%;max-width:254px;height:auto;border:0;">
+          <p style="margin:10px 0 3px;font-family:Georgia,'Times New Roman',serif;font-size:17px;color:#1f1a14;">{{ promo.title }} <span style="color:#b5852a;">→</span></p>
+          <p style="margin:0;font-family:Helvetica,Arial,sans-serif;font-size:13px;line-height:19px;color:#6b6157;">{{ promo.text }}</p>
+        </a>
+      </td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
+</td></tr>
+{% endif %}
+{% endblock %}

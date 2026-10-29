@@ -65,6 +65,9 @@ def create_app(config: BaseConfig | str | None = None) -> Flask:
     init_uploads(app)
     init_templating(app)
     init_catalog(app)
+    from app.email_images import init_email_images
+
+    init_email_images(app)
     init_assets(app)
     init_legacy_redirects(app)
 

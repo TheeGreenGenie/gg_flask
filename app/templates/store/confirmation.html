@@ -1,17 +1,77 @@
 {% extends "layout.html" %}
+{%- from "partials/icons.html" import icon -%}
+{%- set paid = order.payment_status.value == 'paid' -%}
 {% block title %}Order {{ order.public_id }} · GG Afrikan Eleganz{% endblock %}
+{% block styles %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}">
+  {#- The provider's confirmation can lag the shopper by a few seconds: check again by itself. -#}
+  {% if not paid %}<meta http-equiv="refresh" content="5">{% endif %}
+{% endblock %}
 {% block content %}
-<div class="gg-page-title"><div class="gg-container"><h1>Thank you for your order</h1></div></div>
-<main class="gg-container gg-content-page">
-  <p>Order <strong>{{ order.public_id }}</strong></p>
-  {% if order.payment_status.value == 'paid' %}
-    <div hidden data-gg-analytics-event='{{ {"name": "purchase", "once": order.public_id, "params": {"transaction_id": order.public_id, "currency": "USD", "value": order.total_cents / 100, "tax": order.tax_cents / 100, "shipping": order.shipping_cents / 100, "coupon": order.coupon_code or "", "items": order.lines|map(attribute="sku")|map("string")|list}}|tojson|forceescape }}'></div>
-    <p>Your payment of <strong>{{ order.total_cents|money }}</strong> was received. We will send order details to {{ order.email }}.</p>
-  {% else %}
-    <p>Your payment is still being confirmed. Refresh this page in a moment.</p>
-  {% endif %}
-  <h2>Shipping to</h2>
-  <address>{{ order.first_name }} {{ order.last_name }}<br>{{ order.address1 }}{% if order.address2 %}<br>{{ order.address2 }}{% endif %}<br>{{ order.city }}, {{ order.region }} {{ order.postcode }}<br>{{ order.country }}</address>
-  <p><a class="gg-button gg-button--accent" href="{{ url_for('store.home') }}">Continue shopping</a></p>
-</main>
+<div class="gg-container gg-pay gg-thanks">
+  <section class="gg-thanks__hero{% if not paid %} is-pending{% endif %}" aria-labelledby="thanks-title">
+    <span class="gg-thanks__mark" aria-hidden="true">{{ icon('check' if paid else 'clock', 30) }}</span>
+    {% if paid %}
+      <div hidden data-gg-analytics-event='{{ {"name": "purchase", "once": order.public_id, "params": {"transaction_id": order.public_id, "currency": "USD", "value": order.total_cents / 100, "tax": order.tax_cents / 100, "shipping": order.shipping_cents / 100, "coupon": order.coupon_code or "", "items": order.lines|map(attribute="sku")|map("string")|list}}|tojson|forceescape }}'></div>
+      <h1 id="thanks-title">Thank you, {{ order.first_name }}!</h1>
+      <p>Your payment of <strong>{{ order.total_cents|money }}</strong> was received. A confirmation is on its way to <strong>{{ order.email }}</strong>.</p>
+    {% else %}
+      <h1 id="thanks-title">Confirming your payment…</h1>
+      <p>This usually takes a few seconds. This page will update by itself; you don’t need to pay again.</p>
+    {% endif %}
+    <p class="gg-thanks__order">Order <strong>{{ order.public_id }}</strong></p>
+  </section>
+
+  <section class="gg-pay__review" aria-labelledby="items-title">
+    {% if paid %}
+      <h2 class="gg-pay__heading">What happens next</h2>
+      <ol class="gg-thanks__steps">
+        <li class="is-done"><span>{{ icon('check', 16) }}</span><div><strong>Order confirmed</strong><small>We’ve received your order and payment.</small></div></li>
+        <li><span>{{ icon('clock', 16) }}</span><div><strong>We prepare it</strong><small>Your fabric is cut, checked and packed with care.</small></div></li>
+        <li><span>{{ icon('truck', 16) }}</span><div><strong>On its way</strong><small>You’ll get an email with tracking when it ships.</small></div></li>
+      </ol>
+    {% endif %}
+
+    <h2 class="gg-pay__heading" id="items-title">Your items</h2>
+    <ul class="gg-pay__items">
+      {% for line in order.lines %}
+        {%- set v = line.variant -%}
+        {%- set img = v.image.path if v and v.image else (v.product.cover.path if v and v.product.cover else None) -%}
+        <li class="gg-pay__item">
+          <img src="{{ media_url(img) }}" width="96" height="96" alt="{{ line.product_name }}" loading="{{ 'eager' if loop.first else 'lazy' }}">
+          <div class="gg-pay__item-text">
+            <p class="gg-pay__item-name">{{ line.product_name }}</p>
+            {% if line.variant_label and line.variant_label != line.product_name %}<p class="gg-pay__item-meta">{{ line.variant_label }}</p>{% endif %}
+            <p class="gg-pay__item-meta">Qty {{ line.quantity }} · {{ line.unit_price_cents|money }} each</p>
+          </div>
+          <p class="gg-pay__item-total">{{ line.line_total_cents|money }}</p>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <div class="gg-pay__ship">
+      <span class="gg-pay__ship-icon">{{ icon('truck', 20) }}</span>
+      <div>
+        <h2 class="gg-pay__heading">Shipping to</h2>
+        <address class="gg-thanks__address">{{ order.first_name }} {{ order.last_name }}<br>
+          {{ order.address1 }}{% if order.address2 %}, {{ order.address2 }}{% endif %}<br>
+          {{ order.city }}, {{ order.region }} {{ order.postcode }} · {{ order.country }}</address>
+        {% if order.shipping_service %}<p class="gg-pay__item-meta">{{ order.shipping_service }}</p>{% endif %}
+      </div>
+    </div>
+  </section>
+
+  <aside class="gg-pay__box" aria-labelledby="total-title">
+    <h2 id="total-title">{{ 'Paid' if paid else 'Order total' }}</h2>
+    <dl class="gg-summary__rows">
+      <div><dt>Items</dt><dd>{{ order.subtotal_cents|money }}</dd></div>
+      {% if order.discount_cents %}<div><dt>Discount{% if order.coupon_code %} ({{ order.coupon_code }}){% endif %}</dt><dd>−{{ order.discount_cents|money }}</dd></div>{% endif %}
+      <div><dt>Shipping</dt><dd>{{ order.shipping_cents|money }}</dd></div>
+      <div><dt>Sales tax</dt><dd>{{ order.tax_cents|money }}</dd></div>
+      <div class="gg-summary__total"><dt>Total</dt><dd>{{ order.total_cents|money }}</dd></div>
+    </dl>
+    <a class="gg-button gg-button--accent gg-pay__button" href="{{ url_for('store.shop') }}">Continue shopping</a>
+    <p class="gg-pay__method">Questions about your order? <a href="{{ url_for('content.contact') }}">Contact us</a> and mention order {{ order.public_id }}.</p>
+  </aside>
+</div>
 {% endblock %}

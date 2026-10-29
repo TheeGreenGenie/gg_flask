@@ -1,0 +1,46 @@
+{% extends "email/_base.html" %}
+{% import "email/_parts.html" as part %}
+{% block title %}Order {{ order.public_id }} is on its way{% endblock %}
+{% block preheader %}Your order {{ order.public_id }} has shipped{% if carrier_name %} with {{ carrier_name }}{% endif %}. Track it anytime.{% endblock %}
+{% block body %}
+<tr><td class="gg-pad" align="center" style="padding:32px 40px 8px;">
+  <p style="margin:0 0 8px;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#2e6b2f;">Shipped{% if shipped_on %} · {{ shipped_on }}{% endif %}</p>
+  <h1 style="margin:0 0 10px;font-family:Georgia,'Times New Roman',serif;font-size:30px;line-height:36px;font-weight:normal;color:#1f1a14;">Your order is on its way, {{ order.first_name }}</h1>
+  <p style="margin:0 auto;max-width:440px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:23px;color:#6b6157;">Your fabric has been packed with care and handed to the carrier.</p>
+</td></tr>
+
+<tr><td class="gg-pad" style="padding:22px 40px 8px;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f6f1e9;border:1px solid #e6dccd;">
+    <tr><td align="center" style="padding:24px 20px;font-family:Helvetica,Arial,sans-serif;">
+      <p style="margin:0 0 4px;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#9a7a3c;">Delivered by</p>
+      <p style="margin:0 0 14px;font-family:Georgia,'Times New Roman',serif;font-size:24px;color:#1f1a14;">{{ carrier_name or "Our carrier" }}</p>
+      <p style="margin:0 0 4px;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#9a7a3c;">Tracking number</p>
+      <p style="margin:0 0 20px;font-size:17px;letter-spacing:1px;color:#1f1a14;"><strong>{{ order.tracking_number }}</strong></p>
+      {% if tracking_url %}{{ part.button(tracking_url, "Track your package") }}{% endif %}
+    </td></tr>
+  </table>
+</td></tr>
+
+<tr><td class="gg-pad" style="padding:26px 40px 4px;">
+  {{ part.heading("In this parcel") }}
+  {{ part.items(lines) }}
+</td></tr>
+
+<tr><td class="gg-pad" style="padding:22px 40px 28px;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+    <tr>
+      <td class="gg-col" width="50%" valign="top" style="padding:0 12px 16px 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#3d352c;">
+        {{ part.heading("Delivering to") }}
+        {{ part.address(order) }}
+      </td>
+      <td class="gg-col" width="50%" valign="top" style="padding:0 0 16px 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#3d352c;">
+        {{ part.heading("Order") }}
+        {{ order.public_id }}<br>Placed {{ placed_on }}<br>{{ delivery_method }}
+      </td>
+    </tr>
+  </table>
+</td></tr>
+{% if account_url %}
+<tr><td align="center" style="padding:0 40px 32px;">{{ part.button(account_url, "View your order") }}</td></tr>
+{% endif %}
+{% endblock %}

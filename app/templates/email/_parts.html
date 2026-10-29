@@ -1,0 +1,48 @@
+{#- Pieces shared by the order emails. Inline styles only (mail apps drop stylesheets). -#}
+
+{% macro heading(text) -%}
+<p style="margin:0 0 12px;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#9a7a3c;">{{ text }}</p>
+{%- endmacro %}
+
+{% macro items(lines) -%}
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+  {% for row in lines %}{% set line = row.line %}
+  <tr>
+    <td width="96" valign="top" style="padding:12px 0;border-top:1px solid #efe7da;">
+      <img src="{{ row.photo }}" width="80" height="80" alt="{{ line.product_name }}" style="display:block;width:80px;height:80px;object-fit:cover;border:1px solid #e6dccd;background:#f6f1e9;">
+    </td>
+    <td valign="top" style="padding:14px 12px 12px 14px;border-top:1px solid #efe7da;font-family:Helvetica,Arial,sans-serif;">
+      <p style="margin:0 0 4px;font-size:15px;line-height:21px;font-weight:bold;color:#1f1a14;">{{ line.product_name }}</p>
+      {% if line.variant_label and line.variant_label != line.product_name %}<p style="margin:0 0 4px;font-size:13px;line-height:19px;color:#6b6157;">{{ line.variant_label }}</p>{% endif %}
+      <p style="margin:0;font-size:13px;line-height:19px;color:#6b6157;">Qty {{ line.quantity }} · {{ line.unit_price_cents|money }} each · SKU {{ line.sku }}</p>
+    </td>
+    <td valign="top" align="right" style="padding:14px 0 12px;border-top:1px solid #efe7da;font-family:Helvetica,Arial,sans-serif;font-size:15px;font-weight:bold;color:#1f1a14;white-space:nowrap;">{{ line.line_total_cents|money }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{%- endmacro %}
+
+{% macro totals(order) -%}
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#3d352c;border-top:1px solid #efe7da;">
+  <tr><td style="padding:12px 0 4px;">Items</td><td align="right" style="padding:12px 0 4px;">{{ order.subtotal_cents|money }}</td></tr>
+  {% if order.discount_cents %}<tr><td style="padding:4px 0;">Discount{% if order.coupon_code %} ({{ order.coupon_code }}){% endif %}</td><td align="right" style="padding:4px 0;color:#2e6b2f;">−{{ order.discount_cents|money }}</td></tr>{% endif %}
+  <tr><td style="padding:4px 0;">Shipping</td><td align="right" style="padding:4px 0;">{{ order.shipping_cents|money }}</td></tr>
+  <tr><td style="padding:4px 0 12px;">Sales tax</td><td align="right" style="padding:4px 0 12px;">{{ order.tax_cents|money }}</td></tr>
+  <tr><td style="padding:12px 0 0;border-top:2px solid #1f1a14;font-family:Georgia,'Times New Roman',serif;font-size:18px;color:#1f1a14;">Total</td><td align="right" style="padding:12px 0 0;border-top:2px solid #1f1a14;font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:bold;color:#1f1a14;">{{ order.total_cents|money }}</td></tr>
+</table>
+{%- endmacro %}
+
+{% macro address(order) -%}
+{{ order.first_name }} {{ order.last_name }}<br>
+{{ order.address1 }}{% if order.address2 %}<br>{{ order.address2 }}{% endif %}<br>
+{{ order.city }}, {{ order.region }} {{ order.postcode }}<br>
+{{ order.country }}
+{%- endmacro %}
+
+{% macro button(url, label) -%}
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+  <tr><td align="center" bgcolor="#1f1a14" style="background:#1f1a14;">
+    <a href="{{ url }}" style="display:inline-block;padding:15px 34px;font-family:Helvetica,Arial,sans-serif;font-size:14px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;color:#f6f1e9;text-decoration:none;border:1px solid #d9b46a;">{{ label }}</a>
+  </td></tr>
+</table>
+{%- endmacro %}

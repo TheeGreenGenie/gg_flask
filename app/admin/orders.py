@@ -6,7 +6,6 @@ from datetime import UTC, datetime
 
 from sqlalchemy import select
 
-from app import mail
 from app.admin import service
 from app.admin.models import AdminUser
 from app.catalog.models import utcnow
@@ -93,14 +92,10 @@ def mark_shipped(
     db.session.commit()
     if not notify:
         return False
-    name = TRACKING_CARRIERS[carrier][0]
-    body = (
-        f"Good news: your order {order.public_id} is on its way!\n\n"
-        f"Carrier: {name}\nTracking number: {number}\nTrack it here: {order.tracking_url}\n\n"
-        "Thank you for shopping with GG Afrikan Eleganz."
-    )
     try:
-        return mail.send(order.email, f"Your order {order.public_id} has shipped", body)
+        from app import order_emails
+
+        return order_emails.send_shipped(order)
     except Exception:  # noqa: BLE001 - the order is saved; never fail the owner's request
         return False
 

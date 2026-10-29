@@ -1,0 +1,18 @@
+Good news, {{ order.first_name }}: your order {{ order.public_id }} is on its way!
+
+Delivered by:    {{ carrier_name or "our carrier" }}
+Tracking number: {{ order.tracking_number }}
+{% if tracking_url %}Track your package: {{ tracking_url }}
+{% endif %}
+IN THIS PARCEL
+{% for row in lines %}- {{ row.line.quantity }} x {{ row.line.product_name }}
+{% endfor %}
+DELIVERING TO
+{{ order.first_name }} {{ order.last_name }}
+{{ order.address1 }}{% if order.address2 %}, {{ order.address2 }}{% endif %}
+{{ order.city }}, {{ order.region }} {{ order.postcode }}, {{ order.country }}
+{% if account_url %}
+View your order: {{ account_url }}
+{% endif %}
+Questions? Reply to this email, write to {{ contact_email }} or call/text {{ contact_phone }}.
+Thank you for shopping with GG Afrikan Eleganz - {{ shop_url }}

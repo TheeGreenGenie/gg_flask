@@ -153,6 +153,9 @@ class BaseConfig:
         self.GG_PLATFORM = _env("GG_PLATFORM")
         self.ADMIN_ALLOWED_IPS = _env_csv("ADMIN_ALLOWED_IPS")
         self.PREVIEW_PASSWORD = _env("PREVIEW_PASSWORD")
+        # Public address used for links and images in emails (e.g. https://ggafrikaneleganz.com).
+        # Unset: the address the request came in on (Stripe/PayPal webhooks use the real domain).
+        self.SITE_URL = _env("SITE_URL")
         for network in self.ADMIN_ALLOWED_IPS:
             try:
                 ipaddress.ip_network(network, strict=False)

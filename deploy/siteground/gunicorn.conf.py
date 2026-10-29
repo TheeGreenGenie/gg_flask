@@ -4,6 +4,9 @@ import os
 
 bind = f"unix:{os.environ['GG_SOCKET']}"
 umask = 0o077  # the socket is reachable by this hosting account only
+# Recorded so the next wrapper start can stop this Gunicorn if SiteGround killed the wrapper
+# without letting it shut Gunicorn down (see stopLeftovers in server.js).
+pidfile = os.environ.get("GG_PIDFILE")
 workers = int(os.environ.get("GG_WORKERS", "2"))  # the host caps processes; keep this small
 preload_app = True  # import the app once, then fork: faster wake-up after idle, less memory
 timeout = 30

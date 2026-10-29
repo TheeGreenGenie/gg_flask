@@ -33,7 +33,8 @@ SMTP_TIMEOUT_SECONDS = 15
 class Message:
     to: str
     subject: str
-    body: str
+    body: str  # plain text: always sent, for text-only mail apps and when images are blocked
+    html: str | None = None  # optional designed version, sent alongside the text
 
 
 def available() -> bool:
@@ -44,14 +45,15 @@ def available() -> bool:
     return backend in ("console", "memory")
 
 
-def send(to: str, subject: str, body: str) -> bool:
+def send(to: str, subject: str, body: str, html: str | None = None) -> bool:
     backend = current_app.config.get("MAIL_BACKEND")
-    msg = Message(to, subject, body)
+    msg = Message(to, subject, body, html)
     if backend == "memory":
         current_app.extensions.setdefault("outbox", []).append(msg)
         return True
     if backend == "console":
-        text = f"\n--- email to {to}: {subject} ---\n{body}\n--- end email ---\n"
+        extra = f"(+ HTML version, {len(html)} characters)\n" if html else ""
+        text = f"\n--- email to {to}: {subject} ---\n{body}\n{extra}--- end email ---\n"
         # Windows consoles may not be UTF-8; a character like "→" must never break a request.
         encoding = getattr(sys.stdout, "encoding", None) or "utf-8"
         sys.stdout.write(text.encode(encoding, errors="replace").decode(encoding))
@@ -79,6 +81,8 @@ def build(msg: Message) -> EmailMessage:
     if cfg.get("MAIL_REPLY_TO"):
         email["Reply-To"] = cfg["MAIL_REPLY_TO"]
     email.set_content(msg.body)
+    if msg.html:
+        email.add_alternative(msg.html, subtype="html")  # mail apps show the best they support
     return email
 
 

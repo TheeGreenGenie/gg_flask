@@ -1,0 +1,36 @@
+{% if for_owner %}NEW PAID ORDER {{ order.public_id }}: {{ order.first_name }} {{ order.last_name }}, {{ order.total_cents|money }}
+
+To pack and ship: {{ delivery_method }}{% if parcel_weight %}, estimated parcel {{ parcel_weight }}{% endif %}
+Customer: {{ order.email }}{% if order.phone %}, {{ order.phone }}{% endif %}
+Open in admin to mark it shipped: {{ admin_url }}
+{% else %}Thank you, {{ order.first_name }}!
+
+Your GG Afrikan Eleganz order {{ order.public_id }} is confirmed{% if placed_on %} ({{ placed_on }}){% endif %}. Your payment was received and we're getting it ready. We'll email you a tracking link as soon as it ships.
+{% endif %}
+YOUR ORDER
+{% for row in lines %}- {{ row.line.quantity }} x {{ row.line.product_name }}{% if row.line.variant_label and row.line.variant_label != row.line.product_name %} ({{ row.line.variant_label }}){% endif %}: {{ row.line.line_total_cents|money }}
+{% endfor %}
+Items:     {{ order.subtotal_cents|money }}
+{% if order.discount_cents %}Discount:  -{{ order.discount_cents|money }}{% if order.coupon_code %} ({{ order.coupon_code }}){% endif %}
+{% endif %}Shipping:  {{ order.shipping_cents|money }}
+Sales tax: {{ order.tax_cents|money }}
+Total:     {{ order.total_cents|money }}
+
+DELIVERING TO
+{{ order.first_name }} {{ order.last_name }}
+{{ order.address1 }}{% if order.address2 %}, {{ order.address2 }}{% endif %}
+{{ order.city }}, {{ order.region }} {{ order.postcode }}, {{ order.country }}
+
+DELIVERY: {{ delivery_method }}{% if carrier_name and tracking_url %} - {{ carrier_name }}, track it: {{ tracking_url }}{% else %} - tracking link emailed when it ships{% endif %}
+PAYMENT: {{ payment_method }}
+CONTACT: {{ order.email }}{% if order.phone %}, {{ order.phone }}{% endif %}
+{% if not for_owner %}{% if account_url %}
+View your order: {{ account_url }}
+{% endif %}
+KEEP EXPLORING
+{% for promo in promos %}- {{ promo.title }}: {{ promo.url }}
+{% endfor %}
+Questions? Reply to this email, write to {{ contact_email }} or call/text {{ contact_phone }}.
+
+GG Afrikan Eleganz, Philadelphia - {{ shop_url }}
+{% endif %}

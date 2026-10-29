@@ -39,6 +39,7 @@ TRIES = 10  # wrong passwords per visitor per hour
 ALWAYS_OPEN = (
     "static",
     "media",
+    "email-images",  # product photos in order emails must load while the shop is locked
     "health",
     "webhooks",  # Stripe/PayPal must reach these for test orders to complete
     "admin",  # owner sign-in (password + authenticator); phone approvals use it

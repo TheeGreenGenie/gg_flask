@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="light only">
+  <title>{% block title %}GG Afrikan Eleganz{% endblock %}</title>
+  {#- Mail apps ignore most stylesheets: everything that matters is inline. This only tightens
+      the layout on phones where it is supported. -#}
+  <style>
+    @media (max-width: 620px) {
+      .gg-card { width: 100% !important; }
+      .gg-pad { padding-left: 20px !important; padding-right: 20px !important; }
+      .gg-col { display: block !important; width: 100% !important; }
+      .gg-promo { display: block !important; width: 100% !important; padding: 0 0 16px !important; }
+      .gg-hide-sm { display: none !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background:#f6f1e9;-webkit-text-size-adjust:100%;">
+  <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#f6f1e9;">{% block preheader %}{% endblock %}</div>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f6f1e9;">
+    <tr><td align="center" style="padding:28px 12px;">
+      <table role="presentation" class="gg-card" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:600px;background:#ffffff;border:1px solid #e6dccd;">
+        <tr><td align="center" style="padding:30px 24px 22px;">
+          <a href="{{ shop_url }}" style="text-decoration:none;"><img src="{{ logo }}" width="260" height="33" alt="GG Afrikan Eleganz" style="display:block;width:260px;height:auto;border:0;font-family:Georgia,'Times New Roman',serif;font-size:22px;color:#1f1a14;"></a>
+          <p style="margin:12px 0 0;font-family:Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#9a7a3c;">Authentic African prints · Philadelphia</p>
+        </td></tr>
+        <tr><td style="padding:0 24px;"><div style="height:1px;background:#d9b46a;line-height:1px;font-size:1px;">&nbsp;</div></td></tr>
+        {% block body %}{% endblock %}
+        <tr><td class="gg-pad" style="padding:30px 40px 34px;background:#1f1a14;">
+          <p style="margin:0 0 6px;font-family:Georgia,'Times New Roman',serif;font-size:17px;color:#f6f1e9;">We’re here to help</p>
+          <p style="margin:0 0 14px;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#d6cfc4;">
+            Reply to this email, write to <a href="mailto:{{ contact_email }}" style="color:#e8c77d;">{{ contact_email }}</a>,
+            call or text <a href="tel:{{ contact_phone|replace(' ', '')|replace('-', '') }}" style="color:#e8c77d;">{{ contact_phone }}</a>,
+            or use our <a href="{{ contact_url }}" style="color:#e8c77d;">contact page</a>.
+          </p>
+          <p style="margin:0 0 16px;font-family:Helvetica,Arial,sans-serif;font-size:13px;">
+            {%- for key, label, url in social %}<a href="{{ url }}" style="color:#e8c77d;text-decoration:none;">{{ label }}</a>{% if not loop.last %}<span style="color:#7d7366;"> &nbsp;·&nbsp; </span>{% endif %}{% endfor -%}
+          </p>
+          <p style="margin:0;font-family:Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#a39a8d;">© {{ year }} GG Afrikan Eleganz · Philadelphia, PA, United States<br>You are receiving this because you placed an order at <a href="{{ shop_url }}" style="color:#a39a8d;">ggafrikaneleganz.com</a>.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>

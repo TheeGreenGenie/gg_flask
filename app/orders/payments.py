@@ -19,8 +19,6 @@ from typing import Any
 from flask import current_app
 from sqlalchemy import select
 
-from app import mail
-from app.catalog import units
 from app.catalog.models import Variant, utcnow
 from app.extensions import db
 from app.orders import providers
@@ -583,20 +581,8 @@ def _expired(order: Order) -> bool:
 
 
 def send_order_emails(order: Order) -> None:
-    lines = "\n".join(f"- {line.quantity} × {line.product_name}" for line in order.lines)
-    body = (
-        f"Thank you for your order {order.public_id}.\n\n{lines}\n\n"
-        f"Total: ${order.total_cents / 100:.2f}\n"
-    )
-    mail.send(order.email, f"Order {order.public_id} confirmed", body)
-    owner = current_app.config.get("ORDER_NOTIFICATION_EMAIL")
-    if owner:
-        service = order.shipping_service or "flat rate"
-        shipping = f"Shipping: {service} ${order.shipping_cents / 100:.2f}"
-        if order.parcel_weight_grams:
-            weight = order.parcel_weight_grams
-            shipping += (
-                f"\nEstimated parcel weight: {units.format_weight(weight)}"
-                f" (USPS price step {units.usps_weight_step(weight)})"
-            )
-        mail.send(owner, f"New order {order.public_id}", f"{body}{shipping}\n")
+    """The customer's confirmation and the owner's new-order notice (app/order_emails.py)."""
+    from app import order_emails
+
+    order_emails.send_confirmation(order)
+    order_emails.send_owner_notice(order)

@@ -1,0 +1,54 @@
+/* "Coming soon" and team-preview pages shown while PREVIEW_PASSWORD locks the shop. */
+.gg-preview {
+	display: grid;
+	min-height: 100vh;
+	margin: 0;
+	padding: 1rem;
+	place-items: center;
+	background: var(--gg-warm);
+}
+
+.gg-preview__card {
+	width: min(32rem, 100%);
+	padding: clamp(1.5rem, 5vw, 2.75rem);
+	border-radius: var(--gg-radius-md);
+	background: var(--gg-paper);
+	box-shadow: var(--gg-shadow), inset 0 0 0 1px var(--gg-raised-edge);
+	text-align: center;
+}
+
+.gg-preview__logo { width: min(16rem, 80%); height: auto; margin-bottom: 1.5rem; }
+:root[data-theme="dark"] .gg-preview__logo { filter: invert(1) hue-rotate(180deg); }
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) .gg-preview__logo { filter: invert(1) hue-rotate(180deg); }
+}
+
+.gg-preview h1 { margin: 0 0 .75rem; font-family: var(--gg-font-heading); font-size: clamp(1.4rem, 4vw, 1.8rem); }
+.gg-preview p { color: var(--gg-muted); line-height: 1.6; }
+.gg-preview a { color: var(--gg-link); }
+.gg-preview__team { margin-top: 1.5rem; font-size: .85rem; }
+
+.gg-preview form { display: grid; gap: .6rem; margin-top: 1rem; text-align: left; }
+.gg-preview label { font-weight: 700; }
+.gg-preview input[type="password"] {
+	min-height: 2.75rem;
+	padding: .5rem .75rem;
+	border: 1px solid var(--gg-input-border);
+	border-radius: var(--gg-radius-sm);
+	color: var(--gg-ink);
+	background: var(--gg-paper);
+	font: inherit;
+}
+
+.gg-preview__button {
+	min-height: 2.75rem;
+	border: 0;
+	border-radius: var(--gg-radius-sm);
+	color: var(--gg-accent-ink);
+	background: var(--gg-accent);
+	font: inherit;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.gg-preview__error { color: var(--gg-sale); font-weight: 700; }

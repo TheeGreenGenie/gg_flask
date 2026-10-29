@@ -16,6 +16,8 @@ bp = Blueprint("seo", __name__)
 
 @bp.get("/robots.txt")
 def robots() -> Response:
+    if current_app.config.get("PREVIEW_PASSWORD"):  # locked for preview: index nothing
+        return Response("User-agent: *\nDisallow: /\n", mimetype="text/plain")
     body = f"User-agent: *\nDisallow: /admin/\nSitemap: {url_for('seo.sitemap', _external=True)}\n"
     return Response(body, mimetype="text/plain")
 

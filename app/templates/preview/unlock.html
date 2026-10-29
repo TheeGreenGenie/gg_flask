@@ -1,0 +1,14 @@
+{% extends "preview/_page.html" %}
+{% block title %}Team preview · GG Afrikan Eleganz{% endblock %}
+{% block content %}
+    <h1>Team preview</h1>
+    <p>Enter the preview password to see the shop while it's being built.</p>
+    {% if error %}<p class="gg-preview__error" role="alert">{{ error }}</p>{% endif %}
+    <form method="post" action="{{ url_for('preview.preview') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="next" value="{{ next }}">
+      <label for="preview-password">Preview password</label>
+      <input id="preview-password" name="password" type="password" autocomplete="current-password" required autofocus>
+      <button class="gg-preview__button" type="submit">Open the shop</button>
+    </form>
+{% endblock %}

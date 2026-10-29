@@ -1,0 +1,8 @@
+{% extends "preview/_page.html" %}
+{% block title %}Coming soon · GG Afrikan Eleganz{% endblock %}
+{% block content %}
+    <h1>Our new shop is on its way</h1>
+    <p>We're putting the finishing touches on a new home for authentic African prints and fabrics. Please check back soon.</p>
+    <p>Questions or orders in the meantime: <a href="mailto:ggafrikan@gmail.com">ggafrikan@gmail.com</a></p>
+    <p class="gg-preview__team"><a href="{{ url_for('preview.preview', next=request.path) }}">Team preview</a></p>
+{% endblock %}

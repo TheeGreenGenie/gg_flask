@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}GG Afrikan Eleganz{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/preview.css') }}">
+</head>
+<body class="gg-preview">
+  <main class="gg-preview__card">
+    <img class="gg-preview__logo" src="{{ url_for('static', filename='img/logo@2x.png') }}" alt="GG Afrikan Eleganz" width="260" height="46">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

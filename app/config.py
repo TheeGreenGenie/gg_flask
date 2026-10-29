@@ -55,6 +55,8 @@ class BaseConfig:
     # IP restriction. Phone approvals of Studio sign-ins need /admin from the phone, so set this
     # only if those come from a listed network (home Wi-Fi, VPN).
     ADMIN_ALLOWED_IPS: tuple[str, ...] = ()
+    # Preview lock (app/preview.py): set while the shop is live on its domain but not open yet.
+    PREVIEW_PASSWORD: str | None = None
 
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
@@ -148,6 +150,7 @@ class BaseConfig:
         # Where scheduled jobs leave heartbeats (default: instance/jobs).
         self.JOBS_HEARTBEAT_DIR = _env("JOBS_HEARTBEAT_DIR")
         self.ADMIN_ALLOWED_IPS = _env_csv("ADMIN_ALLOWED_IPS")
+        self.PREVIEW_PASSWORD = _env("PREVIEW_PASSWORD")
         for network in self.ADMIN_ALLOWED_IPS:
             try:
                 ipaddress.ip_network(network, strict=False)
@@ -298,6 +301,8 @@ class ProductionConfig(BaseConfig):
             raise ConfigError("SHIPPING_BACKEND must be 'flat' or 'shippo'")
         if not 0 <= self.ADDRESS_LOOKUP_DAILY_CAP <= 1_000_000:
             raise ConfigError("ADDRESS_LOOKUP_DAILY_CAP must be between 0 and 1000000")
+        if self.PREVIEW_PASSWORD is not None and len(self.PREVIEW_PASSWORD) < 12:
+            raise ConfigError("PREVIEW_PASSWORD must be at least 12 characters")
         if self.KV_BACKEND not in (None, "database"):
             raise ConfigError("KV_BACKEND must be 'database' (or unset to use REDIS_URL)")
         if not 0 <= self.NEWSLETTER_HOURLY_CAP <= 10_000:

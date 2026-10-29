@@ -52,6 +52,11 @@ def create_app(config: BaseConfig | str | None = None) -> Flask:
     csrf.init_app(app)
     init_redis(app)
     init_security_headers(app)
+    # First request hook: the preview lock decides before anything else runs.
+    from app.preview import init_preview
+
+    init_preview(app)
+
     from app.launch import init_launch
     from app.mail import init_mail
 

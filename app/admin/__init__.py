@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import functools
 import ipaddress
+import time
 from collections.abc import Callable
 from typing import Any
 
@@ -450,6 +451,66 @@ def init_admin(app: Flask) -> None:
         click.echo("Recovery codes (store securely; each works once):")
         for code in codes:
             click.echo(f"  {code}")
+
+    def _admin_named(username: str) -> AdminUser:
+        try:
+            normalized = service.normalize_username(username)
+        except service.AdminError as exc:
+            raise click.ClickException(str(exc)) from None
+        user = db.session.scalar(select(AdminUser).where(AdminUser.username == normalized))
+        if user is None:
+            raise click.ClickException("Administrator username not found.")
+        return user
+
+    @admin_cli.command("check-code")
+    @click.argument("username")
+    def check_code(username: str) -> None:
+        """Check a code from the authenticator app against this admin's key (prints no secrets)."""
+        user = _admin_named(username)
+        click.echo(f"Server time (UTC): {time.strftime('%H:%M:%S', time.gmtime())}")
+        code = click.prompt("Current code from your authenticator app", hide_input=True)
+        offset = service.code_offset(user.totp_secret, code)
+        if offset is None:
+            click.echo(
+                "NO MATCH: this authenticator entry holds a different key (an older entry, or a "
+                "typo when it was added). Fix it with: admin reset-authenticator " + user.username
+            )
+        elif abs(offset) <= 30:
+            click.echo("MATCH: the key and clocks agree. Sign in with a fresh code.")
+        else:
+            click.echo(
+                f"CLOCK: the code matches only if the clocks are {offset:+d} seconds apart. "
+                "Turn on automatic date and time on the phone (Google Authenticator: "
+                "Settings > Time correction for codes)."
+            )
+
+    @admin_cli.command("reset-authenticator")
+    @click.argument("username")
+    def reset_authenticator(username: str) -> None:
+        """Give an admin a new authenticator key; saved only after a code from it is confirmed."""
+        user = _admin_named(username)
+        secret = service.generate_totp_secret()
+        grouped = " ".join(secret[i : i + 4] for i in range(0, len(secret), 4))
+        click.echo(
+            "In your authenticator app, add a NEW entry (Google Authenticator: + > Enter a setup "
+            "key; delete the old GG entry afterwards):"
+        )
+        click.echo(f"  Account: GG Afrikan Eleganz ({user.username})")
+        click.echo(f"  Key:     {grouped}")
+        click.echo("  Type:    Time based")
+        click.echo(
+            f"Or open this setup link on the phone: {service.provisioning_uri(user, secret)}"
+        )
+        for _ in range(3):
+            code = click.prompt("Type the 6-digit code the NEW entry shows")
+            if service.verify_totp(secret, code.replace(" ", "").strip()):
+                service.replace_totp_secret(user, secret)
+                click.echo(
+                    "Saved. Sign in with codes from the new entry; other sessions were signed out."
+                )
+                return
+            click.echo("That code does not match the new key yet. Check the key, then try again.")
+        raise click.ClickException("Not saved: the old key still works. Run the command again.")
 
     @admin_cli.command("reset-password")
     @click.argument("username")

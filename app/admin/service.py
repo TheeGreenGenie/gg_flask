@@ -46,10 +46,11 @@ def generate_totp_secret() -> str:
     return base64.b32encode(secrets.token_bytes(20)).decode().rstrip("=")
 
 
-def provisioning_uri(admin: AdminUser) -> str:
+def provisioning_uri(admin: AdminUser, secret: str | None = None) -> str:
     label = quote(f"GG Afrikan Eleganz:{admin.username}")
     issuer = quote("GG Afrikan Eleganz")
-    return f"otpauth://totp/{label}?secret={admin.totp_secret}&issuer={issuer}&digits=6&period=30"
+    key = secret or admin.totp_secret
+    return f"otpauth://totp/{label}?secret={key}&issuer={issuer}&digits=6&period=30"
 
 
 def totp(secret: str, at: int | None = None) -> str:
@@ -253,6 +254,25 @@ def change_password(admin: AdminUser, current_password: str, new_password: str) 
     # Keep this browser signed in while invalidating every other existing session.
     session["admin_sv"] = admin.session_version
     _password_change_notice(admin, reset=False)
+
+
+def code_offset(secret: str, code: str, at: int | None = None, span: int = 600) -> int | None:
+    """How far apart the clocks are for `code` to match (0 = now), or None if it never matches
+    within +/- `span` seconds, which means the authenticator entry holds a different key."""
+    now = int(time.time()) if at is None else at
+    code = code.replace(" ", "").strip()
+    for drift in sorted(range(-span, span + 1, 30), key=abs):
+        if hmac.compare_digest(totp(secret, now + drift), code):
+            return drift
+    return None
+
+
+def replace_totp_secret(admin: AdminUser, secret: str) -> None:
+    """Server-only recovery: switch to a new authenticator key and sign out every browser."""
+    admin.totp_secret = secret
+    admin.session_version += 1
+    audit(admin, "admin.authenticator.reset", "admin", str(admin.id))
+    db.session.commit()
 
 
 def reset_password(admin: AdminUser, new_password: str) -> None:

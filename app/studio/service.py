@@ -781,7 +781,7 @@ def _bulk_selection(form: dict[str, str]) -> tuple[list[Variant], str]:
         category = db.session.get(Category, int(category_id)) if category_id.isdigit() else None
         if category is None:
             raise StudioError("That category no longer exists.")
-        ids = [category.id, *(child.id for child in category.children)]
+        ids = category.subtree_ids()  # with its subcategories at every level
         statement = statement.where(Product.categories.any(Category.id.in_(ids)))
         label.append(f"category “{category.name}”")
     if query:
@@ -1209,7 +1209,7 @@ def plan_bulk_visibility(form: dict[str, str]) -> BulkVisibilityPlan:
         category = db.session.get(Category, int(category_id)) if category_id.isdigit() else None
         if category is None:
             raise StudioError("That category no longer exists.")
-        ids = [category.id, *(child.id for child in category.children)]
+        ids = category.subtree_ids()  # with its subcategories at every level
         statement = statement.where(Product.categories.any(Category.id.in_(ids)))
         label.append(f"category “{category.name}”")
     if query:

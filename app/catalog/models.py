@@ -89,7 +89,8 @@ variant_option_values = Table(
 
 
 class Category(db.Model):  # type: ignore[name-defined]
-    """What the product is. At most two public levels (D-003); enforced by the manifest loader."""
+    """What the product is. At most three levels (D-003, widened 2026-10-29 for Fabrics → Wax Prints
+    → Grand Super Wax); enforced by the manifest loader."""
 
     __tablename__ = "categories"
 
@@ -105,6 +106,26 @@ class Category(db.Model):  # type: ignore[name-defined]
     children: Mapped[list[Category]] = relationship(
         back_populates="parent", order_by="Category.position"
     )
+
+    def subtree(self) -> list[Category]:
+        """This category and every category under it, at any depth (parents first)."""
+        out = [self]
+        for child in self.children:
+            out.extend(child.subtree())
+        return out
+
+    def subtree_ids(self) -> list[int]:
+        return [cat.id for cat in self.subtree()]
+
+    @property
+    def ancestors(self) -> list[Category]:
+        """Parent categories from the top down (empty for a top-level category)."""
+        chain: list[Category] = []
+        node = self.parent
+        while node is not None:
+            chain.insert(0, node)
+            node = node.parent
+        return chain
 
     def __repr__(self) -> str:
         return f"<Category {self.slug}>"

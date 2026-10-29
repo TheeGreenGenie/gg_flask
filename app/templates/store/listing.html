@@ -14,7 +14,7 @@
       <ol>
         <li><a href="{{ url_for('store.home') }}">Home</a></li>
         {% if endpoint != 'store.shop' or query %}<li><a href="{{ url_for('store.shop') }}">Shop</a></li>{% endif %}
-        {% if category and category.parent %}<li><a href="{{ url_for('store.category', slug=category.parent.slug) }}">{{ category.parent.name }}</a></li>{% endif %}
+        {% if category %}{% for parent in category.ancestors %}<li><a href="{{ url_for('store.category', slug=parent.slug) }}">{{ parent.name }}</a></li>{% endfor %}{% endif %}
         <li aria-current="page">{{ title }}</li>
       </ol>
     </nav>
@@ -32,16 +32,11 @@
           <h2 id="filter-cats" class="gg-filters__title">Categories</h2>
           <ul class="gg-filters__tree">
             <li><a href="{{ url_for('store.shop') }}"{% if endpoint == 'store.shop' and not query %} aria-current="page"{% endif %}>All products</a></li>
-            {% for top in filter_categories %}
+            {#- Any depth: Fabrics → Wax Prints → Grand Super Wax. -#}
+            {% for node in filter_categories recursive %}
               <li>
-                <a href="{{ url_for('store.category', slug=top.slug) }}"{% if category and category.id == top.id %} aria-current="page"{% endif %}>{{ top.name }} <span class="gg-filters__count">({{ counts.get(top.id, 0) }})</span></a>
-                {% if top.children %}
-                  <ul>
-                    {% for child in top.children %}
-                      <li><a href="{{ url_for('store.category', slug=child.slug) }}"{% if category and category.id == child.id %} aria-current="page"{% endif %}>{{ child.name }} <span class="gg-filters__count">({{ counts.get(child.id, 0) }})</span></a></li>
-                    {% endfor %}
-                  </ul>
-                {% endif %}
+                <a href="{{ url_for('store.category', slug=node.slug) }}"{% if category and category.id == node.id %} aria-current="page"{% endif %}>{{ node.name }} <span class="gg-filters__count">({{ counts.get(node.id, 0) }})</span></a>
+                {% if node.children %}<ul>{{ loop(node.children) }}</ul>{% endif %}
               </li>
             {% endfor %}
           </ul>

@@ -19,6 +19,7 @@ test("settings file: comments, quotes, export and trailing notes", () => {
       "SMTP_PORT=587          # STARTTLS",
       "export KV_BACKEND=database",
       "EMPTY=",
+      "EMPTY_WITH_NOTE=                 # optional amount added to each Shippo rate",
       "HASH_IN_VALUE=abc#def",
       "bad key=x",
       "=novalue",
@@ -30,6 +31,7 @@ test("settings file: comments, quotes, export and trailing notes", () => {
     SMTP_PORT: "587",
     KV_BACKEND: "database",
     EMPTY: "",
+    EMPTY_WITH_NOTE: "",
     HASH_IN_VALUE: "abc#def",
   });
 });

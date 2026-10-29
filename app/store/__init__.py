@@ -122,7 +122,7 @@ def _render_listing(title: str, description: str = "", **kwargs: Any) -> str:
     collection = kwargs.get("collection_slug")
     cats = None
     if category is not None:
-        cats = [category, *category.children]
+        cats = category.subtree()  # a group's page shows everything under it, at any depth
     page = queries.listing(categories=cats, collection=collection, **args)
     if args["query"] and category is None and collection is None:
         title = f"Search results for “{args['query']}”"

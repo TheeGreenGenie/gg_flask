@@ -84,6 +84,8 @@ function parseEnv(text) {
     const quote = value[0];
     if ((quote === '"' || quote === "'") && value.indexOf(quote, 1) > 0) {
       value = value.slice(1, value.indexOf(quote, 1));
+    } else if (value.startsWith("#")) {
+      value = ""; // `KEY=   # note` has no value, as python-dotenv and the shell read it
     } else {
       const hash = value.search(/\s#/);
       if (hash >= 0) value = value.slice(0, hash).trim();
@@ -464,9 +466,12 @@ function createWrapper(options = {}) {
       log(`forwarding ${names.map((n) => `${n}=${JSON.stringify(req.headers[n] ?? null)}`).join(" ")} -> ip=${ip}`);
     }
     if (!(await waitReady())) {
-      return plain(res, 503, "The shop is starting up. Please refresh in a few seconds.", {
-        "Retry-After": "5",
-      });
+      // "failed" means setup or Python could not start: see ~/.ggflask/logs/app.log
+      const text =
+        phase === "failed"
+          ? "The shop is temporarily unavailable. Please try again later."
+          : "The shop is starting up. Please refresh in a few seconds.";
+      return plain(res, 503, text, { "Retry-After": phase === "failed" ? "60" : "5" });
     }
     forward(req, res, host, ip);
   }

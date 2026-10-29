@@ -14,6 +14,7 @@ MAIN_MENU: Final = (
         "category": "fabrics",
         "children": (
             ("Ankara Prints", "ankara"),
+            ("Wax Prints", "wax-prints"),
             ("Kente Prints", "kente"),
             ("Adire (Tie-Dye)", "adire"),
             ("Satin & Chiffon", "satin-chiffon"),

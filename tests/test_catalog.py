@@ -59,9 +59,15 @@ def test_valid_manifest_has_no_errors(assets: Path) -> None:
         ),
         (
             lambda d: d["categories"][0]["children"][0].update(
-                children=[{"slug": "deep", "name": "Too deep"}]
+                children=[
+                    {
+                        "slug": "third",
+                        "name": "Third level",
+                        "children": [{"slug": "deep", "name": "Too deep"}],
+                    }
+                ]
             ),
-            "2 levels deep",
+            "3 levels deep",
         ),
     ],
 )

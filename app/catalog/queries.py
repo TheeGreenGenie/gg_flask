@@ -266,7 +266,7 @@ def collection_by_slug(slug: str) -> Collection | None:
 
 
 def category_counts() -> dict[int, int]:
-    """Active product count per category (children roll up into parents). Cached."""
+    """Active products per category, counting everything under it once (cached)."""
     raw = cache.cached_json(
         "category-counts", lambda: {str(k): v for k, v in _category_counts().items()}
     )
@@ -274,16 +274,23 @@ def category_counts() -> dict[int, int]:
 
 
 def _category_counts() -> dict[int, int]:
+    # A product may sit in several groups at once (a wax print is in Ankara Prints and in Wax
+    # Prints → Grand Super Wax), so parents count distinct products, not the sum of children.
     rows = db.session.execute(
-        select(product_categories.c.category_id, func.count())
+        select(product_categories.c.category_id, product_categories.c.product_id)
         .join(Product, Product.id == product_categories.c.product_id)
         .where(Product.status == ProductStatus.ACTIVE)
-        .group_by(product_categories.c.category_id)
     ).all()
-    counts = {cid: n for cid, n in rows}
-    for cat in db.session.scalars(select(Category).where(Category.parent_id.is_not(None))):
-        if cat.parent_id is not None:
-            counts[cat.parent_id] = counts.get(cat.parent_id, 0) + counts.get(cat.id, 0)
+    products: dict[int, set[int]] = {}
+    for category_id, product_id in rows:
+        products.setdefault(category_id, set()).add(product_id)
+    counts: dict[int, int] = {}
+    for cat in db.session.scalars(select(Category)):
+        found: set[int] = set()
+        for cid in cat.subtree_ids():
+            found |= products.get(cid, set())
+        if found:
+            counts[cat.id] = len(found)
     return counts
 
 
@@ -292,18 +299,17 @@ DISCOVERY_ROOT = "fabrics"
 
 
 def discovery_category_ids(slug: str | None) -> list[int]:
-    """Category ids to draw from: the whole Fabrics tree, or one of its subcategories.
-
-    Anything outside the Fabrics tree falls back to the whole tree.
+    """Category ids to draw from: the whole Fabrics tree, or one subcategory and everything
+    under it. Anything outside the Fabrics tree falls back to the whole tree.
     """
     root = category_by_slug(DISCOVERY_ROOT)
     if root is None:
         return []
     if slug and slug != root.slug:
-        child = next((c for c in root.children if c.slug == slug), None)
-        if child is not None:
-            return [child.id]
-    return [root.id, *(c.id for c in root.children)]
+        match = next((c for c in root.subtree() if c.slug == slug), None)
+        if match is not None:
+            return match.subtree_ids()
+    return root.subtree_ids()
 
 
 def _discovery_stmt(ids: list[int]) -> Select[Product]:

@@ -19,7 +19,7 @@
     <ol>
       <li><a href="{{ url_for('store.home') }}">Home</a></li>
       <li><a href="{{ url_for('store.shop') }}">Shop</a></li>
-      {% if category and category.parent %}<li><a href="{{ url_for('store.category', slug=category.parent.slug) }}">{{ category.parent.name }}</a></li>{% endif %}
+      {% if category %}{% for parent in category.ancestors %}<li><a href="{{ url_for('store.category', slug=parent.slug) }}">{{ parent.name }}</a></li>{% endfor %}{% endif %}
       {% if category %}<li><a href="{{ url_for('store.category', slug=category.slug) }}">{{ category.name }}</a></li>{% endif %}
       <li aria-current="page">{{ product.name }}</li>
     </ol>

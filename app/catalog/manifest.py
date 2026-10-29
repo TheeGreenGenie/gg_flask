@@ -38,7 +38,7 @@ SCHEMA_VERSION = 1
 SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 SKU_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 IMAGE_SUFFIXES = {".webp", ".jpg", ".jpeg", ".png"}
-MAX_CATEGORY_DEPTH = 2  # D-003
+MAX_CATEGORY_DEPTH = 3  # D-003 (owner, 2026-10-29: Fabrics → Wax Prints → Grand Super Wax)
 
 PRODUCT_KEYS = {
     "slug", "name", "type", "status", "featured", "published", "legacy_wp_id",
@@ -83,7 +83,7 @@ def validate(data: dict[str, Any], assets_dir: Path) -> list[str]:
     if data.get("schema_version") != SCHEMA_VERSION:
         err(f"schema_version must be {SCHEMA_VERSION}")
 
-    # Categories (max two levels).
+    # Categories (max MAX_CATEGORY_DEPTH levels).
     category_slugs: set[Any] = set()
 
     def walk(nodes: Any, depth: int, where: str) -> None:

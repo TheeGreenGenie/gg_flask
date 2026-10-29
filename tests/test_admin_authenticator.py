@@ -70,3 +70,58 @@ def test_matching_code_switches_key_and_signs_out_other_sessions(app: Flask, mon
         user = db.session.scalar(db.select(AdminUser))
         assert user is not None and user.totp_secret == fixed != old
         assert user.session_version == version + 1
+
+
+PASSWORD = "Long unique phrase 482!"  # noqa: S105 (test fixture)
+
+
+def _create(app: Flask, answers: str):  # type: ignore[no-untyped-def]
+    return app.test_cli_runner().invoke(
+        args=["admin", "create", "--username", "boss", "--email", "boss@example.com"],
+        input=f"{PASSWORD}\n{PASSWORD}\n{answers}",
+    )
+
+
+def test_create_only_finishes_once_the_new_entry_gives_a_matching_code(
+    app: Flask, monkeypatch
+) -> None:  # type: ignore[no-untyped-def]
+    fixed = service.generate_totp_secret()
+    monkeypatch.setattr(service, "generate_totp_secret", lambda: fixed)
+    refused = _create(app, "000000\n111111\n222222\n")
+    assert refused.exit_code != 0 and "Nothing created" in refused.output
+    with app.app_context():
+        assert db.session.scalar(db.select(AdminUser.id)) is None  # a stale entry can't slip by
+
+    created = _create(app, f"{service.totp(fixed)}\n")
+    assert created.exit_code == 0, created.output
+    assert (
+        "authenticator entry is confirmed" in created.output and "Recovery codes" in created.output
+    )
+    with app.app_context():
+        assert db.session.scalar(db.select(AdminUser.totp_secret)) == fixed
+
+
+def test_create_refuses_bad_details_before_any_key_is_shown(app: Flask) -> None:
+    _owner_secret(app)  # "owner" exists
+    result = app.test_cli_runner().invoke(
+        args=["admin", "create", "--username", "owner", "--email", "x@example.com"],
+        input=f"{PASSWORD}\n{PASSWORD}\n",
+    )
+    assert result.exit_code != 0 and "already exists" in result.output
+    assert "Key:" not in result.output
+
+
+def test_entries_are_labelled_with_their_site(app: Flask) -> None:
+    with app.app_context():
+        assert "owner%20%40%20local" in service.provisioning_uri("owner", "ABC")
+        app.config["SITE_URL"] = "https://ggafrikaneleganz.com"
+        assert "owner%20%40%20ggafrikaneleganz.com" in service.provisioning_uri("owner", "ABC")
+    output = (
+        app.test_cli_runner()
+        .invoke(
+            args=["admin", "create", "--username", "boss", "--email", "boss@example.com"],
+            input=f"{PASSWORD}\n{PASSWORD}\nx\nx\nx\n",
+        )
+        .output
+    )
+    assert "Account: GG Afrikan Eleganz (boss @ ggafrikaneleganz.com)" in output

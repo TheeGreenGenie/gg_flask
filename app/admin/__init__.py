@@ -440,17 +440,46 @@ def init_admin(app: Flask) -> None:
     @click.option("--role", type=click.Choice([r.value for r in AdminRole]), default="owner")
     @click.password_option(confirmation_prompt=True)
     def create(username: str, email: str, role: str, password: str) -> None:
-        """Create an administrator and print one-time 2FA setup information."""
+        """Create an administrator once their authenticator entry is proven to work."""
         try:
-            user, codes = service.create_admin(username, email, password, AdminRole(role))
+            normalized, _ = service.check_new_admin(username, email, password)
         except service.AdminError as exc:
             raise click.ClickException(str(exc)) from None
-        click.echo("Administrator created. Add this account to an authenticator app:")
-        click.echo(f"Secret: {user.totp_secret}")
-        click.echo(f"URI: {service.provisioning_uri(user)}")
-        click.echo("Recovery codes (store securely; each works once):")
+        secret = service.generate_totp_secret()
+        if not _confirm_new_key(normalized, secret):
+            raise click.ClickException(
+                "Nothing created: no code matched the new key. Run the command again."
+            )
+        try:
+            _, codes = service.create_admin(
+                username, email, password, AdminRole(role), totp_secret=secret
+            )
+        except service.AdminError as exc:
+            raise click.ClickException(str(exc)) from None
+        click.echo("Administrator created; the authenticator entry is confirmed.")
+        click.echo("Recovery codes (store offline; each works once if the phone is lost):")
         for code in codes:
             click.echo(f"  {code}")
+
+    def _confirm_new_key(username: str, secret: str) -> bool:
+        """Show a new key and ask for a code from it: True once a code matches (3 tries)."""
+        grouped = " ".join(secret[i : i + 4] for i in range(0, len(secret), 4))
+        click.echo(
+            "In your authenticator app, add a NEW entry (Google Authenticator: + > Enter a setup "
+            "key; delete any older GG entry for this account afterwards):"
+        )
+        click.echo(f"  Account: GG Afrikan Eleganz ({username} @ {service.site_tag()})")
+        click.echo(f"  Key:     {grouped}")
+        click.echo("  Type:    Time based")
+        click.echo(
+            f"Or open this setup link on the phone: {service.provisioning_uri(username, secret)}"
+        )
+        for _ in range(3):
+            code = click.prompt("Type the 6-digit code the NEW entry shows")
+            if service.verify_totp(secret, code.replace(" ", "").strip()):
+                return True
+            click.echo("That code does not match the new key yet. Check the key, then try again.")
+        return False
 
     def _admin_named(username: str) -> AdminUser:
         try:
@@ -490,27 +519,10 @@ def init_admin(app: Flask) -> None:
         """Give an admin a new authenticator key; saved only after a code from it is confirmed."""
         user = _admin_named(username)
         secret = service.generate_totp_secret()
-        grouped = " ".join(secret[i : i + 4] for i in range(0, len(secret), 4))
-        click.echo(
-            "In your authenticator app, add a NEW entry (Google Authenticator: + > Enter a setup "
-            "key; delete the old GG entry afterwards):"
-        )
-        click.echo(f"  Account: GG Afrikan Eleganz ({user.username})")
-        click.echo(f"  Key:     {grouped}")
-        click.echo("  Type:    Time based")
-        click.echo(
-            f"Or open this setup link on the phone: {service.provisioning_uri(user, secret)}"
-        )
-        for _ in range(3):
-            code = click.prompt("Type the 6-digit code the NEW entry shows")
-            if service.verify_totp(secret, code.replace(" ", "").strip()):
-                service.replace_totp_secret(user, secret)
-                click.echo(
-                    "Saved. Sign in with codes from the new entry; other sessions were signed out."
-                )
-                return
-            click.echo("That code does not match the new key yet. Check the key, then try again.")
-        raise click.ClickException("Not saved: the old key still works. Run the command again.")
+        if not _confirm_new_key(user.username, secret):
+            raise click.ClickException("Not saved: the old key still works. Run the command again.")
+        service.replace_totp_secret(user, secret)
+        click.echo("Saved. Sign in with codes from the new entry; other sessions were signed out.")
 
     @admin_cli.command("reset-password")
     @click.argument("username")

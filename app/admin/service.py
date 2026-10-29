@@ -12,7 +12,7 @@ import secrets
 import struct
 import time
 from typing import Any
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError
@@ -46,11 +46,19 @@ def generate_totp_secret() -> str:
     return base64.b32encode(secrets.token_bytes(20)).decode().rstrip("=")
 
 
-def provisioning_uri(admin: AdminUser, secret: str | None = None) -> str:
-    label = quote(f"GG Afrikan Eleganz:{admin.username}")
+def site_tag() -> str:
+    """Which site an authenticator entry belongs to, so live and local entries never look alike
+    in the app (two identical "owner" entries is how a stale key got used on 2026-10-29)."""
+    site_url = current_app.config.get("SITE_URL")
+    if site_url:
+        return urlsplit(str(site_url)).hostname or "live"
+    return "live" if current_app.config.get("APP_ENV") == "production" else "local"
+
+
+def provisioning_uri(username: str, secret: str) -> str:
+    label = quote(f"GG Afrikan Eleganz:{username} @ {site_tag()}")
     issuer = quote("GG Afrikan Eleganz")
-    key = secret or admin.totp_secret
-    return f"otpauth://totp/{label}?secret={key}&issuer={issuer}&digits=6&period=30"
+    return f"otpauth://totp/{label}?secret={secret}&issuer={issuer}&digits=6&period=30"
 
 
 def totp(secret: str, at: int | None = None) -> str:
@@ -99,9 +107,8 @@ def _check_admin_password(password: str, email: str) -> None:
         raise AdminError(str(exc)) from None
 
 
-def create_admin(
-    username_raw: str, email_raw: str, password: str, role: AdminRole
-) -> tuple[AdminUser, list[str]]:
+def check_new_admin(username_raw: str, email_raw: str, password: str) -> tuple[str, str]:
+    """Everything create_admin refuses, checked before anything is added to an authenticator."""
     username = normalize_username(username_raw)
     email = normalize_email(email_raw)
     _check_admin_password(password, email)
@@ -113,12 +120,23 @@ def create_admin(
         raise AdminError("An administrator with that email already exists.")
     if db.session.scalar(select(User.id).where(User.email == email)) is not None:
         raise AdminError("A customer account with that email already exists.")
+    return username, email
+
+
+def create_admin(
+    username_raw: str,
+    email_raw: str,
+    password: str,
+    role: AdminRole,
+    totp_secret: str | None = None,
+) -> tuple[AdminUser, list[str]]:
+    username, email = check_new_admin(username_raw, email_raw, password)
     admin = AdminUser(
         username=username,
         email=email,
         password_hash=_hasher.hash(password),
         role=role,
-        totp_secret=generate_totp_secret(),
+        totp_secret=totp_secret or generate_totp_secret(),
     )
     db.session.add(admin)
     db.session.flush()

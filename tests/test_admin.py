@@ -167,7 +167,9 @@ def test_totp_accepts_small_clock_drift() -> None:
     assert not service.verify_totp(secret, "12345", now)
 
 
-def test_admin_create_cli(app: Flask) -> None:
+def test_admin_create_cli(app: Flask, monkeypatch: pytest.MonkeyPatch) -> None:
+    secret = service.generate_totp_secret()
+    monkeypatch.setattr(service, "generate_totp_secret", lambda: secret)
     runner = app.test_cli_runner()
     result = runner.invoke(
         args=[
@@ -180,9 +182,10 @@ def test_admin_create_cli(app: Flask) -> None:
             "--role",
             "catalog",
         ],
-        input="Another unique phrase 782!\nAnother unique phrase 782!\n",
+        # password twice, then a code from the new authenticator entry (create confirms it)
+        input=f"Another unique phrase 782!\nAnother unique phrase 782!\n{service.totp(secret)}\n",
     )
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.output
     assert "otpauth://totp/" in result.output and "Recovery codes" in result.output
 
 

@@ -24,6 +24,9 @@ categories:
     - slug: regular-wax
       name: Regular Wax
       image: categories/regular-wax.webp
+    - slug: other-wax
+      name: Other Wax
+      image: categories/other-wax.webp
   - slug: kente
     name: Kente Prints
     image: categories/kente.webp
@@ -3444,7 +3447,7 @@ products:
     Measures 6 yards, 36" by 45".'
   categories:
   - ankara
-  - wax-prints
+  - other-wax
   collections:
   - ankara-plus
   images:
@@ -5228,7 +5231,7 @@ products:
     Measures 6 yards, 36" by 45".'
   categories:
   - ankara
-  - wax-prints
+  - other-wax
   collections:
   - ankara-plus
   images:
@@ -5266,7 +5269,7 @@ products:
     Measures 6 yards, 36" by 45".'
   categories:
   - ankara
-  - wax-prints
+  - other-wax
   collections:
   - ankara-plus
   images:
@@ -5304,7 +5307,7 @@ products:
     Measures 6 yards, 36" by 45".'
   categories:
   - ankara
-  - wax-prints
+  - other-wax
   collections:
   - ankara-plus
   images:
@@ -5342,7 +5345,7 @@ products:
     Measures 6 yards, 36" by 45".'
   categories:
   - ankara
-  - wax-prints
+  - other-wax
   collections:
   - ankara-plus
   images:
@@ -5380,7 +5383,7 @@ products:
     Measures 6 yards, 36" by 45".'
   categories:
   - ankara
-  - wax-prints
+  - other-wax
   collections:
   - ankara-plus
   images:
@@ -5418,7 +5421,7 @@ products:
     Measures 6 yards, 36" by 45".'
   categories:
   - ankara
-  - wax-prints
+  - other-wax
   collections: []
   images:
   - file: products/african-ankara-print-101005/01.webp
@@ -5454,7 +5457,7 @@ products:
     Measures 6 yards, 36" by 45".'
   categories:
   - ankara
-  - wax-prints
+  - other-wax
   collections:
   - ankara-plus
   images:
@@ -5492,7 +5495,7 @@ products:
     Measures 6 yards, 36" by 45".'
   categories:
   - ankara
-  - wax-prints
+  - other-wax
   collections:
   - ankara-plus
   images:
@@ -5530,7 +5533,7 @@ products:
     Measures 6 yards, 36" by 45".'
   categories:
   - ankara
-  - wax-prints
+  - other-wax
   collections:
   - ankara-plus
   images:
@@ -5568,7 +5571,7 @@ products:
     Measures 6 yards, 36" by 45".'
   categories:
   - ankara
-  - wax-prints
+  - other-wax
   collections:
   - ankara-plus
   images:
@@ -5606,7 +5609,7 @@ products:
     Measures 6 yards, 36" by 45".'
   categories:
   - ankara
-  - wax-prints
+  - other-wax
   collections: []
   images:
   - file: products/african-ankara-print-101013/01.webp
@@ -5643,7 +5646,7 @@ products:
     Measures 6 yards, 36" by 45".'
   categories:
   - ankara
-  - wax-prints
+  - other-wax
   collections:
   - ankara-plus
   images:

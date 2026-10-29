@@ -47,7 +47,7 @@ html.gg-home-enhanced {
 	outline-offset: 3px;
 }
 
-.gg-body--home { background: var(--gg-warm); }
+.gg-body--home { background: var(--gg-home-bg); }
 
 /* ---------- Slides ---------- */
 

@@ -3,7 +3,7 @@
 /* ---------- Top bar ---------- */
 .gg-topbar {
 	border-bottom: 1px solid var(--gg-line-soft);
-	background: var(--gg-paper);
+	background: var(--gg-header-bg);
 	font-size: .72rem;
 }
 
@@ -43,8 +43,8 @@
 	position: sticky;
 	z-index: 50;
 	top: 0;
-	background: var(--gg-paper);
-	box-shadow: 0 1px 0 var(--gg-line-soft);
+	background: var(--gg-header-bg);
+	box-shadow: 0 1px 0 var(--gg-line); /* a clear edge between the header and the page */
 	transition: box-shadow var(--gg-motion-base) ease;
 }
 

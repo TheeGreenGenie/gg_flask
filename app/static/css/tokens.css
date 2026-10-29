@@ -45,6 +45,17 @@
 	--gg-scroll-thumb: #c9c0b3;
 	--gg-scroll-thumb-hover: #a99f91;
 
+	/* Surfaces. Raised surfaces (--gg-warm) must stand apart from the page in both themes. */
+	--gg-header-bg: #fff;
+	--gg-home-bg: var(--gg-warm);
+	--gg-raised-edge: transparent; /* hairline around raised panels (dark theme only) */
+	/* Feature bands: always dark with light text, in both themes (blog post header, contact
+	   header, call-to-action and help banners). Text colours are fixed, never theme tokens. */
+	--gg-band-bg: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+	--gg-band-text: #f8f5ef;
+	--gg-band-muted: #d6cfc4;
+	--gg-band-edge: transparent;
+
 	--gg-radius-sm: .5rem;
 	--gg-radius-md: 1rem;
 	--gg-radius-lg: 1.5rem;
@@ -66,20 +77,25 @@
 :root[data-theme="dark"] {
 	--gg-ink: #f4f0e9;
 	--gg-muted: #bdb5aa;
-	--gg-paper: #141414;
-	--gg-warm: #0c0c0c;
-	--gg-warm-deep: #22201d;
-	--gg-inverse: #050505;
+	--gg-paper: #121110;
+	--gg-header-bg: #1c1a17;
+	--gg-home-bg: var(--gg-paper);
+	--gg-raised-edge: #3b352e;
+	--gg-band-bg: linear-gradient(135deg, #2c2620 0%, #3d342a 100%);
+	--gg-band-edge: rgba(255, 195, 51, .28);
+	--gg-warm: #26221d; /* raised panels: lighter than the page, not darker */
+	--gg-warm-deep: #322c25;
+	--gg-inverse: #0a0908;
 	--gg-inverse-soft: #1a1917;
-	--gg-line: #39342e;
+	--gg-line: #3b352e;
 	--gg-link: #ffc333;
 	--gg-focus: #ffc333;
 	--gg-sale: #ff8a80;
 	--gg-success: #8fd18f;
-	--gg-footer-bg: #0f0f0f;
+	--gg-footer-bg: #0d0c0b;
 	--gg-text-soft: #e0dbd3;
 	--gg-muted-2: #b0a89c;
-	--gg-line-soft: #2a2826;
+	--gg-line-soft: #2b2722;
 	--gg-input-border: #4a443d;
 	--gg-icon-muted: #8f877c;
 	--gg-crumb-sep: #6f675d;
@@ -97,20 +113,25 @@
 	:root:not([data-theme="light"]) {
 		--gg-ink: #f4f0e9;
 		--gg-muted: #bdb5aa;
-		--gg-paper: #141414;
-		--gg-warm: #0c0c0c;
-		--gg-warm-deep: #22201d;
-		--gg-inverse: #050505;
+		--gg-paper: #121110;
+		--gg-header-bg: #1c1a17;
+		--gg-home-bg: var(--gg-paper);
+		--gg-raised-edge: #3b352e;
+		--gg-band-bg: linear-gradient(135deg, #2c2620 0%, #3d342a 100%);
+		--gg-band-edge: rgba(255, 195, 51, .28);
+		--gg-warm: #26221d; /* raised panels: lighter than the page, not darker */
+		--gg-warm-deep: #322c25;
+		--gg-inverse: #0a0908;
 		--gg-inverse-soft: #1a1917;
-		--gg-line: #39342e;
+		--gg-line: #3b352e;
 		--gg-link: #ffc333;
 		--gg-focus: #ffc333;
 		--gg-sale: #ff8a80;
 		--gg-success: #8fd18f;
-		--gg-footer-bg: #0f0f0f;
+		--gg-footer-bg: #0d0c0b;
 		--gg-text-soft: #e0dbd3;
 		--gg-muted-2: #b0a89c;
-		--gg-line-soft: #2a2826;
+		--gg-line-soft: #2b2722;
 		--gg-input-border: #4a443d;
 		--gg-icon-muted: #8f877c;
 		--gg-crumb-sep: #6f675d;

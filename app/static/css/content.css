@@ -137,11 +137,12 @@
 .gg-deco-help {
 	margin-top: clamp(40px, 7vw, 64px);
 	padding: clamp(40px, 6vw, 64px) 20px;
-	color: rgba(255, 255, 255, .78);
-	background: #0d0d0d;
+	color: var(--gg-band-muted);
+	background: var(--gg-band-bg);
+	box-shadow: inset 0 0 0 1px var(--gg-band-edge);
 }
 
-.gg-deco-help h2 { margin: 0 0 12px; color: #fff; font-size: clamp(24px, 3vw, 28px); }
+.gg-deco-help h2 { margin: 0 0 12px; color: var(--gg-band-text); font-size: clamp(24px, 3vw, 28px); }
 .gg-deco-help p { max-width: 560px; margin: 0 auto 24px; line-height: 1.7; }
 .gg-deco-help a:not(.gg-deco-help__btn) { color: var(--gg-accent); }
 

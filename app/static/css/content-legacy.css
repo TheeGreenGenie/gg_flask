@@ -7,6 +7,7 @@
 .gg-about-page .gg-about-hero {
 	padding: 60px 0;
 	background: var(--gg-warm);
+	box-shadow: inset 0 0 0 1px var(--gg-raised-edge);
 }
 .gg-about-page .gg-about-hero-inner {
 	display: flex;
@@ -99,16 +100,17 @@
 }
 .gg-about-page .gg-about-cta {
 	padding: 80px 0;
-	background: #0E0E0E;
+	background: var(--gg-band-bg);
+	box-shadow: inset 0 0 0 1px var(--gg-band-edge);
 	text-align: center;
 }
 .gg-about-page .gg-about-cta h2 {
-	color: #fff;
+	color: var(--gg-band-text);
 	font-size: 32px;
 	margin: 0 0 15px;
 }
 .gg-about-page .gg-about-cta p {
-	color: rgba(255,255,255,0.7);
+	color: var(--gg-band-muted);
 	font-size: 16px;
 	margin: 0 0 30px;
 	max-width: 500px;
@@ -145,16 +147,16 @@
 }
 .gg-contact-page .gg-blog-page .gg-page-header {
 	padding: 40px 0;
-	background: #f9f9f9;
+	background: var(--gg-subtle-bg);
 	text-align: center;
 }
 .gg-contact-page .gg-blog-page .gg-page-header {
 	padding: 50px 0;
-	background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+	background: var(--gg-band-bg);
 	text-align: center;
 }
 .gg-contact-page .gg-blog-page .gg-page-subtitle {
-	color: rgba(255, 255, 255, 0.8);
+	color: var(--gg-band-muted);
 	font-size: 16px;
 	margin: 0;
 }
@@ -163,7 +165,8 @@
 }
 .gg-single-post .gg-post-header {
 	padding: 60px 0;
-	background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+	background: var(--gg-band-bg);
+	box-shadow: inset 0 -1px 0 var(--gg-band-edge);
 	text-align: center;
 }
 .gg-single-post .gg-post-header .gg-container {
@@ -189,18 +192,18 @@
 	letter-spacing: 0.5px;
 }
 .gg-single-post .gg-post-date {
-	color: rgba(255, 255, 255, 0.7);
+	color: var(--gg-band-muted);
 	font-size: 14px;
 }
 .gg-single-post .gg-post-title {
-	color: var(--gg-paper);
+	color: var(--gg-band-text);
 	font-size: 42px;
 	font-weight: 700;
 	line-height: 1.25;
 	margin: 0 0 20px;
 }
 .gg-single-post .gg-post-intro {
-	color: rgba(255, 255, 255, 0.85);
+	color: var(--gg-band-text);
 	font-size: 18px;
 	line-height: 1.6;
 	margin: 0 0 25px;
@@ -222,12 +225,12 @@
 }
 .gg-single-post .gg-author-name {
 	display: block;
-	color: var(--gg-paper);
+	color: var(--gg-band-text);
 	font-weight: 600;
 	font-size: 14px;
 }
 .gg-single-post .gg-read-time {
-	color: rgba(255, 255, 255, 0.6);
+	color: var(--gg-band-muted);
 	font-size: 13px;
 }
 .gg-single-post .gg-post-featured-image {
@@ -286,7 +289,7 @@
 	background: var(--gg-warm);
 	font-style: italic;
 	font-size: 20px;
-	color: #444;
+	color: var(--gg-text-soft);
 }
 .gg-single-post .gg-post-body ul,
 .gg-single-post .gg-post-body ol {
@@ -297,7 +300,8 @@
 	margin-bottom: 0.5em;
 }
 .gg-single-post .gg-post-body a {
-	color: var(--gg-accent);
+	color: var(--gg-link);
+	text-decoration-color: var(--gg-accent);
 	text-decoration: none;
 	border-bottom: 1px solid transparent;
 	transition: border-color 0.3s ease;
@@ -436,7 +440,7 @@
 	transition: color 0.3s ease;
 }
 .gg-single-post .gg-nav-title:hover {
-	color: var(--gg-accent);
+	color: var(--gg-link);
 }
 .gg-single-post .gg-related-posts {
 	padding: 60px 0;
@@ -504,7 +508,7 @@
 	transition: color 0.3s ease;
 }
 .gg-single-post .gg-related-content h3 a:hover {
-	color: var(--gg-accent);
+	color: var(--gg-link);
 }
 @media (max-width: 991px) {
 	.gg-single-post .gg-post-title {
@@ -560,14 +564,15 @@
 }
 .gg-contact-page .gg-contact-header {
 	padding: 60px 0;
-	background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+	background: var(--gg-band-bg);
+	box-shadow: inset 0 0 0 1px var(--gg-band-edge);
 	text-align: center;
 }
 .gg-contact-page .gg-contact-header .gg-page-title {
-	color: #fff;
+	color: var(--gg-band-text);
 }
 .gg-contact-page .gg-contact-header .gg-page-subtitle {
-	color: rgba(255, 255, 255, 0.8);
+	color: var(--gg-band-muted);
 }
 .gg-contact-page .gg-contact-section {
 	padding: 60px 0;
@@ -582,7 +587,7 @@
 	background: var(--gg-paper);
 	padding: 40px;
 	border-radius: 8px;
-	box-shadow: 0 5px 30px rgba(0, 0, 0, 0.08);
+	box-shadow: 0 5px 30px rgba(0, 0, 0, 0.08), inset 0 0 0 1px var(--gg-raised-edge);
 }
 .gg-contact-page .gg-form-title {
 	font-size: 26px;
@@ -617,7 +622,7 @@
 	margin-bottom: 8px;
 }
 .gg-contact-page .gg-form-group label span {
-	color: #c00;
+	color: var(--gg-sale);
 }
 .gg-contact-page .gg-form-group input,
 .gg-contact-page .gg-form-group select,
@@ -682,7 +687,7 @@
 }
 .gg-contact-page .gg-contact-form-wrapper .wpcf7-submit:hover {
 	background: var(--gg-ink);
-	color: var(--gg-accent);
+	color: var(--gg-paper); /* --gg-ink turns light in dark mode; yellow on it was unreadable */
 	border-color: var(--gg-ink);
 }
 .gg-contact-page .gg-contact-info {
@@ -718,7 +723,7 @@
 	align-items: center;
 	justify-content: center;
 	flex-shrink: 0;
-	color: var(--gg-accent);
+	color: var(--gg-link);
 	box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
 }
 .gg-contact-page .gg-contact-details h3 {
@@ -728,7 +733,7 @@
 	color: var(--gg-ink);
 }
 .gg-contact-page .gg-contact-details a {
-	color: var(--gg-accent);
+	color: var(--gg-link);
 	text-decoration: none;
 	font-size: 15px;
 	font-weight: 500;
@@ -776,7 +781,8 @@
 }
 .gg-contact-page .gg-contact-faq {
 	padding: 60px 0;
-	background: #1a1a1a;
+	background: var(--gg-band-bg);
+	box-shadow: inset 0 0 0 1px var(--gg-band-edge);
 }
 .gg-contact-page .gg-faq-inner {
 	text-align: center;
@@ -785,12 +791,12 @@
 }
 .gg-contact-page .gg-faq-inner h2 {
 	font-size: 28px;
-	color: #fff;
+	color: var(--gg-band-text);
 	margin: 0 0 15px;
 }
 .gg-contact-page .gg-faq-inner p {
 	font-size: 16px;
-	color: rgba(255, 255, 255, 0.75);
+	color: var(--gg-band-muted);
 	margin: 0 0 25px;
 	line-height: 1.6;
 }
@@ -837,6 +843,7 @@
 .gg-faq-page .gg-faq-hero {
 	padding: 70px 0;
 	background: var(--gg-warm);
+	box-shadow: inset 0 -1px 0 var(--gg-raised-edge);
 	text-align: center;
 	position: relative;
 	overflow: hidden;
@@ -995,7 +1002,7 @@
 	padding-top: 18px;
 }
 .gg-faq-page .gg-faq-card-body a {
-	color: var(--gg-accent);
+	color: var(--gg-link);
 	text-decoration: none;
 	font-weight: 600;
 	transition: color 0.3s;
@@ -1005,16 +1012,17 @@
 }
 .gg-faq-page .gg-faq-cta {
 	padding: 80px 0;
-	background: #0E0E0E;
+	background: var(--gg-band-bg);
+	box-shadow: inset 0 0 0 1px var(--gg-band-edge);
 	text-align: center;
 }
 .gg-faq-page .gg-faq-cta h2 {
-	color: #fff;
+	color: var(--gg-band-text);
 	font-size: 32px;
 	margin: 0 0 15px;
 }
 .gg-faq-page .gg-faq-cta p {
-	color: rgba(255, 255, 255, 0.7);
+	color: var(--gg-band-muted);
 	font-size: 16px;
 	margin: 0 0 30px;
 	max-width: 500px;

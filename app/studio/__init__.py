@@ -236,22 +236,34 @@ def approval(token: str) -> str | Response:
     record = service.request_by_token(token)
     if record is None:
         abort(404)
-    owner = admin_service.current_admin()
-    # Only an owner who signs in with an authenticator approves sign-ins (never an
-    # approval-only admin account).
-    is_owner = admin_service.can_approve_sign_ins(owner)
+    # Only an owner who uses an authenticator approves sign-ins (never an approval-only admin
+    # account). From the ntfy link the owner is usually signed out: the code from their
+    # authenticator app proves it is them. An owner already signed in just presses the button.
+    signed_in = admin_service.current_admin()
+    is_owner = signed_in is None or admin_service.can_approve_sign_ins(signed_in)
+    needs_code = signed_in is None
     error = ""
     if request.method == "POST":
         if not is_owner:
             abort(403)
+        approve = request.form.get("decision") == "approve"
         try:
-            service.decide(record, request.form.get("decision") == "approve")
-        except service.StudioError as exc:
+            if approve and needs_code:
+                admin_service.approver_by_code(
+                    request.form.get("code", ""), f"studio:{record.request_id}"
+                )
+            service.decide(record, approve)
+        except (service.StudioError, admin_service.AdminError) as exc:
             error = str(exc)
         else:
             return render_template("studio/approval_done.html", record=record)
     return render_template(
-        "studio/approval.html", record=record, token=token, is_owner=is_owner, error=error
+        "studio/approval.html",
+        record=record,
+        token=token,
+        is_owner=is_owner,
+        needs_code=needs_code,
+        error=error,
     )
 
 

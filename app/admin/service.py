@@ -285,11 +285,42 @@ def _move(record: AdminLoginRequest, before: str, after: str, **values: Any) -> 
     return changed == 1
 
 
-def decide_login_request(record: AdminLoginRequest, approve: bool, approver: AdminUser) -> None:
-    if not can_approve_sign_ins(approver) or approver.id == record.admin_id:
+APPROVE_CODE_TRIES = 5  # wrong authenticator codes per request before it can't be approved
+
+
+def approver_by_code(code_raw: str, request_key: str, requester_id: int | None = None) -> AdminUser:
+    """The owner whose authenticator shows this code right now (approval without signing in).
+    `request_key` names the sign-in request (admin or Studio) the wrong-code limit applies to;
+    `requester_id` is the admin asking to sign in, who can never approve themselves."""
+    if not ratelimit.allow("approve-code", request_key, APPROVE_CODE_TRIES, 900, fail_closed=True):
+        raise AdminError("Too many wrong codes. Ask them to sign in again for a new request.")
+    code = code_raw.replace(" ", "").strip()
+    owners = db.session.scalars(
+        select(AdminUser).where(AdminUser.active.is_(True), AdminUser.role == AdminRole.OWNER)
+    ).all()
+    for owner in owners:
+        if (
+            can_approve_sign_ins(owner)
+            and owner.id != requester_id
+            and verify_totp(owner.totp_secret, code)
+        ):
+            return owner
+    raise AdminError("That code doesn't match the owner's authenticator app. Try the newest code.")
+
+
+def decide_login_request(
+    record: AdminLoginRequest, approve: bool, approver: AdminUser | None
+) -> None:
+    """Approving needs a proven owner; declining only needs the private link from the push."""
+    if approver is not None and (
+        not can_approve_sign_ins(approver) or approver.id == record.admin_id
+    ):
         raise AdminError("Only the owner, signed in with an authenticator, can approve this.")
+    if approve and approver is None:
+        raise AdminError("Enter the code from your authenticator app to approve.")
     after = "approved" if approve else "denied"
-    if not _move(record, "pending", after, decided_at=utcnow(), decided_by_id=approver.id):
+    decided_by = approver.id if approver else None
+    if not _move(record, "pending", after, decided_at=utcnow(), decided_by_id=decided_by):
         db.session.rollback()
         raise AdminError("This sign-in request has expired or was already decided.")
     audit(
@@ -297,7 +328,7 @@ def decide_login_request(record: AdminLoginRequest, approve: bool, approver: Adm
         f"admin.login.{after}",
         "login_request",
         record.request_id,
-        {"by": approver.username},
+        {"by": approver.username if approver else "push link"},
     )
     db.session.commit()
 

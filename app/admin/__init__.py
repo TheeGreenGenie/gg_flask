@@ -156,19 +156,26 @@ def approve_sign_in(token: str) -> str | Response:
     record = service.login_request_by_token(token)
     if record is None:
         abort(404)
-    approver = service.current_admin()
-    if approver is None:
-        return redirect(url_for("admin.login", next=request.path))
-    allowed = service.can_approve_sign_ins(approver) and approver.id != record.admin_id
+    # Signed out (the usual case from the ntfy link), the owner approves with the code from
+    # their authenticator app; an owner who is already signed in just presses the button.
+    signed_in = service.current_admin()
+    allowed = signed_in is None or (
+        service.can_approve_sign_ins(signed_in) and signed_in.id != record.admin_id
+    )
+    needs_code = signed_in is None
     error = ""
     decided = False
     if request.method == "POST":
         if not allowed:
             abort(403)
+        approve = request.form.get("decision") == "approve"
         try:
-            service.decide_login_request(
-                record, request.form.get("decision") == "approve", approver
-            )
+            approver = signed_in
+            if approve and approver is None:
+                approver = service.approver_by_code(
+                    request.form.get("code", ""), f"admin:{record.request_id}", record.admin_id
+                )
+            service.decide_login_request(record, approve, approver)
         except service.AdminError as exc:
             error = str(exc)
         else:
@@ -178,6 +185,7 @@ def approve_sign_in(token: str) -> str | Response:
         record=record,
         token=token,
         allowed=allowed,
+        needs_code=needs_code,
         decided=decided,
         error=error,
     )

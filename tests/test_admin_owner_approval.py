@@ -151,3 +151,49 @@ def test_cli_creates_and_switches_approval_accounts(catalog_app: Flask) -> None:
     assert off.exit_code != 0 and "Not changed" in off.output
     on_last = runner.invoke(args=["admin", "set-approval", "owner", "on"])
     assert on_last.exit_code != 0 and "only owner with an authenticator" in on_last.output
+
+
+def _owner_code(app: Flask) -> str:
+    with app.app_context():
+        owner = db.session.scalar(db.select(AdminUser).where(AdminUser.username == "owner"))
+        assert owner is not None
+        return service.totp(owner.totp_secret)
+
+
+def test_owner_approves_from_the_push_with_an_authenticator_code_without_signing_in(
+    catalog_app: Flask, pushes: list[dict[str, Any]]
+) -> None:
+    admin_client(catalog_app)  # the owner exists, but this phone is not signed in
+    _approval_account(catalog_app)
+    browser, waiting = _sign_in(catalog_app)
+    phone = catalog_app.test_client()
+    link = _approve_path(pushes[0])
+    page = phone.get(link)
+    assert page.status_code == 200 and "Code from your authenticator app" in page.get_data(
+        as_text=True
+    )
+    wrong = phone.post(link, data={"decision": "approve", "code": "000000"})
+    assert "That code" in wrong.get_data(as_text=True)
+    assert browser.get(waiting).headers.get("Refresh") == "2"  # still waiting
+
+    done = phone.post(link, data={"decision": "approve", "code": _owner_code(catalog_app)})
+    assert "Approved" in done.get_data(as_text=True)
+    assert browser.get(waiting).location == "/admin/"
+    assert browser.get("/admin/").status_code == 200
+    assert phone.get("/admin/").status_code == 302  # approving never signed the phone in
+
+
+def test_declining_from_the_push_needs_no_code_and_wrong_codes_run_out(
+    catalog_app: Flask, pushes: list[dict[str, Any]]
+) -> None:
+    admin_client(catalog_app)
+    _approval_account(catalog_app)
+    browser, waiting = _sign_in(catalog_app)
+    phone = catalog_app.test_client()
+    link = _approve_path(pushes[0])
+    for _ in range(service.APPROVE_CODE_TRIES):
+        phone.post(link, data={"decision": "approve", "code": "000000"})
+    blocked = phone.post(link, data={"decision": "approve", "code": _owner_code(catalog_app)})
+    assert "Too many wrong codes" in blocked.get_data(as_text=True)
+    phone.post(link, data={"decision": "deny"})
+    assert "was not approved" in browser.get(waiting).get_data(as_text=True)

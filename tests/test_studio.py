@@ -1081,3 +1081,59 @@ def test_approve_cannot_override_a_denial(app: Flask, client) -> None:
         with pytest.raises(service.StudioError, match="already decided"):
             service.decide(record, True)
         assert db.session.get(StudioLoginRequest, record.id).status == ApprovalStatus.DENIED
+
+
+def test_owner_approves_staff_from_the_push_with_an_authenticator_code(
+    app: Flask, client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.admin import service as admin_service
+    from app.admin.models import AdminRole, AdminUser
+    from tests.test_admin import admin_client
+
+    links: list[str] = []
+    monkeypatch.setattr(
+        service, "send_push", lambda title, message, link, *a, **k: links.append(link)
+    )
+    admin_client(app, AdminRole.OWNER)  # the owner exists; the phone below is signed out
+    _user(app)
+    client.post(PREFIX + "/", data={"username": "ada", "password": PASSWORD})
+    link = PREFIX + "/approve/" + links[0].rsplit("/approve/", 1)[1]
+    phone = app.test_client()
+    assert b"Code from your authenticator app" in phone.get(link).data
+    assert b"That code" in phone.post(link, data={"decision": "approve", "code": "000000"}).data
+    with app.app_context():
+        assert db.session.query(StudioLoginRequest).one().status == ApprovalStatus.PENDING
+        owner = db.session.query(AdminUser).one()
+        code = admin_service.totp(owner.totp_secret)
+    phone.post(link, data={"decision": "approve", "code": code})
+    with app.app_context():
+        assert db.session.query(StudioLoginRequest).one().status == ApprovalStatus.APPROVED
+    assert phone.get("/admin/").status_code == 302  # approving never signed the phone in
+
+
+def test_staff_requests_decline_without_a_code_and_lock_after_wrong_codes(
+    app: Flask, client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.admin import service as admin_service
+    from app.admin.models import AdminRole, AdminUser
+    from tests.test_admin import admin_client
+
+    links: list[str] = []
+    monkeypatch.setattr(
+        service, "send_push", lambda title, message, link, *a, **k: links.append(link)
+    )
+    admin_client(app, AdminRole.OWNER)
+    _user(app)
+    client.post(PREFIX + "/", data={"username": "ada", "password": PASSWORD})
+    link = PREFIX + "/approve/" + links[0].rsplit("/approve/", 1)[1]
+    phone = app.test_client()
+    for _ in range(admin_service.APPROVE_CODE_TRIES):
+        phone.post(link, data={"decision": "approve", "code": "000000"})
+    with app.app_context():
+        owner = db.session.query(AdminUser).one()
+        code = admin_service.totp(owner.totp_secret)
+    blocked = phone.post(link, data={"decision": "approve", "code": code})
+    assert b"Too many wrong codes" in blocked.data
+    phone.post(link, data={"decision": "deny"})
+    with app.app_context():
+        assert db.session.query(StudioLoginRequest).one().status == ApprovalStatus.DENIED

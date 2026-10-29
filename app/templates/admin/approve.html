@@ -22,11 +22,17 @@
     {% if allowed %}
       <form method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% if needs_code %}
+          <div class="gg-field"><label for="code">Code from your authenticator app</label><input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="7" autofocus required></div>
+        {% endif %}
         <button class="gg-button gg-button--accent gg-button--block" type="submit" name="decision" value="approve">Approve sign-in</button>
+      </form>
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="gg-button gg-button--block" type="submit" name="decision" value="deny">Decline</button>
       </form>
     {% else %}
-      <p class="gg-form-error" role="alert">Only the owner, signed in with an authenticator, can approve this.</p>
+      <p class="gg-form-error" role="alert">Only the owner can approve this. Sign out of this account first, then use the owner's authenticator code.</p>
     {% endif %}
   {% endif %}
 </section>

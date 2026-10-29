@@ -36,6 +36,9 @@ class AdminUser(db.Model):  # type: ignore[name-defined]
         Enum(AdminRole, name="admin_role", values_callable=lambda e: [m.value for m in e])
     )
     totp_secret: Mapped[str] = mapped_column(String(64))
+    # Signs in with the owner's approval (ntfy push, like Studio staff) instead of an
+    # authenticator app. Such an account can never approve sign-ins itself.
+    uses_owner_approval: Mapped[bool] = mapped_column(default=False, server_default="false")
     active: Mapped[bool] = mapped_column(default=True)
     session_version: Mapped[int] = mapped_column(Integer, default=1)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
@@ -45,6 +48,30 @@ class AdminUser(db.Model):  # type: ignore[name-defined]
         back_populates="admin", cascade="all, delete-orphan"
     )
     customer_user: Mapped[User | None] = relationship("User")
+
+
+class AdminLoginRequest(db.Model):  # type: ignore[name-defined]
+    """One sign-in waiting for the owner's approval (accounts with uses_owner_approval)."""
+
+    __tablename__ = "admin_login_requests"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    request_id: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    admin_id: Mapped[int] = mapped_column(ForeignKey("admin_users.id", ondelete="CASCADE"))
+    approval_token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    match_code: Mapped[str] = mapped_column(String(2))
+    # pending -> approved | denied | expired; approved -> consumed (one session, once)
+    status: Mapped[str] = mapped_column(String(12), default="pending", index=True)
+    ip_address: Mapped[str | None] = mapped_column(String(45))
+    user_agent: Mapped[str | None] = mapped_column(String(300))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    decided_by_id: Mapped[int | None] = mapped_column(
+        ForeignKey("admin_users.id", ondelete="SET NULL")
+    )
+
+    admin: Mapped[AdminUser] = relationship(foreign_keys=[admin_id])
 
 
 class AdminRecoveryCode(db.Model):  # type: ignore[name-defined]

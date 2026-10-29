@@ -15,6 +15,7 @@ from flask import (
     abort,
     current_app,
     flash,
+    make_response,
     redirect,
     render_template,
     request,
@@ -101,9 +102,12 @@ def login() -> str | Response:
     if request.method == "POST":
         try:
             service.begin_login(request.form.get("username", ""), request.form.get("password", ""))
+            pending = service.start_owner_approval()
         except service.AdminError as exc:
             error = str(exc)
         else:
+            if pending is not None:  # this account signs in with the owner's approval
+                return redirect(url_for("admin.waiting", request_id=pending.request_id))
             return redirect(url_for("admin.verify"))
     return render_template(
         "admin/login.html", error=error, username=request.form.get("username", "")
@@ -124,6 +128,59 @@ def verify() -> str | Response:
             wanted = _safe_next(session.pop("owner_return_to", None))
             return redirect(wanted or url_for("admin.dashboard"))
     return render_template("admin/verify.html", error=error)
+
+
+@bp.get("/waiting/<request_id>")
+def waiting(request_id: str) -> str | Response:
+    """Approval accounts wait here while the owner approves from their phone."""
+    record = service.find_login_request(request_id)
+    if record is None or session.get("admin_request") != record.request_id:
+        abort(404)
+    error = ""
+    if record.status == "approved":
+        try:
+            service.finish_approved_login(record)
+        except service.AdminError as exc:
+            error = str(exc)
+        else:
+            return redirect(url_for("admin.dashboard"))
+    response = make_response(render_template("admin/waiting.html", record=record, error=error))
+    if record.status == "pending":
+        response.headers["Refresh"] = "2"
+    return response
+
+
+@bp.route("/approve/<token>", methods=["GET", "POST"])
+def approve_sign_in(token: str) -> str | Response:
+    """The owner's approve/deny page for an approval account's sign-in (link from ntfy)."""
+    record = service.login_request_by_token(token)
+    if record is None:
+        abort(404)
+    approver = service.current_admin()
+    if approver is None:
+        return redirect(url_for("admin.login", next=request.path))
+    allowed = service.can_approve_sign_ins(approver) and approver.id != record.admin_id
+    error = ""
+    decided = False
+    if request.method == "POST":
+        if not allowed:
+            abort(403)
+        try:
+            service.decide_login_request(
+                record, request.form.get("decision") == "approve", approver
+            )
+        except service.AdminError as exc:
+            error = str(exc)
+        else:
+            decided = True
+    return render_template(
+        "admin/approve.html",
+        record=record,
+        token=token,
+        allowed=allowed,
+        decided=decided,
+        error=error,
+    )
 
 
 @bp.post("/logout")
@@ -438,13 +495,34 @@ def init_admin(app: Flask) -> None:
     @click.option("--username", prompt=True)
     @click.option("--email", prompt=True)
     @click.option("--role", type=click.Choice([r.value for r in AdminRole]), default="owner")
+    @click.option(
+        "--owner-approval",
+        is_flag=True,
+        help="Sign in with the owner's phone approval (ntfy) instead of an authenticator app.",
+    )
     @click.password_option(confirmation_prompt=True)
-    def create(username: str, email: str, role: str, password: str) -> None:
+    def create(username: str, email: str, role: str, password: str, owner_approval: bool) -> None:
         """Create an administrator once their authenticator entry is proven to work."""
         try:
             normalized, _ = service.check_new_admin(username, email, password)
         except service.AdminError as exc:
             raise click.ClickException(str(exc)) from None
+        if owner_approval:
+            if not _has_approver():
+                raise click.ClickException(
+                    "No owner signs in with an authenticator yet, so nobody could approve this "
+                    "account. Create that owner first."
+                )
+            try:
+                user, _ = service.create_admin(username, email, password, AdminRole(role))
+            except service.AdminError as exc:
+                raise click.ClickException(str(exc)) from None
+            service.set_owner_approval(user, True)
+            click.echo(
+                f"Administrator {user.username} created. Each sign-in sends the owner an approval "
+                "request (ntfy); there is no authenticator or recovery code for this account."
+            )
+            return
         secret = service.generate_totp_secret()
         if not _confirm_new_key(normalized, secret):
             raise click.ClickException(
@@ -523,6 +601,35 @@ def init_admin(app: Flask) -> None:
             raise click.ClickException("Not saved: the old key still works. Run the command again.")
         service.replace_totp_secret(user, secret)
         click.echo("Saved. Sign in with codes from the new entry; other sessions were signed out.")
+
+    def _has_approver() -> bool:
+        owners = db.session.scalars(select(AdminUser).where(AdminUser.active.is_(True))).all()
+        return any(service.can_approve_sign_ins(owner) for owner in owners)
+
+    @admin_cli.command("set-approval")
+    @click.argument("username")
+    @click.argument("mode", type=click.Choice(["on", "off"]))
+    def set_approval(username: str, mode: str) -> None:
+        """Switch an admin between owner approval (on) and an authenticator app (off)."""
+        user = _admin_named(username)
+        if mode == "on":
+            if user.role == AdminRole.OWNER and not any(
+                service.can_approve_sign_ins(other)
+                for other in db.session.scalars(select(AdminUser)).all()
+                if other.id != user.id and other.active
+            ):
+                raise click.ClickException(
+                    "This is the only owner with an authenticator: nobody could approve it."
+                )
+            service.set_owner_approval(user, True)
+            click.echo(f"{user.username} now signs in with the owner's approval.")
+            return
+        secret = service.generate_totp_secret()  # off: an authenticator replaces the approval
+        if not _confirm_new_key(user.username, secret):
+            raise click.ClickException("Not changed: still signs in with the owner's approval.")
+        service.replace_totp_secret(user, secret)
+        service.set_owner_approval(user, False)
+        click.echo(f"{user.username} now signs in with this authenticator entry.")
 
     @admin_cli.command("reset-password")
     @click.argument("username")

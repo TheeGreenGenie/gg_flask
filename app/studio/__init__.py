@@ -237,7 +237,9 @@ def approval(token: str) -> str | Response:
     if record is None:
         abort(404)
     owner = admin_service.current_admin()
-    is_owner = bool(owner and owner.role == AdminRole.OWNER)
+    # Only an owner who signs in with an authenticator approves sign-ins (never an
+    # approval-only admin account).
+    is_owner = admin_service.can_approve_sign_ins(owner)
     error = ""
     if request.method == "POST":
         if not is_owner:
@@ -327,7 +329,9 @@ def key_approval(token: str) -> str | Response:
     if record is None:
         abort(404)
     owner = admin_service.current_admin()
-    is_owner = bool(owner and owner.role == AdminRole.OWNER)
+    is_owner = admin_service.can_approve_sign_ins(
+        owner
+    )  # sign-in credentials: authenticator owners only
     error = ""
     if request.method == "POST":
         if not is_owner or owner is None:

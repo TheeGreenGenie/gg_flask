@@ -354,28 +354,34 @@ def set_admin_link(user: StudioUser, admin_username: str | None) -> None:
 
 
 def _send_approval(record: StudioLoginRequest, token: str) -> None:
-    """Transport seam. The owner can choose ntfy/Pushover later without changing auth."""
     from flask import url_for
 
-    link = url_for("studio.approval", token=token, _external=True)
+    send_push(
+        "Staff Studio sign-in request",
+        f"{record.user.username} wants to sign in. Match {record.match_code}.",
+        url_for("studio.approval", token=token, _external=True),
+        record.expires_at,
+        log_label=record.user.username,
+    )
+
+
+def send_push(
+    title: str, message: str, link: str, expires_at: datetime, *, log_label: str = ""
+) -> None:
+    """Approval push to the owner's phone (ntfy, or a webhook). Shared by Studio and /admin
+    sign-ins. The console backend (development only) logs the link instead."""
     backend = current_app.config.get("STUDIO_APPROVAL_BACKEND", "console")
     if backend == "console":
-        _log.warning(
-            "studio_approval_requested user=%s match=%s url=%s",
-            record.user.username,
-            record.match_code,
-            link,
-        )
+        _log.warning("approval_requested who=%s title=%s url=%s", log_label, title, link)
         return
     import urllib.request
 
-    message = f"{record.user.username} wants to sign in. Match {record.match_code}."
     headers = {"Content-Type": "application/json"}
     if backend == "ntfy":
         target = str(current_app.config["STUDIO_NTFY_SERVER"]).rstrip("/") + "/"
         payload_data: dict[str, Any] = {
             "topic": current_app.config["STUDIO_NTFY_TOPIC"],
-            "title": "Staff Studio sign-in request",
+            "title": title,
             "message": message,
             "priority": 4,  # ntfy's JSON API takes 1-5 only; "high" is rejected with a 400
             "tags": ["key"],
@@ -388,10 +394,10 @@ def _send_approval(record: StudioLoginRequest, token: str) -> None:
     else:
         target = current_app.config["STUDIO_APPROVAL_WEBHOOK_URL"]
         payload_data = {
-            "title": "Staff Studio sign-in request",
+            "title": title,
             "message": message,
             "url": link,
-            "expires_at": record.expires_at.isoformat(),
+            "expires_at": expires_at.isoformat(),
         }
     payload = json.dumps(payload_data).encode()
     req = urllib.request.Request(  # noqa: S310 - production configuration requires HTTPS
@@ -404,7 +410,7 @@ def _send_approval(record: StudioLoginRequest, token: str) -> None:
         with urllib.request.urlopen(req, timeout=3):  # noqa: S310
             pass
     except OSError:
-        _log.exception("studio_approval_notification_failed")
+        _log.exception("approval_notification_failed")
 
 
 def find_request(request_id: str) -> StudioLoginRequest | None:

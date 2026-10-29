@@ -24,3 +24,11 @@
 .gg-admin__images p { font-size: .82rem; }
 @media (max-width: 40rem) { .gg-admin__cards { grid-template-columns: 1fr; } }
 @media print { .gg-header, .gg-admin__nav, .gg-print-hide { display: none !important; } .gg-admin { padding: 0; } }
+
+/* Owner-approval sign-in: match code shown on both screens, request details. */
+.gg-admin__match { width: fit-content; margin: 1.25rem auto; padding: .7rem 1.1rem; border: 2px solid var(--gg-accent); border-radius: var(--gg-radius-md); font: 700 clamp(2.5rem, 12vw, 3.5rem)/1 var(--gg-font-heading); letter-spacing: .2em; }
+.gg-admin__details { display: grid; gap: .4rem; margin: 0 0 1.25rem; color: var(--gg-muted); font-size: .9rem; }
+.gg-admin__details div { display: flex; gap: .75rem; }
+.gg-admin__details dt { min-width: 5.5rem; font-weight: 700; }
+.gg-admin__details dd { margin: 0; word-break: break-word; }
+.gg-admin__login form .gg-button + .gg-button { margin-top: .6rem; }

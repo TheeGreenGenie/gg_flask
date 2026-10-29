@@ -1,0 +1,23 @@
+{% extends "admin/_base.html" %}
+{% block title %}Waiting for approval · GG Afrikan Eleganz{% endblock %}
+{% block admin_body %}
+<section class="gg-admin__login" aria-live="polite">
+  <p class="gg-eyebrow">Owner approval</p>
+  {% if record.status == 'pending' %}
+    <h1>Waiting for the owner to approve</h1>
+    <p>The owner has been sent a notification. Ask them to check that this code matches what they see:</p>
+    <p class="gg-admin__match" aria-label="Match code">{{ record.match_code }}</p>
+    <p>This page continues by itself once your sign-in is approved. The request expires after two minutes.</p>
+  {% elif record.status == 'denied' %}
+    <h1>Sign-in was not approved</h1>
+    <p>The owner declined this sign-in. <a href="{{ url_for('admin.login') }}">Start again</a> if you think this was a mistake.</p>
+  {% elif record.status == 'expired' %}
+    <h1>This request expired</h1>
+    <p>It was not approved within two minutes. <a href="{{ url_for('admin.login') }}">Sign in again</a> to send a new request.</p>
+  {% else %}
+    <h1>Sign-in already used</h1>
+    <p><a href="{{ url_for('admin.login') }}">Sign in again</a>.</p>
+  {% endif %}
+  {% if error %}<p class="gg-form-error" role="alert">{{ error }}</p>{% endif %}
+</section>
+{% endblock %}

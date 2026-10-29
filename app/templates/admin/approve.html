@@ -1,0 +1,33 @@
+{% extends "admin/_base.html" %}
+{% block title %}Approve admin sign-in · GG Afrikan Eleganz{% endblock %}
+{% block admin_body %}
+<section class="gg-admin__login">
+  <p class="gg-eyebrow">Admin sign-in request</p>
+  {% if decided or record.status in ('approved', 'denied', 'consumed') %}
+    <h1>{{ 'Approved' if record.status in ('approved', 'consumed') else 'Declined' }}</h1>
+    <p>{{ record.admin.username }}’s sign-in was {{ 'approved' if record.status in ('approved', 'consumed') else 'declined' }}. You can close this page.</p>
+  {% elif record.status == 'expired' %}
+    <h1>This request expired</h1>
+    <p>{{ record.admin.username }} can sign in again to send a new request.</p>
+  {% else %}
+    <h1>{{ record.admin.username }} wants to sign in to admin</h1>
+    <p>Approve only if the code on their screen matches:</p>
+    <p class="gg-admin__match" aria-label="Match code">{{ record.match_code }}</p>
+    <dl class="gg-admin__details">
+      <div><dt>Requested</dt><dd>{{ record.created_at.strftime('%H:%M UTC') }}</dd></div>
+      {% if record.ip_address %}<div><dt>From</dt><dd>{{ record.ip_address }}</dd></div>{% endif %}
+      {% if record.user_agent %}<div><dt>Device</dt><dd>{{ record.user_agent[:120] }}</dd></div>{% endif %}
+    </dl>
+    {% if error %}<p class="gg-form-error" role="alert">{{ error }}</p>{% endif %}
+    {% if allowed %}
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="gg-button gg-button--accent gg-button--block" type="submit" name="decision" value="approve">Approve sign-in</button>
+        <button class="gg-button gg-button--block" type="submit" name="decision" value="deny">Decline</button>
+      </form>
+    {% else %}
+      <p class="gg-form-error" role="alert">Only the owner, signed in with an authenticator, can approve this.</p>
+    {% endif %}
+  {% endif %}
+</section>
+{% endblock %}

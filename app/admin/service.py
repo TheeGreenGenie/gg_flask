@@ -11,18 +11,25 @@ import re
 import secrets
 import struct
 import time
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from urllib.parse import quote, urlsplit
 
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError
 from flask import current_app, g, has_request_context, request, session
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from app import ratelimit
 from app.accounts.models import User
 from app.accounts.service import MAX_PASSWORD, AccountError, check_password, normalize_email
-from app.admin.models import AdminAudit, AdminRecoveryCode, AdminRole, AdminUser
+from app.admin.models import (
+    AdminAudit,
+    AdminLoginRequest,
+    AdminRecoveryCode,
+    AdminRole,
+    AdminUser,
+)
 from app.catalog.models import utcnow
 from app.extensions import db
 from app.passwords import DUMMY_HASH
@@ -171,6 +178,143 @@ def begin_login(username_raw: str, password: str) -> None:
     session["admin_pending_at"] = int(time.time())
 
 
+APPROVAL_TTL = timedelta(minutes=2)  # same as Studio sign-in approvals
+
+
+def _aware(value: datetime) -> datetime:
+    return value if value.tzinfo is not None else value.replace(tzinfo=UTC)
+
+
+APPROVAL_REQUESTS = 5  # per account per 15 minutes, so nobody can flood the owner's phone
+_MATCH_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+
+
+def can_approve_sign_ins(admin: AdminUser | None) -> bool:
+    """Only an owner who signs in with an authenticator approves sign-ins (Studio or admin).
+    An approval-only account never approves anything, including itself."""
+    return bool(admin and admin.role == AdminRole.OWNER and not admin.uses_owner_approval)
+
+
+def _pending_admin() -> AdminUser | None:
+    pending = session.get("admin_pending")
+    started = session.get("admin_pending_at", 0)
+    if not isinstance(pending, int) or not isinstance(started, int):
+        return None
+    if time.time() - started > PENDING_SECONDS:
+        return None
+    admin = db.session.get(AdminUser, pending)
+    return admin if admin is not None and admin.active else None
+
+
+def start_owner_approval() -> AdminLoginRequest | None:
+    """After a correct password: for an approval account, ask the owner's phone and return the
+    request (None for authenticator accounts, which go on to the code page)."""
+    admin = _pending_admin()
+    if admin is None or not admin.uses_owner_approval:
+        return None
+    if not ratelimit.allow(
+        "admin-approval", str(admin.id), APPROVAL_REQUESTS, 900, fail_closed=True
+    ):
+        raise AdminError("Too many sign-in requests. Please wait a few minutes and try again.")
+    token = secrets.token_urlsafe(32)
+    record = AdminLoginRequest(
+        request_id=secrets.token_urlsafe(24),
+        admin_id=admin.id,
+        approval_token_hash=hashlib.sha256(token.encode()).hexdigest(),
+        match_code=secrets.choice(_MATCH_ALPHABET) + secrets.choice(_MATCH_ALPHABET),
+        status="pending",
+        ip_address=(ratelimit.client_key() or "")[:45] or None,
+        user_agent=(request.user_agent.string or "")[:300] or None,
+        expires_at=utcnow() + APPROVAL_TTL,
+    )
+    db.session.add(record)
+    audit(admin, "admin.login.approval_requested", "login_request", record.request_id)
+    db.session.commit()
+    session["admin_request"] = record.request_id  # only this browser may use the approval
+    from flask import url_for
+
+    from app.studio import service as studio_service
+
+    studio_service.send_push(
+        "Admin sign-in request",
+        f"{admin.username} wants to sign in to admin. Match {record.match_code}.",
+        url_for("admin.approve_sign_in", token=token, _external=True),
+        record.expires_at,
+        log_label=admin.username,
+    )
+    return record
+
+
+def find_login_request(request_id: str) -> AdminLoginRequest | None:
+    if not request_id or len(request_id) > 64:
+        return None
+    record = db.session.scalar(
+        select(AdminLoginRequest).where(AdminLoginRequest.request_id == request_id)
+    )
+    if record and record.status == "pending" and _aware(record.expires_at) <= utcnow():
+        record.status, record.decided_at = "expired", utcnow()
+        db.session.commit()
+    return record
+
+
+def login_request_by_token(token: str) -> AdminLoginRequest | None:
+    if not token or len(token) > 100:
+        return None
+    record = db.session.scalar(
+        select(AdminLoginRequest).where(
+            AdminLoginRequest.approval_token_hash == hashlib.sha256(token.encode()).hexdigest()
+        )
+    )
+    return find_login_request(record.request_id) if record else None
+
+
+def _move(record: AdminLoginRequest, before: str, after: str, **values: Any) -> bool:
+    """One conditional UPDATE, so two simultaneous clicks can never both win."""
+    now = utcnow()
+    changed = db.session.execute(
+        update(AdminLoginRequest)
+        .where(
+            AdminLoginRequest.id == record.id,
+            AdminLoginRequest.status == before,
+            AdminLoginRequest.expires_at > now,
+        )
+        .values(status=after, **values)
+        .execution_options(synchronize_session=False)
+    ).rowcount  # type: ignore[attr-defined]
+    db.session.refresh(record)
+    return changed == 1
+
+
+def decide_login_request(record: AdminLoginRequest, approve: bool, approver: AdminUser) -> None:
+    if not can_approve_sign_ins(approver) or approver.id == record.admin_id:
+        raise AdminError("Only the owner, signed in with an authenticator, can approve this.")
+    after = "approved" if approve else "denied"
+    if not _move(record, "pending", after, decided_at=utcnow(), decided_by_id=approver.id):
+        db.session.rollback()
+        raise AdminError("This sign-in request has expired or was already decided.")
+    audit(
+        record.admin,
+        f"admin.login.{after}",
+        "login_request",
+        record.request_id,
+        {"by": approver.username},
+    )
+    db.session.commit()
+
+
+def finish_approved_login(record: AdminLoginRequest) -> AdminUser:
+    """Turn an approved request into a session, once, in the browser that asked for it."""
+    if (
+        session.get("admin_request") != record.request_id
+        or session.get("admin_pending") != record.admin_id
+    ):
+        raise AdminError("This approval belongs to a different browser. Sign in again.")
+    if record.status != "approved" or not _move(record, "approved", "consumed"):
+        db.session.rollback()
+        raise AdminError("This sign-in has not been approved, or was already used.")
+    return _start_session(record.admin, "owner_approval")
+
+
 def complete_login(code_raw: str) -> AdminUser:
     pending = session.get("admin_pending")
     started = session.get("admin_pending_at", 0)
@@ -185,6 +329,8 @@ def complete_login(code_raw: str) -> AdminUser:
     if admin is None or not admin.active:
         _clear_admin_session()
         raise AdminError("Your sign-in attempt expired. Start again.")
+    if admin.uses_owner_approval:  # no codes or recovery codes for these accounts
+        raise AdminError("This account signs in with the owner's approval.")
     if not ratelimit.allow(
         "admin-otp", f"{admin.id}:{ratelimit.client_key()}", 10, 900, fail_closed=True
     ):
@@ -204,6 +350,10 @@ def complete_login(code_raw: str) -> AdminUser:
         method = "recovery"
     else:
         raise AdminError("That verification code is not valid.")
+    return _start_session(admin, method)
+
+
+def _start_session(admin: AdminUser, method: str) -> AdminUser:
     _clear_admin_session()
     now = int(time.time())
     session.update(
@@ -283,6 +433,15 @@ def code_offset(secret: str, code: str, at: int | None = None, span: int = 600) 
         if hmac.compare_digest(totp(secret, now + drift), code):
             return drift
     return None
+
+
+def set_owner_approval(admin: AdminUser, enabled: bool) -> None:
+    """Switch how this admin proves it is them; signs out every browser either way."""
+    if admin.uses_owner_approval != enabled:
+        admin.uses_owner_approval = enabled
+        admin.session_version += 1
+        audit(admin, "admin.second_factor", "admin", str(admin.id), {"owner_approval": enabled})
+        db.session.commit()
 
 
 def replace_totp_secret(admin: AdminUser, secret: str) -> None:

@@ -8,7 +8,13 @@ from app.accounts.models import (
     StoredPaymentMethod,
     User,
 )
-from app.admin.models import AdminAudit, AdminRecoveryCode, AdminRole, AdminUser
+from app.admin.models import (
+    AdminAudit,
+    AdminLoginRequest,
+    AdminRecoveryCode,
+    AdminRole,
+    AdminUser,
+)
 from app.cart.models import Cart, CartLine
 from app.catalog.models import (
     Category,
@@ -94,5 +100,6 @@ __all__ = [
     "StudioSaleItem",
     "Wishlist",
     "WishlistItem",
+    "AdminLoginRequest",
     "KVEntry",
 ]

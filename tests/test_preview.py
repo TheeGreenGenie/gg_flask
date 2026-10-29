@@ -35,6 +35,7 @@ def test_public_sees_coming_soon_and_nothing_is_indexed(locked: Flask) -> None:
         page = client.get(path)
         assert page.status_code == 503, path
         assert b"Our new shop is on its way" in page.data
+        assert page.mimetype == "text/html"  # otherwise browsers show the raw source
         assert page.headers["Cache-Control"] == "private, no-store"
         assert "noindex" in page.headers["X-Robots-Tag"]
     assert client.post("/newsletter", data={"email": "a@b.com"}).status_code == 503

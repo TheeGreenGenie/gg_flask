@@ -89,7 +89,10 @@ def _safe_next(value: str | None) -> str:
 
 
 def _coming_soon() -> Response:
-    response = Response(render_template("preview/coming_soon.html"), status=503)
+    # werkzeug's Response defaults to text/plain; say HTML or browsers show the source.
+    response = Response(
+        render_template("preview/coming_soon.html"), status=503, mimetype="text/html"
+    )
     response.headers["Retry-After"] = "86400"
     return response
 

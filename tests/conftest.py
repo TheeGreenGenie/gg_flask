@@ -95,6 +95,10 @@ def app(tmp_path: Path, _schema: None) -> Iterator[Flask]:
             app.extensions["redis"] = DatabaseKV()
         else:
             app.extensions["redis"] = FakeRedis()
+    elif os.environ.get("TEST_REDIS_URL"):
+        # A real test Redis keeps rate-limit counters between tests; start each test empty,
+        # like the database tables below.
+        app.extensions["redis"].flushdb()
     with app.app_context():
         _empty_all_tables()
     yield app

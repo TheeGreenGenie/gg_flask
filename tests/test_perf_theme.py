@@ -33,6 +33,8 @@ def _cache_keys(app: Flask) -> list[str]:
     store = app.extensions["redis"]
     if hasattr(store, "values"):  # tests' FakeRedis
         return list(store.values)
+    if hasattr(store, "scan_iter"):  # a real test Redis (TEST_REDIS_URL)
+        return [k.decode() for k in store.scan_iter("cache:*")]
     from sqlalchemy import select
 
     from app.extensions import db

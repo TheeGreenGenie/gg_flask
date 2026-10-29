@@ -36,7 +36,8 @@ jobs:
           --health-cmd "redis-cli ping" --health-interval 5s --health-retries 10
     env:
       TEST_DATABASE_URL: postgresql+psycopg://gg:gg@localhost:5432/gg_test
-      TEST_REDIS_URL: ${{ matrix.kv == 'database' && '' || 'redis://localhost:6379/0' }}
+      # (`cond && '' || x` would always give x: an empty string counts as false in expressions)
+      TEST_REDIS_URL: ${{ matrix.kv != 'database' && 'redis://localhost:6379/0' || '' }}
       TEST_KV_BACKEND: ${{ matrix.kv }}
     steps:
       - uses: actions/checkout@v4

@@ -152,6 +152,30 @@ def test_ntfy_approval_payload_is_valid_for_ntfy(
     assert payload["click"].startswith("http") and payload["actions"][0]["url"] == payload["click"]
 
 
+def test_ntfy_refusals_are_logged_with_ntfys_reason(
+    app: Flask, client, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    import urllib.error
+    import urllib.request
+
+    def refuse(req: urllib.request.Request, timeout: float) -> None:
+        body = BytesIO(b'{"code":42908,"http":429,"error":"limit reached: too many requests"}')
+        raise urllib.error.HTTPError(req.full_url, 429, "Too Many Requests", {}, body)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(urllib.request, "urlopen", refuse)
+    app.config.update(
+        STUDIO_APPROVAL_BACKEND="ntfy",
+        STUDIO_NTFY_SERVER="https://ntfy.example",
+        STUDIO_NTFY_TOPIC="private-topic",
+    )
+    _user(app)
+    response = client.post(PREFIX + "/", data={"username": "ada", "password": PASSWORD})
+    assert response.status_code == 302  # the sign-in still waits; the owner can retry
+    logged = " ".join(r.getMessage() for r in caplog.records)
+    assert "status=429" in logged and "limit reached" in logged
+    assert "private-topic" not in logged
+
+
 def test_expired_request_cannot_be_consumed(app: Flask, client) -> None:
     _user(app)
     client.post(PREFIX + "/", data={"username": "ada", "password": PASSWORD})

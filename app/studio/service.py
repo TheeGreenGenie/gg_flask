@@ -374,6 +374,7 @@ def send_push(
     if backend == "console":
         _log.warning("approval_requested who=%s title=%s url=%s", log_label, title, link)
         return
+    import urllib.error
     import urllib.request
 
     headers = {"Content-Type": "application/json"}
@@ -409,8 +410,21 @@ def send_push(
     try:
         with urllib.request.urlopen(req, timeout=3):  # noqa: S310
             pass
+    except urllib.error.HTTPError as exc:
+        # ntfy explains refusals in its body, e.g. {"http":429,"error":"limit reached..."};
+        # it never contains the topic, so it is safe to log.
+        try:
+            reason = exc.read(300).decode("utf-8", "replace")
+        except OSError:
+            reason = ""
+        _log.error(
+            "approval_notification_failed status=%s reason=%s who=%s",
+            exc.code,
+            reason.strip(),
+            log_label,
+        )
     except OSError:
-        _log.exception("approval_notification_failed")
+        _log.exception("approval_notification_failed who=%s", log_label)
 
 
 def find_request(request_id: str) -> StudioLoginRequest | None:

@@ -11,6 +11,7 @@ set -a
 set +a
 export MEDIA_ROOT="${MEDIA_ROOT:-$GG_HOME/media}"
 export JOBS_HEARTBEAT_DIR="${JOBS_HEARTBEAT_DIR:-$GG_HOME/jobs}"
+export BACKUP_DIR="${BACKUP_DIR:-$GG_HOME/backups}"  # same folder as the Saturday cron job
 export GG_PLATFORM=siteground
 cd "$GG_HOME/current"
 exec "$GG_HOME/venv/bin/flask" --app wsgi "$@"

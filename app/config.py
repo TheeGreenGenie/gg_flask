@@ -31,6 +31,29 @@ def _env_optional_int(name: str) -> int | None:
     return int(raw) if raw is not None else None
 
 
+def _env_weight_rates(name: str) -> tuple[tuple[float, int], ...]:
+    """'3:999,8:1699,15:2499' -> ((3.0, 999), (8.0, 1699), (15.0, 2499)): up to N pounds costs
+    that many cents. Bands must go up in both weight and price."""
+    raw = (_env(name) or "").strip()
+    if not raw:
+        return ()
+    bands: list[tuple[float, int]] = []
+    for part in raw.split(","):
+        pounds, _, cents = part.strip().partition(":")
+        try:
+            band = (float(pounds), int(cents))
+        except ValueError:
+            raise ConfigError(f"{name}: {part.strip()!r} must look like 3:999") from None
+        if (
+            band[0] <= 0
+            or band[1] < 0
+            or (bands and (band[0] <= bands[-1][0] or band[1] < bands[-1][1]))
+        ):
+            raise ConfigError(f"{name}: bands must increase in pounds and price")
+        bands.append(band)
+    return tuple(bands)
+
+
 def _env_csv(name: str) -> tuple[str, ...]:
     return tuple(part.strip().upper() for part in (_env(name) or "").split(",") if part.strip())
 
@@ -75,6 +98,18 @@ class BaseConfig:
     SMTP_SECURITY = "starttls"  # starttls (port 587) | ssl (port 465)
     SUPPORTED_COUNTRIES: tuple[str, ...] = ()
     FLAT_SHIPPING_CENTS: int | None = None
+    # Price by total parcel weight (owner, 2026-10-30): every item's weight x quantity, plus
+    # packaging. Set, it replaces the flat rate; past the last band each extra pound adds
+    # SHIPPING_EXTRA_LB_CENTS. Unset = flat rate.
+    SHIPPING_WEIGHT_RATES: tuple[tuple[float, int], ...] = ()
+    SHIPPING_EXTRA_LB_CENTS = 125
+    # Free Standard shipping once the items total at least this (owner, 2026-10-30: $400),
+    # before any coupon; Express is still charged. 0 turns it off.
+    FREE_SHIPPING_FROM_CENTS = 40000
+    # Weekly database backups (app/backup.py): folder, and the optional encrypted email copy.
+    BACKUP_DIR: str | None = None
+    BACKUP_PASSPHRASE: str | None = None
+    BACKUP_EMAIL: str | None = None
     # Lower rate for Philadelphia delivery addresses (owner, 2026-10-26). Unset = flat rate.
     LOCAL_SHIPPING_CENTS: int | None = None
     TAX_BACKEND: str | None = None  # "stripe" (Stripe Tax) or "none" for explicit no-tax
@@ -152,7 +187,7 @@ class BaseConfig:
         # Weekly database backups (`flask backup run`; default: instance/backups).
         self.BACKUP_DIR = _env("BACKUP_DIR")
         # Emailing each backup (owner, 2026-10-30): only when a passphrase is set, and the file is
-        # encrypted with it first. BACKUP_EMAIL defaults to the shop's contact address.
+        # encrypted with it first. BACKUP_EMAIL defaults to ggafrikan@gmail.com (app/backup.py).
         self.BACKUP_PASSPHRASE = _env("BACKUP_PASSPHRASE")
         self.BACKUP_EMAIL = _env("BACKUP_EMAIL")
         # Set to "siteground" by deploy/siteground/* so host-specific checks adapt.
@@ -172,6 +207,17 @@ class BaseConfig:
         self.TRUSTED_PROXY_HOPS = _env_int("TRUSTED_PROXY_HOPS", self.TRUSTED_PROXY_HOPS)
         self.SUPPORTED_COUNTRIES = _env_csv("SUPPORTED_COUNTRIES")
         self.FLAT_SHIPPING_CENTS = _env_optional_int("FLAT_SHIPPING_CENTS")
+        self.SHIPPING_WEIGHT_RATES = _env_weight_rates("SHIPPING_WEIGHT_RATES")
+        self.SHIPPING_EXTRA_LB_CENTS = _env_int(
+            "SHIPPING_EXTRA_LB_CENTS", self.SHIPPING_EXTRA_LB_CENTS
+        )
+        self.FREE_SHIPPING_FROM_CENTS = _env_int(
+            "FREE_SHIPPING_FROM_CENTS", self.FREE_SHIPPING_FROM_CENTS
+        )
+        if self.SHIPPING_EXTRA_LB_CENTS < 0 or self.FREE_SHIPPING_FROM_CENTS < 0:
+            raise ConfigError(
+                "SHIPPING_EXTRA_LB_CENTS and FREE_SHIPPING_FROM_CENTS must be 0 or more"
+            )
         self.LOCAL_SHIPPING_CENTS = _env_optional_int("LOCAL_SHIPPING_CENTS")
         self.TAX_BACKEND = _env("TAX_BACKEND")
         self.SHIPPING_BACKEND = _env("SHIPPING_BACKEND", self.SHIPPING_BACKEND) or "flat"

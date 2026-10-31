@@ -32,6 +32,16 @@ means warnings, and `2` means a failed security/availability expectation. The JS
 HTTP status, selected headers, captured-response length/hash and a truncation flag, never the
 response body.
 
+### SiteGround edge challenges
+
+`--expect-preview` means the application's intentional `503` preview lock. It does **not** treat
+SiteGround's `202` `sg-captcha: challenge` response as a successful application check. When the edge
+challenges the probe, the result is deliberately fail-closed and the application/log-path result is
+**inconclusive**: the challenge prevented access, but it also prevented the probe from verifying the
+response behind it. Allowlist the monitor through SiteGround if available, or rerun from an approved
+location that can reach the application. Never mark a generic `202` as proof that a sensitive path
+is denied.
+
 This is not a vulnerability scanner and does not replace provider reconciliation, log shipping,
 alert acknowledgement, restore testing, incident runbooks, or an independent penetration test.
 

@@ -87,7 +87,13 @@ def checks() -> list[Check]:
     )
     shipping = current_app.config.get("SHIPPING_BACKEND")
     shipping_ready = bool(
-        (shipping == "flat" and current_app.config.get("FLAT_SHIPPING_CENTS") is not None)
+        (
+            shipping == "flat"
+            and (
+                current_app.config.get("FLAT_SHIPPING_CENTS") is not None
+                or bool(current_app.config.get("SHIPPING_WEIGHT_RATES"))
+            )
+        )
         or (shipping == "shippo" and current_app.config.get("SHIPPO_API_TOKEN"))
     )
     results.append(

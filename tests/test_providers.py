@@ -331,3 +331,72 @@ def test_checkout_offers_express_only_with_live_rates(
     catalog_app.config.update(SHIPPING_BACKEND="shippo", SHIPPO_API_TOKEN="t")
     html = shop.get("/checkout/").get_data(as_text=True)
     assert 'value="express"' in html and "Priority Mail Express" in html
+
+
+# Weight bands and free shipping (owner, 2026-10-30) --------------------------------------
+
+BANDS = ((3.0, 999), (8.0, 1699), (15.0, 2499), (25.0, 3499))
+ONE_YARD_GRAMS = 560  # roughly one 1-yard precut piece, before packaging
+
+
+def _cut(price_cents: int = 1200) -> Variant:
+    return Variant(sku="CUT", price_cents=price_cents, weight_grams=ONE_YARD_GRAMS)
+
+
+def test_weight_bands_count_every_piece_ordered(app: Flask) -> None:
+    app.config.update(SHIPPING_WEIGHT_RATES=BANDS, SHIPPING_EXTRA_LB_CENTS=125)
+    with app.app_context():
+        one = providers.quote_shipping(address(), [(_cut(), 1)])
+        two = providers.quote_shipping(address(), [(_cut(), 2)])
+        five = providers.quote_shipping(address(), [(_cut(), 5)])  # ~6.4 lb with packaging
+        many = providers.quote_shipping(address(), [(_cut(), 25)])  # ~31 lb
+    assert one.cents == 999 and two.cents == 999  # ~1.5 lb and ~2.7 lb
+    assert five.cents == 1699  # five cuts weigh as much as a bundle, and cost like one
+    assert many.cents == 3499 + 7 * 125  # past 25 lb: each extra started pound adds $1.25
+    assert one.service == "Standard (by weight)"
+
+
+def test_without_bands_the_flat_rate_still_applies(app: Flask) -> None:
+    app.config["SHIPPING_WEIGHT_RATES"] = ()
+    with app.app_context():
+        assert providers.quote_shipping(address(), [(_cut(), 5)]).cents == 799
+
+
+def test_free_standard_shipping_from_400_dollars_even_in_philadelphia(app: Flask) -> None:
+    app.config.update(SHIPPING_WEIGHT_RATES=BANDS, FREE_SHIPPING_FROM_CENTS=40000)
+    with app.app_context():
+        just_under = providers.quote_shipping(address(), [(_cut(39999), 1)])
+        exactly = providers.quote_shipping(address(), [(_cut(20000), 2)])
+        philly = providers.quote_shipping(address("Philadelphia", "19103"), [(_cut(40000), 1)])
+    assert just_under.cents == 999
+    assert exactly.cents == 0 and exactly.service == "Free shipping"
+    assert philly.cents == 0
+
+
+def test_free_shipping_can_be_turned_off(app: Flask) -> None:
+    app.config.update(SHIPPING_WEIGHT_RATES=BANDS, FREE_SHIPPING_FROM_CENTS=0)
+    with app.app_context():
+        assert providers.quote_shipping(address(), [(_cut(50000), 1)]).cents == 999
+
+
+def test_bad_band_settings_are_refused(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.config import ConfigError, _env_weight_rates
+
+    monkeypatch.setenv("SHIPPING_WEIGHT_RATES", "3:999, 8:1699")
+    assert _env_weight_rates("SHIPPING_WEIGHT_RATES") == ((3.0, 999), (8.0, 1699))
+    for bad in ("8:1699,3:999", "3:999,8:500", "three:999", "3:"):
+        monkeypatch.setenv("SHIPPING_WEIGHT_RATES", bad)
+        with pytest.raises(ConfigError):
+            _env_weight_rates("SHIPPING_WEIGHT_RATES")
+
+
+def test_negative_shipping_amounts_stop_startup(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.config import ConfigError, DevelopmentConfig
+
+    for name in ("SHIPPING_EXTRA_LB_CENTS", "FREE_SHIPPING_FROM_CENTS"):
+        monkeypatch.setenv(name, "-1")
+        with pytest.raises(ConfigError, match="0 or more"):
+            DevelopmentConfig()
+        monkeypatch.delenv(name)
+    monkeypatch.setenv("FREE_SHIPPING_FROM_CENTS", "0")  # 0 = free shipping off: allowed
+    assert DevelopmentConfig().FREE_SHIPPING_FROM_CENTS == 0

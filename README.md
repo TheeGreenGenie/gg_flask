@@ -117,6 +117,16 @@ Owners and support administrators can manage orders, private notes, status progr
 confirmation emails, invoices, and packing slips. Only owners can trigger a provider refund.
 Owners and catalog administrators can manage coupons.
 
+**Order alerts** (`/admin/alerts/`, owner only): add email addresses and ntfy topics (each phone
+subscribes to a hard-to-guess topic in the free ntfy app) and press **Send test**. Every paid order
+then emails `ORDER_NOTIFICATION_EMAIL` plus the list and pushes to each topic with a link that
+opens the order. The order page shows each item's photo, name, option and size, the money
+breakdown, customer, delivery and payment details.
+
+Admin accounts created with `flask admin create ... --owner-approval` sign in with the owner's
+approval (ntfy push; the owner approves with their authenticator code) instead of an
+authenticator app. A correct admin password followed by three wrong codes alerts the owner.
+
 ## Checkout and payments
 
 Checkout fails closed until supported countries, flat shipping, and tax handling are set.
@@ -140,7 +150,9 @@ against analytics and backlink exports before launch.
 | Setting | Effect |
 |---|---|
 | `SHIPPING_BACKEND=shippo`, `SHIPPO_API_TOKEN`, `SHIP_FROM_*` | Live USPS rates from Shippo, cheapest USPS service, by parcel weight (product `weight_grams`, default 450 g each + 120 g packaging) and a 12×10×4 in box. Falls back to `FLAT_SHIPPING_CENTS` if Shippo is unavailable. `SHIPPING_HANDLING_CENTS` adds a fixed amount. |
-| `LOCAL_SHIPPING_CENTS` | Philadelphia ZIPs (191xx, 19019, 19092, 19093, 19099) always get this rate. |
+| `LOCAL_SHIPPING_CENTS` | Philadelphia ZIPs (191xx, 19019, 19092, 19093, 19099) always get this rate (owner: `799`). |
+| `SHIPPING_WEIGHT_RATES=3:999,8:1699,15:2499,25:3499`, `SHIPPING_EXTRA_LB_CENTS` | Without Shippo, Standard shipping is priced on the total parcel weight (each item × quantity + packaging): up to 3 lb $9.99, 8 lb $16.99, and so on; each started pound past the last band adds `SHIPPING_EXTRA_LB_CENTS` (default 125). Unset keeps `FLAT_SHIPPING_CENTS`. Bad bands stop startup. |
+| `FREE_SHIPPING_FROM_CENTS` | Free Standard shipping once the items total this much, before coupons, Philadelphia included (default 40000 = $400; 0 turns it off). Express is still charged. |
 | `TAX_BACKEND=stripe` (+ `STRIPE_SECRET_KEY`) | Stripe Tax calculates tax at checkout for Stripe and PayPal orders, records a tax transaction after payment and reverses it on refund. If Stripe Tax is unreachable the order is refused rather than charged the wrong tax. |
 | `MAIL_BACKEND=smtp`, `SMTP_HOST/PORT/USERNAME/PASSWORD`, `SMTP_SECURITY`, `MAIL_FROM` | Password-reset, order and Studio-summary emails through any provider's SMTP relay (Postmark, Amazon SES, SendGrid, Google Workspace…). Always encrypted (STARTTLS on 587 or SSL on 465); production refuses `console`/`memory`. A failed send is logged without the message or address. Verify the sending domain with the provider (SPF/DKIM/DMARC DNS records) or mail lands in spam. |
 
@@ -185,8 +197,13 @@ sales at their scheduled times. The command is idempotent.
 Run every minute: `flask --app wsgi studio sync-blog` publishes scheduled journal articles.
 Run daily: `flask --app wsgi reviews purge-removed` permanently deletes expired private copies of
 automatically removed text when `MODERATION_RETENTION_DAYS=15`.
-Run daily: `flask --app wsgi studio daily-summary` emails operational counts to
-`ORDER_NOTIFICATION_EMAIL` through the configured mail backend.
+Run daily: `flask --app wsgi studio daily-summary` emails operational counts (including failed
+sign-ins in the last 24 hours) to `ORDER_NOTIFICATION_EMAIL` through the configured mail backend,
+and clears IP addresses and browser details older than 90 days.
+Run weekly (SiteGround: Saturdays `30 3 * * 6`): `flask --app wsgi backup run` saves a database
+backup, keeps the newest 3, and emails an encrypted copy when `BACKUP_PASSPHRASE` is set
+(`backup decrypt FILE.enc` opens it). Prove restores with `backup test-restore SPARE_DB` into an
+empty spare database; details in `deploy/SITEGROUND.md` section 7.
 
 ## Staff Studio (in progress)
 

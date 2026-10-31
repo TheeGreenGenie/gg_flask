@@ -396,7 +396,10 @@ def checkout() -> Response | str:
         for code in current_app.config.get("SUPPORTED_COUNTRIES", ())
     ]
     configured = (
-        current_app.config.get("FLAT_SHIPPING_CENTS") is not None
+        (
+            current_app.config.get("FLAT_SHIPPING_CENTS") is not None
+            or bool(current_app.config.get("SHIPPING_WEIGHT_RATES"))
+        )
         and current_app.config.get("TAX_BACKEND") is not None
         and bool(countries)
     )

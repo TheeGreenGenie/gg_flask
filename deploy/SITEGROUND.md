@@ -10,7 +10,7 @@ Everything private lives in `~/.ggflask` on the Node project's account, never in
 | `~/.ggflask/env` | the app's settings (you write it; same format as `.env`) |
 | `~/.ggflask/venv/` | Python packages (built automatically on first start) |
 | `~/.ggflask/media/` | product and blog photos |
-| `~/.ggflask/logs/` | `wrapper.log`, `app.log`, `jobs.log` (rotated at 5 MB) |
+| `~/.ggflask/logs/` | `wrapper.log`/`app.log` (5 MB, three rotated copies); `python.log` (rolled to `.1` only when a fresh Gunicorn starts); `jobs.log` (append-only—monitor its size) |
 | `~/.ggflask/jobs/` | scheduled-job heartbeats (`jobs check` reads them) |
 | `~/.ggflask/current` | link to the deployed code, used by cron and the helper below |
 
@@ -65,7 +65,8 @@ STUDIO_APPROVAL_BACKEND=ntfy
 STUDIO_NTFY_TOPIC=your existing topic
 SUPPORTED_COUNTRIES=US,CA,MX
 FLAT_SHIPPING_CENTS=1000
-LOCAL_SHIPPING_CENTS=500
+LOCAL_SHIPPING_CENTS=799
+SHIPPING_WEIGHT_RATES=3:999,8:1699,15:2499,25:3499
 TAX_BACKEND=none
 MAIL_BACKEND=smtp
 SMTP_HOST=smtp.gmail.com

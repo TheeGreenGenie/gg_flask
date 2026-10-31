@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -111,6 +112,11 @@ def quote_shipping(
             log.warning("shippo_express_failed", extra={"reason": str(exc)[:200]})
             raise unavailable from None
 
+    free_from = cfg.get("FREE_SHIPPING_FROM_CENTS")
+    items_cents = sum(variant.price_cents * qty for variant, qty in lines)
+    if isinstance(free_from, int) and free_from > 0 and items_cents >= free_from:
+        return ShippingQuote(0, "USPS", "Free shipping")
+
     flat = cfg.get("FLAT_SHIPPING_CENTS")
     local = cfg.get("LOCAL_SHIPPING_CENTS")
     if isinstance(local, int) and local >= 0 and is_philadelphia(address):
@@ -122,9 +128,32 @@ def quote_shipping(
         except ProviderError as exc:
             log.warning("shippo_quote_failed", extra={"reason": str(exc)[:200]})
 
+    by_weight = weight_rate_cents(parcel_weight_grams(lines))
+    if by_weight is not None:
+        return ShippingQuote(by_weight, "USPS", "Standard (by weight)")
     if not isinstance(flat, int) or flat < 0:
         raise CheckoutError("Shipping is not configured yet.")
     return ShippingQuote(flat, "USPS", "Flat rate")
+
+
+GRAMS_PER_POUND = 453.59237
+
+
+def weight_rate_cents(weight_grams: int) -> int | None:
+    """Price for the whole parcel from SHIPPING_WEIGHT_RATES (None when not configured).
+    The weight already counts every item times its quantity, so five 1-yard cuts cost more
+    than one."""
+    cfg = current_app.config
+    bands = cfg.get("SHIPPING_WEIGHT_RATES") or ()
+    if not bands:
+        return None
+    pounds = weight_grams / GRAMS_PER_POUND
+    for max_pounds, cents in bands:
+        if pounds <= max_pounds:
+            return int(cents)
+    last_pounds, last_cents = bands[-1]
+    extra = math.ceil(pounds - last_pounds)
+    return int(last_cents) + extra * int(cfg.get("SHIPPING_EXTRA_LB_CENTS") or 0)
 
 
 def _is_express(rate: dict[str, Any]) -> bool:

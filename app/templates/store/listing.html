@@ -5,7 +5,7 @@
 {% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">{% endblock %}
 {% block content %}
 {%- macro page_url(n) -%}
-  {{ url_for(endpoint, q=query or None, in_stock='1' if in_stock else None, sort=sort if sort != 'default' else None, page=n if n > 1 else None, **view_args) }}
+  {{ url_for(endpoint, q=query or None, in_stock='1' if in_stock else None, color=colors or None, sort=sort if sort != 'default' else None, page=n if n > 1 else None, **view_args) }}
 {%- endmacro -%}
 
 <div class="gg-page-title">
@@ -55,6 +55,17 @@
             <legend class="gg-filters__title">Availability</legend>
             <label class="gg-filters__check"><input type="checkbox" name="in_stock" value="1"{% if in_stock %} checked{% endif %} data-gg-autosubmit-field> In stock only</label>
           </fieldset>
+          {% if color_counts %}
+          <fieldset class="gg-colors">
+            <legend class="gg-filters__title">Colour</legend>
+            <ul class="gg-colors__list">
+              {% for name in color_order if color_counts.get(name) or name in colors %}
+                <li><label class="gg-colors__option"><input type="checkbox" name="color" value="{{ name }}"{% if name in colors %} checked{% endif %} data-gg-autosubmit-field><span class="gg-swatch gg-swatch--{{ name|lower }}" aria-hidden="true"></span>{{ name }} <span class="gg-filters__count">({{ color_counts.get(name, 0) }})</span></label></li>
+              {% endfor %}
+            </ul>
+            {% if colors %}<a class="gg-colors__clear" href="{{ url_for(endpoint, q=query or None, in_stock='1' if in_stock else None, sort=sort if sort != 'default' else None, **view_args) }}">Clear colours</a>{% endif %}
+          </fieldset>
+          {% endif %}
           <button class="gg-button gg-button--dark gg-filters__apply" type="submit">Apply</button>
         </form>
       </div>
@@ -69,6 +80,7 @@
       <form class="gg-sort" method="get" action="{{ url_for(endpoint, **view_args) }}" data-gg-autosubmit>
         {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
         {% if in_stock %}<input type="hidden" name="in_stock" value="1">{% endif %}
+        {% for name in colors %}<input type="hidden" name="color" value="{{ name }}">{% endfor %}
         <label class="gg-visually-hidden" for="sort">Sort products</label>
         <select id="sort" name="sort">
           {% for key, label in sorts.items() %}
@@ -86,7 +98,7 @@
     {% else %}
       <div class="gg-empty">
         <h2>Nothing here yet</h2>
-        <p>{% if query or in_stock %}Try removing a filter, or browse everything we have.{% else %}New pieces are on the way. Browse the rest of the shop in the meantime.{% endif %}</p>
+        <p>{% if query or in_stock or colors %}Try removing a filter, or browse everything we have.{% else %}New pieces are on the way. Browse the rest of the shop in the meantime.{% endif %}</p>
         <a class="gg-button gg-button--accent" href="{{ url_for('store.shop') }}">View all products</a>
       </div>
     {% endif %}

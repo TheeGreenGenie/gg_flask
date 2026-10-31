@@ -12,9 +12,12 @@ from werkzeug.wrappers import Response
 
 from app import cache
 from app.catalog import manifest, naming
+from app.catalog.models import utcnow
 
 media_bp = Blueprint("media", __name__)
 MEDIA_CSP = "default-src 'none'; style-src 'unsafe-inline'; sandbox"
+TEST_ITEM_SLUG = "test-item-not-for-sale"
+TEST_ITEM_CENTS = 50  # Stripe's minimum charge
 
 
 @media_bp.get("/media/<path:path>")
@@ -71,6 +74,39 @@ def init_catalog(app: Flask) -> None:
         )
         if report.archived:
             click.echo(f"  archived (not in manifest): {', '.join(report.archived)}")
+
+    @catalog_cli.command("add-test-item")
+    def add_test_item_cmd() -> None:
+        """Create (or reset) the $0.50 launch test item: no photo, no description, ships free.
+
+        Used to place one real order per payment provider before launch, then refunded. Hide it
+        in the Studio afterwards, before removing PREVIEW_PASSWORD."""
+        from app.catalog.models import Product, ProductStatus, ProductType, Variant
+        from app.extensions import db
+
+        product = db.session.scalar(db.select(Product).where(Product.slug == TEST_ITEM_SLUG))
+        if product is None:
+            product = Product(slug=TEST_ITEM_SLUG, product_type=ProductType.HOME_ACCESSORIES)
+            db.session.add(product)
+        product.name = "Test item — not for sale"
+        product.summary = ""
+        product.description = ""
+        product.status = ProductStatus.ACTIVE
+        product.free_shipping = True
+        product.published_at = product.published_at or utcnow()
+        if not product.variants:
+            product.variants.append(Variant(sku="TEST-ITEM", price_cents=TEST_ITEM_CENTS))
+        for variant in product.variants:
+            variant.price_cents = TEST_ITEM_CENTS
+            variant.compare_at_cents = None
+            variant.track_inventory = False  # never runs out
+            variant.active = True
+        db.session.commit()
+        cache.bump_catalog_version()
+        click.echo(
+            f"Test item ready at /product/{TEST_ITEM_SLUG}/ ($0.50, free shipping). "
+            "Refund each test order in /admin, then hide the item in Studio > Products."
+        )
 
     @catalog_cli.command("autoname")
     @click.option("--write", is_flag=True, help="Save names and colors into manifest.yaml.")

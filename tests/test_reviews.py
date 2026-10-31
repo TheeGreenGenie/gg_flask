@@ -185,6 +185,8 @@ def test_posting_rules_and_privacy_disclose_moderation(client) -> None:
     privacy = client.get("/privacy-policy/")
     assert rules.status_code == 200
     assert b"Positive and negative opinions are treated the same" in rules.data
+    # Same styled layout as the other policy pages (it once used unstyled classes).
+    assert b"css/content.css" in rules.data and b"gg-deco-article" in rules.data
     assert privacy.status_code == 200
     assert b"Reviews, comments, and moderation" in privacy.data
     assert b"reviews, comments, and questions" in privacy.data

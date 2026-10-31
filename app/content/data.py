@@ -78,7 +78,8 @@ POLICIES: Final = {
             (
                 "Shipping charges",
                 (
-                    "We offer Standard shipping (USPS Ground Advantage, usually 2–5 business days) and Express shipping (USPS Priority Mail Express, usually 1–2 business days). The price of each is calculated from your address and the weight of your order, and Philadelphia addresses receive a lower local Standard rate.",
+                    "Standard shipping (USPS Ground Advantage, usually 2–5 business days) is priced by the total weight of your order, so it depends on how many pieces you buy. Philadelphia addresses pay a flat local rate. Standard shipping is free on orders of $400 or more in merchandise.",
+                    "Faster shipping (USPS Priority Mail Express, usually 1–2 business days) is offered at checkout when it is available for your address.",
                     "The shipping charge is shown before you pay; that displayed amount is the amount charged for shipping.",
                 ),
             ),

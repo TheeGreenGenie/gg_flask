@@ -27,6 +27,7 @@ from app.assets import media_version
 from app.cart import service as cart_service
 from app.catalog import queries
 from app.catalog.models import Product, utcnow
+from app.catalog.naming import PALETTE
 from app.content import blog
 from app.extensions import csrf, db
 from app.orders import payments, providers
@@ -39,6 +40,7 @@ from app.store import content
 from app.templating import money
 
 bp = Blueprint("store", __name__)
+COLOR_ORDER = (*PALETTE, "Multicolor")  # how colour swatches are listed in the shop filters
 
 
 def _media_url(path: str | None) -> str:
@@ -113,6 +115,8 @@ def _listing_args() -> dict[str, Any]:
     return {
         "query": request.args.get("q", "").strip()[:100],
         "in_stock": request.args.get("in_stock") == "1",
+        # ?color=Navy&color=Teal: only names from the catalog's colour list, in palette order.
+        "colors": [name for name in COLOR_ORDER if name in request.args.getlist("color")],
         "sort": sort if sort in queries.SORTS else "default",
         "page": page,
     }
@@ -135,6 +139,13 @@ def _render_listing(title: str, description: str = "", **kwargs: Any) -> str:
         result=page,
         sorts=queries.SORTS,
         filter_categories=queries.top_categories(),
+        color_counts=queries.color_counts(
+            categories=cats,
+            collection=collection,
+            query=args["query"],
+            in_stock=args["in_stock"],
+        ),
+        color_order=COLOR_ORDER,
         counts=queries.category_counts(),
         endpoint=request.endpoint,
         view_args=request.view_args or {},

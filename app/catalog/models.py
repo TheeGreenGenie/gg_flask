@@ -186,6 +186,9 @@ class Product(db.Model):  # type: ignore[name-defined]
     summary: Mapped[str] = mapped_column(String(300), default="")
     description: Mapped[str] = mapped_column(Text, default="")
     featured: Mapped[bool] = mapped_column(default=False)
+    # Ships free on its own and adds nothing to a mixed parcel (owner, 2026-10-31: only the
+    # $0.50 launch test item; `flask catalog add-test-item`).
+    free_shipping: Mapped[bool] = mapped_column(default=False, server_default="false")
     sale_unit: Mapped[str] = mapped_column(
         String(20), default=SaleUnit.FIXED_BUNDLE.value, server_default="fixed_bundle"
     )

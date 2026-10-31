@@ -168,6 +168,7 @@ def test_stripe_tax_sends_lines_shipping_and_address(
     assert form["customer_details[address][postal_code]"] == "19103"
     assert form["shipping_cost[amount]"] == "500"
     assert form["line_items[1][tax_code]"] == "txcd_30011000"
+    assert form["line_items[0][tax_code]"] == "txcd_30011000"  # fabric is taxed as clothing
     assert form["line_items[0][tax_behavior]"] == "exclusive"
 
 
@@ -400,3 +401,42 @@ def test_negative_shipping_amounts_stop_startup(monkeypatch: pytest.MonkeyPatch)
         monkeypatch.delenv(name)
     monkeypatch.setenv("FREE_SHIPPING_FROM_CENTS", "0")  # 0 = free shipping off: allowed
     assert DevelopmentConfig().FREE_SHIPPING_FROM_CENTS == 0
+
+
+# The launch test item (owner, 2026-10-31) -------------------------------------------------
+
+
+def test_test_item_command_creates_a_50_cent_item_that_ships_free(catalog_app: Flask) -> None:
+    from app.catalog import TEST_ITEM_SLUG
+    from app.catalog.models import Product, ProductStatus
+
+    runner = catalog_app.test_cli_runner()
+    first = runner.invoke(args=["catalog", "add-test-item"])
+    assert first.exit_code == 0, first.output
+    assert runner.invoke(args=["catalog", "add-test-item"]).exit_code == 0  # safe to repeat
+    with catalog_app.app_context():
+        items = db.session.scalars(db.select(Product).where(Product.slug == TEST_ITEM_SLUG)).all()
+        assert len(items) == 1
+        item = items[0]
+        assert item.status == ProductStatus.ACTIVE and item.free_shipping
+        assert item.images == [] and item.description == "" and item.summary == ""
+        assert [(v.price_cents, v.track_inventory) for v in item.variants] == [(50, False)]
+        alone = providers.quote_shipping(address(), [(item.variants[0], 1)])
+        philly = providers.quote_shipping(address("Philadelphia", "19103"), [(item.variants[0], 1)])
+        assert (alone.cents, philly.cents) == (0, 0) and alone.service == "Free shipping"
+    page = catalog_app.test_client().get(f"/product/{TEST_ITEM_SLUG}/")
+    assert page.status_code == 200
+
+
+def test_free_shipping_item_adds_no_weight_to_a_mixed_order(catalog_app: Flask) -> None:
+    from app.catalog.models import Product, ProductType
+
+    catalog_app.config.update(SHIPPING_WEIGHT_RATES=BANDS)
+    with catalog_app.app_context():
+        free = Variant(sku="FREE", price_cents=50, weight_grams=3000)
+        free.product = Product(slug="x", name="x", product_type=ProductType.HOME_ACCESSORIES,
+                               free_shipping=True)  # fmt: skip
+        with_cut = providers.quote_shipping(address(), [(free, 1), (_cut(), 1)])
+        cut_alone = providers.quote_shipping(address(), [(_cut(), 1)])
+        db.session.rollback()
+    assert with_cut.cents == cut_alone.cents == 999  # the 3 kg test item weighs nothing here

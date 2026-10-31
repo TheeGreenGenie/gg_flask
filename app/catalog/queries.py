@@ -21,6 +21,7 @@ from app.catalog.models import (
     product_collections,
     utcnow,
 )
+from app.catalog.naming import COLOR_NAMES
 from app.extensions import db
 
 PAGE_SIZE = 16  # feature matrix R-007
@@ -95,15 +96,63 @@ def base_query() -> Select[Product]:
     )
 
 
+def _has_color(name: str):  # type: ignore[no-untyped-def]
+    """`colors` is a comma-separated list ("Navy,Cream"); match a whole name, never a part."""
+    return func.concat(",", Product.colors, ",").ilike(f"%,{name},%")
+
+
 def listing(
     *,
     categories: list[Category] | None = None,
     collection: str | None = None,
     query: str = "",
     in_stock: bool = False,
+    colors: list[str] | None = None,
     sort: str = "default",
     page: int = 1,
 ) -> Page:
+    stmt = _filtered(categories, collection, query, in_stock)
+    if colors:  # any of the chosen colours (owner, 2026-10-30: search prints by colour)
+        stmt = stmt.where(or_(*(_has_color(name) for name in colors)))
+
+    order = {
+        "newest": [Product.published_at.desc().nulls_last()],
+        "price-asc": [_min_price().asc()],
+        "price-desc": [_min_price().desc()],
+        "name": [Product.name.asc()],
+    }.get(sort, [Product.featured.desc(), Product.published_at.desc().nulls_last()])
+    stmt = stmt.order_by(*order, Product.id)  # id keeps pagination stable (C-010)
+
+    total = db.session.scalar(select(func.count()).select_from(stmt.order_by(None).subquery()))
+    pages = max(1, -(-(total or 0) // PAGE_SIZE))
+    page = min(max(1, page), pages)
+    items = list(db.session.scalars(stmt.limit(PAGE_SIZE).offset((page - 1) * PAGE_SIZE)))
+    return Page(items, total or 0, page, pages)
+
+
+def color_counts(
+    *,
+    categories: list[Category] | None = None,
+    collection: str | None = None,
+    query: str = "",
+    in_stock: bool = False,
+) -> dict[str, int]:
+    """Products per colour on the current page's scope (before any colour is chosen)."""
+    stmt = _filtered(categories, collection, query, in_stock).with_only_columns(Product.colors)
+    counts: dict[str, int] = {}
+    for raw in db.session.scalars(stmt):
+        for name in (raw or "").split(","):
+            if name:
+                counts[name] = counts.get(name, 0) + 1
+    return counts
+
+
+def _filtered(
+    categories: list[Category] | None,
+    collection: str | None,
+    query: str,
+    in_stock: bool,
+) -> Select[Product]:
     stmt = base_query()
     if categories is not None:
         ids = [c.id for c in categories]
@@ -131,29 +180,20 @@ def listing(
         )
     if query:
         like = f"%{query.replace('%', '').replace('_', '')}%"
+        # A colour word in the search ("teal", "navy wax") also finds prints of that colour.
+        words = {word.strip(",.").casefold() for word in query.split()}
+        named = [name for name in COLOR_NAMES if name.casefold() in words]
         stmt = stmt.where(
             or_(
                 Product.name.ilike(like),
                 Product.summary.ilike(like),
                 exists(_active_variant().where(Variant.sku.ilike(like))),
+                *(_has_color(name) for name in named),
             )
         )
     if in_stock:
         stmt = stmt.where(_in_stock_clause())
-
-    order = {
-        "newest": [Product.published_at.desc().nulls_last()],
-        "price-asc": [_min_price().asc()],
-        "price-desc": [_min_price().desc()],
-        "name": [Product.name.asc()],
-    }.get(sort, [Product.featured.desc(), Product.published_at.desc().nulls_last()])
-    stmt = stmt.order_by(*order, Product.id)  # id keeps pagination stable (C-010)
-
-    total = db.session.scalar(select(func.count()).select_from(stmt.order_by(None).subquery()))
-    pages = max(1, -(-(total or 0) // PAGE_SIZE))
-    page = min(max(1, page), pages)
-    items = list(db.session.scalars(stmt.limit(PAGE_SIZE).offset((page - 1) * PAGE_SIZE)))
-    return Page(items, total or 0, page, pages)
+    return stmt
 
 
 def newest(limit: int) -> list[Product]:

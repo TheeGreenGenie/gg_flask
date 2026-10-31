@@ -37,6 +37,8 @@ nightly backups, updates, rollback and restore).
 
 ## Catalog
 
+**Colour search:** shop pages filter by colour (`?color=Navy&color=Teal`, any of them) using the colours stored on each product, with counts per colour; typing a colour in the search box finds it too.
+
 Products come from [catalog/manifest.yaml](catalog/manifest.yaml) plus photos in `catalog/assets/`.
 Edit the YAML, then:
 
@@ -130,6 +132,8 @@ authenticator app. A correct admin password followed by three wrong codes alerts
 ## Checkout and payments
 
 Checkout fails closed until supported countries, flat shipping, and tax handling are set.
+
+**Launch payment test:** `flask --app wsgi catalog add-test-item` creates "Test item — not for sale" ($0.50, Stripe's minimum; no photo; ships free) at `/product/test-item-not-for-sale/`. Buy it once per provider with live keys while the preview lock is on, refund each order in /admin, then hide the item in Studio > Products before going public. Refunds never restock, so reset stock for any real products used in testing.
 Configure the variables documented in `.env.example`, then register these HTTPS webhooks:
 
 - Stripe: `/webhooks/stripe` (`checkout.session.completed`)

@@ -42,9 +42,10 @@ DEFAULT_ITEM_WEIGHT_GRAMS = 450  # used when a product has no shipping weight ye
 PACKAGING_WEIGHT_GRAMS = 120
 
 # Stripe product tax codes per product type. txcd_99999999 = general tangible goods.
-# Pennsylvania treats most clothing as exempt; confirm codes with your accountant.
+# Pennsylvania treats most clothing as exempt. Fabric is taxed as clothing (owner, 2026-10-30,
+# reviewed by the owner's lawyer); STRIPE_TAX_CODES can still override per product type.
 DEFAULT_TAX_CODES = {
-    "fabric": "txcd_99999999",
+    "fabric": "txcd_30011000",
     "clothing": "txcd_30011000",
     "home_accessories": "txcd_99999999",
 }
@@ -116,6 +117,12 @@ def quote_shipping(
     items_cents = sum(variant.price_cents * qty for variant, qty in lines)
     if isinstance(free_from, int) and free_from > 0 and items_cents >= free_from:
         return ShippingQuote(0, "USPS", "Free shipping")
+    # Free-shipping products (only the launch test item) ship free on their own and add no
+    # weight when mixed with other items, which are priced as usual.
+    paid = [(variant, qty) for variant, qty in lines if not _ships_free(variant)]
+    if lines and not paid:
+        return ShippingQuote(0, "USPS", "Free shipping")
+    lines = paid
 
     flat = cfg.get("FLAT_SHIPPING_CENTS")
     local = cfg.get("LOCAL_SHIPPING_CENTS")
@@ -134,6 +141,11 @@ def quote_shipping(
     if not isinstance(flat, int) or flat < 0:
         raise CheckoutError("Shipping is not configured yet.")
     return ShippingQuote(flat, "USPS", "Flat rate")
+
+
+def _ships_free(variant: Variant) -> bool:
+    product = getattr(variant, "product", None)
+    return bool(product is not None and product.free_shipping)
 
 
 GRAMS_PER_POUND = 453.59237

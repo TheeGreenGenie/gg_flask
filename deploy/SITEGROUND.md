@@ -129,8 +129,13 @@ If `/home/customer` is not your home path, use the output of `echo $HOME`. Check
 
 **Backups:** run `$F backup run` once by hand first. It needs `pg_dump` on the server (SiteGround
 includes it with PostgreSQL); the message says plainly if it is missing. `$F backup list` shows
-what is kept. The backups sit on the same server, so once a month download the newest file
-(Site Tools > File Manager, `.ggflask/backups`) to your computer or cloud storage.
+what is kept.
+
+**Off-server copy by email:** add `BACKUP_PASSPHRASE=` (a long phrase only you know, 16+
+characters; write it down somewhere safe, it cannot be recovered) to `~/.ggflask/env`. Each
+backup is then encrypted with it and emailed to the shop address (ggafrikan@gmail.com; set
+`BACKUP_EMAIL=` for another). Without the passphrase nothing is emailed. To open an emailed
+`.enc` file on your computer: `flask --app wsgi backup decrypt FILE.enc`.
 Restoring replaces the live data, so ask Claude for the exact `pg_restore` command first.
 
 ## 8. Staging checks (paste results to Claude; no secrets)

@@ -236,3 +236,54 @@ def test_missing_pg_dump_is_said_plainly(
     monkeypatch.setattr(backup.shutil, "which", lambda name: None)
     result = app.test_cli_runner().invoke(args=["backup", "run"])
     assert result.exit_code != 0 and "pg_dump is not installed" in result.output
+
+
+def test_backups_are_emailed_encrypted_only_with_a_passphrase(
+    app: Flask, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    app.config.update(BACKUP_DIR=str(tmp_path / "kept"), BACKUP_EMAIL=None)
+    _fake_tools(monkeypatch, [])
+    outbox = app.extensions.setdefault("outbox", [])
+    runner = app.test_cli_runner()
+    off = runner.invoke(args=["backup", "run"])
+    assert off.exit_code == 0 and "Emailing is off" in off.output and outbox == []
+
+    app.config["BACKUP_PASSPHRASE"] = "short"  # noqa: S105 - test fixture
+    weak = runner.invoke(args=["backup", "run"])
+    assert weak.exit_code != 0 and "at least 16 characters" in weak.output and outbox == []
+
+    passphrase = "correct horse battery staple"  # noqa: S105 - test fixture
+    app.config["BACKUP_PASSPHRASE"] = passphrase
+    sent = runner.invoke(args=["backup", "run"])
+    assert sent.exit_code == 0 and "ggafrikan@gmail.com" in sent.output
+    message = outbox[-1]
+    assert message.to == "ggafrikan@gmail.com"  # the shop's contact address by default
+    ((name, sealed),) = message.attachments
+    assert name.endswith(".dump.enc")
+    assert b"PGDMP" not in sealed  # never readable without the passphrase
+    with app.app_context():
+        assert backup.decrypt(sealed, passphrase) == b"PGDMP fake dump"
+        with pytest.raises(backup.BackupError, match="Wrong passphrase"):
+            backup.decrypt(sealed, "not the passphrase at all")
+    assert passphrase not in sent.output and passphrase not in message.body
+
+    # Opening it on the owner's computer.
+    enc = tmp_path / name
+    enc.write_bytes(sealed)
+    wrong = runner.invoke(args=["backup", "decrypt", str(enc)], input="nope nope nope\n")
+    assert wrong.exit_code != 0 and "Wrong passphrase" in wrong.output
+    right = runner.invoke(args=["backup", "decrypt", str(enc)], input=passphrase + "\n")
+    assert right.exit_code == 0
+    assert (tmp_path / name.removesuffix(".enc")).read_bytes() == b"PGDMP fake dump"
+
+
+def test_attachments_reach_the_real_email_message(app: Flask) -> None:
+    from app import mail
+
+    app.config["MAIL_FROM"] = "shop@example.com"
+    with app.app_context():
+        built = mail.build(mail.Message("o@example.com", "Backup", "Attached.", None,
+                                        (("gg-db-1.dump.enc", b"\x00secret"),)))  # fmt: skip
+    files = list(built.iter_attachments())
+    assert [f.get_filename() for f in files] == ["gg-db-1.dump.enc"]
+    assert files[0].get_content() == b"\x00secret"

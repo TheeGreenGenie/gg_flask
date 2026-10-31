@@ -151,6 +151,10 @@ class BaseConfig:
         self.JOBS_HEARTBEAT_DIR = _env("JOBS_HEARTBEAT_DIR")
         # Weekly database backups (`flask backup run`; default: instance/backups).
         self.BACKUP_DIR = _env("BACKUP_DIR")
+        # Emailing each backup (owner, 2026-10-30): only when a passphrase is set, and the file is
+        # encrypted with it first. BACKUP_EMAIL defaults to the shop's contact address.
+        self.BACKUP_PASSPHRASE = _env("BACKUP_PASSPHRASE")
+        self.BACKUP_EMAIL = _env("BACKUP_EMAIL")
         # Set to "siteground" by deploy/siteground/* so host-specific checks adapt.
         self.GG_PLATFORM = _env("GG_PLATFORM")
         self.ADMIN_ALLOWED_IPS = _env_csv("ADMIN_ALLOWED_IPS")

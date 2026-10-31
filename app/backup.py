@@ -96,6 +96,93 @@ def run(now: datetime | None = None) -> Path:
     return target
 
 
+# ---------- emailing an encrypted copy (owner, 2026-10-30) ----------
+# The dump holds customer details and the admin sign-in secrets, so it never leaves the server
+# unencrypted: AES-256-GCM with a key stretched from BACKUP_PASSPHRASE by scrypt. The file can
+# only be opened with `flask backup decrypt` and the passphrase; a wrong one is refused.
+
+MAGIC = b"GGBACKUP1\n"
+MIN_PASSPHRASE = 16
+MAX_EMAIL_BYTES = 17 * 1024 * 1024  # Gmail's 25 MB limit includes the ~37% email encoding
+
+
+def _key(passphrase: str, salt: bytes) -> bytes:
+    from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
+
+    return Scrypt(salt=salt, length=32, n=2**15, r=8, p=1).derive(passphrase.encode())
+
+
+def encrypt(data: bytes, passphrase: str) -> bytes:
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+    salt, nonce = os.urandom(16), os.urandom(12)
+    return MAGIC + salt + nonce + AESGCM(_key(passphrase, salt)).encrypt(nonce, data, MAGIC)
+
+
+def decrypt(blob: bytes, passphrase: str) -> bytes:
+    from cryptography.exceptions import InvalidTag
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+    if not blob.startswith(MAGIC):
+        raise BackupError("This is not an encrypted GG backup file.")
+    body = blob[len(MAGIC) :]
+    salt, nonce, sealed = body[:16], body[16:28], body[28:]
+    try:
+        return AESGCM(_key(passphrase, salt)).decrypt(nonce, sealed, MAGIC)
+    except InvalidTag:
+        raise BackupError("Wrong passphrase, or the file is damaged.") from None
+
+
+def email_to() -> str | None:
+    """Where backups are emailed, or None when emailing is off (no passphrase set)."""
+    from app import site_content
+
+    if not current_app.config.get("BACKUP_PASSPHRASE"):
+        return None
+    return current_app.config.get("BACKUP_EMAIL") or site_content.CONTACT_EMAIL
+
+
+def email_backup(path: Path) -> str:
+    """Send the encrypted backup; returns a one-line result for the job log."""
+    from app import mail
+
+    to = email_to()
+    passphrase = str(current_app.config.get("BACKUP_PASSPHRASE") or "")
+    if to is None:
+        return "Emailing is off (set BACKUP_PASSPHRASE to turn it on)."
+    if len(passphrase) < MIN_PASSPHRASE:
+        raise BackupError(
+            f"BACKUP_PASSPHRASE must be at least {MIN_PASSPHRASE} characters; nothing was emailed."
+        )
+    sealed = encrypt(path.read_bytes(), passphrase)
+    name = path.name + ".enc"
+    if len(sealed) > MAX_EMAIL_BYTES:
+        sent = mail.send(
+            to,
+            f"GG database backup {path.stem[len(PREFIX) :]}: too large to email",
+            f"This week's backup ({len(sealed) // (1024 * 1024)} MB) is too large to attach. "
+            "It is saved on the server in .ggflask/backups; download it from Site Tools > "
+            "File Manager.\n",
+        )
+        if not sent:
+            raise BackupError("The backup was saved, but the email could not be sent.")
+        return f"Too large to attach; a notice was emailed to {to}."
+    sent = mail.send(
+        to,
+        f"GG database backup {path.stem[len(PREFIX) :]}",
+        "This week's database backup is attached, encrypted with your backup passphrase.\n\n"
+        "Keep this email: it is an off-server copy in case the server is ever lost. The server "
+        f"keeps only the newest {KEEP} backups; older emails are your history.\n\n"
+        "To open it, on a computer with the project:\n"
+        f"  flask --app wsgi backup decrypt {name}\n"
+        "and type the passphrase. Only restore with Claude's help: it replaces the live data.\n",
+        attachments=((name, sealed),),
+    )
+    if not sent:
+        raise BackupError("The backup was saved, but the email could not be sent.")
+    return f"Encrypted copy emailed to {to}."
+
+
 def prune() -> list[Path]:
     """Delete everything but the newest KEEP dumps (and any half-written leftovers)."""
     removed = []
@@ -122,6 +209,25 @@ def init_backup(app: Flask) -> None:
             raise click.ClickException(str(exc)) from None
         size = path.stat().st_size / (1024 * 1024)
         click.echo(f"Backup saved: {path.name} ({size:.1f} MB). Keeping the newest {KEEP}.")
+        try:
+            click.echo(email_backup(path))
+        except BackupError as exc:  # the job shows as failed so the daily summary flags it
+            raise click.ClickException(str(exc)) from None
+
+    @backup_cli.command("decrypt")
+    @click.argument("source", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+    def decrypt_command(source: Path) -> None:
+        """Turn an emailed SOURCE.enc back into a .dump file (asks for the passphrase)."""
+        passphrase = click.prompt("Backup passphrase", hide_input=True)
+        try:
+            data = decrypt(source.read_bytes(), passphrase)
+        except BackupError as exc:
+            raise click.ClickException(str(exc)) from None
+        target = source.with_suffix("") if source.suffix == ".enc" else source.with_suffix(".dump")
+        if target.exists():
+            raise click.ClickException(f"{target.name} already exists; move it first.")
+        target.write_bytes(data)
+        click.echo(f"Decrypted to {target}. Restore only with Claude's help.")
 
     @backup_cli.command("list")
     def list_command() -> None:

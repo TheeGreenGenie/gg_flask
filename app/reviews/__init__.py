@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import click
-from flask import Blueprint, Flask, flash, redirect, request, url_for
+from flask import Blueprint, Flask, abort, flash, redirect, request, url_for
 from werkzeug.wrappers import Response
 
 from app.accounts import service as account_service
@@ -30,6 +30,26 @@ def create(slug: str) -> Response:
         flash(str(exc), "error")
     else:
         flash(f"Your {post.kind.value} was posted.", "success")
+    return redirect(url_for("store.product", slug=slug) + "#reviews")
+
+
+@bp.post("/posts/<int:post_id>/remove")
+def remove(post_id: int) -> Response:
+    """Studio and admin accounts take a post off the product page (kept privately, restorable)."""
+    from app.extensions import db
+    from app.reviews.models import ProductPost
+
+    remover = service.staff_remover()
+    if remover is None:
+        abort(403)
+    post = db.get_or_404(ProductPost, post_id)
+    slug = post.product.slug
+    try:
+        service.remove_post(post, request.form.get("reason", ""), remover)
+    except service.ReviewError as exc:
+        flash(str(exc), "error")
+    else:
+        flash("Removed from the website. It can be restored in the Studio if needed.", "success")
     return redirect(url_for("store.product", slug=slug) + "#reviews")
 
 

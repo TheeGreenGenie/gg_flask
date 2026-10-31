@@ -217,7 +217,7 @@ def test_role_permissions_and_inventory_history(catalog_app: Flask) -> None:
     _approved_cookie(catalog_app, client, roles="inventory", change=True)
     assert client.get(PREFIX + "/inventory").status_code == 200
     assert client.get(PREFIX + "/prices").status_code == 200  # every account (owner, 2026-10-30)
-    assert client.get(PREFIX + "/community").status_code == 403  # not theirs
+    assert client.get(PREFIX + "/community").status_code == 200  # everyone may remove posts
     with catalog_app.app_context():
         variant = db.session.query(Variant).first()
         assert variant is not None
@@ -423,15 +423,15 @@ def test_editor_hides_and_restores_product_without_deleting(catalog_app: Flask) 
         assert db.session.query(Product).filter_by(id=product_id).count() == 1
 
 
-def test_every_role_may_edit_products_but_not_moderate(catalog_app: Flask) -> None:
-    """Owner, 2026-10-30: all Studio accounts get the product tools; community stays scoped."""
+def test_every_role_may_edit_products_and_remove_posts(catalog_app: Flask) -> None:
+    """Owner, 2026-10-30/31: all Studio accounts get the product tools and may remove posts."""
     client = catalog_app.test_client()
     _approved_cookie(catalog_app, client, roles="inventory", change=True)
     with catalog_app.app_context():
         product_id = db.session.query(Product.id).first()[0]
     assert client.get(PREFIX + "/products").status_code == 200
     assert client.get(PREFIX + f"/products/{product_id}").status_code == 200
-    assert client.get(PREFIX + "/community").status_code == 403
+    assert client.get(PREFIX + "/community").status_code == 200  # removing posts: everyone
 
 
 def test_editor_updates_product_details_and_categories(catalog_app: Flask) -> None:

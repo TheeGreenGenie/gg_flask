@@ -7,6 +7,17 @@ The suite has two deliberately small layers appropriate to the store's current t
    summary, sends a one-hour-deduplicated alert after a correct admin password followed by three
    wrong codes in 15 minutes, and clears non-consent IP/browser details after 90 days.
 
+The existing 07:30 `studio daily-summary` job sends the consolidated application findings to
+`MONITORING_SUMMARY_EMAIL` (currently `solomonshasanmi@gmail.com`). The setting is separate from
+`ORDER_NOTIFICATION_EMAIL`, with the latter retained only as a compatibility fallback. The digest
+includes privileged sign-in failures and lockouts, scheduled-job and backup health, plus low-stock,
+moderation, sale and Studio activity counts. Tests use the memory mail backend and never send to the
+real address.
+
+The credential-free release probe remains an off-host check. Its scheduler should alert directly on
+a nonzero exit instead of depending on this on-host email; otherwise a SiteGround or application
+outage could suppress both the finding and its notification.
+
 The release probe does not import the application, open its environment file, authenticate, or
 submit real commerce data.
 
@@ -57,6 +68,10 @@ schema:
 Current evidence (2026-10-30): 19 focused tests passed, including the four controls Claude added and
 a counter-outage regression. Five existing daily-summary/job/ntfy interaction tests also passed. No
 production database, live key, or environment file is needed.
+
+Recipient routing evidence (2026-10-31): two dedicated tests plus four existing summary/security/job
+compatibility checks passed in a disposable PostgreSQL database (**6/6**); lint, formatting and
+types passed. The database was removed after the run and no SMTP delivery was attempted.
 
 Traffic-exhaustion controls and owner response steps are in
 [DDOS_RUNBOOK.md](DDOS_RUNBOOK.md). The Node wrapper has a tested global/per-IP admission gate, but

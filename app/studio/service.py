@@ -1778,9 +1778,16 @@ def send_daily_summary(now: datetime | None = None) -> bool:
     """Send a low-detail operational digest through the configured mail adapter."""
     now = now or utcnow()
     cutoff = now - timedelta(days=1)
-    recipient = str(current_app.config.get("ORDER_NOTIFICATION_EMAIL") or "").strip()
+    recipient = str(
+        current_app.config.get("MONITORING_SUMMARY_EMAIL")
+        or current_app.config.get("ORDER_NOTIFICATION_EMAIL")
+        or ""
+    ).strip()
     if not recipient:
-        raise StudioError("Set ORDER_NOTIFICATION_EMAIL before scheduling the Studio summary.")
+        raise StudioError(
+            "Set MONITORING_SUMMARY_EMAIL or ORDER_NOTIFICATION_EMAIL before scheduling "
+            "the Studio summary."
+        )
     if not mail.available():
         raise StudioError("Configure MAIL_BACKEND before scheduling the Studio summary.")
     activity = int(

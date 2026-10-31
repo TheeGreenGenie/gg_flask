@@ -76,6 +76,7 @@ SMTP_USERNAME=ggafrikaneleganz@gmail.com
 SMTP_PASSWORD=the app password
 MAIL_FROM="GG Afrikan Eleganz <ggafrikaneleganz@gmail.com>"
 ORDER_NOTIFICATION_EMAIL=ggafrikaneleganz@gmail.com
+MONITORING_SUMMARY_EMAIL=solomonshasanmi@gmail.com
 HERE_API_KEY=...
 MAILCHIMP_API_KEY=...
 MAILCHIMP_SERVER_PREFIX=...
@@ -125,8 +126,26 @@ Command for each (replace the last words per row):
 | daily 07:30 | `studio daily-summary` |
 | Saturdays 03:30 (`30 3 * * 6`) | `backup run`: database backup to `~/.ggflask/backups`, keeps the newest 3 (three weeks) |
 
+**Confirm the high-frequency rows with SiteGround before launch.** SiteGround's current
+[fair-use guidance](https://www.siteground.com/kb/fair-use-siteground-hosting/) recommends at least
+30 minutes between scheduled script executions. This project's one-minute sale/blog timing and
+15-minute order timing predate that guidance. If support requires a 30-minute cadence, do not just
+slow the jobs: their heartbeat thresholds and the accepted delay for scheduled sales, posts, stock
+release and pending refunds must be changed together. The daily summary, daily cleanup and weekly
+backup rows already meet the interval guidance.
+
+The 07:30 summary goes to `MONITORING_SUMMARY_EMAIL` and reports failed privileged sign-ins,
+lockouts, job/backup health and operating counts. It falls back to `ORDER_NOTIFICATION_EMAIL` only
+for deployments that have not added the dedicated setting yet. This is an application email, so
+SMTP delivery must be healthy; keep UptimeRobot and the external security probe off-host so a host
+outage cannot silence every alert.
+
 If `/home/customer` is not your home path, use the output of `echo $HOME`. Check them with
 `$F jobs check` the next day.
+
+SiteGround creates and edits these under **Site Tools > Devs > Cron Jobs**. Its cron form can send
+the command's output to an email address, which is useful during setup but noisy for frequent jobs;
+the application wrapper also keeps private output and heartbeats under `~/.ggflask/`.
 
 **Backups:** run `$F backup run` once by hand first. It needs `pg_dump` on the server (SiteGround
 includes it with PostgreSQL); the message says plainly if it is missing. `$F backup list` shows
@@ -137,9 +156,11 @@ characters; write it down somewhere safe, it cannot be recovered) to `~/.ggflask
 backup is then encrypted with it and emailed to the original shop mailbox (ggafrikan@gmail.com, on purpose; set
 `BACKUP_EMAIL=` for another). Without the passphrase nothing is emailed. To open an emailed
 `.enc` file on your computer: `flask --app wsgi backup decrypt FILE.enc`.
-Restoring replaces the live data, so ask Claude for the exact `pg_restore` command first.
+For the launch restore drill, create an empty spare PostgreSQL database in Site Tools, then run
+`$F backup test-restore SPARE_DB_NAME`. It refuses the live database name, restores only into the
+spare database and compares key row counts; do not use a raw restore command against production.
 
-## 8. Staging checks (paste results to Claude; no secrets)
+## 8. Pre-launch checks (paste results to Claude; no secrets)
 
 First run the automated security and hosting check; it prints PASS / FAIL / WARN per item and
 never prints a secret value:
@@ -155,7 +176,7 @@ Then the manual checks:
    public IP. If it is empty or SiteGround's, tell Claude before going further (rate limits and the
    optional admin IP list depend on it). Then set `GG_DEBUG_FORWARDING=0`.
 2. **No shared caching of pages:** in PowerShell,
-   `curl.exe -sI https://staging2.ggafrikaneleganz.com/ | findstr /i "cache-control x-proxy-cache"`
+   `curl.exe -sI https://ggafrikaneleganz.com/ | findstr /i "cache-control x-proxy-cache"`
    must show `private, no-store` and no `HIT`.
 3. **Nothing private is public:** these must all be 404:
    `/.ggflask/env`, `/.env`, `/.git/config`, `/.nodeapp/`, `/requirements.lock`, `/package.json`,
@@ -168,8 +189,33 @@ Then the manual checks:
 6. **Newsletter:** a signed-out signup gets the Mailchimp confirmation email.
 7. **Address autocomplete** at checkout suggests addresses.
 8. **Wake-up time:** leave the site untouched for 2 minutes, then
-   `curl.exe -s -o NUL -w "%{time_starttransfer}s" https://staging2.ggafrikaneleganz.com/`, and
+   `curl.exe -s -o NUL -w "%{time_starttransfer}s" https://ggafrikaneleganz.com/`, and
    again right after.
+
+## 9. Final cutover checklist
+
+1. Deploy one reviewed commit containing all intended launch changes; run the launch check above and
+   resolve every `FAIL` before changing payment mode.
+2. Add `MONITORING_SUMMARY_EMAIL=solomonshasanmi@gmail.com`, confirm the cron rows in section 7 and
+   get SiteGround's answer on the four high-frequency jobs. Run `$F jobs check` after they have had
+   time to produce heartbeats.
+3. Run `$F mail test solomonshasanmi@gmail.com`, then `$F studio daily-summary`; confirm the actual
+   digest arrives. This is the only safe proof that SMTP, cron command configuration and the mailbox
+   work together.
+4. Complete `$F backup test-restore SPARE_DB_NAME`; keep the encrypted off-host backup and its
+   passphrase separately.
+5. Configure UptimeRobot (homepage and `/health/ready`) and schedule the credential-free security
+   probe off-host with its own alert destination. Do not make an on-host email the only outage alert.
+6. Enter live Stripe and PayPal values only in SiteGround's protected environment, including new
+   live webhook signing values and `PAYPAL_API_BASE=https://api-m.paypal.com`; restart once. Confirm
+   the Apple Pay association if Apple Pay is enabled. Do not paste or print any secret during checks.
+7. Run one low-value real order and refund through each provider. Confirm provider dashboard,
+   signed webhook receipt, database order state, inventory effect and customer/admin emails. Reset
+   test-item stock if needed and hide the test item afterward.
+8. Revoke superseded WordPress/sandbox/monitor credentials, remove `PREVIEW_PASSWORD`, restart, rerun
+   the launch check and security probe without `--expect-preview`, and submit the sitemap to Search
+   Console.
+9. Watch payment, refund, order email, inventory, job, backup and security alerts for 48 hours.
 
 ## Optional: bring the local catalog and photos
 

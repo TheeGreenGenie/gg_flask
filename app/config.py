@@ -140,6 +140,7 @@ class BaseConfig:
     PAYPAL_WEBHOOK_ID: str | None = None
     PAYPAL_API_BASE = "https://api-m.sandbox.paypal.com"
     ORDER_NOTIFICATION_EMAIL: str | None = None
+    MONITORING_SUMMARY_EMAIL: str | None = None
     MAILCHIMP_API_KEY: str | None = None
     MAILCHIMP_SERVER_PREFIX: str | None = None
     MAILCHIMP_LIST_ID: str | None = None
@@ -247,9 +248,13 @@ class BaseConfig:
         self.SMTP_USERNAME = _env("SMTP_USERNAME")
         self.SMTP_PASSWORD = _env("SMTP_PASSWORD")
         self.SMTP_SECURITY = (_env("SMTP_SECURITY") or self.SMTP_SECURITY).lower()
-        # New orders, Studio approvals and the daily summary (owner, 2026-10-27).
+        # New orders and Studio approvals (owner, 2026-10-27).
         self.ORDER_NOTIFICATION_EMAIL = (
             _env("ORDER_NOTIFICATION_EMAIL") or "ggafrikaneleganz@gmail.com"
+        )
+        # Daily security, scheduled-job, backup and operational findings.
+        self.MONITORING_SUMMARY_EMAIL = (
+            _env("MONITORING_SUMMARY_EMAIL") or "solomonshasanmi@gmail.com"
         )
         self.MAILCHIMP_API_KEY = _env("MAILCHIMP_API_KEY")
         self.MAILCHIMP_SERVER_PREFIX = _env("MAILCHIMP_SERVER_PREFIX")
@@ -319,6 +324,7 @@ class TestingConfig(BaseConfig):
         self.SECRET_KEY = "test-only-not-secret"  # noqa: S105
         self.MAIL_BACKEND = "memory"  # never send real email from tests, whatever the shell says
         self.ORDER_NOTIFICATION_EMAIL = _env("ORDER_NOTIFICATION_EMAIL")  # tests opt in
+        self.MONITORING_SUMMARY_EMAIL = _env("MONITORING_SUMMARY_EMAIL")  # tests opt in
         # PostgreSQL only, like production. Default: the docker-compose database on this PC.
         self.SQLALCHEMY_DATABASE_URI = (
             _env("TEST_DATABASE_URL") or "postgresql+psycopg://gg:gg@localhost:55432/gg_test"

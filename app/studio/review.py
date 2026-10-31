@@ -428,7 +428,12 @@ STEP_UP: dict[str, Callable[[MultiDict[str, str]], bool]] = {
 # Blog posting goes live without the owner for every account (owner, 2026-10-30: "groups + blog
 # free, prices held"). Groups are never held. The password step-up above still applies.
 LIVE_FOR_STAFF = frozenset(
-    {"studio.blog_edit", "studio.blog_publication", "studio.blog_revision_restore"}
+    {
+        "studio.blog_edit",
+        "studio.blog_publication",
+        "studio.blog_revision_restore",
+        "studio.community_moderate",  # removing/restoring posts takes effect at once
+    }
 )
 
 # endpoint -> (describer, the page's original roles for the permission pre-check)

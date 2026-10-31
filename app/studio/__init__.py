@@ -167,7 +167,9 @@ def _finish_sign_in(record: StudioLoginRequest) -> str | Response:
         secure=bool(current_app.config["SESSION_COOKIE_SECURE"]),
         httponly=True,
         samesite="Strict",
-        path=url_for("studio.login"),
+        # Site-wide so product pages can offer staff the Remove button (owner, 2026-10-31).
+        # Still HttpOnly, Secure and SameSite=Strict; the private Studio path is never exposed.
+        path="/",
     )
     return response
 
@@ -490,13 +492,14 @@ def change_review_link(change_id: int) -> Response:
 def logout() -> Response:
     service.revoke_current()
     response = make_response(redirect(url_for("studio.login")))
-    response.delete_cookie(
-        current_app.config["STUDIO_COOKIE_NAME"],
-        path=url_for("studio.login"),
-        secure=bool(current_app.config["SESSION_COOKIE_SECURE"]),
-        httponly=True,
-        samesite="Strict",
-    )
+    for path in ("/", url_for("studio.login")):  # also clears cookies set before 2026-10-31
+        response.delete_cookie(
+            current_app.config["STUDIO_COOKIE_NAME"],
+            path=path,
+            secure=bool(current_app.config["SESSION_COOKIE_SECURE"]),
+            httponly=True,
+            samesite="Strict",
+        )
     return response
 
 

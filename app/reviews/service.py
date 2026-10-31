@@ -6,6 +6,7 @@ import math
 import re
 import unicodedata
 from datetime import timedelta
+from typing import Any
 
 from flask import current_app, request, url_for
 from sqlalchemy import func, select
@@ -319,6 +320,55 @@ def _notify_owner(post: ProductPost, product: Product) -> None:
         f"A customer posted a {post.kind.value} on {product.name}.\n\n"
         f"Title: {post.title}\nStatus: {post.status.value}\n\nView: {link}\n",
     )
+
+
+# Removing a review, comment or question (owner, 2026-10-31): Studio and admin accounts only,
+# from the Studio or straight from the product page. The post leaves the website but is kept
+# privately and can be restored in the Studio; who removed it, when and why is audited. Reasons
+# are posting-rule breaches only: US rules forbid removing honest reviews for being negative.
+REMOVE_REASONS = {
+    "spam": "Spam or advertising",
+    "abuse": "Harassment, hate or obscenity",
+    "private": "Private information",
+    "off_topic": "Not about this product",
+    "fake": "Fake or not a real customer",
+    "duplicate": "Duplicate post",
+    "customer_request": "The customer asked us to remove it",
+}
+
+
+def staff_remover() -> tuple[str, Any] | None:
+    """The signed-in Studio user or admin allowed to remove posts, or None (customers never)."""
+    from app.admin import service as admin_service
+    from app.studio import service as studio_service
+
+    studio_user = studio_service.current_user()
+    if studio_user is not None and not studio_user.must_change_password:
+        return "studio", studio_user
+    admin = admin_service.current_admin()
+    if admin is not None:
+        return "admin", admin
+    return None
+
+
+def remove_post(post: ProductPost, reason: str, remover: tuple[str, Any]) -> None:
+    if reason not in REMOVE_REASONS:
+        raise ReviewError("Choose why this post is being removed.")
+    if post.status == PostStatus.HIDDEN:
+        raise ReviewError("That post has already been removed.")
+    before = post.status.value
+    post.status = PostStatus.HIDDEN
+    detail = {"before": before, "after": "hidden", "reason": reason, "where": "product page"}
+    kind, actor = remover
+    if kind == "studio":
+        from app.studio import service as studio_service
+
+        studio_service.audit(actor, "studio.community.remove", "product_post", str(post.id), detail)
+    else:
+        from app.admin import service as admin_service
+
+        admin_service.audit(actor, "admin.community.remove", "product_post", str(post.id), detail)
+    db.session.commit()
 
 
 def public_posts(product: Product) -> list[ProductPost]:

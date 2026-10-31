@@ -125,6 +125,8 @@ then emails `ORDER_NOTIFICATION_EMAIL` plus the list and pushes to each topic wi
 opens the order. The order page shows each item's photo, name, option and size, the money
 breakdown, customer, delivery and payment details.
 
+**Removing posts:** any Studio or admin account, while signed in, sees a **Staff only** Remove control (reason required) under each review, comment and question on product pages. Removed posts leave the website at once, stay privately in the database with an audit entry (who, when, why), and can be restored in the Studio's Community section. Customers can never remove posts.
+
 Admin accounts created with `flask admin create ... --owner-approval` sign in with the owner's
 approval (ntfy push; the owner approves with their authenticator code) instead of an
 authenticator app. A correct admin password followed by three wrong codes alerts the owner.

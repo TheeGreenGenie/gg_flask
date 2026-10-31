@@ -232,9 +232,9 @@ def test_unreviewed_staff_still_change_things_directly(shop_app: Flask) -> None:
 @pytest.mark.parametrize(
     ("roles", "allowed", "refused"),
     [
-        ("maintenance", [*EVERYONE], ["/community", "/password-swaps"]),
+        ("maintenance", [*EVERYONE, "/community"], ["/password-swaps"]),
         ("sales", [*EVERYONE, "/community"], ["/password-swaps"]),
-        ("branding", [*EVERYONE], ["/community", "/password-swaps"]),
+        ("branding", [*EVERYONE, "/community"], ["/password-swaps"]),
     ],
 )
 def test_every_account_gets_the_product_and_blog_tools_only(

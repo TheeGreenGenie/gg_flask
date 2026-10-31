@@ -80,15 +80,13 @@ SCOPED: dict[StudioRole, frozenset[str]] = {
 
 
 # Every Studio account (owner, 2026-10-30): all of the co-owner's product, price, stock, sale,
-# blog and group tools, plus creating products. Not her owner-only tools (approving others'
-# changes, keys, password swaps) and not community moderation, which stays with its roles.
+# blog and group tools, plus creating products, and removing/restoring customer posts (owner,
+# 2026-10-31). Not her owner-only tools (approving others' changes, keys, password swaps);
+# public replies and the moderation word list stay with the community roles.
 STAFF_TOOLS = (
     SCOPED[StudioRole.BRANDING]
     | SCOPED[StudioRole.MAINTENANCE]
-    | (
-        SCOPED[StudioRole.SALES]
-        - {"studio.community", "studio.community_reply", "studio.community_moderate"}
-    )
+    | (SCOPED[StudioRole.SALES] - {"studio.community_reply"})
     | {
         "studio.product_new",
         "studio.groups",
@@ -97,6 +95,10 @@ STAFF_TOOLS = (
         "studio.collection_edit",
         "studio.collection_delete",
         "studio.blog_product_search",
+        # Everyone may take a review/comment/question off the site and restore it (owner,
+        # 2026-10-31). Replying and the word list stay with the community roles.
+        "studio.community",
+        "studio.community_moderate",
     }
 )
 

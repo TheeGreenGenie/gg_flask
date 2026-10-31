@@ -191,6 +191,9 @@ def product(slug: str) -> str:
         gallery=_gallery(item),
         related=queries.related(item),
         product_posts=review_service.public_posts(item),
+        # Signed-in Studio/admin staff see a Remove button on each post (never customers).
+        can_remove_posts=review_service.staff_remover() is not None,
+        remove_reasons=review_service.REMOVE_REASONS,
         review_photos=review_images.photos_enabled(),
         rating_average=rating_average,
         rating_count=rating_count,

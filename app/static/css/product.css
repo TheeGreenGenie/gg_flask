@@ -235,3 +235,9 @@
 
 .gg-product-post__photos { display: flex; flex-wrap: wrap; gap: .5rem; margin: .5rem 0; }
 .gg-product-post__photos img { width: 6rem; height: 6rem; border-radius: .5rem; object-fit: cover; }
+
+/* Staff-only remove control on each review/comment/question (Studio and admin accounts). */
+.gg-product-post__staff { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: .85rem; padding: .6rem .75rem; border: 1px dashed var(--gg-line); border-radius: var(--gg-radius-sm); background: var(--gg-subtle-bg); font-size: .9rem; }
+.gg-product-post__staff span { color: var(--gg-muted); font-weight: 700; }
+.gg-product-post__staff select { min-height: 2.5rem; }
+.gg-product-post__staff .gg-button { min-height: 2.5rem; padding-inline: 1rem; }

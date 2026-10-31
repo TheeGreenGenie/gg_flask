@@ -118,13 +118,22 @@ $F mail test YOUR@EMAIL          # real email delivery check
 Command for each (replace the last words per row):
 `sh /home/customer/.ggflask/current/deploy/siteground/run-job.sh studio sync-sales`
 
-| Schedule | Job |
+| Installed cron expression | Job |
 |---|---|
-| every minute (or SiteGround's shortest) | `studio sync-sales`, `studio sync-blog` |
-| every 15 minutes | `orders release-expired-holds`, `orders sync-refunds` |
-| daily 03:10 / 03:15 / 03:20 | `wishlist-prune`, `accounts purge-unverified`, `reviews purge-removed` |
-| daily 07:30 | `studio daily-summary` |
-| Saturdays 03:30 (`30 3 * * 6`) | `backup run`: database backup to `~/.ggflask/backups`, keeps the newest 3 (three weeks) |
+| `*/1 * * * *` | `studio sync-sales` |
+| `*/1 * * * *` | `studio sync-blog` |
+| `*/15 * * * *` | `orders release-expired-holds` |
+| `7,22,37,52 * * * *` | `orders sync-refunds` |
+| `10 8 * * *` | `wishlist-prune` |
+| `15 8 * * *` | `accounts purge-unverified` |
+| `20 8 * * *` | `reviews purge-removed` |
+| `30 11 * * *` | `studio daily-summary` |
+| `30 3 * * 6` | `backup run`: database backup to `~/.ggflask/backups`, keeps the newest 3 (three weeks) |
+
+These are the values the owner confirmed are already installed on 2026-10-31; do not create
+duplicates. Confirm the timezone shown by SiteGround. If its cron clock is UTC, `30 11 * * *`
+arrives at 07:30 New York time while daylight saving time is active and 06:30 after the 2026-11-01
+fall-back. Change the hour only if a fixed local delivery time matters.
 
 **Confirm the high-frequency rows with SiteGround before launch.** SiteGround's current
 [fair-use guidance](https://www.siteground.com/kb/fair-use-siteground-hosting/) recommends at least
@@ -134,7 +143,7 @@ slow the jobs: their heartbeat thresholds and the accepted delay for scheduled s
 release and pending refunds must be changed together. The daily summary, daily cleanup and weekly
 backup rows already meet the interval guidance.
 
-The 07:30 summary goes to `MONITORING_SUMMARY_EMAIL` and reports failed privileged sign-ins,
+The daily summary goes to `MONITORING_SUMMARY_EMAIL` and reports failed privileged sign-ins,
 lockouts, job/backup health and operating counts. It falls back to `ORDER_NOTIFICATION_EMAIL` only
 for deployments that have not added the dedicated setting yet. This is an application email, so
 SMTP delivery must be healthy; keep UptimeRobot and the external security probe off-host so a host

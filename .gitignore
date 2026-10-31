@@ -19,6 +19,7 @@ instance/
 flask_*.md
 PROJECT_STATUS.md
 node_python_fedora_plan.md
+current_security.md
 
 
 # Developer hand-off notes between AI sessions (planning, local only)

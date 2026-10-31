@@ -20,7 +20,7 @@ from argon2.exceptions import InvalidHashError, VerificationError
 from flask import current_app, g, has_request_context, request, session
 from sqlalchemy import select, update
 
-from app import ratelimit
+from app import ratelimit, security_events
 from app.accounts.models import User
 from app.accounts.service import MAX_PASSWORD, AccountError, check_password, normalize_email
 from app.admin.models import (
@@ -167,8 +167,10 @@ def begin_login(username_raw: str, password: str) -> None:
     try:
         _hasher.verify(admin.password_hash if admin else _dummy_hash, password[:MAX_PASSWORD])
     except (VerificationError, InvalidHashError):
+        security_events.record("admin_password")
         raise generic from None
     if admin is None or not admin.active:
+        security_events.record("admin_password")
         raise generic
     if _hasher.check_needs_rehash(admin.password_hash):
         admin.password_hash = _hasher.hash(password)
@@ -380,8 +382,31 @@ def complete_login(code_raw: str) -> AdminUser:
         recovery.used_at = utcnow()
         method = "recovery"
     else:
+        _wrong_code_after_right_password(admin)
         raise AdminError("That verification code is not valid.")
     return _start_session(admin, method)
+
+
+CODE_ALERT_AFTER = 3  # wrong codes in 15 minutes, after a correct password
+
+
+def _wrong_code_after_right_password(admin: AdminUser) -> None:
+    """Reaching the code step means the password was right. Repeated wrong codes there mean
+    someone else probably knows it: tell the owner at once (at most once an hour)."""
+    security_events.record("admin_code")
+    within_limit = ratelimit.allow(
+        "admin-code-wrong", str(admin.id), CODE_ALERT_AFTER - 1, 900, fail_closed=False
+    )
+    if within_limit or not ratelimit.allow("admin-code-alerted", str(admin.id), 1, 3600):
+        return
+    audit(admin, "admin.login.code_alert", "admin", str(admin.id))
+    db.session.commit()
+    _notify_owner(
+        "Admin sign-in warning",
+        f"Someone entered the correct password for admin {admin.username} but then "
+        f"{CODE_ALERT_AFTER} wrong sign-in codes. If this was not you or a teammate, change "
+        "that password now (from the server: flask admin reset-password).",
+    )
 
 
 def _start_session(admin: AdminUser, method: str) -> AdminUser:
@@ -495,20 +520,25 @@ def reset_password(admin: AdminUser, new_password: str) -> None:
 
 def _password_change_notice(admin: AdminUser, *, reset: bool) -> None:
     """Notify without ever copying the password into email, push, logs, or audit data."""
-    from app import mail
-
     action = "reset by the server owner" if reset else "changed by the signed-in administrator"
     message = (
         f"The password for private admin username {admin.username} was {action}. "
         "The password itself is not stored or sent. If this was unexpected, disable the account "
         "and reset it from the server immediately."
     )
+    _notify_owner("Private admin password changed", message)
+
+
+def _notify_owner(subject: str, message: str) -> None:
+    """Security notices: email to the owner address and a push to the owner's ntfy topic."""
+    from app import mail
+
     recipient = str(current_app.config.get("ORDER_NOTIFICATION_EMAIL") or "").strip()
     if recipient and mail.available():
         try:
-            mail.send(recipient, "Private admin password changed", message)
+            mail.send(recipient, subject, message)
         except Exception:  # pragma: no cover - provider failures vary
-            _log.exception("admin_password_notice_email_failed")
+            _log.exception("admin_security_notice_email_failed")
     if current_app.config.get("STUDIO_APPROVAL_BACKEND") == "ntfy" and current_app.config.get(
         "STUDIO_NTFY_TOPIC"
     ):
@@ -524,7 +554,7 @@ def _send_ntfy_security_notice(message: str) -> None:
             "topic": current_app.config["STUDIO_NTFY_TOPIC"],
             "title": "Private admin security notice",
             "message": message,
-            "priority": "high",
+            "priority": 5,  # ntfy's JSON API takes 1-5 only; "high" is rejected with a 400
             "tags": ["warning"],
         }
     ).encode()
@@ -538,7 +568,7 @@ def _send_ntfy_security_notice(message: str) -> None:
         with urllib.request.urlopen(request_record, timeout=3):  # noqa: S310
             pass
     except OSError:
-        _log.exception("admin_password_notice_push_failed")
+        _log.exception("admin_security_notice_push_failed")
 
 
 def audit(

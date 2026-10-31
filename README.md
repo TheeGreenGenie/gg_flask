@@ -233,6 +233,8 @@ Studio from a browser already signed in to `/admin` as that owner is approved im
 
 Tests run on PostgreSQL only (never SQLite), by default the `gg_test` database of the docker-compose PostgreSQL (`docker compose up -d`; create it once with `docker exec gg_flask-db-1 createdb -U gg gg_test`). The schema is built once per run and every table is emptied before each test. Redis is faked unless `TEST_REDIS_URL` is set; `TEST_KV_BACKEND=database` runs the whole suite on the PostgreSQL stand-in for Redis used on SiteGround.
 
+Do not run two ordinary pytest processes against `gg_test`: their schema setup and table cleanup can block or erase each other's work. For concurrent Claude/Codex/developer runs, use the disposable database-per-process workflow in [PARALLEL_TESTING.md](PARALLEL_TESTING.md).
+
 ## Configuration
 
 All settings come from environment variables; see [.env.example](.env.example) for names. Locally, put them in a `.env` file in the project folder: with the dev extras installed (`python-dotenv`), every `flask` command loads it automatically. The server does not use `.env`; it reads `/etc/gg-flask/env` (DEPLOY.md step 4). `APP_ENV=production` (used for staging and live) refuses to start without `SECRET_KEY` (32+ chars), `DATABASE_URL` and either `REDIS_URL` or `KV_BACKEND=database` (rate limits and caches in PostgreSQL, for hosts without Redis such as SiteGround).

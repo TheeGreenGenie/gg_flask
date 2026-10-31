@@ -1805,7 +1805,13 @@ def init_studio(app: Flask) -> None:
 
     @studio_cli.command("daily-summary")
     def daily_summary() -> None:
-        """Send the owner a summary of Studio attention items and activity."""
+        """Send the owner a summary of Studio attention items and activity.
+
+        Also clears IP addresses and browser details older than 90 days (app/retention.py)."""
+        from app import retention
+
+        cleared = retention.clear_old_network_details()
+        click.echo(f"Cleared network details from {cleared} record(s) older than 90 days.")
         try:
             sent = service.send_daily_summary()
         except service.StudioError as exc:

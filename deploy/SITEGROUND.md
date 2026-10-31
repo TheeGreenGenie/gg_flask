@@ -71,10 +71,10 @@ MAIL_BACKEND=smtp
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_SECURITY=starttls
-SMTP_USERNAME=ggafrikan@gmail.com
+SMTP_USERNAME=ggafrikaneleganz@gmail.com
 SMTP_PASSWORD=the app password
-MAIL_FROM="GG Afrikan Eleganz <ggafrikan@gmail.com>"
-ORDER_NOTIFICATION_EMAIL=ggafrikan@gmail.com
+MAIL_FROM="GG Afrikan Eleganz <ggafrikaneleganz@gmail.com>"
+ORDER_NOTIFICATION_EMAIL=ggafrikaneleganz@gmail.com
 HERE_API_KEY=...
 MAILCHIMP_API_KEY=...
 MAILCHIMP_SERVER_PREFIX=...
@@ -105,7 +105,7 @@ tail -n 50 ~/.ggflask/logs/app.log       # package install, database update, err
 
 ```bash
 F="sh $HOME/.ggflask/current/deploy/siteground/flask.sh"
-$F admin create --username owner --email ggafrikan@gmail.com --role owner   # scan the QR/secret
+$F admin create --username owner --email ggafrikaneleganz@gmail.com --role owner   # scan the QR/secret
 $F studio sync-users             # preview
 $F studio sync-users --apply     # creates the Studio accounts and links tgg to owner
 $F mail test YOUR@EMAIL          # real email delivery check
@@ -133,7 +133,7 @@ what is kept.
 
 **Off-server copy by email:** add `BACKUP_PASSPHRASE=` (a long phrase only you know, 16+
 characters; write it down somewhere safe, it cannot be recovered) to `~/.ggflask/env`. Each
-backup is then encrypted with it and emailed to the shop address (ggafrikan@gmail.com; set
+backup is then encrypted with it and emailed to the original shop mailbox (ggafrikan@gmail.com, on purpose; set
 `BACKUP_EMAIL=` for another). Without the passphrase nothing is emailed. To open an emailed
 `.enc` file on your computer: `flask --app wsgi backup decrypt FILE.enc`.
 Restoring replaces the live data, so ask Claude for the exact `pg_restore` command first.

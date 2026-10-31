@@ -49,7 +49,7 @@ def test_contact_validation_and_delivery(client: FlaskClient, app: Flask) -> Non
     )
     assert sent.status_code == 302 and sent.headers["Location"].endswith("/contact-us/")
     message = app.extensions["outbox"][-1]
-    assert message.to == "ggafrikan@gmail.com"
+    assert message.to == "ggafrikaneleganz@gmail.com"
     assert "ada@example.com" in message.body and "coordinating fabric" in message.body
 
 

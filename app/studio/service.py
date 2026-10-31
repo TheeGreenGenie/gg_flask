@@ -20,7 +20,7 @@ from flask import current_app, g, has_request_context, request
 from sqlalchemy import func, or_, select, update
 from werkzeug.datastructures import FileStorage
 
-from app import cache, mail, ratelimit
+from app import cache, mail, ratelimit, security_events
 from app.accounts.models import User
 from app.accounts.service import MAX_PASSWORD, check_password
 from app.catalog import images as image_service
@@ -277,12 +277,14 @@ def begin_login(username_raw: str, password: str) -> tuple[StudioLoginRequest, s
     try:
         _hasher.verify(user.password_hash if user else _dummy_hash, password[:MAX_PASSWORD])
     except (VerificationError, InvalidHashError):
+        security_events.record("studio_password")
         if user:
             user.failed_attempts += 1
             if user.failed_attempts >= 5:
                 user.locked_until = utcnow() + LOCK_TTL
                 user.failed_attempts = 0
                 audit(user, "studio.login.locked", "studio_user", str(user.id))
+                security_events.record("studio_locked")
             db.session.commit()
         raise generic from None
     if user is None or not user.active:
@@ -1822,6 +1824,7 @@ def send_daily_summary(now: datetime | None = None) -> bool:
         f"Low-stock or sold-out options: {low_stock}\n"
         f"Reviews/questions needing attention: {community}\n"
         f"Scheduled or active sales: {sales}\n\n"
+        f"{security_events.summary_lines(now)}"
         f"{_job_lines()}"
         "Open the private Staff Studio address to review details."
     )

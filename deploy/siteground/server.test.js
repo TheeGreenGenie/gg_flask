@@ -2,7 +2,14 @@
 // Unit tests for the SiteGround wrapper's request-handling helpers: `npm test`.
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { parseEnv, clientIp, upstreamHeaders, downstreamHeaders, normaliseHost } = require("./server.js");
+const {
+  parseEnv,
+  clientIp,
+  upstreamHeaders,
+  downstreamHeaders,
+  normaliseHost,
+  createAdmissionGate,
+} = require("./server.js");
 
 function pairs(raw) {
   const out = [];
@@ -15,7 +22,7 @@ test("settings file: comments, quotes, export and trailing notes", () => {
     [
       "# comment",
       "APP_ENV=production",
-      'MAIL_FROM="GG Afrikan Eleganz <ggafrikan@gmail.com>"',
+      'MAIL_FROM="GG Afrikan Eleganz <ggafrikaneleganz@gmail.com>"',
       "SMTP_PORT=587          # STARTTLS",
       "export KV_BACKEND=database",
       "EMPTY=",
@@ -27,7 +34,7 @@ test("settings file: comments, quotes, export and trailing notes", () => {
   );
   assert.deepEqual(env, {
     APP_ENV: "production",
-    MAIL_FROM: "GG Afrikan Eleganz <ggafrikan@gmail.com>",
+    MAIL_FROM: "GG Afrikan Eleganz <ggafrikaneleganz@gmail.com>",
     SMTP_PORT: "587",
     KV_BACKEND: "database",
     EMPTY: "",
@@ -99,4 +106,24 @@ test("repeated request headers and every Set-Cookie survive the trip", () => {
 test("host names are compared without port or case", () => {
   assert.equal(normaliseHost(" Staging2.GGAfrikanEleganz.com:443 "), "staging2.ggafrikaneleganz.com");
   assert.equal(normaliseHost(undefined), "");
+});
+
+test("backend admission is bounded globally and per visitor", () => {
+  const gate = createAdmissionGate(3, 2);
+  const first = gate.enter("203.0.113.1");
+  const second = gate.enter("203.0.113.1");
+  assert.equal(typeof first, "function");
+  assert.equal(typeof second, "function");
+  assert.equal(gate.enter("203.0.113.1"), null); // per-visitor cap
+  const third = gate.enter("198.51.100.2");
+  assert.equal(typeof third, "function");
+  assert.equal(gate.enter("192.0.2.3"), null); // global cap
+  first();
+  first(); // release is deliberately idempotent
+  assert.equal(typeof gate.enter("192.0.2.3"), "function");
+});
+
+test("backend admission rejects nonsensical limits", () => {
+  assert.throws(() => createAdmissionGate(0, 1), /invalid admission limits/);
+  assert.throws(() => createAdmissionGate(2, 3), /invalid admission limits/);
 });

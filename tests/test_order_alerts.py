@@ -257,7 +257,7 @@ def test_backups_are_emailed_encrypted_only_with_a_passphrase(
     sent = runner.invoke(args=["backup", "run"])
     assert sent.exit_code == 0 and "ggafrikan@gmail.com" in sent.output
     message = outbox[-1]
-    assert message.to == "ggafrikan@gmail.com"  # the shop's contact address by default
+    assert message.to == "ggafrikan@gmail.com"  # the original mailbox, kept for backups
     ((name, sealed),) = message.attachments
     assert name.endswith(".dump.enc")
     assert b"PGDMP" not in sealed  # never readable without the passphrase
@@ -287,3 +287,32 @@ def test_attachments_reach_the_real_email_message(app: Flask) -> None:
     files = list(built.iter_attachments())
     assert [f.get_filename() for f in files] == ["gg-db-1.dump.enc"]
     assert files[0].get_content() == b"\x00secret"
+
+
+def test_test_restore_refuses_the_live_database_and_compares_counts(
+    app: Flask, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    app.config.update(
+        BACKUP_DIR=str(tmp_path),
+        SQLALCHEMY_DATABASE_URI="postgresql+psycopg://shop:pw@db.example/gg_site",
+    )
+    (tmp_path / "gg-db-20261031T073000Z.dump").write_bytes(b"PGDMP")
+    calls: list[dict[str, Any]] = []
+    _fake_tools(monkeypatch, calls)
+    counts = {
+        "gg_site": dict.fromkeys(backup.CHECK_TABLES, 5) | {"orders": 7},
+        "gg_restore_test": dict.fromkeys(backup.CHECK_TABLES, 5),
+    }
+    monkeypatch.setattr(backup, "_counts", lambda url: counts[url.database])
+    runner = app.test_cli_runner()
+    live = runner.invoke(args=["backup", "test-restore", "gg_site"])
+    assert live.exit_code != 0 and "That is the live database" in live.output and calls == []
+    bad = runner.invoke(args=["backup", "test-restore", "x; drop"])
+    assert bad.exit_code != 0 and calls == []
+    ok = runner.invoke(args=["backup", "test-restore", "gg_restore_test"])
+    assert ok.exit_code == 0, ok.output
+    assert "gg-db-20261031T073000Z.dump" in ok.output and "The backup restores" in ok.output
+    assert "live changed since the backup" in ok.output  # 2 newer orders, explained
+    restore = calls[0]["args"]
+    assert restore[restore.index("--dbname") + 1] == "gg_restore_test"
+    assert "--clean" in restore and "pw" not in " ".join(restore)

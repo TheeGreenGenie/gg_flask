@@ -182,6 +182,7 @@ POLICIES: Final = {
                 "Sharing and retention",
                 (
                     "We share information only with service providers and authorities as needed to operate the store, process transactions, deliver orders, protect rights, or comply with law. We keep it only as long as needed for those purposes and applicable obligations.",
+                    "For security, we record the IP address and browser type used for sign-ins, staff changes, and customer posts. These details are cleared automatically after 90 days. Records of marketing consent keep them as proof that you opted in.",
                 ),
             ),
             (

@@ -29,7 +29,9 @@ const APP_DIR = path.resolve(__dirname, "..", "..");
 const LIMITS = {
   startupWaitMs: 25_000, // a request waits this long for Python before getting a 503
   upstreamTimeoutMs: 35_000, // the slowest Flask response allowed (as Apache had)
-  maxWaiting: 200, // requests held while Python starts
+  maxWaiting: 32, // bound cold-start memory/fd use during a burst
+  maxActive: 32, // requests allowed to occupy/queue for the two-worker Python backend
+  maxActivePerIp: 12, // one visitor/NAT cannot consume every backend slot
   headersTimeoutMs: 20_000,
   requestTimeoutMs: 120_000, // whole request including a large photo upload
   keepAliveMs: 5_000,
@@ -105,6 +107,33 @@ function clientIp(headers, headerName) {
     .filter(Boolean);
   const last = parts[parts.length - 1] || "";
   return net.isIP(last) ? last : "";
+}
+
+/** Bounded in-memory admission for work sent to Python; upstream DDoS filtering remains the edge's job. */
+function createAdmissionGate(maxTotal, maxPerKey) {
+  if (!(maxTotal > 0) || !(maxPerKey > 0) || maxPerKey > maxTotal) {
+    throw new Error("invalid admission limits");
+  }
+  let total = 0;
+  const byKey = new Map();
+  return {
+    enter(rawKey) {
+      const key = rawKey || "unknown";
+      const current = byKey.get(key) || 0;
+      if (total >= maxTotal || current >= maxPerKey) return null;
+      total += 1;
+      byKey.set(key, current + 1);
+      let released = false;
+      return () => {
+        if (released) return;
+        released = true;
+        total -= 1;
+        const remaining = (byKey.get(key) || 1) - 1;
+        if (remaining > 0) byKey.set(key, remaining);
+        else byKey.delete(key);
+      };
+    },
+  };
 }
 
 /** Request headers for Flask, as a raw [name, value, ...] list so repeated headers survive. */
@@ -237,6 +266,7 @@ function createWrapper(options = {}) {
   let child = null;
   let adopted = null; // pid of a Gunicorn left running by the previous (idled) wrapper
   let crashes = [];
+  const admission = createAdmissionGate(LIMITS.maxActive, LIMITS.maxActivePerIp);
   const pylogPath = path.join(P.logs, "python.log");
 
   const alive = (pid) => {
@@ -564,6 +594,18 @@ function createWrapper(options = {}) {
           : "The shop is starting up. Please refresh in a few seconds.";
       return plain(res, 503, text, { "Retry-After": phase === "failed" ? "60" : "5" });
     }
+    // A visitor can leave while awaiting a cold start. Never spend or leak a backend slot for a
+    // request whose close event already happened before the admission listeners could be attached.
+    if (req.destroyed || res.destroyed || res.writableEnded) return;
+    const release = admission.enter(ip);
+    if (!release) {
+      return plain(res, 503, "The shop is busy. Please try again shortly.", {
+        "Retry-After": "5",
+        Connection: "close",
+      });
+    }
+    res.once("finish", release);
+    res.once("close", release);
     forward(req, res, host, ip);
   }
 
@@ -608,6 +650,7 @@ module.exports = {
   upstreamHeaders,
   downstreamHeaders,
   normaliseHost,
+  createAdmissionGate,
   createWrapper,
   LIMITS,
 };

@@ -67,7 +67,7 @@ SOCIAL_LINKS: Final = (
 # Owner, 2026-10-27: everything goes to the store Gmail until the domain mailboxes
 # (info@/returns@/support@ggafrikaneleganz.com) are set up. Shown on the site and used as the
 # contact-form recipient and the default owner notification address (config).
-CONTACT_EMAIL: Final = "ggafrikan@gmail.com"
+CONTACT_EMAIL: Final = "ggafrikaneleganz@gmail.com"
 CONTACT_PHONE: Final = "+1 215-984-2270"
 
 COUNTRY_NAMES: Final = {

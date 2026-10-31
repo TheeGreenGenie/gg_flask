@@ -7,6 +7,7 @@ import ipaddress
 import time
 from collections.abc import Callable
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import click
 from flask import (
@@ -23,6 +24,7 @@ from flask import (
     url_for,
 )
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from werkzeug.wrappers import Response
 
 from app.admin import catalog as catalog_service
@@ -39,7 +41,15 @@ from app.catalog.models import (
     Variant,
 )
 from app.extensions import db
-from app.orders.models import TRACKING_CARRIERS, Coupon, DiscountType, Order, OrderStatus
+from app.orders import alerts
+from app.orders.models import (
+    TRACKING_CARRIERS,
+    Coupon,
+    DiscountType,
+    Order,
+    OrderAlertRecipient,
+    OrderStatus,
+)
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -229,7 +239,11 @@ def dashboard() -> str:
 @bp.get("/catalog/")
 @roles(AdminRole.CATALOG)
 def catalog() -> str:
-    products = db.session.scalars(select(Product).order_by(Product.name)).all()
+    products = db.session.scalars(
+        select(Product)
+        .order_by(Product.name)
+        .options(selectinload(Product.images), selectinload(Product.variants))
+    ).all()
     categories = db.session.scalars(
         select(Category).order_by(Category.position, Category.name)
     ).all()
@@ -342,10 +356,12 @@ def orders() -> str:
 @bp.get("/orders/<int:order_id>")
 @roles(AdminRole.SUPPORT)
 def order_view(order_id: int) -> str:
+    order = db.get_or_404(Order, order_id)
     return render_template(
         "admin/order.html",
         admin=_admin(),
-        order=db.get_or_404(Order, order_id),
+        order=order,
+        placed=order.created_at.astimezone(ZoneInfo("America/New_York")),
         statuses=OrderStatus,
         carriers=TRACKING_CARRIERS,
     )
@@ -444,6 +460,51 @@ def order_document(order_id: int, document: str) -> str:
         admin=_admin(),
         order=db.get_or_404(Order, order_id),
         document=document,
+    )
+
+
+@bp.route("/alerts/", methods=["GET", "POST"])
+@roles()
+def alert_list() -> str | Response:
+    """Owner only: who gets an email or a phone push (ntfy) for every new paid order."""
+    if request.method == "POST":
+        action = request.form.get("action", "")
+        record = None
+        if action != "add":
+            record = db.get_or_404(OrderAlertRecipient, int(request.form.get("id", "0") or 0))
+        try:
+            if action == "add":
+                alerts.add(
+                    _admin(),
+                    request.form.get("kind", ""),
+                    request.form.get("value", ""),
+                    request.form.get("label", ""),
+                )
+                flash("Added. Send a test to check it arrives.", "success")
+            elif record is not None and action == "remove":
+                alerts.remove(_admin(), record)
+                flash("Removed from order alerts.", "success")
+            elif record is not None and action in {"pause", "resume"}:
+                alerts.set_active(_admin(), record, action == "resume")
+                flash("Paused." if action == "pause" else "Alerts resumed.", "success")
+            elif record is not None and action == "test":
+                if alerts.send_test(record):
+                    flash("Test sent. It should arrive within a minute.", "success")
+                else:
+                    flash("The test could not be sent. Check the address or topic.", "error")
+        except alerts.AlertError as exc:
+            db.session.rollback()
+            flash(str(exc), "error")
+        return redirect(url_for("admin.alert_list"))
+    recipients = db.session.scalars(
+        select(OrderAlertRecipient).order_by(OrderAlertRecipient.kind, OrderAlertRecipient.id)
+    ).all()
+    return render_template(
+        "admin/alerts.html",
+        admin=_admin(),
+        recipients=recipients,
+        server_email=current_app.config.get("ORDER_NOTIFICATION_EMAIL") or "",
+        ntfy_server=str(current_app.config.get("STUDIO_NTFY_SERVER") or "https://ntfy.sh"),
     )
 
 

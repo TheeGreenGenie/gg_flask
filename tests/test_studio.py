@@ -153,7 +153,7 @@ def test_ntfy_approval_payload_is_valid_for_ntfy(
 
 
 def test_ntfy_refusals_are_logged_with_ntfys_reason(
-    app: Flask, client, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+    app: Flask, client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     import urllib.error
     import urllib.request
@@ -163,6 +163,8 @@ def test_ntfy_refusals_are_logged_with_ntfys_reason(
         raise urllib.error.HTTPError(req.full_url, 429, "Too Many Requests", {}, body)  # type: ignore[arg-type]
 
     monkeypatch.setattr(urllib.request, "urlopen", refuse)
+    logged_lines: list[str] = []  # the app's log setup may stop propagation, so record directly
+    monkeypatch.setattr(service._log, "error", lambda msg, *a: logged_lines.append(msg % a))
     app.config.update(
         STUDIO_APPROVAL_BACKEND="ntfy",
         STUDIO_NTFY_SERVER="https://ntfy.example",
@@ -171,7 +173,7 @@ def test_ntfy_refusals_are_logged_with_ntfys_reason(
     _user(app)
     response = client.post(PREFIX + "/", data={"username": "ada", "password": PASSWORD})
     assert response.status_code == 302  # the sign-in still waits; the owner can retry
-    logged = " ".join(r.getMessage() for r in caplog.records)
+    logged = " ".join(logged_lines)
     assert "status=429" in logged and "limit reached" in logged
     assert "private-topic" not in logged
 
@@ -214,7 +216,8 @@ def test_role_permissions_and_inventory_history(catalog_app: Flask) -> None:
     client = catalog_app.test_client()
     _approved_cookie(catalog_app, client, roles="inventory", change=True)
     assert client.get(PREFIX + "/inventory").status_code == 200
-    assert client.get(PREFIX + "/prices").status_code == 403
+    assert client.get(PREFIX + "/prices").status_code == 200  # every account (owner, 2026-10-30)
+    assert client.get(PREFIX + "/community").status_code == 403  # not theirs
     with catalog_app.app_context():
         variant = db.session.query(Variant).first()
         assert variant is not None
@@ -420,17 +423,15 @@ def test_editor_hides_and_restores_product_without_deleting(catalog_app: Flask) 
         assert db.session.query(Product).filter_by(id=product_id).count() == 1
 
 
-def test_inventory_role_cannot_edit_products(catalog_app: Flask) -> None:
+def test_every_role_may_edit_products_but_not_moderate(catalog_app: Flask) -> None:
+    """Owner, 2026-10-30: all Studio accounts get the product tools; community stays scoped."""
     client = catalog_app.test_client()
     _approved_cookie(catalog_app, client, roles="inventory", change=True)
     with catalog_app.app_context():
         product_id = db.session.query(Product.id).first()[0]
-    assert client.get(PREFIX + "/products").status_code == 403
-    response = client.post(
-        PREFIX + f"/products/{product_id}/visibility",
-        data={"live": "0", "expected": "active", "reason": "Not permitted"},
-    )
-    assert response.status_code == 403
+    assert client.get(PREFIX + "/products").status_code == 200
+    assert client.get(PREFIX + f"/products/{product_id}").status_code == 200
+    assert client.get(PREFIX + "/community").status_code == 403
 
 
 def test_editor_updates_product_details_and_categories(catalog_app: Flask) -> None:
@@ -1063,7 +1064,7 @@ def test_bulk_hide_previews_needs_password_and_applies(catalog_app: Flask) -> No
         assert reasons == {"Bulk: End of season"}
 
 
-def test_each_role_undoes_only_its_own_kind_of_product_change(catalog_app: Flask) -> None:
+def test_every_role_undoes_both_kinds_of_product_change(catalog_app: Flask) -> None:
     with catalog_app.app_context():
         product = db.session.query(Product).filter_by(status=ProductStatus.ACTIVE).first()
         details = ProductHistory(
@@ -1077,7 +1078,7 @@ def test_each_role_undoes_only_its_own_kind_of_product_change(catalog_app: Flask
         details_id, hidden_id = details.id, hidden.id
     client = catalog_app.test_client()
     _approved_cookie(catalog_app, client, roles="maintenance", change=True)
-    assert client.post(PREFIX + f"/products/history/{details_id}/undo").status_code == 403
+    assert client.post(PREFIX + f"/products/history/{details_id}/undo").status_code == 302
     assert client.post(PREFIX + f"/products/history/{hidden_id}/undo").status_code == 302
 
 

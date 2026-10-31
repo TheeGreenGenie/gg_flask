@@ -1172,3 +1172,12 @@
 	line-height: 1.2;
 	text-transform: uppercase;
 }
+
+/* Product previews inside articles ([product: …], [category: …], [collection: …]). */
+.gg-post-shop { margin: 2.25rem 0; padding: 1.25rem; border: 1px solid var(--gg-line); border-radius: var(--gg-radius-md); background: var(--gg-warm); }
+.gg-post-shop__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .5rem 1rem; margin-bottom: 1rem; }
+.gg-post-shop__head h3 { margin: 0; }
+.gg-post-shop__head a { font-weight: 700; }
+.gg-post-shop__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 10.5rem), 1fr)); gap: 1rem; }
+.gg-post-shop--single { max-width: 18rem; margin-inline: auto; padding: .75rem; }
+.gg-post-shop--single .gg-post-shop__grid { grid-template-columns: 1fr; }

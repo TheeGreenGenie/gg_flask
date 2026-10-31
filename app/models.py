@@ -28,7 +28,15 @@ from app.catalog.models import (
 from app.content.models import BlogPost, BlogRevision
 from app.kvstore import KVEntry
 from app.media.models import MediaAsset
-from app.orders.models import Coupon, Order, OrderLine, OrderNote, PaymentEvent, StockHold
+from app.orders.models import (
+    Coupon,
+    Order,
+    OrderAlertRecipient,
+    OrderLine,
+    OrderNote,
+    PaymentEvent,
+    StockHold,
+)
 from app.reviews.models import (
     ModerationRemoval,
     ModerationWord,
@@ -81,6 +89,7 @@ __all__ = [
     "OrderNote",
     "PaymentEvent",
     "StockHold",
+    "OrderAlertRecipient",
     "ProductPost",
     "ProductPostReply",
     "ProductPostPhoto",

@@ -20,6 +20,10 @@ from app.store.content import POSTS as LEGACY_POSTS
 
 SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 LINK_RE = re.compile(r"^\[([^\]]{1,160})\]\((https?://[^\s)]+)\)$")
+# A preview card row inside an article (owner, 2026-10-30): "[product: slug]",
+# "[category: slug]" or "[collection: slug]" on a line of its own.
+EMBED_RE = re.compile(r"^\[(product|category|collection):\s*([a-z0-9]+(?:-[a-z0-9]+)*)\]$")
+EMBED_LIMIT = 8  # products shown for a category or collection
 IMAGE_RE = re.compile(r'^!\[([^\]]{3,255})\]\((static:|media:)([^\s)]+)\)(?:\s+"([^"]{0,255})")?$')
 
 
@@ -75,6 +79,14 @@ def parse_body(raw: str) -> list[dict[str, object]]:
             items.append(line[2:].strip()[:1000])
             continue
         flush_items()
+        embed = EMBED_RE.fullmatch(line)
+        if embed:
+            flush_paragraph()
+            kind, slug = embed.group(1), embed.group(2)
+            if _embed_target(kind, slug) is None:
+                raise BlogError(f"There is no {kind} with the web name “{slug}”.")
+            blocks.append({"type": "embed", "kind": kind, "slug": slug})
+            continue
         link = LINK_RE.fullmatch(line)
         image = IMAGE_RE.fullmatch(line)
         if link:
@@ -114,6 +126,8 @@ def body_to_editor(blocks: list[dict[str, object]]) -> str:
                 output.extend("- " + str(item) for item in raw_items)
         elif kind == "link":
             output.append(f"[{block.get('text', '')}]({block.get('url', '')})")
+        elif kind == "embed":
+            output.append(f"[{block.get('kind', '')}: {block.get('slug', '')}]")
         elif kind == "img":
             caption = str(block.get("caption", ""))
             suffix = f' "{caption}"' if caption else ""
@@ -238,6 +252,8 @@ def _template_blocks(blocks: list[dict[str, object]]) -> tuple:
             )
         elif kind == "link":
             output.append(("link", str(block.get("text", "")), str(block.get("url", "")), ""))
+        elif kind == "embed":
+            output.append(("embed", str(block.get("kind", "")), str(block.get("slug", "")), ""))
         else:
             output.append((str(kind), str(block.get("text", "")), "", ""))
     return tuple(output)
@@ -277,3 +293,52 @@ def record_revision(post: BlogPost, user_id: int, reason: str) -> None:
 def safe_external_url(url: str) -> bool:
     parsed = urlparse(url)
     return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+
+
+def _embed_target(kind: str, slug: str) -> Any:
+    from app.catalog import queries
+    from app.catalog.models import Category, Collection, Product
+
+    if kind == "collection" and slug in queries.VIRTUAL_COLLECTIONS:
+        return queries.VIRTUAL_COLLECTIONS[slug]
+    model: Any = {"product": Product, "category": Category, "collection": Collection}[kind]
+    return db.session.scalar(select(model).where(model.slug == slug))
+
+
+@dataclass(frozen=True)
+class Embed:
+    title: str
+    url: str
+    products: list[Any]
+
+
+def embed(kind: str, slug: str) -> Embed | None:
+    """Live products for a preview row, read when the article is shown (so prices, photos and
+    stock are always current). Hidden products never appear; an empty row is skipped."""
+    from flask import url_for
+
+    from app.catalog import queries
+
+    if kind == "product":
+        product = queries.product_by_slug(slug)
+        if product is None:
+            return None
+        return Embed("", url_for("store.product", slug=slug), [product])
+    if kind == "category":
+        category = queries.category_by_slug(slug)
+        if category is None:
+            return None
+        items = queries.listing(categories=category.subtree()).items[:EMBED_LIMIT]
+        return Embed(category.name, url_for("store.category", slug=slug), items) if items else None
+    if kind == "collection":
+        if slug in queries.VIRTUAL_COLLECTIONS:  # New Arrivals, Sale
+            title = queries.VIRTUAL_COLLECTIONS[slug][0]
+        else:
+            collection = queries.collection_by_slug(slug)  # None unless live
+            if collection is None:
+                return None
+            title = collection.name
+        items = queries.listing(collection=slug).items[:EMBED_LIMIT]
+        url = url_for("store.collection", slug=slug)
+        return Embed(title, url, items) if items else None
+    return None

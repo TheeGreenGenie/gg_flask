@@ -30,6 +30,9 @@ from app.studio.models import (
 PREFIX = "/studio-testing-private-path"
 PASSWORD = "Temporary phrase 8472!"
 OWNER_PASSWORD = "Long unique phrase 482!"
+# Owner, 2026-10-30: every Studio account gets all product, price, stock, sale, blog and
+# group tools.
+EVERYONE = ("/inventory", "/products", "/products/new", "/prices", "/sales", "/blog", "/groups")
 
 
 def _staff_client(
@@ -190,7 +193,8 @@ def test_held_photo_is_private_until_approved(shop_app: Flask) -> None:
         assert not held.exists()
 
 
-def test_drafts_are_not_held_but_publishing_is(shop_app: Flask) -> None:
+def test_blog_posting_goes_live_without_the_owner(shop_app: Flask) -> None:
+    """Owner, 2026-10-30: groups and blog are free for reviewed staff; prices stay held."""
     staff = _staff_client(shop_app, "branding")
     form = {
         "title": "Our new prints",
@@ -212,8 +216,8 @@ def test_drafts_are_not_held_but_publishing_is(shop_app: Flask) -> None:
         post_id = post.id
     staff.post(PREFIX + f"/blog/{post_id}/publication", data={"action": "publish"})
     with shop_app.app_context():
-        assert db.session.get(BlogPost, post_id).status == BlogStatus.DRAFT
-        assert "Publish now" in db.session.scalars(select(StudioChange)).one().summary
+        assert db.session.get(BlogPost, post_id).status == BlogStatus.PUBLISHED
+        assert db.session.scalar(select(StudioChange)) is None
 
 
 def test_unreviewed_staff_still_change_things_directly(shop_app: Flask) -> None:
@@ -228,12 +232,12 @@ def test_unreviewed_staff_still_change_things_directly(shop_app: Flask) -> None:
 @pytest.mark.parametrize(
     ("roles", "allowed", "refused"),
     [
-        ("maintenance", ["/inventory", "/products"], ["/prices", "/blog", "/community", "/sales"]),
-        ("sales", ["/prices", "/sales", "/community"], ["/inventory", "/blog"]),
-        ("branding", ["/blog", "/products"], ["/inventory", "/prices", "/sales", "/community"]),
+        ("maintenance", [*EVERYONE], ["/community", "/password-swaps"]),
+        ("sales", [*EVERYONE, "/community"], ["/password-swaps"]),
+        ("branding", [*EVERYONE], ["/community", "/password-swaps"]),
     ],
 )
-def test_scoped_roles_see_only_their_area(
+def test_every_account_gets_the_product_and_blog_tools_only(
     shop_app: Flask, roles: str, allowed: list[str], refused: list[str]
 ) -> None:
     staff = _staff_client(shop_app, roles)

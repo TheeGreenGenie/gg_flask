@@ -1,9 +1,67 @@
 {% extends "admin/_base.html" %}
 {% block title %}Order {{ order.public_id }} · Administration{% endblock %}
 {% block admin_body %}
-<header class="gg-admin__header"><div><p class="gg-eyebrow">Order</p><h1>{{ order.public_id }}</h1><p>{{ order.status.value|replace('_', ' ')|title }} · {{ order.payment_status.value|title }}</p></div><div><a href="{{ url_for('admin.order_document', order_id=order.id, document='invoice') }}">Invoice</a> · <a href="{{ url_for('admin.order_document', order_id=order.id, document='packing-slip') }}">Packing slip</a></div></header>
-<section class="gg-admin__section"><h2>Items</h2><div class="gg-admin__table-wrap"><table class="gg-admin__table"><thead><tr><th>Item</th><th>SKU</th><th>Qty</th><th>Total</th></tr></thead><tbody>{% for line in order.lines %}<tr><td>{{ line.product_name }}<small>{{ line.variant_label }}</small></td><td>{{ line.sku }}</td><td>{{ line.quantity }}</td><td>{{ line.line_total_cents|money }}</td></tr>{% endfor %}</tbody></table></div><p><strong>Total: {{ order.total_cents|money }}</strong>{% if order.refunded_cents %} · Refunded: {{ order.refunded_cents|money }}{% endif %}</p></section>
-<section class="gg-admin__section"><h2>Customer and shipping</h2><p>{{ order.first_name }} {{ order.last_name }} · <a href="mailto:{{ order.email }}">{{ order.email }}</a>{% if order.phone %} · {{ order.phone }}{% endif %}</p><address>{{ order.address1 }}{% if order.address2 %}<br>{{ order.address2 }}{% endif %}<br>{{ order.city }}, {{ order.region }} {{ order.postcode }}<br>{{ order.country }}</address><p>{% if order.shipping_service %}{{ order.shipping_carrier }} {{ order.shipping_service }} · {% endif %}{{ order.shipping_cents|money }} shipping</p>{% if order.parcel_weight_grams %}<p><strong>Estimated parcel weight:</strong> {{ order.parcel_weight_grams|weight }} — USPS price step <strong>{{ order.parcel_weight_grams|usps_step }}</strong> <small>(fabric estimated at 16 oz per square yard, plus packaging)</small></p>{% endif %}</section>
-{% if order.status.value in ('paid', 'processing', 'shipped') %}<section class="gg-admin__section"><h2>Shipping</h2>{% if order.tracking_number %}<p>Shipped {% if order.shipped_at %}{{ order.shipped_at.strftime('%Y-%m-%d') }} {% endif %}with {{ carriers[order.tracking_carrier][0] }}: <a href="{{ order.tracking_url }}" rel="noopener noreferrer" target="_blank">{{ order.tracking_number }}</a></p>{% endif %}<form class="gg-admin__form" method="post" action="{{ url_for('admin.order_shipped', order_id=order.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>Carrier <select name="carrier">{% for code, carrier in carriers.items() %}<option value="{{ code }}"{% if code == (order.tracking_carrier or 'usps') %} selected{% endif %}>{{ carrier[0] }}</option>{% endfor %}</select></label><label>Tracking number <input type="text" name="tracking_number" required maxlength="60" autocomplete="off" value="{{ order.tracking_number or '' }}" placeholder="Paste it from Pirate Ship or Click-N-Ship"></label><label class="gg-check"><input type="checkbox" name="notify" value="1" checked> Email the customer the tracking link</label><button class="gg-button" type="submit">{% if order.tracking_number %}Save corrected tracking{% else %}Mark as shipped{% endif %}</button></form></section>{% endif %}<section class="gg-admin__section"><h2>Actions</h2><form class="gg-admin__form" method="post" action="{{ url_for('admin.order_status', order_id=order.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>Status <select name="status">{% for status in statuses %}<option value="{{ status.value }}"{% if status == order.status %} selected{% endif %}>{{ status.value|replace('_', ' ')|title }}</option>{% endfor %}</select></label><button class="gg-button gg-button--outline" type="submit">Update status</button></form><form method="post" action="{{ url_for('admin.order_resend', order_id=order.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="gg-button gg-button--outline" type="submit">Resend confirmation email</button></form>{% if order.refund_status == 'pending' %}<p>Refund pending at {{ order.payment_provider.value|title }} (reference {{ order.refund_reference }}).</p>{% elif order.refund_status == 'failed' %}<p class="gg-form-error">The last refund attempt failed at {{ order.payment_provider.value|title }} (reference {{ order.refund_reference }}). Check the provider's dashboard before trying again.</p>{% endif %}{% if admin.role.value == 'owner' and order.payment_status.value == 'paid' and order.refund_status != 'pending' %}<form method="post" action="{{ url_for('admin.order_refund', order_id=order.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="gg-button gg-button--outline" type="submit">Refund full payment</button></form>{% endif %}</section>
-<section class="gg-admin__section"><h2>Private notes</h2><form class="gg-admin__form" method="post" action="{{ url_for('admin.order_note', order_id=order.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>New note<textarea name="body" rows="4" maxlength="2000" required></textarea></label><button class="gg-button gg-button--accent" type="submit">Add note</button></form>{% for note in order.notes %}<article><p>{{ note.body }}</p><small>{{ note.created_at.strftime('%Y-%m-%d %H:%M') }}</small></article>{% else %}<p>No private notes.</p>{% endfor %}</section>
+<header class="gg-admin__header">
+  <div>
+    <p class="gg-eyebrow">Order</p>
+    <h1>{{ order.public_id }}</h1>
+    <p>Placed {{ placed.strftime('%A %B %d, %Y at %I:%M %p').replace(' 0', ' ') }} (Philadelphia time)</p>
+    <p class="gg-admin__badges"><span class="gg-admin__badge gg-admin__badge--{{ order.status.value }}">{{ order.status.value|replace('_', ' ')|title }}</span><span class="gg-admin__badge">Payment: {{ order.payment_status.value|title }}</span>{% if order.tracking_number %}<span class="gg-admin__badge">Tracking added</span>{% endif %}</p>
+  </div>
+  <div class="gg-admin__header-links"><a class="gg-button gg-button--outline" href="{{ url_for('admin.order_document', order_id=order.id, document='packing-slip') }}">Packing slip</a><a class="gg-button gg-button--outline" href="{{ url_for('admin.order_document', order_id=order.id, document='invoice') }}">Invoice</a></div>
+</header>
+
+<section class="gg-admin__section" aria-labelledby="items-title">
+  <h2 id="items-title">Items ({{ order.lines|sum(attribute='quantity') }})</h2>
+  <ul class="gg-admin__lines">
+    {% for line in order.lines %}
+    {% set variant = line.variant %}{% set product = variant.product if variant else none %}
+    {% set photo = (variant.image if variant and variant.image else (product.cover if product else none)) %}
+    <li>
+      <span class="gg-thumb gg-thumb--big">{% if photo %}<img src="{{ url_for('email_images.image', path=photo.path) }}" width="120" height="120" alt="{{ line.product_name }}" loading="lazy" decoding="async">{% else %}<span class="gg-thumb__none">No photo</span>{% endif %}</span>
+      <div class="gg-admin__line-body">
+        <h3>{{ line.product_name }}</h3>
+        {% if line.variant_label and line.variant_label != line.product_name %}<p><strong>Option:</strong> {{ line.variant_label }}</p>{% endif %}
+        <p><strong>SKU:</strong> {{ line.sku }}{% if product and product.piece_label %} · {{ product.piece_label }}{% elif product %} · sold by the {{ product.sale_unit_label }}{% endif %}{% if product and product.width_inches %} · {{ product.width_inches }}″ wide{% endif %}</p>
+        <p>{{ line.quantity }} × {{ line.unit_price_cents|money }} = <strong>{{ line.line_total_cents|money }}</strong></p>
+        {% if product %}<p class="gg-admin__line-links"><a href="{{ url_for('store.product', slug=product.slug) }}" target="_blank" rel="noopener">View in shop</a> · <a href="{{ url_for('admin.product_edit', product_id=product.id) }}">Edit product</a>{% if variant %} · {{ variant.stock_quantity }} left in stock{% endif %}</p>{% else %}<p><small>This product has since been removed from the catalog.</small></p>{% endif %}
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  <dl class="gg-admin__money">
+    <div><dt>Items</dt><dd>{{ order.subtotal_cents|money }}</dd></div>
+    {% if order.discount_cents %}<div><dt>Discount{% if order.coupon_code %} ({{ order.coupon_code }}){% endif %}</dt><dd>−{{ order.discount_cents|money }}</dd></div>{% endif %}
+    <div><dt>Shipping</dt><dd>{{ order.shipping_cents|money }}</dd></div>
+    <div><dt>Tax</dt><dd>{{ order.tax_cents|money }}</dd></div>
+    <div class="gg-admin__money-total"><dt>Total paid</dt><dd>{{ order.total_cents|money }} {{ order.currency }}</dd></div>
+    {% if order.refunded_cents %}<div><dt>Refunded</dt><dd>−{{ order.refunded_cents|money }}</dd></div>{% endif %}
+  </dl>
+</section>
+
+<div class="gg-admin__cards">
+  <section aria-labelledby="customer-title">
+    <h2 id="customer-title">Customer</h2>
+    <p><strong>{{ order.first_name }} {{ order.last_name }}</strong></p>
+    <p><a href="mailto:{{ order.email }}">{{ order.email }}</a></p>
+    {% if order.phone %}<p><a href="tel:{{ order.phone }}">{{ order.phone }}</a></p>{% endif %}
+    <p><small>{{ 'Has a customer account' if order.user_id else 'Checked out as a guest' }}</small></p>
+  </section>
+  <section aria-labelledby="ship-title">
+    <h2 id="ship-title">Ship to</h2>
+    <address>{{ order.first_name }} {{ order.last_name }}<br>{{ order.address1 }}{% if order.address2 %}<br>{{ order.address2 }}{% endif %}<br>{{ order.city }}, {{ order.region }} {{ order.postcode }}<br>{{ order.country }}</address>
+    <p>{% if order.shipping_service %}{{ order.shipping_carrier }} {{ order.shipping_service }}{% else %}Standard shipping{% endif %} · {{ order.shipping_cents|money }}</p>
+    {% if order.parcel_weight_grams %}<p><strong>Parcel weight:</strong> {{ order.parcel_weight_grams|weight }} · USPS price step <strong>{{ order.parcel_weight_grams|usps_step }}</strong> <small>(fabric estimated at 16 oz per square yard, plus packaging)</small></p>{% endif %}
+  </section>
+  <section aria-labelledby="pay-title">
+    <h2 id="pay-title">Payment</h2>
+    <p>{{ order.payment_provider.value|title }} · {{ order.payment_status.value|title }}</p>
+    {% if order.provider_reference %}<p><small>Reference: {{ order.provider_reference }}</small></p>{% endif %}
+    {% if order.refund_status == 'pending' %}<p>Refund pending at {{ order.payment_provider.value|title }} (reference {{ order.refund_reference }}).</p>{% elif order.refund_status == 'failed' %}<p class="gg-form-error">The last refund attempt failed at {{ order.payment_provider.value|title }} (reference {{ order.refund_reference }}). Check the provider's dashboard before trying again.</p>{% endif %}
+  </section>
+</div>
+
+{% if order.status.value in ('paid', 'processing', 'shipped') %}<section class="gg-admin__section"><h2>Shipping</h2>{% if order.tracking_number %}<p>Shipped {% if order.shipped_at %}{{ order.shipped_at.strftime('%Y-%m-%d') }} {% endif %}with {{ carriers[order.tracking_carrier][0] }}: <a href="{{ order.tracking_url }}" rel="noopener noreferrer" target="_blank">{{ order.tracking_number }}</a></p>{% endif %}<form class="gg-admin__form" method="post" action="{{ url_for('admin.order_shipped', order_id=order.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>Carrier <select name="carrier">{% for code, carrier in carriers.items() %}<option value="{{ code }}"{% if code == (order.tracking_carrier or 'usps') %} selected{% endif %}>{{ carrier[0] }}</option>{% endfor %}</select></label><label>Tracking number <input type="text" name="tracking_number" required maxlength="60" autocomplete="off" value="{{ order.tracking_number or '' }}" placeholder="Paste it from Pirate Ship or Click-N-Ship"></label><label class="gg-check"><input type="checkbox" name="notify" value="1" checked> Email the customer the tracking link</label><button class="gg-button" type="submit">{% if order.tracking_number %}Save corrected tracking{% else %}Mark as shipped{% endif %}</button></form></section>{% endif %}
+<section class="gg-admin__section"><h2>Actions</h2><form class="gg-admin__form" method="post" action="{{ url_for('admin.order_status', order_id=order.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>Status <select name="status">{% for status in statuses %}<option value="{{ status.value }}"{% if status == order.status %} selected{% endif %}>{{ status.value|replace('_', ' ')|title }}</option>{% endfor %}</select></label><button class="gg-button gg-button--outline" type="submit">Update status</button></form><div class="gg-admin__actions"><form method="post" action="{{ url_for('admin.order_resend', order_id=order.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="gg-button gg-button--outline" type="submit">Resend confirmation email</button></form>{% if admin.role.value == 'owner' and order.payment_status.value == 'paid' and order.refund_status != 'pending' %}<form method="post" action="{{ url_for('admin.order_refund', order_id=order.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="gg-button gg-button--outline" type="submit">Refund full payment</button></form>{% endif %}</div></section>
+<section class="gg-admin__section"><h2>Private notes</h2><form class="gg-admin__form" method="post" action="{{ url_for('admin.order_note', order_id=order.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>New note<textarea name="body" rows="4" maxlength="2000" required></textarea></label><button class="gg-button gg-button--accent" type="submit">Add note</button></form>{% for note in order.notes %}<article class="gg-admin__note"><p>{{ note.body }}</p><small>{{ note.created_at.strftime('%Y-%m-%d %H:%M') }}</small></article>{% else %}<p>No private notes.</p>{% endfor %}</section>
 {% endblock %}

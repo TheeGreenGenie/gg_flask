@@ -1,8 +1,8 @@
 """Which Studio pages each role may use.
 
 The original roles keep their behaviour (decorators in app/studio/__init__.py). The scoped
-roles below (owner, 2026-10-27) are page lists so that a person sees and can do only their
-own area; combine roles freely. Owners can use everything.
+roles below (owner, 2026-10-27) are page lists; since 2026-10-30 every account also gets
+STAFF_TOOLS. Owners can use everything.
 """
 
 from __future__ import annotations
@@ -79,8 +79,30 @@ SCOPED: dict[StudioRole, frozenset[str]] = {
 }
 
 
+# Every Studio account (owner, 2026-10-30): all of the co-owner's product, price, stock, sale,
+# blog and group tools, plus creating products. Not her owner-only tools (approving others'
+# changes, keys, password swaps) and not community moderation, which stays with its roles.
+STAFF_TOOLS = (
+    SCOPED[StudioRole.BRANDING]
+    | SCOPED[StudioRole.MAINTENANCE]
+    | (
+        SCOPED[StudioRole.SALES]
+        - {"studio.community", "studio.community_reply", "studio.community_moderate"}
+    )
+    | {
+        "studio.product_new",
+        "studio.groups",
+        "studio.category_edit",
+        "studio.category_delete",
+        "studio.collection_edit",
+        "studio.collection_delete",
+        "studio.blog_product_search",
+    }
+)
+
+
 def scoped_allows(user: StudioUser, endpoint: str | None) -> bool:
-    if endpoint in ALWAYS:
+    if endpoint in ALWAYS or endpoint in STAFF_TOOLS:
         return True
     return any(endpoint in SCOPED.get(role, frozenset()) for role in user.role_set)
 

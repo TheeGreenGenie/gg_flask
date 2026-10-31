@@ -581,8 +581,10 @@ def _expired(order: Order) -> bool:
 
 
 def send_order_emails(order: Order) -> None:
-    """The customer's confirmation and the owner's new-order notice (app/order_emails.py)."""
+    """The customer's confirmation, then the team's new-order alerts (emails and phone pushes
+    on the admin "Order alerts" list, app/orders/alerts.py)."""
     from app import order_emails
+    from app.orders import alerts
 
     order_emails.send_confirmation(order)
-    order_emails.send_owner_notice(order)
+    alerts.new_order(order)

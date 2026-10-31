@@ -121,8 +121,10 @@ def send_confirmation(order: Order) -> bool:
                      text, html)  # fmt: skip
 
 
-def send_owner_notice(order: Order) -> bool:
-    owner = current_app.config.get("ORDER_NOTIFICATION_EMAIL")
+def send_owner_notice(order: Order, to: str | None = None) -> bool:
+    """The new-order notice; `to` defaults to ORDER_NOTIFICATION_EMAIL (orders/alerts.py sends
+    it to everyone on the admin "Order alerts" list)."""
+    owner = to or current_app.config.get("ORDER_NOTIFICATION_EMAIL")
     if not owner:
         return False
     weight = None

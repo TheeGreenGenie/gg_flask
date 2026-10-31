@@ -75,3 +75,94 @@
 .gg-studio__confirm { display: grid; gap: .4rem; max-width: 26rem; margin: 1.25rem 0 1rem; font-weight: 700; }
 .gg-studio__confirm input { min-height: 2.75rem; }
 .gg-studio form + section[aria-labelledby="bulk-preview"] { margin-top: 2.25rem; }
+
+/* ---------- Friendlier Studio (owner, 2026-10-30) ----------
+   Sticky menu that shows where you are, cards for each part of a form, a save button that stays
+   in reach on long forms, photos in every product list, and tables that turn into cards on
+   phones. Colours come from the theme tokens, so light and dark mode both work. */
+.gg-studio__nav { position: sticky; top: 0; z-index: 20; gap: .35rem; margin: 0 calc(-1 * var(--gg-gutter)) 1.75rem; padding: .6rem var(--gg-gutter); background: var(--gg-paper); box-shadow: 0 1px 0 var(--gg-line); }
+.gg-studio__nav a, .gg-studio__nav button { border-radius: 999px; transition: background var(--gg-motion-fast); }
+.gg-studio__nav a:hover, .gg-studio__nav button:hover { background: var(--gg-warm); }
+.gg-studio__nav a[aria-current="page"] { background: var(--gg-ink); color: var(--gg-paper); }
+.gg-studio__nav a:focus-visible, .gg-studio__nav button:focus-visible { outline: 3px solid var(--gg-focus); outline-offset: 2px; }
+@media (max-width: 42rem) {
+	.gg-studio__nav { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+	.gg-studio__nav::-webkit-scrollbar { display: none; }
+	.gg-studio__nav a, .gg-studio__nav button { flex: none; white-space: nowrap; }
+}
+
+.gg-studio__header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 1rem 2rem; }
+.gg-studio__header h1 { margin: .15rem 0 .5rem; font-size: clamp(1.7rem, 5vw, 2.6rem); }
+.gg-studio__header p { max-width: 46rem; color: var(--gg-muted); }
+.gg-studio__header a:not(.gg-button) { display: inline-block; margin-top: .25rem; font-weight: 700; }
+.gg-studio__header .gg-button { margin-right: .75rem; }
+
+/* Forms: every part in its own card, labels above roomy controls, help text quieter. */
+.gg-studio__form { gap: 1.25rem; }
+.gg-studio__form label small, .gg-studio__card legend small { color: var(--gg-muted); font-weight: 400; }
+.gg-studio__form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.gg-studio__form select, .gg-studio__form textarea, .gg-studio__search input, .gg-studio__search select { width: 100%; }
+.gg-studio input[type="datetime-local"], .gg-studio input[type="date"], .gg-studio input:not([type]) { min-height: 2.9rem; padding: .6rem .85rem; border: 1px solid var(--gg-input-border); border-radius: var(--gg-radius-sm); background: var(--gg-paper); color: var(--gg-ink); font-size: 1rem; }
+.gg-studio input[type="file"] { padding: .7rem; border: 2px dashed var(--gg-input-border); border-radius: var(--gg-radius-sm); background: var(--gg-subtle-bg); font-size: 1rem; cursor: pointer; }
+.gg-studio textarea { line-height: 1.55; resize: vertical; }
+.gg-studio :is(input, select, textarea, button, a):focus-visible { outline: 3px solid var(--gg-focus); outline-offset: 2px; }
+.gg-studio__card { display: grid; gap: 1rem; min-width: 0; margin: 0; padding: clamp(1rem, 3vw, 1.5rem); border: 1px solid var(--gg-line); border-radius: var(--gg-radius-md); background: var(--gg-paper); box-shadow: 0 1px 2px rgba(44, 34, 20, .05); }
+.gg-studio__card legend { float: left; width: 100%; margin-bottom: .25rem; padding: 0; font-size: 1.1rem; font-weight: 700; }
+.gg-studio__card legend + * { clear: both; }
+.gg-studio__sticky-save { position: sticky; bottom: 0; z-index: 10; margin-inline: -.5rem; padding: .75rem .5rem; background: linear-gradient(transparent, var(--gg-paper) 35%); }
+.gg-studio__sticky-save .gg-button { width: 100%; max-width: 24rem; min-height: 3.25rem; font-size: 1.05rem; }
+.gg-studio__danger { padding: 1.25rem; border: 1px solid color-mix(in srgb, var(--gg-sale) 40%, var(--gg-line)); border-radius: var(--gg-radius-md); background: var(--gg-err-bg); }
+.gg-studio__danger h2 { margin-top: 0; font-size: 1.15rem; }
+.gg-studio button:disabled { cursor: not-allowed; opacity: .5; }
+
+/* Search bar */
+.gg-studio__search { padding: 1rem; border-radius: var(--gg-radius-md); background: var(--gg-warm); }
+.gg-studio__search .gg-button { min-height: 2.9rem; }
+
+/* Product photos in lists */
+.gg-studio__item { display: flex; align-items: center; gap: .85rem; min-width: 14rem; color: var(--gg-ink); text-decoration: none; }
+.gg-studio__item strong { display: block; }
+a.gg-studio__item:hover strong { text-decoration: underline; }
+
+/* Tables: easier to scan; on phones each row becomes a card with labels. */
+.gg-studio tbody tr:nth-child(even) { background: var(--gg-subtle-bg); }
+.gg-studio tbody tr:hover { background: var(--gg-warm); }
+.gg-studio td { vertical-align: middle; }
+@media (max-width: 42rem) {
+	.gg-studio__table-wrap { overflow: visible; }
+	.gg-studio__table-wrap table, .gg-studio__table-wrap tbody, .gg-studio__table-wrap tr, .gg-studio__table-wrap td { display: block; width: 100%; }
+	.gg-studio__table-wrap thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+	.gg-studio__table-wrap tr { margin-bottom: 1rem; padding: .5rem; border: 1px solid var(--gg-line); border-radius: var(--gg-radius-md); background: var(--gg-paper); }
+	.gg-studio__table-wrap tbody tr:nth-child(even) { background: var(--gg-paper); }
+	.gg-studio__table-wrap td { padding: .5rem; border: 0; }
+	.gg-studio__table-wrap td[data-label]::before { content: attr(data-label); display: block; color: var(--gg-muted); font-size: .75rem; font-weight: 700; text-transform: uppercase; }
+	.gg-studio__visibility { min-width: 0; }
+	.gg-studio__visibility input { flex: 1 1 10rem; }
+}
+
+/* Groups */
+.gg-studio__section-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: 1rem; }
+.gg-studio__section-head h2 { margin: 0; }
+.gg-studio__tree, .gg-studio__cards { display: grid; gap: .5rem; margin: 0; padding: 0; list-style: none; }
+.gg-studio__tree li, .gg-studio__cards li { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .25rem 1rem; padding: .85rem 1rem; border: 1px solid var(--gg-line); border-radius: var(--gg-radius-sm); background: var(--gg-paper); }
+.gg-studio__tree li:target { border-color: var(--gg-accent-strong); box-shadow: 0 0 0 3px color-mix(in srgb, var(--gg-accent) 45%, transparent); }
+.gg-studio__tree a, .gg-studio__cards a { color: var(--gg-ink); font-size: 1.05rem; }
+.gg-studio__tree small, .gg-studio__cards small { color: var(--gg-muted); }
+.gg-studio__cards { grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); }
+.gg-studio__cards li { flex-direction: column; }
+.gg-studio__depth-1 { margin-left: clamp(1rem, 4vw, 2rem); }
+.gg-studio__depth-2 { margin-left: clamp(2rem, 8vw, 4rem); }
+.gg-studio__tree .gg-studio__depth-1, .gg-studio__tree .gg-studio__depth-2 { border-left: 4px solid var(--gg-warm-deep); }
+.gg-studio__tree-checks { display: grid; gap: .35rem; }
+.gg-studio__tree-checks label { display: flex; align-items: center; gap: .6rem; min-height: 2.75rem; padding: .35rem .75rem; border-radius: var(--gg-radius-sm); font-weight: 400; cursor: pointer; }
+.gg-studio__tree-checks label:hover { background: var(--gg-warm); }
+.gg-studio__tree-checks .gg-studio__depth-0 { font-weight: 700; }
+
+/* Product pickers (collections, blog) */
+.gg-studio__pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: .6rem; margin: 0; padding: 0; list-style: none; }
+.gg-studio__pick label, .gg-studio__pick-button { display: flex; align-items: center; gap: .75rem; width: 100%; min-height: 4.5rem; padding: .5rem .75rem; border: 1px solid var(--gg-line); border-radius: var(--gg-radius-sm); background: var(--gg-paper); color: var(--gg-ink); font: inherit; font-weight: 400; text-align: left; cursor: pointer; }
+.gg-studio__pick label:hover, .gg-studio__pick-button:hover { border-color: var(--gg-ink); }
+.gg-studio__pick label:has(input:checked) { border-color: var(--gg-success); background: var(--gg-ok-bg); }
+.gg-studio__pick small { display: block; color: var(--gg-muted); }
+.gg-studio__pick-button img { width: 48px; height: 48px; flex: none; border-radius: var(--gg-radius-sm); object-fit: cover; }
+.gg-studio code { padding: .1rem .35rem; border-radius: .3rem; background: var(--gg-warm); font-size: .9em; }

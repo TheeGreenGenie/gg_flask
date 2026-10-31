@@ -12,6 +12,7 @@ from app.content import blog
 from app.content.data import FAQS, POLICIES
 
 bp = Blueprint("content", __name__)
+bp.add_app_template_global(blog.embed, "blog_embed")  # product previews in articles
 
 # Subject list from the previous site's contact form.
 CONTACT_TOPICS = {

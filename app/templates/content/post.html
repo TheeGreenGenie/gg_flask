@@ -37,6 +37,11 @@
           {% if block[0] == 'h2' %}<h2>{{ block[1] }}</h2>
           {% elif block[0] == 'ul' %}<ul>{% for item in block[1] %}<li>{{ item }}</li>{% endfor %}</ul>
           {% elif block[0] == 'img' %}<figure><img src="{{ media_url(block[1][6:]) if block[1].startswith('media:') else url_for('static', filename=block[1][7:] if block[1].startswith('static:') else block[1]) }}" alt="{{ block[2] }}" loading="lazy"><figcaption>{{ block[3] }}</figcaption></figure>
+          {% elif block[0] == 'embed' %}{% set row = blog_embed(block[1], block[2]) %}{% if row %}
+            <aside class="gg-post-shop{% if row.products|length == 1 %} gg-post-shop--single{% endif %}" aria-label="{{ row.title or row.products[0].name }}">
+              {% if row.title %}<div class="gg-post-shop__head"><h3>{{ row.title }}</h3><a href="{{ row.url }}">Shop all</a></div>{% endif %}
+              <div class="gg-post-shop__grid">{% for p in row.products %}{% include "partials/product_card.html" %}{% endfor %}</div>
+            </aside>{% endif %}
           {% elif block[0] == 'link' %}<p><a href="{{ block[2] }}" rel="noopener noreferrer">{{ block[1] }}</a></p>
           {% else %}<p>{{ block[1] }}</p>{% endif %}
         {% endfor %}

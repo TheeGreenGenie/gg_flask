@@ -21,6 +21,7 @@ set -a
 set +a
 export MEDIA_ROOT="${MEDIA_ROOT:-$GG_HOME/media}"
 export JOBS_HEARTBEAT_DIR="$HEARTBEAT_DIR"
+export BACKUP_DIR="${BACKUP_DIR:-$GG_HOME/backups}"  # outside the web root and the deploy folder
 export GG_PLATFORM=siteground
 
 cd "$APP_DIR" || exit 1

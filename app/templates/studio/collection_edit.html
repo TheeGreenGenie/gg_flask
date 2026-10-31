@@ -1,0 +1,58 @@
+{% extends "studio/_base.html" %}
+{% block title %}{{ collection.name if collection else 'New collection' }} · Staff Studio{% endblock %}
+{% block studio_body %}{% from "_thumb.html" import thumb %}
+{% set data = form or {} %}
+<header class="gg-studio__header">
+  <div>
+    <p class="gg-eyebrow">Collection</p>
+    <h1>{{ collection.name if collection else 'New collection' }}</h1>
+    {% if collection %}<p>Web address <code>/collections/{{ collection.slug }}/</code></p>{% endif %}
+    <a href="{{ url_for('studio.groups') }}">Back to groups</a>
+  </div>
+</header>
+{% if error %}<p class="gg-form-error" role="alert">{{ error }}</p>{% endif %}
+
+<form method="get" class="gg-studio__search" id="find">
+  <label>Find products to add<input type="search" name="q" value="{{ query }}" placeholder="Product name"></label>
+  <button class="gg-button" type="submit">Search</button>
+</form>
+
+<form method="post" class="gg-studio__form gg-studio__form--wide">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  {% if matches %}
+  <fieldset class="gg-studio__card">
+    <legend>Search results: tick to add</legend>
+    <ul class="gg-studio__pick">
+      {% for product in matches %}<li><label><input type="checkbox" name="product_ids" value="{{ product.id }}">{{ thumb(product) }}<span><strong>{{ product.name }}</strong><small>{{ product.status.value|title }}</small></span></label></li>{% endfor %}
+    </ul>
+  </fieldset>
+  {% elif query %}<p>No other products match “{{ query }}”.</p>{% endif %}
+
+  <fieldset class="gg-studio__card">
+    <legend>In this collection ({{ members|length }}): untick to remove</legend>
+    <ul class="gg-studio__pick">
+      {% for product in members %}<li><label><input type="checkbox" name="product_ids" value="{{ product.id }}" checked>{{ thumb(product) }}<span><strong>{{ product.name }}</strong><small>{{ product.status.value|title }}</small></span></label></li>
+      {% else %}<li>No products yet. Search above to add some.</li>{% endfor %}
+    </ul>
+  </fieldset>
+
+  <fieldset class="gg-studio__card">
+    <legend>Details</legend>
+    <label>Name<input name="name" value="{{ data.get('name', collection.name if collection else '') }}" maxlength="120" required></label>
+    <label>Description<textarea name="description" rows="4" maxlength="5000">{{ data.get('description', collection.description if collection else '') }}</textarea></label>
+    <div class="gg-studio__two">
+      <label>Show from <small>(optional, Philadelphia time)</small><input type="datetime-local" name="starts_at" value="{{ data.get('starts_at', starts) }}"></label>
+      <label>Show until <small>(optional)</small><input type="datetime-local" name="ends_at" value="{{ data.get('ends_at', ends) }}"></label>
+    </div>
+    <label>Order<input name="position" value="{{ data.get('position', collection.position if collection else 0) }}" inputmode="numeric"><small>Lower numbers show first.</small></label>
+  </fieldset>
+  <div class="gg-studio__sticky-save"><button class="gg-button" type="submit">{{ 'Save collection' if collection else 'Create collection' }}</button></div>
+</form>
+{% if collection %}
+<section class="gg-studio__section gg-studio__danger">
+  <h2>Delete this collection</h2>
+  <p>The products stay in the shop; only this grouping is removed.</p>
+  <form method="post" action="{{ url_for('studio.collection_delete', collection_id=collection.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="gg-button gg-button--outline" type="submit">Delete collection</button></form>
+</section>
+{% endif %}
+{% endblock %}

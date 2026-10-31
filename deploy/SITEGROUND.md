@@ -122,9 +122,16 @@ Command for each (replace the last words per row):
 | every 15 minutes | `orders release-expired-holds`, `orders sync-refunds` |
 | daily 03:10 / 03:15 / 03:20 | `wishlist-prune`, `accounts purge-unverified`, `reviews purge-removed` |
 | daily 07:30 | `studio daily-summary` |
+| Saturdays 03:30 (`30 3 * * 6`) | `backup run`: database backup to `~/.ggflask/backups`, keeps the newest 3 (three weeks) |
 
 If `/home/customer` is not your home path, use the output of `echo $HOME`. Check them with
 `$F jobs check` the next day.
+
+**Backups:** run `$F backup run` once by hand first. It needs `pg_dump` on the server (SiteGround
+includes it with PostgreSQL); the message says plainly if it is missing. `$F backup list` shows
+what is kept. The backups sit on the same server, so once a month download the newest file
+(Site Tools > File Manager, `.ggflask/backups`) to your computer or cloud storage.
+Restoring replaces the live data, so ask Claude for the exact `pg_restore` command first.
 
 ## 8. Staging checks (paste results to Claude; no secrets)
 

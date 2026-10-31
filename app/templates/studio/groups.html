@@ -1,0 +1,36 @@
+{% extends "studio/_base.html" %}
+{% block title %}Groups · Staff Studio{% endblock %}
+{% block studio_body %}{% from "studio/_play.html" import steps with context %}
+<header class="gg-studio__header">
+  <div>
+    <p class="gg-eyebrow">Groups</p>
+    <h1>Categories and collections</h1>
+    <p><strong>Categories</strong> say what a product is (Fabrics → Wax Prints → Grand Super Wax). <strong>Collections</strong> are hand-picked sets, like “New arrivals” or a holiday edit. Changes here go live straight away.</p>
+  </div>
+</header>
+{{ steps([["🗂️", "Tap a group to rename it, move it, or change its products"], ["➕", "Use the New buttons to add one"]]) }}
+
+<section class="gg-studio__section" aria-labelledby="cat-title">
+  <div class="gg-studio__section-head"><h2 id="cat-title">Categories</h2><a class="gg-button" href="{{ url_for('studio.category_edit') }}">New category</a></div>
+  <ul class="gg-studio__tree">
+    {% for category, depth in tree %}
+    <li class="gg-studio__depth-{{ depth }}" id="category-{{ category.id }}">
+      <a href="{{ url_for('studio.category_edit', category_id=category.id) }}"><strong>{{ category.name }}</strong></a>
+      <small>{{ counts.get(category.id, 0) }} product{{ '' if counts.get(category.id, 0) == 1 else 's' }}</small>
+    </li>
+    {% else %}<li>No categories yet.</li>{% endfor %}
+  </ul>
+</section>
+
+<section class="gg-studio__section" aria-labelledby="col-title">
+  <div class="gg-studio__section-head"><h2 id="col-title">Collections</h2><a class="gg-button" href="{{ url_for('studio.collection_edit') }}">New collection</a></div>
+  <ul class="gg-studio__cards">
+    {% for collection in collections %}
+    <li>
+      <a href="{{ url_for('studio.collection_edit', collection_id=collection.id) }}"><strong>{{ collection.name }}</strong></a>
+      <small>{{ sizes.get(collection.id, 0) }} product{{ '' if sizes.get(collection.id, 0) == 1 else 's' }} · {% if collection.is_live(now) %}Showing{% elif collection.ends_at and collection.ends_at < now %}Ended{% else %}Starts later{% endif %}</small>
+    </li>
+    {% else %}<li>No collections yet.</li>{% endfor %}
+  </ul>
+</section>
+{% endblock %}

@@ -26,7 +26,8 @@ EXPECTED = {
     "accounts-purge-unverified": 26 * 3600,  # daily
     "reviews-purge-removed": 26 * 3600,  # daily
     "studio-daily-summary": 26 * 3600,  # daily
-    "backup": 26 * 3600,  # nightly, run by deploy/backup.sh
+    "backup": 26 * 3600,  # nightly, run by deploy/backup.sh (own servers)
+    "backup-run": 8 * 24 * 3600,  # weekly database backup on SiteGround (Saturdays)
 }
 
 
@@ -47,8 +48,9 @@ def check(now: float | None = None) -> list[JobState]:
     now = time.time() if now is None else now
     states = []
     for name, max_age in EXPECTED.items():
-        if name == "backup" and current_app.config.get("GG_PLATFORM") == "siteground":
-            continue  # SiteGround takes its own daily backups; deploy/backup.sh is not used there
+        on_siteground = current_app.config.get("GG_PLATFORM") == "siteground"
+        if name == ("backup" if on_siteground else "backup-run"):
+            continue  # SiteGround runs `flask backup run` weekly; own servers use deploy/backup.sh
         path = heartbeat_dir() / f"{name}.json"
         try:
             beat = json.loads(path.read_text(encoding="utf-8"))

@@ -157,7 +157,9 @@ def add_note(admin: AdminUser, order: Order, raw_body: str) -> None:
 def resend_email(admin: AdminUser, order: Order) -> None:
     if order.payment_status != PaymentStatus.PAID:
         raise OrderAdminError("Confirmation email is available only for paid orders.")
-    payments.send_order_emails(order)
+    from app import order_emails
+
+    order_emails.send_confirmation(order)  # the customer only: the team was alerted already
     service.audit(admin, "order.email.resent", "order", str(order.id))
     db.session.commit()
 

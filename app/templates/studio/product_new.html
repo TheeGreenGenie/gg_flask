@@ -1,0 +1,61 @@
+{% extends "studio/_base.html" %}
+{% block title %}New product · Staff Studio{% endblock %}
+{% block studio_body %}{% from "studio/_play.html" import steps with context %}
+<header class="gg-studio__header">
+  <div>
+    <p class="gg-eyebrow">Products</p>
+    <h1>Add a new product</h1>
+    <p>New products start <strong>hidden</strong>. Add photos on the next page, then put it live from Products when it’s ready.</p>
+    <a href="{{ url_for('studio.products') }}">Back to products</a>
+  </div>
+</header>
+{{ steps([["✏️", "Fill in the name, price and category"], ["📷", "Add photos on the next page"], ["🚀", "Put it live from Products"]]) }}
+{% if error %}<p class="gg-form-error" role="alert">{{ error }}</p>{% endif %}
+<form method="post" class="gg-studio__form gg-studio__form--wide">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <fieldset class="gg-studio__card">
+    <legend>The basics</legend>
+    <label>Product name<input name="name" value="{{ form.get('name', '') }}" maxlength="200" required autofocus></label>
+    <div class="gg-studio__two">
+      <label>Kind of product<select name="product_type" required>
+        <option value="">Choose…</option>
+        {% for value, label in types.items() %}<option value="{{ value }}"{% if form.get('product_type') == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select></label>
+      <label>Sold as<select name="sale_unit">
+        {% for unit in sale_units %}<option value="{{ unit.value }}"{% if form.get('sale_unit', 'fixed_bundle') == unit.value %} selected{% endif %}>{{ unit.value|replace('_', ' ')|title }}</option>{% endfor %}
+      </select></label>
+    </div>
+    <div class="gg-studio__two">
+      <label>Price ($)<input name="price" value="{{ form.get('price', '') }}" inputmode="decimal" placeholder="24.99" required></label>
+      <label>How many in stock<input name="stock" value="{{ form.get('stock', '0') }}" inputmode="numeric"></label>
+    </div>
+  </fieldset>
+  <fieldset class="gg-studio__card">
+    <legend>Fabric size <small>(leave blank if not fabric)</small></legend>
+    <div class="gg-studio__two">
+      <label>Length of one piece (yards)<input name="piece_length_yards" value="{{ form.get('piece_length_yards', '') }}" inputmode="decimal" placeholder="e.g. 1, 6 or 4-5"></label>
+      <label>Width (inches)<input name="width_inches" value="{{ form.get('width_inches', '') }}" inputmode="numeric" placeholder="45"></label>
+    </div>
+  </fieldset>
+  <fieldset class="gg-studio__card">
+    <legend>Choices customers pick <small>(optional)</small></legend>
+    <p class="gg-studio__tip">For example Colour: Red, Blue, Gold. Each choice gets the same price and stock to start; change them later in Prices and Stock.</p>
+    <div class="gg-studio__two">
+      <label>Choice name<input name="option_name" value="{{ form.get('option_name', '') }}" maxlength="60" placeholder="Colour"></label>
+      <label>Choices, separated by commas<input name="option_values" value="{{ form.get('option_values', '') }}" placeholder="Red, Blue, Gold"></label>
+    </div>
+  </fieldset>
+  <fieldset class="gg-studio__card">
+    <legend>Words</legend>
+    <label>Short summary<textarea name="summary" rows="2" maxlength="300">{{ form.get('summary', '') }}</textarea></label>
+    <label>Description<textarea name="description" rows="8" maxlength="20000">{{ form.get('description', '') }}</textarea></label>
+  </fieldset>
+  <fieldset class="gg-studio__card">
+    <legend>Categories <small>(pick at least one)</small></legend>
+    <div class="gg-studio__tree-checks">
+      {% for category, depth in tree %}<label class="gg-studio__depth-{{ depth }}"><input type="checkbox" name="category_ids" value="{{ category.id }}"{% if category.id in chosen %} checked{% endif %}> {{ category.name }}</label>{% endfor %}
+    </div>
+  </fieldset>
+  <div class="gg-studio__sticky-save"><button class="gg-button" type="submit">Create product (hidden)</button></div>
+</form>
+{% endblock %}

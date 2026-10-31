@@ -1,7 +1,7 @@
 {% extends "admin/_base.html" %}
 {% block title %}Catalog Administration · GG Afrikan Eleganz{% endblock %}
-{% block admin_body %}
+{% block admin_body %}{% from "_thumb.html" import thumb %}
 <header class="gg-admin__header"><div><p class="gg-eyebrow">Administration</p><h1>Catalog</h1><p>{{ products|length }} products · {{ categories|length }} categories</p></div></header>
-<section class="gg-admin__section"><h2>Products</h2><div class="gg-admin__table-wrap"><table class="gg-admin__table"><thead><tr><th>Product</th><th>Status</th><th>Variants</th><th></th></tr></thead><tbody>{% for product in products %}<tr><td><strong>{{ product.name }}</strong><small>{{ product.slug }}</small></td><td>{{ product.status.value|title }}</td><td>{{ product.variants|length }}</td><td><a class="gg-link" href="{{ url_for('admin.product_edit', product_id=product.id) }}">Edit</a></td></tr>{% endfor %}</tbody></table></div></section>
+<section class="gg-admin__section"><h2>Products</h2><div class="gg-admin__table-wrap"><table class="gg-admin__table"><thead><tr><th>Product</th><th>Status</th><th>Variants</th><th></th></tr></thead><tbody>{% for product in products %}<tr><td><a class="gg-admin__item" href="{{ url_for('admin.product_edit', product_id=product.id) }}">{{ thumb(product) }}<span><strong>{{ product.name }}</strong><small>{{ product.slug }}</small></span></a></td><td data-label="Status">{{ product.status.value|title }}</td><td data-label="Variants">{{ product.variants|length }}</td><td><a class="gg-link" href="{{ url_for('admin.product_edit', product_id=product.id) }}">Edit</a></td></tr>{% endfor %}</tbody></table></div></section>
 <section class="gg-admin__section"><h2>Categories</h2><div class="gg-admin__cards">{% for category in categories %}<section><h3>{{ category.name }}</h3><p>{{ category.slug }}</p><a class="gg-link" href="{{ url_for('admin.category_edit', category_id=category.id) }}">Edit category</a></section>{% endfor %}</div></section>
 {% endblock %}

@@ -28,6 +28,7 @@ from flask import (
     url_for,
 )
 from sqlalchemy import func, or_, select
+from sqlalchemy.orm import selectinload
 from werkzeug.wrappers import Response
 
 from app.admin import service as admin_service
@@ -40,6 +41,7 @@ from app.catalog.models import (
     ProductStatus,
     SaleUnit,
     Variant,
+    product_collections,
     utcnow,
 )
 from app.content import blog as blog_service
@@ -47,6 +49,7 @@ from app.content.models import BlogPost, BlogRevision
 from app.extensions import db
 from app.reviews.models import ModerationWord, PostStatus, ProductPost
 from app.studio import blog_media, passkeys, permissions, review, service, sms
+from app.studio import catalog as studio_catalog
 from app.studio.models import (
     ApprovalStatus,
     ChangeStatus,
@@ -415,6 +418,9 @@ def password_swap() -> Response:
 PAGE_SIZE = 25  # rows per Studio list page (comfortable on a phone)
 
 
+_VARIANT_PHOTOS = selectinload(Variant.product).selectinload(Product.images)
+
+
 def _paginate(statement: Any) -> tuple[list[Any], dict[str, int]]:
     """One page of results plus what the pager partial needs (page, pages, total, first, last)."""
     total = int(
@@ -559,7 +565,12 @@ def dashboard() -> str:
 @roles(StudioRole.EDITOR, StudioRole.INVENTORY)
 def inventory() -> str:
     query = request.args.get("q", "").strip()[:100]
-    statement = select(Variant).join(Variant.product).order_by(Product.name, Variant.position)
+    statement = (
+        select(Variant)
+        .join(Variant.product)
+        .order_by(Product.name, Variant.position)
+        .options(_VARIANT_PHOTOS, selectinload(Variant.image), selectinload(Variant.option_values))
+    )
     if query:
         like = f"%{query}%"
         statement = statement.where(or_(Product.name.ilike(like), Variant.sku.ilike(like)))
@@ -718,7 +729,12 @@ def inventory_undo(history_id: int) -> Response:
 @roles(StudioRole.EDITOR)
 def prices() -> str:
     query = request.args.get("q", "").strip()[:100]
-    statement = select(Variant).join(Variant.product).order_by(Product.name, Variant.position)
+    statement = (
+        select(Variant)
+        .join(Variant.product)
+        .order_by(Product.name, Variant.position)
+        .options(_VARIANT_PHOTOS, selectinload(Variant.image), selectinload(Variant.option_values))
+    )
     if query:
         like = f"%{query}%"
         statement = statement.where(or_(Product.name.ilike(like), Variant.sku.ilike(like)))
@@ -842,7 +858,11 @@ def price_undo(history_id: int) -> Response:
 def products() -> str:
     query = request.args.get("q", "").strip()[:100]
     status = request.args.get("status", "").strip()
-    statement = select(Product).order_by(Product.name)
+    statement = (
+        select(Product)
+        .order_by(Product.name)
+        .options(selectinload(Product.images), selectinload(Product.categories))
+    )
     if query:
         statement = statement.where(Product.name.ilike(f"%{query}%"))
     if status in {value.value for value in ProductStatus}:
@@ -1061,6 +1081,171 @@ def product_image_remove(image_id: int) -> Response:
     return redirect(url_for("studio.product_edit", product_id=product_id) + "#photos")
 
 
+@bp.route("/products/new", methods=["GET", "POST"])
+@roles(StudioRole.EDITOR)
+def product_new() -> str | Response:
+    """A new product starts hidden; photos are added on its edit page next."""
+    error = ""
+    form = request.form.to_dict() if request.method == "POST" else {}
+    chosen = request.form.getlist("category_ids") if request.method == "POST" else []
+    if request.method == "POST":
+        try:
+            product = studio_catalog.create_product(_user(), form, chosen)
+        except service.StudioError as exc:
+            db.session.rollback()
+            error = str(exc)
+        else:
+            flash(
+                "Product created and hidden. Add photos below, then put it live from Products.",
+                "success",
+            )
+            return redirect(url_for("studio.product_edit", product_id=product.id) + "#photos")
+    return render_template(
+        "studio/product_new.html",
+        staff=_user(),
+        form=form,
+        chosen={int(c) for c in chosen if c.isdigit()},
+        tree=studio_catalog.category_tree(),
+        types=studio_catalog.TYPE_LABELS,
+        sale_units=SaleUnit,
+        error=error,
+    )
+
+
+@bp.get("/groups")
+@roles(StudioRole.EDITOR)
+def groups() -> str:
+    collections = db.session.scalars(
+        select(Collection).order_by(Collection.position, Collection.name)
+    ).all()
+    sizes: dict[int, int] = dict(
+        db.session.execute(
+            select(product_collections.c.collection_id, func.count()).group_by(
+                product_collections.c.collection_id
+            )
+        ).all()
+    )
+    return render_template(
+        "studio/groups.html",
+        staff=_user(),
+        tree=studio_catalog.category_tree(),
+        counts=studio_catalog.product_counts(),
+        collections=collections,
+        sizes=sizes,
+        now=utcnow(),
+    )
+
+
+@bp.route("/groups/categories/new", methods=["GET", "POST"])
+@bp.route("/groups/categories/<int:category_id>", methods=["GET", "POST"])
+@roles(StudioRole.EDITOR)
+def category_edit(category_id: int | None = None) -> str | Response:
+    category = db.get_or_404(Category, category_id) if category_id is not None else None
+    error = ""
+    if request.method == "POST":
+        try:
+            category = studio_catalog.save_category(_user(), category, request.form.to_dict())
+        except service.StudioError as exc:
+            db.session.rollback()
+            error = str(exc)
+        else:
+            flash(f"Category “{category.name}” saved.", "success")
+            return redirect(url_for("studio.groups") + f"#category-{category.id}")
+    blocked = set(category.subtree_ids()) if category else set()
+    return render_template(
+        "studio/category_edit.html",
+        staff=_user(),
+        category=category,
+        form=request.form if request.method == "POST" else None,
+        parents=[
+            (cat, depth)
+            for cat, depth in studio_catalog.category_tree()
+            if cat.id not in blocked and depth < studio_catalog.MAX_CATEGORY_DEPTH - 1
+        ],
+        count=studio_catalog.product_counts().get(category.id, 0) if category else 0,
+        error=error,
+    )
+
+
+@bp.post("/groups/categories/<int:category_id>/delete")
+@roles(StudioRole.EDITOR)
+def category_delete(category_id: int) -> Response:
+    category = db.get_or_404(Category, category_id)
+    try:
+        studio_catalog.delete_category(_user(), category)
+        flash("Category deleted.", "success")
+    except service.StudioError as exc:
+        db.session.rollback()
+        flash(str(exc), "error")
+        return redirect(url_for("studio.category_edit", category_id=category_id))
+    return redirect(url_for("studio.groups"))
+
+
+@bp.route("/groups/collections/new", methods=["GET", "POST"])
+@bp.route("/groups/collections/<int:collection_id>", methods=["GET", "POST"])
+@roles(StudioRole.EDITOR)
+def collection_edit(collection_id: int | None = None) -> str | Response:
+    collection = db.get_or_404(Collection, collection_id) if collection_id is not None else None
+    error = ""
+    if request.method == "POST":
+        try:
+            collection = studio_catalog.save_collection(
+                _user(), collection, request.form.to_dict(), request.form.getlist("product_ids")
+            )
+        except service.StudioError as exc:
+            db.session.rollback()
+            error = str(exc)
+        else:
+            flash(f"Collection “{collection.name}” saved.", "success")
+            return redirect(url_for("studio.collection_edit", collection_id=collection.id))
+    member_ids = set(studio_catalog.collection_product_ids(collection)) if collection else set()
+    if request.method == "POST":
+        member_ids = {int(v) for v in request.form.getlist("product_ids") if v.isdigit()}
+    members = (
+        db.session.scalars(
+            select(Product).where(Product.id.in_(member_ids)).order_by(Product.name)
+        ).all()
+        if member_ids
+        else []
+    )
+    query = request.args.get("q", "").strip()[:100]
+    matches: list[Product] = []
+    if query:
+        matches = list(
+            db.session.scalars(
+                select(Product)
+                .where(Product.name.ilike(f"%{query}%"), Product.id.not_in(member_ids or {0}))
+                .order_by(Product.name)
+                .limit(60)
+            )
+        )
+    local = ZoneInfo("America/New_York")
+    return render_template(
+        "studio/collection_edit.html",
+        staff=_user(),
+        collection=collection,
+        form=request.form if request.method == "POST" else None,
+        members=members,
+        matches=matches,
+        query=query,
+        starts=collection.starts_at.astimezone(local).strftime("%Y-%m-%dT%H:%M")
+        if collection and collection.starts_at
+        else "",
+        ends=collection.ends_at.astimezone(local).strftime("%Y-%m-%dT%H:%M")
+        if collection and collection.ends_at
+        else "",
+        error=error,
+    )
+
+
+@bp.post("/groups/collections/<int:collection_id>/delete")
+@roles(StudioRole.EDITOR)
+def collection_delete(collection_id: int) -> Response:
+    studio_catalog.delete_collection(_user(), db.get_or_404(Collection, collection_id))
+    flash("Collection deleted. Its products are unchanged.", "success")
+    return redirect(url_for("studio.groups"))
+
+
 @bp.get("/sales")
 @roles(StudioRole.EDITOR)
 def sales() -> str:
@@ -1206,6 +1391,39 @@ def _blog_form_with_uploads() -> dict[str, str]:
         alt = alt.replace("]", "").replace("[", "") or "Photo"
         form["body"] = f"{form.get('body', '').rstrip()}\n\n![{alt}]({reference})"
     return form
+
+
+@bp.get("/blog/shop-items")
+@roles(StudioRole.EDITOR)
+def blog_product_search() -> Response:
+    """The blog editor's picker: products, categories and collections matching a search."""
+    query = request.args.get("q", "").strip()[:80]
+    if len(query) < 2:
+        return _json_response(json.dumps({"items": []}))
+    like = f"%{query.replace('%', '').replace('_', '')}%"
+    items: list[dict[str, str]] = []
+    for category in db.session.scalars(
+        select(Category).where(Category.name.ilike(like)).order_by(Category.name).limit(5)
+    ):
+        items.append({"kind": "category", "slug": category.slug, "name": category.name})
+    for collection in db.session.scalars(
+        select(Collection).where(Collection.name.ilike(like)).order_by(Collection.name).limit(5)
+    ):
+        items.append({"kind": "collection", "slug": collection.slug, "name": collection.name})
+    for product in db.session.scalars(
+        select(Product).where(Product.name.ilike(like)).order_by(Product.name).limit(15)
+    ):
+        cover = product.cover
+        items.append(
+            {
+                "kind": "product",
+                "slug": product.slug,
+                "name": product.name,
+                "note": "" if product.status == ProductStatus.ACTIVE else "hidden: won't show",
+                "image": url_for("email_images.image", path=cover.path) if cover else "",
+            }
+        )
+    return _json_response(json.dumps({"items": items}))
 
 
 @bp.get("/blog/<int:post_id>/preview")

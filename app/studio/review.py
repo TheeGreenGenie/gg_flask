@@ -425,6 +425,12 @@ STEP_UP: dict[str, Callable[[MultiDict[str, str]], bool]] = {
     "studio.blog_publication": lambda form: form.get("action") == "unpublish",
 }
 
+# Blog posting goes live without the owner for every account (owner, 2026-10-30: "groups + blog
+# free, prices held"). Groups are never held. The password step-up above still applies.
+LIVE_FOR_STAFF = frozenset(
+    {"studio.blog_edit", "studio.blog_publication", "studio.blog_revision_restore"}
+)
+
 # endpoint -> (describer, the page's original roles for the permission pre-check)
 HELD: dict[str, tuple[Describer, tuple[StudioRole, ...]]] = {
     "studio.inventory_update": (_inventory_update, (StudioRole.EDITOR, StudioRole.INVENTORY)),
@@ -558,7 +564,12 @@ def gate(endpoint: str, view: Callable[..., Any]) -> Callable[..., Any]:
             except service.StudioError as exc:
                 flash(str(exc), "error")
                 return redirect(back, code=303)
-        if user is None or user.must_change_password or not user.requires_review:
+        if (
+            user is None
+            or user.must_change_password
+            or not user.requires_review
+            or endpoint in LIVE_FOR_STAFF
+        ):
             return view(*args, **kwargs)  # the view's own sign-in/role checks apply
         if not permissions.can(user, endpoint, legacy_roles):
             abort(403)

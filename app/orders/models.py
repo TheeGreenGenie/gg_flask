@@ -241,3 +241,21 @@ class OrderNote(db.Model):  # type: ignore[name-defined]
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     order: Mapped[Order] = relationship(back_populates="notes")
+
+
+class OrderAlertRecipient(db.Model):  # type: ignore[name-defined]
+    """Who hears about new paid orders (owner, 2026-10-30): an email address, or an ntfy topic
+    that phones subscribe to in the free ntfy app (no sign-up). Managed in /admin/alerts."""
+
+    __tablename__ = "order_alert_recipients"
+    __table_args__ = (
+        UniqueConstraint("kind", "value"),
+        CheckConstraint("kind IN ('email', 'ntfy')", name="order_alert_kind_valid"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    kind: Mapped[str] = mapped_column(String(10))
+    value: Mapped[str] = mapped_column(String(254))
+    label: Mapped[str] = mapped_column(String(80), default="")
+    active: Mapped[bool] = mapped_column(default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

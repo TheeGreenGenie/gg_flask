@@ -1,0 +1,3 @@
+{# Small product photo for Studio and admin lists: a cached 480px JPEG, loaded only when scrolled
+   into view, so long lists stay fast. `big` for cards (pickers, previews). #}
+{% macro thumb(product, big=false, image=none) %}{% set cover = image or product.cover %}{% set size = 120 if big else 64 %}<span class="gg-thumb{% if big %} gg-thumb--big{% endif %}">{% if cover %}<img src="{{ url_for('email_images.image', path=cover.path) }}" width="{{ size }}" height="{{ size }}" alt="" loading="lazy" decoding="async">{% else %}<span class="gg-thumb__none" aria-hidden="true">No photo</span>{% endif %}</span>{% endmacro %}

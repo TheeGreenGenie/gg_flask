@@ -1,0 +1,59 @@
+{% extends "admin/_base.html" %}
+{% block title %}Order alerts · Administration{% endblock %}
+{% block admin_body %}
+<header class="gg-admin__header">
+  <div>
+    <p class="gg-eyebrow">Administration</p>
+    <h1>Order alerts</h1>
+    <p>Everyone here hears about every new paid order. Emails include the items, photos and address; phone alerts open the order in admin with one tap.</p>
+  </div>
+</header>
+
+<section class="gg-admin__section" aria-labelledby="list-title">
+  <h2 id="list-title">Who gets alerts</h2>
+  <ul class="gg-admin__alerts">
+    {% if server_email %}<li><div><strong>📧 {{ server_email }}</strong><small>Owner address from the server settings (always on)</small></div></li>{% endif %}
+    {% for r in recipients %}
+    <li>
+      <div>
+        <strong>{{ '📱' if r.kind == 'ntfy' else '📧' }} {{ r.label or ('Phone' if r.kind == 'ntfy' else r.value) }}</strong>
+        <small>{% if r.kind == 'ntfy' %}Phone alert · ntfy topic {{ r.value[:3] }}…{{ r.value[-2:] }}{% else %}Email · {{ r.value }}{% endif %}{% if not r.active %} · <strong>paused</strong>{% endif %}</small>
+      </div>
+      <form method="post" class="gg-admin__actions">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="id" value="{{ r.id }}">
+        <button class="gg-button gg-button--outline" name="action" value="test" type="submit">Send test</button>
+        <button class="gg-button gg-button--outline" name="action" value="{{ 'pause' if r.active else 'resume' }}" type="submit">{{ 'Pause' if r.active else 'Resume' }}</button>
+        <button class="gg-button gg-button--outline" name="action" value="remove" type="submit">Remove</button>
+      </form>
+    </li>
+    {% else %}{% if not server_email %}<li>Nobody yet. Add an email or a phone below.</li>{% endif %}{% endfor %}
+  </ul>
+</section>
+
+<div class="gg-admin__cards">
+  <section aria-labelledby="phone-title">
+    <h2 id="phone-title">Add a phone</h2>
+    <ol>
+      <li>On the phone, install the free <strong>ntfy</strong> app (App Store or Google Play). No account is needed.</li>
+      <li>Tap <strong>+</strong> and subscribe to a topic name that is hard to guess, for example <code>gg-orders-7f3k9q</code>{% if ntfy_server != 'https://ntfy.sh' %} on the server {{ ntfy_server }}{% endif %}. Anyone who knows the name can read the alerts, so treat it like a password.</li>
+      <li>Type the same topic below, add it, then press <strong>Send test</strong>.</li>
+    </ol>
+    <form method="post" class="gg-admin__form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="add"><input type="hidden" name="kind" value="ntfy">
+      <label>Whose phone<input name="label" maxlength="80" placeholder="e.g. Mrs. Adetolu's phone"></label>
+      <label>ntfy topic<input name="value" required minlength="6" maxlength="64" pattern="[A-Za-z0-9_\-]{6,64}" autocomplete="off" spellcheck="false"></label>
+      <button class="gg-button" type="submit">Add phone</button>
+    </form>
+  </section>
+  <section aria-labelledby="email-title">
+    <h2 id="email-title">Add an email</h2>
+    <p>The address gets the full order notice for each new order.</p>
+    <form method="post" class="gg-admin__form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="add"><input type="hidden" name="kind" value="email">
+      <label>Whose email<input name="label" maxlength="80" placeholder="e.g. Shop email"></label>
+      <label>Email address<input type="email" name="value" required maxlength="254"></label>
+      <button class="gg-button" type="submit">Add email</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

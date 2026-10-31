@@ -11,6 +11,7 @@
     {% if studio_can('studio.prices', 'editor') %}{{ item('studio.prices', '🏷️', 'Prices', 'Prices') }}{% endif %}
     {% if studio_can('studio.sales', 'editor') %}{{ item('studio.sales', '🎉', 'Sales', 'Sales') }}{% endif %}
     {% if studio_can('studio.products', 'editor') %}{{ item('studio.products', '🧵', 'Products', 'Products') }}{% endif %}
+    {% if studio_can('studio.groups', 'editor') %}{{ item('studio.groups', '🗂️', 'Groups', 'Groups', ('studio.category', 'studio.collection')) }}{% endif %}
     {% if studio_can('studio.blog_posts', 'editor') %}{{ item('studio.blog_posts', '✍️', 'Blog', 'Blog') }}{% endif %}
     {% if studio_can('studio.community', 'support') %}{{ item('studio.community', '💬', 'Customer questions', 'Reviews & questions') }}{% endif %}
     {{ item('studio.changes', '✅', 'My changes' if staff.requires_review else 'Changes', 'My changes' if staff.requires_review else 'Changes') }}

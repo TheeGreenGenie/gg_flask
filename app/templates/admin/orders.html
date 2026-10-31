@@ -3,6 +3,6 @@
 {% block admin_body %}
 <header class="gg-admin__header"><div><p class="gg-eyebrow">Store administration</p><h1>Orders</h1></div></header>
 <div class="gg-admin__table-wrap gg-admin__section"><table class="gg-admin__table"><thead><tr><th>Order</th><th>Customer</th><th>Status</th><th>Total</th><th>Date</th></tr></thead><tbody>
-{% for order in orders %}<tr><td><a href="{{ url_for('admin.order_view', order_id=order.id) }}">{{ order.public_id }}</a><small>{{ order.payment_provider.value|title }}</small></td><td>{{ order.first_name }} {{ order.last_name }}<small>{{ order.email }}</small></td><td>{{ order.status.value|replace('_', ' ')|title }}</td><td>{{ order.total_cents|money }}</td><td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td></tr>{% else %}<tr><td colspan="5">No orders yet.</td></tr>{% endfor %}
+{% for order in orders %}<tr><td><a href="{{ url_for('admin.order_view', order_id=order.id) }}">{{ order.public_id }}</a><small>{{ order.payment_provider.value|title }}</small></td><td data-label="Customer">{{ order.first_name }} {{ order.last_name }}<small>{{ order.email }}</small></td><td data-label="Status">{{ order.status.value|replace('_', ' ')|title }}</td><td data-label="Total">{{ order.total_cents|money }}</td><td data-label="Date">{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td></tr>{% else %}<tr><td colspan="5">No orders yet.</td></tr>{% endfor %}
 </tbody></table></div>
 {% endblock %}

@@ -69,10 +69,22 @@ def test_daily_summary_warns_about_job_problems(catalog_app: Flask, tmp_path: Pa
         assert "ran normally" in catalog_app.extensions["outbox"][-1].body
 
 
-def test_siteground_does_not_expect_the_server_backup_job(app: Flask, tmp_path: Path) -> None:
+def test_siteground_expects_the_weekly_database_backup(app: Flask, tmp_path: Path) -> None:
     app.config.update(JOBS_HEARTBEAT_DIR=str(tmp_path), GG_PLATFORM="siteground")
     _all_healthy(tmp_path)
     (tmp_path / "backup.json").unlink()
     with app.app_context():
-        assert jobs.problems() == []  # SiteGround's own daily backups replace deploy/backup.sh
+        assert jobs.problems() == []  # `flask backup run` replaces deploy/backup.sh there
         assert "backup" not in {state.name for state in jobs.check()}
+        _beat(tmp_path, "backup-run", age=6 * 86400)  # last Saturday: fine
+        assert jobs.problems() == []
+        _beat(tmp_path, "backup-run", age=9 * 86400)  # a weekend was missed
+        assert {state.name for state in jobs.problems()} == {"backup-run"}
+
+
+def test_own_servers_do_not_expect_the_weekly_job(app: Flask, tmp_path: Path) -> None:
+    app.config["JOBS_HEARTBEAT_DIR"] = str(tmp_path)
+    _all_healthy(tmp_path)
+    (tmp_path / "backup-run.json").unlink()
+    with app.app_context():
+        assert jobs.problems() == []

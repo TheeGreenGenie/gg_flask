@@ -144,3 +144,4 @@
 	.gg-play__tile { min-height: 8.5rem; }
 	.gg-play__tile-icon { font-size: 2.4rem; }
 }
+.gg-play .gg-studio__nav a[aria-current="page"] { background: var(--play-gold); color: var(--play-gold-ink); box-shadow: inset 0 0 0 2px var(--gg-ink); }

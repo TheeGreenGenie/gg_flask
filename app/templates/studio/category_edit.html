@@ -1,0 +1,35 @@
+{% extends "studio/_base.html" %}
+{% block title %}{{ category.name if category else 'New category' }} · Staff Studio{% endblock %}
+{% block studio_body %}
+{% set data = form or {} %}
+<header class="gg-studio__header">
+  <div>
+    <p class="gg-eyebrow">Category</p>
+    <h1>{{ category.name if category else 'New category' }}</h1>
+    {% if category %}<p>{{ count }} product{{ '' if count == 1 else 's' }} · web address <code>/shop/{{ category.slug }}/</code> (stays the same when renamed, so old links keep working)</p>{% endif %}
+    <a href="{{ url_for('studio.groups') }}">Back to groups</a>
+  </div>
+</header>
+{% if error %}<p class="gg-form-error" role="alert">{{ error }}</p>{% endif %}
+<form method="post" class="gg-studio__form gg-studio__form--wide">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <fieldset class="gg-studio__card">
+    <label>Name<input name="name" value="{{ data.get('name', category.name if category else '') }}" maxlength="120" required{% if not category %} autofocus{% endif %}></label>
+    {% set current_parent = data.get('parent_id', (category.parent_id|string) if category and category.parent_id else '') %}
+    <label>Goes inside<select name="parent_id">
+      <option value="">Nothing (a top-level category)</option>
+      {% for parent, depth in parents %}<option value="{{ parent.id }}"{% if current_parent == parent.id|string %} selected{% endif %}>{{ '— ' * depth }}{{ parent.name }}</option>{% endfor %}
+    </select><small>Categories can be at most 3 levels deep.</small></label>
+    <label>Order<input name="position" value="{{ data.get('position', category.position if category else 0) }}" inputmode="numeric"><small>Lower numbers show first among categories at the same level.</small></label>
+    <label>Description<textarea name="description" rows="5" maxlength="5000">{{ data.get('description', category.description if category else '') }}</textarea></label>
+  </fieldset>
+  <div class="gg-studio__sticky-save"><button class="gg-button" type="submit">{{ 'Save category' if category else 'Create category' }}</button></div>
+</form>
+{% if category %}
+<section class="gg-studio__section gg-studio__danger">
+  <h2>Delete this category</h2>
+  <p>Only possible when it has no products and no subcategories. Products are never deleted.</p>
+  <form method="post" action="{{ url_for('studio.category_delete', category_id=category.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="gg-button gg-button--outline" type="submit"{% if count or category.children %} disabled{% endif %}>Delete category</button></form>
+</section>
+{% endif %}
+{% endblock %}
